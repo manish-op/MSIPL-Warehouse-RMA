@@ -1,0 +1,25 @@
+{
+  "short_name": "Warehouse Software",
+  "name": "MSIPL Warehouse Software",
+  "icons": [
+    {
+      "src": "images.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "images/png"
+    },
+    {
+      "src": "images.png",
+      "type": "images/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "images.png",
+      "type": "images/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

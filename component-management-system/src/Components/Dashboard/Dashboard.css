@@ -1,0 +1,44 @@
+/* The main container for the entire application view */
+.mainPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* Use the main background color for the overall page */
+  background-color: var(--background-color);
+  transition: background-color 0.2s linear;
+}
+
+/* Container for the sidebar and the main content area */
+.Dashboard-content {
+  display: flex;
+  flex: 1; /* Allows this section to grow and fill available space */
+  overflow-y: hidden; /* Prevents double scrollbars */
+}
+
+.sidebar {
+  /* Use the component background for distinct UI elements */
+  background-color: var(--component-background);
+  /* Use the global border color */
+  border-inline-end: 1px solid var(--border-color);
+  flex: 0 0 250px; /* Give the sidebar a fixed width that doesn't shrink */
+  overflow-y: auto; /* Allow sidebar to scroll if content is long */
+  transition: background-color 0.2s linear, border-color 0.2s linear;
+}
+
+/* The main content area where routed pages will appear */
+.content {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Allows the content to fill the remaining space */
+  overflow-y: auto; /* The main scrollbar for the application content */
+  padding: 20px;
+  /* The content area should use the main background color */
+  background-color: var(--background-color);
+}
+
+/* Media query to hide the sidebar on smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}

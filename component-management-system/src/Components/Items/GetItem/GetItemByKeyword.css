@@ -1,0 +1,335 @@
+/* left actions column */
+.left-actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #fff; /* match table bg */
+}
+
+/* inner container - hidden by default, becomes visible on row hover (via .visible) */
+.left-actions-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+/* when visible, make it fully visible */
+.left-actions-inner.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* make buttons compact */
+.left-actions-inner .ant-btn {
+  width: 36px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ensure left fixed column doesn't look detached */
+.ant-table-fixed-header .ant-table-body .left-actions-cell,
+.ant-table-fixed .ant-table-cell {
+  background: #fff;
+}
+
+/* keep rest of the styling from previous CSS (ellipsis, description clamp, horizontal scroll) */
+/* ...existing rules... */
+
+.table-cell-ellipsis {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.description-cell {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2em;
+  max-height: 3.6em;
+  font-size: 13px;
+  color: rgba(0,0,0,0.85);
+}
+
+/* horizontal scroll wrapper */
+.table-horizontal-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* action-buttons area at right (keeps previous behavior) */
+.last-col-wrapper { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.updated-date { font-size: 13px; color: rgba(0,0,0,0.65); margin-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.action-buttons { transition: opacity 0.15s ease; opacity: 0; pointer-events: none; }
+.compact-table tr:hover .action-buttons, .compact-table tr:focus-within .action-buttons { opacity: 1 !important; pointer-events: auto !important; }
+
+/* small screens */
+@media (max-width: 800px) {
+  .compact-table .ant-table-tbody > tr > td,
+  .compact-table .ant-table-thead > tr > th {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+
+
+
+/* GetItemByKeyword.css */
+
+/* 1. The container for the buttons - hidden by default */
+.row-hover-actions {
+  opacity: 0;
+  transform: translateX(-15px); /* Start slightly shifted left */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth easing */
+  visibility: hidden; /* Prevents accidental clicks when hidden */
+}
+
+/* 2. When the user hovers over the TABLE ROW, reveal the actions */
+.ant-table-row:hover .row-hover-actions {
+  opacity: 1;
+  transform: translateX(0); /* Slide into place */
+  visibility: visible;
+}
+
+/* Optional: Keep it visible on mobile devices where hover doesn't exist */
+@media (max-width: 768px) {
+  .row-hover-actions {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+  }
+}
+
+
+
+/* GetItemByKeyword.css */
+
+/* --- FIX 1: FLOATING ACTIONS OVERLAY --- */
+/* This container sits inside the Serial No cell */
+.cell-content-wrapper {
+  position: relative; /* Anchor for the absolute buttons */
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.overlay-actions {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%); /* Center vertically */
+  
+  /* Visual Styling */
+  background: rgba(255, 255, 255, 0.95); /* White background to cover text */
+  padding-right: 10px;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+  border-radius: 0 4px 4px 0;
+  z-index: 10;
+  
+  /* Animation properties */
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+  pointer-events: none; /* Ignore clicks when hidden */
+}
+
+/* Reveal buttons when hovering the TABLE ROW */
+.ant-table-row:hover .overlay-actions {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto; /* Enable clicks when visible */
+}
+
+/* --- FIX 2: PREVENT INPUT ENLARGING --- */
+/* Force standard height and prevent flex-stretching on inputs */
+.search-card .ant-input,
+.search-card .ant-select-selector {
+  height: 32px !important; /* Standard AntD height */
+  max-height: 32px !important;
+}
+
+.search-card .ant-form-item-control-input {
+  min-height: 32px;
+}
+
+/* Ensure the form columns don't stretch vertically unnecessarily */
+.search-card .ant-col {
+  flex: 0 0 auto; /* Prevent growing */
+}
+
+/* GetItemByKeyword.css */
+
+/* --- FIX 1: PREVENT INPUT FIELDS FROM ENLARGING --- */
+/* Forces inputs to stay compact even if the table below grows */
+.search-card .ant-input,
+.search-card .ant-select-selector,
+.search-card .ant-picker {
+  height: 32px !important;
+  max-height: 32px !important;
+}
+
+.search-card .ant-form-item-control-input {
+  min-height: 32px;
+}
+
+/* Prevents the grid columns from stretching vertically */
+.search-card .ant-row {
+  align-items: flex-start; 
+}
+
+/* --- FIX 2: GLASSMORPHISM FLOATING ACTIONS --- */
+
+/* Wrapper for the cell content */
+.cell-content-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* The Overlay Container */
+.overlay-actions {
+  position: absolute;
+  right: 0; /* Align to the RIGHT so it doesn't cover left-aligned text immediately */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 15px; /* Fade start area */
+  padding-right: 5px;
+  
+  /* --- THE TRANSPARENT GLASS EFFECT --- */
+  /* Gradient: Transparent on left -> Semi-transparent white on right */
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.85) 30%);
+  backdrop-filter: blur(2px); /* Blurs the text behind the buttons slightly */
+  
+  opacity: 0; /* Hidden by default */
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+  border-radius: 4px;
+}
+
+/* Show on Hover */
+.ant-table-row:hover .overlay-actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- BUTTON STYLING --- */
+/* Make buttons stand out slightly but keep them light */
+.action-btn-update {
+  color: #1890ff;
+  border: 1px solid rgba(24, 144, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.action-btn-history {
+  color: #722ed1;
+  border: 1px solid rgba(114, 46, 209, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.action-btn-update:hover, .action-btn-history:hover {
+  background: white;
+  transform: scale(1.05);
+}
+
+/* GetItemByKeyword.css */
+
+/* --- FIX: Force standard height for inputs to prevent enlarging --- */
+/* This ensures the form stays compact even if the table grows */
+.search-card .ant-input,
+.search-card .ant-select-selector,
+.search-card .ant-picker {
+  height: 32px !important;
+  max-height: 32px !important;
+}
+
+.search-card .ant-form-item-control-input {
+  min-height: 32px;
+}
+
+/* Align items to start to prevent flex stretching */
+.search-card .ant-row {
+  align-items: flex-start; 
+}
+
+/* --- CELL OVERLAY STYLES (GLASSMORPHISM) --- */
+
+/* Wrapper for the cell content */
+.cell-content-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Glassmorphism Overlay Container */
+.overlay-actions {
+  position: absolute;
+  right: 0; /* Aligned to right to avoid covering start of serial no */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 20px; /* Gradient fade start */
+  padding-right: 0;
+  
+  /* Transparent Gradient Background: Clear on left -> Semi-white on right */
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.95) 100%);
+  backdrop-filter: blur(1px); /* Slight blur behind buttons */
+  
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+  z-index: 10;
+  border-radius: 4px;
+}
+
+/* Show on Row Hover */
+.ant-table-row:hover .overlay-actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- GHOST BUTTON STYLES --- */
+/* Light colors to remain transparent-ish */
+.action-btn-update {
+  color: #1890ff;
+  border: 1px solid rgba(24, 144, 255, 0.4);
+  background: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+  font-size: 12px;
+  backdrop-filter: blur(4px);
+}
+
+.action-btn-history {
+  color: #722ed1;
+  border: 1px solid rgba(114, 46, 209, 0.4);
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  backdrop-filter: blur(4px);
+}
+
+/* Hover effects for the buttons themselves */
+.action-btn-update:hover, .action-btn-history:hover {
+  background: #fff; /* Solid white on hover */
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}

@@ -1,0 +1,142 @@
+/* ---------- Base / Layout ---------- */
+.simple-home-container {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  /* background image placement (adjust path if needed) */
+  background: url("../../images/office.png") center/cover no-repeat;
+}
+
+/* subtle animated background zoom (keeps image visible but subtle) */
+@keyframes bg-zoom {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* wrapper used to apply transform separately from overlay */
+.simple-home-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit; /* re-use the same background image */
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  filter: brightness(0.45);
+  transform-origin: center;
+  animation: bg-zoom 18s ease-in-out infinite;
+}
+
+/* dark overlay sits above the background image (keeps text readable) */
+.simple-home-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1;
+}
+
+/* ---------- Hero content ---------- */
+.simple-hero {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 28px;
+  color: white;
+  max-width: 720px;
+  /* a gentle floating up animation for the hero card */
+  animation: float-in 900ms cubic-bezier(.2,.9,.3,1) both;
+}
+
+/* title slide up + fade-in */
+@keyframes slide-up-fade {
+  from { transform: translateY(18px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* small float effect for the whole hero */
+@keyframes float-in {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* staggered elements */
+.simple-title {
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+  animation: slide-up-fade 650ms ease-out both;
+  animation-delay: 120ms;
+}
+
+.simple-text {
+  font-size: 1.05rem;
+  margin-bottom: 20px;
+  opacity: 0.95;
+  animation: slide-up-fade 650ms ease-out both;
+  animation-delay: 260ms;
+}
+
+/* button pop-in animation and interactive states */
+@keyframes btn-pop {
+  0%   { transform: scale(0.92); opacity: 0; }
+  60%  { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+.simple-btn {
+  background: #316a9c;
+  color: white;
+  padding: 12px 26px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  animation: btn-pop 520ms cubic-bezier(.2,.9,.3,1) both;
+  animation-delay: 420ms;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  box-shadow: 0 6px 18px rgba(24, 38, 58, 0.18);
+}
+
+
+.simple-btn:hover,
+.simple-btn:focus {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(24,38,58,0.22);
+  background: #468ac0;
+}
+
+
+.simple-btn:focus {
+  outline: 3px solid rgba(70,138,192,0.25);
+  outline-offset: 3px;
+}
+
+
+@media (max-width: 900px) {
+  .simple-home-container::after { animation-duration: 22s; }
+  .simple-title { font-size: 2rem; }
+}
+
+@media (max-width: 480px) {
+  .simple-home-container { background-position: center top; }
+  .simple-title { font-size: 1.8rem; }
+  .simple-text { font-size: 1rem; padding: 0 6px; }
+  .simple-btn { padding: 10px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .simple-home-container::after,
+  .simple-hero,
+  .simple-title,
+  .simple-text,
+  .simple-btn {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

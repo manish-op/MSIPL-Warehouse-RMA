@@ -1,0 +1,27 @@
+.add-keyword-container {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 20px; 
+}
+
+
+
+.add-keyword-title {
+  font-size: 20px;
+  color: var(  --text-color-secondary);
+  text-align: center;
+  padding: 2px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+
+.subkeyword-header {
+ 
+  color: var(--text-color);
+  margin-top: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+}

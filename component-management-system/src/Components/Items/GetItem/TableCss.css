@@ -1,0 +1,26 @@
+/* Make the table visible on print */
+@media print {
+  body * {
+    visibility: hidden; /* Hide everything by default */
+  }
+
+  #table-to-print,
+  #table-to-print * {
+    visibility: visible; /* Show only the table */
+  }
+
+  #table-to-print {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  /* Optional: adjust table font size for print */
+  #table-to-print table {
+    font-size: 12px;
+  }
+}
+.results-card {
+  margin-bottom: 60px; /* This creates a buffer at the bottom */
+}

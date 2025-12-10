@@ -1,0 +1,101 @@
+/* --- Your existing styles (unchanged) --- */
+.history-table-wrapper {
+  width: 100%;
+  margin: 4px;
+  padding: 4px;
+  height: 100%;
+  overflow-y: scroll; /* This is the problem for printing */
+  align-items: center;
+  justify-content: space-evenly;
+  
+  /* Use theme variables */
+  background-color: var(--component-background);
+  color: var(--text-color);
+}
+
+.history-table-wrapper h2 {
+  color: var(--text-color);
+}
+
+/* --- Themed Table Styles --- */
+.history-table-themed {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--component-background);
+  color: var(--text-color);
+}
+
+.history-table-themed th,
+.history-table-themed td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  text-align: left;
+}
+
+.history-table-themed th {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* --- Button Style --- */
+.print-button {
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 4px 15px;
+  cursor: pointer;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: 1px solid var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.print-button:hover {
+  opacity: 0.8;
+}
+
+/* === UPDATED PRINT STYLES === */
+@media print {
+
+  /* 1. Set print orientation to landscape */
+  @page {
+    size: landscape;
+    margin: 1cm;
+  }
+
+  /* 2. Hide everything on the page by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* 3. Make only the table wrapper and its contents visible */
+  /* This ID is on your main wrapper <div> in HistoryTable.js */
+  #historyTable,
+  #historyTable * {
+    visibility: visible;
+  }
+
+  /* 4. Position the table to fill the printed page */
+  #historyTable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 10px; /* Add a little padding */
+  }
+
+  /* 5. This is the critical fix:
+     Forcefully remove the scroll behavior from the wrapper
+     to ensure all rows are printed.
+  */
+  .history-table-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important; /* Be extra sure */
+  }
+
+  /* 6. Hide the print button itself */
+  .print-button {
+    display: none !important; /* Use display:none to remove it from layout */
+  }
+}

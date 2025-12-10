@@ -1,0 +1,115 @@
+/* AuditTrail.css */
+
+.audit-trail-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+}
+
+.audit-trail-header {
+    background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+    padding: 32px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 12px rgba(114, 46, 209, 0.3);
+}
+
+.audit-trail-header .header-icon {
+    font-size: 48px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.stat-mini-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-mini-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.stat-mini-card .ant-statistic-title {
+    font-size: 12px;
+    color: #8c8c8c;
+}
+
+.stat-mini-card .ant-statistic-content {
+    font-size: 24px;
+}
+
+.filter-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.table-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.table-card .ant-table-thead>tr>th {
+    background: #fafafa;
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+}
+
+.table-card .ant-table-tbody>tr:hover>td {
+    background: #f0f5ff;
+}
+
+.changes-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.changes-cell .old-value {
+    padding: 2px 6px;
+    background: rgba(245, 34, 45, 0.05);
+    border-radius: 4px;
+    border-left: 2px solid #ff4d4f;
+}
+
+.changes-cell .new-value {
+    padding: 2px 6px;
+    background: rgba(82, 196, 26, 0.05);
+    border-radius: 4px;
+    border-left: 2px solid #52c41a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .audit-trail-header {
+        padding: 20px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .filter-card,
+    .table-card {
+        margin: 0 16px 16px !important;
+    }
+}
+
+/* Animation */
+.table-card .ant-table-row {
+    animation: fadeInRow 0.3s ease;
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

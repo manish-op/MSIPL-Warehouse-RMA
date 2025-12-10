@@ -1,0 +1,245 @@
+/* src/Components/UserProfile/Profile.css */
+
+/* ---------------------------------------------------------
+   1. SELF-CONTAINED THEME DEFINITIONS (Guarantees Text Color)
+   --------------------------------------------------------- */
+:root {
+  /* Light Mode Defaults */
+  --profile-text-main: #333333;
+  --profile-text-muted: #666666;
+  --profile-bg: #ffffff;
+  --profile-border: #f0f0f0;
+  
+  /* Brand Colors */
+  --brand-1: #0f6fff;
+  --brand-2: #00bfa6;
+  --brand-3: #ffb300;
+  --brand-4: #8e44ad;
+  --brand-5: #ef5350;
+  
+  /* Component specifics */
+  --progress-track: #eef2ff;
+  --stat-secondary-bg: #2d3748;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* DETECT DARK MODE 
+   (If your app uses a class .dark-mode instead of data-theme, change this selector)
+*/
+[data-theme='dark'] {
+  /* Dark Mode Overrides */
+  --profile-text-main: #ffffff;      /* Pure white text */
+  --profile-text-muted: #b0b0b0;     /* Light grey text */
+  --profile-bg: #1f1f1f;             /* Dark card background */
+  --profile-border: #444444;         /* Dark border */
+  
+  --progress-track: #303030;
+  --stat-secondary-bg: #3a3a3a;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ------------------------
+   2. Main Layout
+   ------------------------ */
+.profile-dashboard {
+  padding: 18px;
+  max-width: 1100px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  color: var(--profile-text-main);
+  /* Uses variable if available, fallback to transparent */
+  background-color: var(--background-color, transparent); 
+}
+
+.dashboard-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
+  /* FORCE COLOR */
+  color: var(--profile-text-main) !important;
+}
+
+/* ------------------------
+   3. Card Styles
+   ------------------------ */
+.user-profile-card,
+.stats-card {
+  /* Force background and border color */
+  background-color: var(--profile-bg) !important;
+  border: 1px solid var(--profile-border) !important;
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.user-profile-card .ant-card-body,
+.stats-card .ant-card-body {
+  padding: 0 !important;
+  width: 100%;
+}
+
+/* ------------------------
+   4. Profile Text (Crucial Fixes)
+   ------------------------ */
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.user-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  /* FORCE COLOR */
+  color: var(--profile-text-main) !important;
+}
+
+.user-details-list p {
+  margin: 8px 0;
+  font-size: 14px;
+  /* FORCE COLOR */
+  color: var(--profile-text-main) !important;
+  padding-left: 10px;
+  border-left: 2px solid transparent;
+}
+
+.user-details-list strong {
+  /* Ensure labels (Email, Mobile) are also colored */
+  color: var(--profile-text-main) !important;
+  opacity: 0.9;
+}
+
+/* ------------------------
+   5. Stats & Graphs
+   ------------------------ */
+.stat-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.stat-box {
+  border-radius: 8px;
+  color: #fff; /* Box text is always white because box has color bg */
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 86px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.stat-box.main {
+  flex: 1 1 0;
+  background: var(--brand-1);
+}
+
+.stat-box.secondary {
+  width: 120px;
+  background: var(--stat-secondary-bg);
+  border: 1px solid var(--profile-border);
+  /* Ensure text inside the secondary box adapts if background is light/dark */
+  color: #fff; 
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.9;
+  text-transform: uppercase;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+/* ------------------------
+   6. Region Grid Text
+   ------------------------ */
+.region-cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.region-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 180px;
+  
+  /* Background and Border */
+  background-color: var(--profile-bg);
+  border: 1px solid var(--profile-border);
+  
+  border-radius: 8px;
+  padding: 10px;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.region-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--region-hover-shadow);
+  border-color: var(--brand-1);
+}
+
+.region-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.region-info .region-name {
+  font-weight: 700;
+  font-size: 13px;
+  /* FORCE COLOR */
+  color: var(--profile-text-main) !important;
+}
+
+.region-info .region-count {
+  font-size: 13px;
+  /* FORCE COLOR (Muted) */
+  color: var(--profile-text-muted) !important;
+}
+
+/* ------------------------
+   7. Utilities & Responsive
+   ------------------------ */
+.profile-avatar {
+  background: var(--brand-1) !important;
+  color: #fff !important;
+  font-size: 40px !important;
+}
+
+.centered-spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+}
+
+.error-text {
+  color: #ff4d4f;
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 900px) {
+  .profile-row { flex-direction: column; }
+  .left-col, .right-col { width: 100%; flex: 0 0 auto; }
+}
+
+@media (max-width: 480px) {
+  .stat-row { flex-direction: column; }
+  .stat-box.secondary { width: 100%; }
+  .stat-number { font-size: 22px; }
+}

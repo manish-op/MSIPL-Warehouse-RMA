@@ -1,0 +1,114 @@
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  padding: 10px 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s linear;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 55px;
+  width: 55px;
+  border-radius: 50%;
+  margin-right: 10px;
+  transition: all 0.2s ease-in-out;
+}
+
+.companyName {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--header-text);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: gap 0.2s ease-in-out;
+}
+
+.header-btn {
+  background: var(--button-bg);
+  color: var(--header-text);
+  padding: 8px 18px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex; /* Use inline-flex for better alignment */
+  align-items: center;
+  gap: 8px; /* Gap between text and icon */
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+}
+
+.header-btn:hover {
+  background: var(--button-hover-bg);
+}
+
+/* Hide the icon component on desktop by default */
+.header-btn .header-btn-icon {
+  display: none;
+}
+
+
+@media screen and (max-width: 768px) {
+  .header {
+    padding: 8px 15px;
+  }
+
+  /* Hide company name to save space */
+  .companyName {
+    display: none;
+  }
+
+  .logo {
+    height: 40px;
+    width: 40px;
+  }
+
+  .header-right {
+    gap: 12px;
+  }
+
+
+  
+  .header-icon-btn {
+    padding: 8px;
+    font-size: 20px; 
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+ 
+  .header-right a.header-btn {
+    font-size: 0; 
+    padding: 8px;
+    width: 38px;
+    height: 38px; 
+    border-radius: 50%; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  
+  .header-right a.header-btn > svg {
+    font-size: 18px; 
+    display: block;
+    margin: 0;
+  }
+}

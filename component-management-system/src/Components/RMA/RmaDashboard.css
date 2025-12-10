@@ -1,0 +1,341 @@
+/* Global Layout Background */
+.ant-layout {
+  background: #f0f2f5;
+  transition: background 0.3s;
+}
+
+[data-theme='dark'] .ant-layout {
+  background: #000000;
+}
+
+/* Sidebar Styling */
+.msipl-sider {
+  background: #001529;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
+  overflow: hidden;
+}
+
+/* Sidebar collapsed state animations */
+.msipl-sider.ant-layout-sider-collapsed {
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.msipl-sider .ant-menu {
+  transition: all 0.25s ease;
+}
+
+.msipl-sider .ant-menu-item {
+  transition: all 0.2s ease, padding 0.3s ease;
+}
+
+.msipl-sider .ant-menu-item .anticon {
+  transition: font-size 0.2s ease, margin 0.2s ease;
+}
+
+/* Toggle button animation */
+.msipl-sider-toggle {
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.msipl-sider-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.msipl-sider-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Rotate icon on toggle */
+.msipl-sider-toggle .anticon {
+  transition: transform 0.3s ease;
+}
+
+.msipl-sider-toggle:hover .anticon {
+  transform: rotate(180deg);
+}
+
+/* Footer Styling */
+.msipl-footer {
+  background: #001529;
+  color: rgba(255, 255, 255, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  padding: 12px 24px;
+  font-size: 13px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.msipl-footer span {
+  transition: color 0.3s;
+  cursor: default;
+}
+
+.msipl-footer span:hover {
+  color: #fff;
+}
+
+/* RMA Dashboard Styles */
+.rma-dashboard {
+  padding: 24px;
+}
+
+.rma-dashboard .dashboard-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin-bottom: 8px;
+}
+
+[data-theme='dark'] .rma-dashboard .dashboard-title {
+  color: #fff;
+}
+
+/* Stat Cards */
+.stat-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card .ant-statistic-title {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.stat-card .ant-statistic-content {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.stat-card .ant-statistic-content-prefix {
+  margin-right: 8px;
+}
+
+.stat-card-blue {
+  border-left: 4px solid #1890ff;
+}
+
+.stat-card-purple {
+  border-left: 4px solid #722ed1;
+}
+
+.stat-card-green {
+  border-left: 4px solid #52c41a;
+}
+
+.stat-card-orange {
+  border-left: 4px solid #fa8c16;
+}
+
+[data-theme='dark'] .stat-card {
+  background: #1f1f1f;
+}
+
+[data-theme='dark'] .stat-card .ant-statistic-title {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* User Profile Card */
+.user-profile-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.profile-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin-bottom: 16px;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 0;
+  text-align: center;
+}
+
+[data-theme='dark'] .user-name {
+  color: #fff;
+}
+
+.user-details-list {
+  padding: 0 16px 16px;
+}
+
+.user-details-list p {
+  margin: 8px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.user-details-list strong {
+  color: #333;
+}
+
+[data-theme='dark'] .user-details-list p {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='dark'] .user-details-list strong {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme='dark'] .user-profile-card {
+  background: #1f1f1f;
+}
+
+/* ============ Dynamic Sidebar Themes ============ */
+
+/* Blue Theme (Default - Dashboard, RMA Request, Unrepaired, Assigned) */
+.msipl-sider.theme-blue {
+  background: linear-gradient(180deg, #001529 0%, #002140 100%) !important;
+  transition: background 0.3s ease;
+}
+
+.msipl-sider.theme-blue .ant-menu {
+  background: transparent !important;
+}
+
+.msipl-sider.theme-blue .ant-menu-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.msipl-sider.theme-blue .ant-menu-item-selected {
+  background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #fff !important;
+}
+
+.msipl-sider.theme-blue .ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: rgba(24, 144, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+.msipl-sider.theme-blue .msipl-sider-toggle {
+  background: rgba(24, 144, 255, 0.15);
+}
+
+.msipl-sider.theme-blue .msipl-sider-toggle:hover {
+  background: rgba(24, 144, 255, 0.3);
+}
+
+/* Green Theme (Repaired) */
+.msipl-sider.theme-green {
+  background: linear-gradient(180deg, #092b00 0%, #135200 100%) !important;
+  transition: background 0.3s ease;
+}
+
+.msipl-sider.theme-green .ant-menu {
+  background: transparent !important;
+}
+
+.msipl-sider.theme-green .ant-menu-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.msipl-sider.theme-green .ant-menu-item-selected {
+  background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%) !important;
+  color: #fff !important;
+}
+
+.msipl-sider.theme-green .ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: rgba(82, 196, 26, 0.25) !important;
+  color: #fff !important;
+}
+
+.msipl-sider.theme-green .msipl-sider-toggle {
+  background: rgba(82, 196, 26, 0.15);
+}
+
+.msipl-sider.theme-green .msipl-sider-toggle:hover {
+  background: rgba(82, 196, 26, 0.3);
+}
+
+/* Red Theme (Can't Be Repaired) */
+.msipl-sider.theme-red {
+  background: linear-gradient(180deg, #2a0000 0%, #520000 100%) !important;
+  transition: background 0.3s ease;
+}
+
+.msipl-sider.theme-red .ant-menu {
+  background: transparent !important;
+}
+
+.msipl-sider.theme-red .ant-menu-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.msipl-sider.theme-red .ant-menu-item-selected {
+  background: linear-gradient(90deg, #f5222d 0%, #ff4d4f 100%) !important;
+  color: #fff !important;
+}
+
+.msipl-sider.theme-red .ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: rgba(245, 34, 45, 0.25) !important;
+  color: #fff !important;
+}
+
+.msipl-sider.theme-red .msipl-sider-toggle {
+  background: rgba(245, 34, 45, 0.15);
+}
+
+.msipl-sider.theme-red .msipl-sider-toggle:hover {
+  background: rgba(245, 34, 45, 0.3);
+}
+
+/* Purple Theme (Audit Trail) */
+.msipl-sider.theme-purple {
+  background: linear-gradient(180deg, #1d0029 0%, #3b0052 100%) !important;
+  transition: background 0.3s ease;
+}
+
+.msipl-sider.theme-purple .ant-menu {
+  background: transparent !important;
+}
+
+.msipl-sider.theme-purple .ant-menu-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.msipl-sider.theme-purple .ant-menu-item-selected {
+  background: linear-gradient(90deg, #722ed1 0%, #9254de 100%) !important;
+  color: #fff !important;
+}
+
+.msipl-sider.theme-purple .ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: rgba(114, 46, 209, 0.25) !important;
+  color: #fff !important;
+}
+
+.msipl-sider.theme-purple .msipl-sider-toggle {
+  background: rgba(114, 46, 209, 0.15);
+}
+
+.msipl-sider.theme-purple .msipl-sider-toggle:hover {
+  background: rgba(114, 46, 209, 0.3);
+}

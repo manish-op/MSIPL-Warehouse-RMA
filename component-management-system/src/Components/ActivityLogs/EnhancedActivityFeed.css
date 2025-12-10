@@ -1,0 +1,112 @@
+/* EnhancedActivityFeed.css */
+
+.enhanced-activity-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+}
+
+.enhanced-activity-header {
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    padding: 32px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+.enhanced-activity-header .header-icon {
+    font-size: 48px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.stat-mini-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-mini-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.stat-mini-card .ant-statistic-title {
+    font-size: 12px;
+    color: #8c8c8c;
+}
+
+.stat-mini-card .ant-statistic-content {
+    font-size: 24px;
+}
+
+.filter-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.table-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.table-card .ant-table-thead>tr>th {
+    background: #fafafa;
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+}
+
+.table-card .ant-table-tbody>tr:hover>td {
+    background: #e6f7ff;
+}
+
+.remark-cell {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .enhanced-activity-header {
+        padding: 20px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .filter-card,
+    .table-card {
+        margin: 0 16px 16px !important;
+    }
+}
+
+/* Animation */
+.table-card .ant-table-row {
+    animation: fadeInRow 0.3s ease;
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Badge styling */
+.enhanced-activity-header .ant-badge {
+    margin-left: auto;
+}
+
+.enhanced-activity-header .ant-tag {
+    border: none;
+    font-weight: 500;
+}

@@ -1,0 +1,28 @@
+/* Container for the AddSubKeyword component */
+.add-sub-keyword-container {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Title inside the card */
+.add-sub-keyword-title {
+  font-size: 20px;
+  /* Use the theme's warning color variable */
+  color: var(--color-warning);
+  text-align: center;
+  padding: 2px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+/* "Subkeywords" header */
+.subkeyword-header {
+  font-size: 15px;
+  /* Use the theme's primary text color */
+  color: var(--text-color);
+  margin-top: 10px;
+  margin-bottom: 15px;
+}

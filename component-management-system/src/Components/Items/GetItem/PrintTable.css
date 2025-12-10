@@ -1,0 +1,80 @@
+/* Keep this rule, it's good for preventing rows from splitting */
+tr, td, th {
+  page-break-inside: avoid !important;
+}
+
+/* This @media block only applies when the user clicks print */
+@media print {
+
+  /* Set landscape mode */
+  @page {
+    size: landscape;
+    margin: 1cm;
+  }
+
+  /* 1. Hide everything on the page */
+  body * {
+    visibility: hidden;
+  }
+
+  /* 2. Make the printable area, its parents, and its children visible */
+  .printable-area,
+  .printable-area *,
+  .results-card,
+  .results-card .ant-card-body,
+  .results-header .ant-typography {
+    visibility: visible;
+  }
+
+  /* 3. Force the parent card and its body to not clip content */
+  .results-card,
+  .results-card .ant-card-body {
+    overflow: visible !important;
+    height: auto !important;
+    position: static !important;
+  }
+
+  /* 4. Position the printable area to fill the page */
+  .printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+  }
+
+  /* * 5. This is the most important fix: 
+   * Forcefully reset all Ant Design scroll/height properties.
+   */
+
+  /* This targets the DIV that has the y:600 scroll */
+  .ant-table-body {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important; /* <-- This is the new, critical rule */
+  }
+
+  /* Reset all table container wrappers */
+  .ant-table-wrapper,
+  .ant-table-container,
+  .ant-table-content,
+  .ant-table {
+    overflow: visible !important;
+    height: auto !important;
+    position: static !important;
+  }
+
+  /* This un-fixes the fixed columns, which break printing */
+  .ant-table-cell-fix-left,
+  .ant-table-cell-fix-right,
+  .ant-table-thead th {
+    position: static !important;
+    display: table-cell !important; /* Render as a normal cell */
+  }
+
+  /* 6. Hide the 'Action' column we tagged */
+  .print-hide {
+    display: none !important;
+  }
+}

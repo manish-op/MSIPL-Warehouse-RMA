@@ -1,0 +1,82 @@
+/* Main container for the entire page */
+.inward-gate-pass-container {
+  background-color: var(--background-color, #f0f2f5);
+  min-height: 100vh;
+  padding: 20px;
+  transition: padding 0.3s ease;
+}
+
+
+.gate-pass-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.gate-pass-title {
+  text-align: center;
+  color: var(--primary-color, #1f3b57);
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 24px;
+  transition: font-size 0.3s ease;
+}
+
+
+.item-details-divider {
+  border-color: var(--primary-color, #1f3b57) !important;
+  margin: 10px 0 20px;
+  color:var( --text-color, #e8e6e3);
+  
+}
+
+
+.item-list-container {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px; 
+  background-color: var(--background-color, #f0f2f5);
+}
+
+.item-detail-card {
+  border-color: var(--primary-color, #1f3b57);
+  border-width: 1px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background-color: var(--component-background, #f9fbfd);
+}
+
+
+.add-item-button {
+  border-color: var(--primary-color, #1f3b57);
+  color: var(--primary-color, #1f3b57);
+}
+
+
+.submit-gatepass-button {
+  background-color: var(--primary-color, #1f3b57);
+  border-color: var(--primary-color, #1f3b57);
+  min-width: 220px;
+  height: 40px;
+  font-weight: bold;
+}
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+  .inward-gate-pass-container {
+    padding: 15px;
+  }
+
+  .gate-pass-card .ant-card-body {
+    padding: 15px; 
+  }
+
+  .gate-pass-title {
+    font-size: 20px; 
+  }
+
+  .submit-gatepass-button {
+    width: 100%; 
+  }
+}

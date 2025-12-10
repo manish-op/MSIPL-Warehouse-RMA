@@ -1,0 +1,71 @@
+.p-4 {
+  padding: 1rem;
+}
+.sm\:p-8 {
+  padding: 2rem;
+}
+.md\:p-12 {
+  padding: 3rem;
+}
+
+/*
+ * This uses the main background color from your theme file.
+ */
+.bg-gray-100 {
+  background-color: var(--background-color);
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.max-w-lg {
+  max-width: 32rem; /* 512px */
+}
+
+.rounded-xl {
+  border-radius: 0.75rem; /* 12px */
+}
+
+/* * This creates a shadow that works in both light and dark mode.
+ */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.25);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+/*
+ * This uses the main text color from your theme file.
+ */
+.text-gray-800 {
+  color: var(--text-color);
+}

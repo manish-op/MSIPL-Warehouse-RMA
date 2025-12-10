@@ -1,0 +1,319 @@
+/* RMA Request Form Wizard Styles */
+
+.rma-wizard-container {
+  padding: 24px;
+  min-height: 100%;
+  background: #f0f2f5;
+}
+
+/* Steps Card */
+.steps-card {
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.wizard-steps .ant-steps-item-icon {
+  background: #fff;
+  border: 2px solid #1890ff;
+}
+
+.wizard-steps .ant-steps-item-finish .ant-steps-item-icon {
+  background: #1890ff;
+  border-color: #1890ff;
+}
+
+.step-icon {
+  font-size: 18px;
+}
+
+/* Form Card */
+.form-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-height: 500px;
+}
+
+.step-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.step-content.active {
+  display: block;
+}
+
+.step-content.hidden {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px !important;
+  color: #1f1f1f;
+}
+
+.step-icon-inline {
+  font-size: 24px;
+  color: #1890ff;
+  background: #e6f7ff;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.step-description {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* Invoice Section */
+.invoice-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Item Cards */
+.item-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  border: 1px solid #e6f7ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.08);
+}
+
+.item-card .ant-card-head {
+  background: #e6f7ff;
+  border-radius: 12px 12px 0 0;
+  min-height: 48px;
+}
+
+.item-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.advanced-options {
+  margin-top: 8px;
+}
+
+.advanced-options .ant-collapse-header {
+  color: #8c8c8c !important;
+  font-size: 13px;
+}
+
+.add-item-btn {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+/* Review Section */
+.review-section {
+  margin-top: 24px;
+}
+
+.review-card {
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.review-card .ant-card-head {
+  background: #fafafa;
+  min-height: 40px;
+}
+
+.review-card .ant-card-head-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.review-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+/* Navigation */
+.wizard-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+  border: none;
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 500;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, #73d13d 0%, #52c41a 100%) !important;
+}
+
+/* Success Card */
+.success-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.rma-numbers-list {
+  max-width: 500px;
+  margin: 24px auto 0;
+  text-align: left;
+}
+
+.rma-number-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #52c41a;
+}
+
+/* Form Inputs */
+.rma-wizard-container .ant-input,
+.rma-wizard-container .ant-select-selector {
+  border-radius: 6px;
+}
+
+.rma-wizard-container .ant-input:focus,
+.rma-wizard-container .ant-input-focused,
+.rma-wizard-container .ant-select-focused .ant-select-selector {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Legacy Styles (keeping for modal popup compatibility) */
+.rma-form-card {
+  background: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 24px auto;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.rma-form-title {
+  text-align: center;
+  margin-bottom: 32px !important;
+  color: #1890ff;
+}
+
+.rma-section-title {
+  margin-top: 32px !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+}
+
+.rma-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-popup {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.close-modal-btn {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 6px;
+  background: #1890ff;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.close-modal-btn:hover {
+  background: #40a9ff;
+}
+
+.close-modal-btn:disabled {
+  background: #d9d9d9;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .rma-wizard-container {
+    padding: 16px;
+  }
+
+  .wizard-steps .ant-steps-item-title {
+    font-size: 12px;
+  }
+
+  .step-emoji {
+    font-size: 22px;
+  }
+
+  .wizard-navigation {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .wizard-navigation>* {
+    width: 100%;
+  }
+
+  .wizard-navigation .ant-space {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

@@ -1,0 +1,9 @@
+/* styles.css */
+.hover-expand {
+    transition: width 0.3s ease-in-out; /* Add a transition for a smooth effect */
+    width: 50px; /* Initial width */
+  }
+  
+  .hover-expand:hover {
+    width: 300px; /* Expanded width on hover */
+  }

@@ -1,0 +1,36 @@
+/* src/components/EmployeeList/EmployeeList.css */
+
+/*
+ * This is the main wrapper for the entire page.
+ * It uses the --background-color variable from your App.css
+ * to ensure the page background matches the theme.
+ */
+.employee-list-wrapper {
+  width: 100%;
+  padding: 24px;
+  /* Use the global background color */
+  background-color: var(--background-color);
+}
+
+/*
+ * This class is applied to your <Card>.
+ * Your App.css already styles `.ant-card` for the theme.
+ * We just add some layout rules here, like max-width.
+ */
+.employee-list-card {
+  max-width: 1400px;
+  margin: 0 auto;
+  /* * No need to set background-color or border-color here.
+   * Your App.css rule for .ant-card already handles it!
+   */
+}
+
+/*
+ * This is your custom class for the <Table>.
+ * It makes the table rows more compact by reducing padding.
+ * The table's colors are already handled by App.css.
+ */
+.compact-table .ant-table-thead > tr > th,
+.compact-table .ant-table-tbody > tr > td {
+  padding: 12px 12px; /* Default is 16px, this is smaller */
+}

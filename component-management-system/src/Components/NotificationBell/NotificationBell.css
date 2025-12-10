@@ -1,0 +1,39 @@
+
+
+/* 1. The Bell Icon */
+.notification-bell-icon {
+
+  color: var(--header-text-color, var(--text-color));
+  transition: color 0.2s linear;
+}
+
+
+.ant-dropdown-menu {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px; /* Ant Design default */
+}
+
+/* 3. The Menu Items */
+.ant-dropdown-menu-item {
+  color: var(--text-color) !important;
+}
+
+/* 4. The Disabled "No notifications" Item */
+.ant-dropdown-menu-item-disabled,
+.ant-dropdown-menu-item-disabled:hover {
+  color: var(--text-color-secondary) !important;
+  background-color: transparent !important;
+  cursor: default;
+}
+
+/* 5. Item Hover Effect */
+.ant-dropdown-menu-item:hover:not(.ant-dropdown-menu-item-disabled) {
+  background-color: var(--hover-color) !important;
+}
+
+/* 6. Spinner inside the menu */
+.ant-spin-tip {
+  color: var(--text-color) !important;
+}
+

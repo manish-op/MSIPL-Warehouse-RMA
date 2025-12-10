@@ -1,0 +1,162 @@
+.chat-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%; 
+ 
+  height: 100vh; 
+  height: 100svh; 
+
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden; 
+  
+  display: flex;
+  flex-direction: column;
+  background-color: var(--component-background);
+}
+
+.chat-header {
+  text-align: center;
+  color: var(--text-color);
+  margin: 0;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--hover-color);
+  flex-shrink: 0; /* Prevents header from shrinking */
+}
+
+.chat-error-bar {
+  color: var(--color-error);
+  background-color: color-mix(in srgb, var(--color-error) 15%, transparent);
+  padding: 12px;
+  text-align: center;
+  font-weight: 500;
+  flex-shrink: 0; /* Prevents error bar from shrinking */
+}
+
+.message-area {
+  flex: 1; /* Key: takes all available space */
+  overflow-y: auto; /* Key: only this area scrolls */
+  padding: 20px;
+  background-color: var(--component-background);
+  overscroll-behavior: contain;
+}
+
+.message-container {
+  margin-bottom: 12px;
+}
+
+/* Styles for the "Guest joined/left" pills */
+.system-message {
+  text-align: center;
+  margin: 12px 0;
+}
+
+.system-message-pill {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.system-message-pill.join {
+  color: var(--color-success);
+  background-color: color-mix(in srgb, var(--color-success) 15%, transparent);
+}
+
+.system-message-pill.leave {
+  background-color: var(--hover-color);
+  color: var(--text-color-secondary);
+}
+
+.system-message-timestamp {
+  font-size: 0.75em;
+  color: var(--text-color-secondary);
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* Styles for a regular chat bubble */
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sender-name {
+  color: var(--text-color-secondary);
+  font-size: 0.8em;
+  margin-bottom: 4px;
+  margin-left: 8px;
+}
+
+.message-bubble {
+  background: var(--hover-color);
+  color: var(--text-color);
+  padding: 10px 14px;
+  border-radius: 20px;
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+/* Styles for the bottom input area */
+.input-area {
+  display: flex;
+  padding: 12px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--hover-color);
+  flex-shrink: 0; /* Prevents input from shrinking */
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 15px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  font-size: 1em;
+  margin-right: 10px;
+  background-color: var(--component-background);
+  color: var(--text-color);
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.send-button {
+  padding: 12px 20px;
+  border: none;
+  color: white;
+  border-radius: 20px;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+/* Desktop styles: Revert to card layout
+*/
+@media (min-width: 600px) {
+  .chat-container {
+    /* Revert to original desktop styles */
+    position: relative;
+    max-width: 600px;
+    margin: 40px auto;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    
+   
+    height: 70vh; 
+  }
+
+  .input-area {
+     padding: 20px;
+     padding-bottom: 20px; 
+  }
+}

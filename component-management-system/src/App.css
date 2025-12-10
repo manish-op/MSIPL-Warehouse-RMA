@@ -1,0 +1,532 @@
+/* --- 1. Global Reset & Box Sizing --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+
+  --background-color: #f0f2f5;
+  --component-background: #ffffff;
+  --text-color: #1c1e21;
+  --text-color-secondary: #65676b;
+  --border-color: #d9d9d9;
+  --hover-color: #f5f5f5;
+
+
+  --sidebar-bg: #ffffff;
+  --sidebar-border: rgba(5, 5, 5, 0.06);
+  /* Semantic Colors */
+  --primary-color: #1677ff;
+  --color-error: #ff4d4f;
+  --color-warning: #faad14;
+  --color-success: #52c41a;
+}
+
+/* Dark Theme */
+[data-theme='dark'] {
+ 
+  --background-color: #141414;
+  --component-background: #1d1d1d;
+  --text-color: #e8e6e3;
+  --text-color-secondary: #8c8c8c;
+  --border-color: #434343;
+  --hover-color: #333333;
+
+  /* Sidebar Specific */
+  --sidebar-bg: #242526;
+  --sidebar-border: #3a3b3c;
+
+  /* Semantic Colors */
+  --primary-color: #1677ff;
+  --color-error: #a61d24;
+  --color-warning: #d89614;
+  --color-success: #49aa19;
+}
+
+
+
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-size: 16px;
+  min-height: 100vh;
+  transition: background-color 0.2s linear, color 0.2s linear;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Responsive Font Sizing */
+@media (min-width: 992px) {
+  body {
+    font-size: 20px;
+  }
+}
+
+
+
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+footer {
+  background-color: rgb(14, 156, 156);
+  padding: 10px;
+  font-size: small;
+  text-align: center;
+  color: white;
+}
+
+
+
+
+/* Card */
+.ant-card {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+.ant-card-head-title {
+  color: var(--text-color) !important;
+}
+
+
+.ant-form-item-label > label {
+  color: var(--text-color) !important;
+}
+
+
+.ant-input-affix-wrapper,
+.ant-input {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+}
+.ant-input-affix-wrapper {
+  border: 1px solid var(--border-color) !important;
+}
+.ant-input-prefix, .ant-input-suffix {
+  color: var(--text-color-secondary) !important;
+}
+.ant-input::placeholder {
+  color: var(--text-color-secondary) !important;
+}
+.ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled) {
+  border-color: var(--color-error) !important;
+}
+
+
+.ant-select-selector {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+}
+.ant-select-selection-placeholder, .ant-select-arrow {
+  color: var(--text-color-secondary) !important;
+}
+.ant-select-selection-item {
+  color: var(--text-color) !important;
+}
+.ant-select-dropdown {
+  background-color: var(--component-background) !important;
+}
+.ant-select-item {
+  color: var(--text-color) !important;
+}
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: var(--hover-color) !important;
+}
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background-color: var(--component-background);
+  color: var(--primary-color) !important;
+  font-weight: 600;
+}
+
+/* Buttons */
+.ant-btn-primary {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+.ant-btn-dashed {
+  background-color: transparent !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color-secondary) !important;
+}
+.ant-btn-dashed:hover, .ant-btn-dashed:focus {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+.ant-btn-dangerous {
+  background-color: transparent !important;
+  border-color: var(--color-error) !important;
+  color: var(--color-error) !important;
+}
+.ant-btn-dangerous:hover, .ant-btn-dangerous:focus {
+  background-color: var(--color-error) !important;
+  border-color: var(--color-error) !important;
+  color: #fff !important;
+}
+
+/* Switch */
+.ant-switch-checked {
+  background-color: var(--primary-color) !important;
+}
+
+/* Date Picker */
+.ant-picker,
+.ant-picker-panel-container,
+.ant-picker-dropdown {
+  background-color: var(--component-background) !important;
+}
+.ant-picker {
+  border: 1px solid var(--border-color) !important;
+}
+.ant-picker-input > input {
+  color: var(--text-color) !important;
+}
+.ant-picker-input > input::placeholder {
+  color: var(--text-color-secondary) !important;
+}
+.ant-picker-suffix, .ant-picker-clear {
+  color: var(--text-color-secondary) !important;
+  background: transparent !important;
+}
+.ant-picker-header {
+  color: var(--text-color) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+.ant-picker-header-view button:hover,
+.ant-picker-header-super-prev-btn:hover,
+.ant-picker-header-prev-btn:hover,
+.ant-picker-header-super-next-btn:hover,
+.ant-picker-header-next-btn:hover {
+  color: var(--text-color) !important;
+}
+.ant-picker-cell {
+  color: var(--text-color-secondary) !important;
+}
+.ant-picker-cell-in-view {
+  color: var(--text-color) !important;
+}
+.ant-picker-cell:hover:not(.ant-picker-cell-selected) .ant-picker-cell-inner {
+  background-color: var(--hover-color) !important;
+}
+.ant-picker-cell-selected .ant-picker-cell-inner {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+.ant-picker-cell-today .ant-picker-cell-inner::before {
+  border-color: var(--primary-color) !important;
+}
+.ant-picker-footer {
+  border-top-color: var(--border-color) !important;
+}
+
+/* Segmented Control */
+.ant-segmented {
+  background-color: var(--background-color) !important;
+}
+.ant-segmented-item {
+  color: var(--text-color-secondary) !important;
+}
+.ant-segmented-item-selected {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+}
+
+/* Upload */
+.ant-upload-list-item,
+.ant-upload-list-item .ant-upload-list-item-name {
+  color: var(--text-color) !important;
+}
+.ant-upload-list-item-card-actions .anticon {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Other Components */
+.ant-message-notice-content {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+}
+.ant-typography, .ant-typography-secondary {
+  color: var(--text-color-secondary);
+}
+.ant-divider {
+  border-top-color: var(--border-color) !important;
+}
+
+
+
+.item-details-divider {
+ 
+  border-color: var(--primary-color, #1f3b57) !important;
+   color: var(--text-color) !important;
+  margin: 10px 0 20px;
+   
+}
+
+
+.item-details-divider .ant-divider-inner-text {
+  color: var(--text-color, #e8e6e3);
+}
+
+.repairing-page-divider{
+  border-color: var(--primary-color, #1f3b57) !important;
+   color: var(--text-color) !important;
+  margin: 10px 0 20px;
+}
+
+
+/* src/App.css */
+
+/* ... (all your other rules for .ant-card, .ant-input, etc.) ... */
+
+/* --- Table --- */
+.ant-table-wrapper,
+.ant-table {
+  background-color: var(--component-background) !important;
+}
+
+/* Table Header */
+.ant-table-thead > tr > th {
+  background-color: var(--background-color) !important; /* Darker header */
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Table Body Cells */
+.ant-table-tbody > tr > td {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Row Hover Effect */
+.ant-table-tbody > tr.ant-table-row:hover > td {
+  background-color: var(--hover-color) !important;
+}
+
+/* Sorter Icons */
+.ant-table-column-sorter-up,
+.ant-table-column-sorter-down {
+  color: var(--text-color-secondary) !important;
+}
+.ant-table-column-sorter-up.active,
+.ant-table-column-sorter-down.active {
+  color: var(--primary-color) !important;
+}
+
+/* Empty State (when no data) */
+.ant-empty-description {
+   color: var(--text-color-secondary) !important;
+}
+
+/* --- Pagination (Part of the Table) --- */
+.ant-pagination-item {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+}
+.ant-pagination-item a {
+  color: var(--text-color) !important;
+}
+
+.ant-pagination-item-active {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+.ant-pagination-item-active a {
+  color: #fff !important;
+}
+
+/* Prev/Next arrows */
+.ant-pagination-item-link {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.ant-pagination-disabled .ant-pagination-item-link {
+  color: var(--text-color-secondary) !important;
+  background-color: var(--hover-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* --- Spin (for loading text) --- */
+.ant-spin-tip {
+  color: var(--text-color) !important;
+}
+
+/* --- InputNumber (Fix for Dark Theme) --- */
+.ant-input-number {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+/* The actual text input field inside */
+.ant-input-number-input {
+  background-color: transparent !important; /* The wrapper has the background */
+  color: var(--text-color) !important;
+}
+
+/* The placeholder text */
+.ant-input-number-input::placeholder {
+  color: var(--text-color-secondary) !important;
+}
+
+/* The up/down arrow buttons wrapper */
+.ant-input-number-handler-wrap {
+  background-color: transparent !important;
+  border-left: 1px solid var(--border-color) !important;
+}
+
+/* The individual up/down buttons */
+.ant-input-number-handler {
+  background-color: transparent !important;
+}
+
+/* The divider between up/down arrows */
+.ant-input-number-handler-down {
+  border-top: 1px solid var(--border-color) !important;
+}
+
+/* The color of the arrow icons */
+.ant-input-number-handler-up-inner,
+.ant-input-number-handler-down-inner {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Hover effect on arrows */
+.ant-input-number-handler:hover {
+  background-color: var(--hover-color) !important;
+}
+
+.ant-input-number-handler:hover .ant-input-number-handler-up-inner,
+.ant-input-number-handler:hover .ant-input-number-handler-down-inner {
+  color: var(--text-color) !important;
+}
+
+/* Disabled state */
+.ant-input-number-disabled {
+  background-color: var(--hover-color) !important;
+  color: var(--text-color-secondary) !important;
+}
+
+
+/* --- InputNumber (Fix for Dark Theme) --- */
+.ant-input-number {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+/* The actual text input field inside */
+.ant-input-number-input {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+}
+
+/* The placeholder text */
+.ant-input-number-input::placeholder {
+  color: var(--text-color-secondary) !important;
+}
+
+/* The up/down arrow buttons wrapper */
+.ant-input-number-handler-wrap {
+  background-color: transparent !important;
+  border-left: 1px solid var(--border-color) !important;
+}
+
+/* The individual up/down buttons */
+.ant-input-number-handler {
+  background-color: transparent !important;
+}
+
+/* The divider between up/down arrows */
+.ant-input-number-handler-down {
+  border-top: 1px solid var(--border-color) !important;
+}
+
+/* The color of the arrow icons */
+.ant-input-number-handler-up-inner,
+.ant-input-number-handler-down-inner {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Hover effect on arrows */
+.ant-input-number-handler:hover {
+  background-color: var(--hover-color) !important;
+}
+
+.ant-input-number-handler:hover .ant-input-number-handler-up-inner,
+.ant-input-number-handler:hover .ant-input-number-handler-down-inner {
+  color: var(--text-color) !important;
+}
+
+/* Disabled state */
+.ant-input-number-disabled {
+  background-color: var(--hover-color) !important;
+  color: var(--text-color-secondary) !important;
+}
+
+/* =========================================
+   Custom Tooltip & Toolbar Integration
+   ========================================= */
+
+/* NOTE: Ensure your input element has the attribute data-content="Your Text"
+   for this tooltip to appear.
+*/
+Input:hover::after {
+  content: attr(data-content);
+  position: absolute;
+  top: 0;
+  left: 100%;
+
+  /* --- Theme Integration --- */
+  /* Replaced hardcoded #f48b8b with component background for theme consistency */
+  background-color: var(--component-background); 
+  /* Replaced hardcoded #3783ee with primary color to match Ant Design theme */
+  border: 1px solid var(--primary-color);
+  /* Added text color to ensure readability in Dark Mode */
+  color: var(--text-color);
+  
+  /* Added shadow for better visibility in Dark Mode */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* --- Layout & Size --- */
+  padding: 10px;
+  min-width: 200px;
+  min-height: 100px;
+  z-index: 10;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Toolbar Wrapper */
+.toolbar-wrap {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  
+  /* Ensure any direct text inside toolbar respects the theme color */
+  color: var(--text-color);
+}
+
+/* Responsive Styles for Toolbar */
+@media (max-width: 575px) {
+  .toolbar-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

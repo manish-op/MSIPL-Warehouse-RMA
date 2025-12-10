@@ -1,0 +1,77 @@
+/* --- Base Table Wrapper Styles --- */
+.employee-ticket-table {
+    margin-top: 20px;
+    /* Uses theme component background */
+    background: var(--component-background); 
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    overflow: hidden; 
+}
+
+/* --- Table Header Styling (TH) --- */
+.employee-ticket-table .ant-table-thead > tr > th {
+    /* Uses theme hover color for a slightly different header background */
+    background-color: var(--hover-color) !important; 
+    color: var(--text-color) !important;
+    
+    /* YOUR SPECIFIC REQUESTS */
+    font-weight: 700 !important; /* Extra bold */
+    text-align: center !important; /* Centered text */
+    padding: 12px 8px !important; /* Increased padding */
+    
+    text-transform: uppercase;
+    /* Uses theme border color, made stronger */
+    border-bottom: 2px solid var(--border-color) !important;
+}
+
+/* Dark Theme Header Override: Ensures the background contrasts component-background */
+[data-theme='dark'] .employee-ticket-table .ant-table-thead > tr > th {
+    background-color: #262626 !important; 
+}
+
+/* Table Header Hover Effect */
+.employee-ticket-table .ant-table-thead > tr > th:hover {
+    /* Mixes primary color for a subtle highlight */
+    background-color: color-mix(in srgb, var(--primary-color) 10%, var(--hover-color)) !important;
+}
+
+/* --- Table Body Styling (TD) --- */
+.employee-ticket-table .ant-table-tbody > tr > td {
+    color: var(--text-color); /* Standard theme text color */
+    border-color: var(--border-color) !important;
+    transition: background-color 0.2s;
+    text-align: center; /* Center cell content for consistency */
+}
+
+/* Row Hover Effect */
+.employee-ticket-table .ant-table-tbody > tr:hover > td {
+    background-color: var(--hover-color) !important; /* Uses the global theme hover color */
+    cursor: pointer;
+}
+
+/* --- Selected Row Indicator (Selected-Row Class) --- */
+
+.selected-row {
+    /* Light tint of primary color */
+    background-color: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
+    font-weight: 500;
+}
+
+.selected-row > td {
+    /* Primary color border and text */
+    border-left: 3px solid var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--text-color) !important; 
+}
+
+/* Selected Row Hover Effect */
+.employee-ticket-table .ant-table-tbody > tr.selected-row:hover > td {
+    /* Slightly darker tint on hover */
+    background-color: color-mix(in srgb, var(--primary-color) 15%, transparent) !important;
+}
+
+/* --- Action Link Styling --- */
+.employee-ticket-table .ant-typography-link {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}

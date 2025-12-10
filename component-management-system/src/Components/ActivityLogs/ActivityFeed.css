@@ -1,0 +1,29 @@
+/* src/Components/ActivityFeed/ActivityFeed.css */
+.activity-card {
+  max-height: 420px;
+  overflow: auto;
+  border-radius: 10px;
+}
+.activity-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 120ms;
+}
+.activity-item:hover {
+  background: rgba(15, 107, 255, 0.03);
+}
+.activity-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.muted {
+  color: #6b7280;
+  font-weight: 400;
+  margin-left: 6px;
+}
+.activity-time {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 6px;
+}

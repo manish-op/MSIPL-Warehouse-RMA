@@ -1,0 +1,210 @@
+/* =================================================================
+   1. GLOBAL THEME VARIABLES
+   ================================================================= */
+:root {
+  /* --- Light Theme Defaults --- */
+  --background-color: #f0f2f5;
+  --component-background: #ffffff;
+  --text-color: #1c1e21;
+  --text-color-secondary: #65676b;
+  --border-color: #d9d9d9;
+  --hover-color: #f5f5f5;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+
+  /* Semantic Colors */
+  --primary-color: #1677ff;
+  --color-error: #ff4d4f;
+  --color-success: #52c41a;
+}
+
+/* --- Dark Theme Overrides --- */
+[data-theme='dark'] {
+  --background-color: #141414;
+  --component-background: #1d1d1d;
+  --text-color: #e8e6e3;
+  --text-color-secondary: #a6a6a6;
+  --border-color: #434343;
+  --hover-color: #333333;
+  --shadow-color: rgba(0, 0, 0, 0.45);
+
+  --primary-color: #1677ff;
+  --color-error: #a61d24;
+  --color-success: #49aa19;
+}
+
+/* =================================================================
+   2. GLOBAL RESET & TYPOGRAPHY
+   ================================================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ensure headings and common text tags inherit the theme color */
+h1, h2, h3, h4, h5, h6, p, span, div {
+  color: inherit;
+}
+
+/* =================================================================
+   3. ANT DESIGN COMPONENT OVERRIDES (Fixing Font Colors)
+   ================================================================= */
+
+/* --- Card --- */
+.ant-card {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+.ant-card-head {
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+.ant-card-head-title {
+  color: var(--text-color) !important;
+}
+
+/* --- Typography / Text --- */
+.ant-typography {
+  color: var(--text-color) !important;
+}
+.ant-typography-secondary {
+  color: var(--text-color-secondary) !important;
+}
+
+/* --- Form Labels (Crucial for "Fonts not changing") --- */
+.ant-form-item-label > label {
+  color: var(--text-color) !important;
+}
+
+/* --- Inputs & TextAreas --- */
+.ant-input,
+.ant-input-affix-wrapper {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Fix Placeholder Color */
+.ant-input::placeholder,
+.ant-input-number-input::placeholder {
+  color: var(--text-color-secondary) !important;
+  opacity: 1; /* Firefox fix */
+}
+
+/* --- Select / Dropdowns --- */
+.ant-select-selector {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+.ant-select-arrow {
+  color: var(--text-color-secondary) !important;
+}
+.ant-select-selection-item {
+  color: var(--text-color) !important;
+}
+.ant-select-dropdown {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color);
+}
+.ant-select-item {
+  color: var(--text-color) !important;
+}
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: var(--hover-color) !important;
+}
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+/* --- Checkbox --- */
+.ant-checkbox-wrapper {
+  color: var(--text-color) !important;
+}
+.ant-checkbox-inner {
+  background-color: var(--component-background) !important;
+  border-color: var(--border-color) !important;
+}
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* --- Buttons (Toolbar) --- */
+.ant-btn-default {
+  background-color: var(--component-background) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+.ant-btn-default:hover {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+.ant-btn-primary {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+/* =================================================================
+   4. CUSTOM TOOLBAR & TOOLTIP INTEGRATION
+   ================================================================= */
+
+/* Toolbar Wrapper */
+.toolbar-wrap {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-color); /* Ensures toolbar text is themed */
+}
+
+@media (max-width: 575px) {
+  .toolbar-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* CUSTOM TOOLTIP
+   Usage in JS: <div className="custom-tooltip" data-content="My Tooltip Text">...</div>
+   Note: Changed selector from 'Input' to '.custom-tooltip' because 
+   HTML <input> tags cannot have ::after pseudo-elements.
+*/
+.custom-tooltip {
+  position: relative; /* Needed for absolute positioning of the tooltip */
+}
+
+.custom-tooltip:hover::after {
+  content: attr(data-content);
+  position: absolute;
+  top: 0; /* Adjust these values based on where you want the tooltip */
+  left: 100%; 
+  margin-left: 10px;
+  
+  /* Theme Integration */
+  background-color: var(--component-background);
+  color: var(--text-color);
+  border: 1px solid var(--primary-color);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  
+  /* Box Model */
+  padding: 10px;
+  min-width: 200px;
+  border-radius: 4px;
+  z-index: 1000;
+  white-space: normal;
+  word-wrap: break-word;
+  font-size: 14px;
+  font-weight: normal;
+}

@@ -1,0 +1,32 @@
+
+.theme-toggle-button {
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px; 
+
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  font-size: 16px;
+  font-weight: 500; 
+
+  /* Theme-dependent styles - use CSS variables */
+  background-color: var(--primary-color); 
+  color: var(--background-color);
+  /* Smooth transition for theme changes */
+  transition: background-color 0.3s ease, color 0.3s ease; 
+}
+
+.theme-toggle-button:hover {
+  opacity: 0.9; /* Slightly dim on hover */
+}
+
+.theme-icon {
+  width: 20px; /* Adjust icon size as needed */
+  height: 20px;
+  
+  filter: var(--icon-filter); 
+}
+

@@ -1,0 +1,130 @@
+/* Sidebar.css */
+
+:root {
+  --sidebar-bg: #001529;
+  --sidebar-header-bg: #002140;
+  --menu-highlight: #1890ff;
+  --text-white: #ffffff;
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+}
+
+/* --- General Sider Styling --- */
+.custom-sidebar {
+  background: var(--sidebar-bg) !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1) 0s;
+}
+
+/* --- Header Section (Logo + Toggle) --- */
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background-color: var(--sidebar-header-bg);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.logo-text {
+  color: var(--text-white);
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* Desktop Toggle Icon inside Header */
+.desktop-toggle, .mobile-close {
+  color: #a6adb4;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+}
+
+.desktop-toggle:hover, .mobile-close:hover {
+  color: var(--text-white);
+}
+
+/* --- Menu Styling --- */
+.custom-menu {
+  background: transparent !important;
+  border-right: none !important;
+  margin-top: 10px;
+}
+
+/* Scrollbar styling for the menu if it gets too long */
+.ant-layout-sider-children {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.ant-layout-sider-children::-webkit-scrollbar {
+  width: 6px;
+}
+.ant-layout-sider-children::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* --- Mobile Specific Styles --- */
+
+/* 1. The Overlay (Backdrop) */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--overlay-bg);
+  z-index: 1000; /* Behind sidebar (1001), above content */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  backdrop-filter: blur(2px); /* Modern blur effect */
+}
+
+.sidebar-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 2. Floating Toggle Button (Visible only on mobile when collapsed) */
+.mobile-toggle-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+}
+
+/* 3. Mobile Sidebar Behavior */
+@media (max-width: 768px) {
+  /* On mobile, sidebar is fixed and slides in from left */
+  .custom-sidebar.mobile-sider {
+    height: 100vh !important;
+  }
+  
+  /* Hide desktop toggle logic */
+  .desktop-toggle {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+    /* Hide mobile elements on desktop */
+    .mobile-toggle-btn {
+        display: none;
+    }
+    .mobile-close {
+        display: none;
+    }
+}

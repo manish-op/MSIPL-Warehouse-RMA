@@ -1,0 +1,113 @@
+.admin-dashboard {
+  padding: 24px;
+  background-color: var(  --component-background);
+  min-height: 100vh;
+}
+
+.dashboard-title {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--text-color);
+  font-size: 2.5rem; 
+}
+
+
+.user-profile-card {
+  text-align: center;
+  border-radius: 8px;
+   color: var(--text-color);
+  box-shadow: 0 4px 8px rgba(98, 238, 243, 0.1);
+}
+
+
+
+.profile-header {
+  margin-bottom: 20px;
+}
+
+.profile-avatar {
+  margin-bottom: 12px;
+}
+
+.user-name {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #4a9bdd;
+}
+
+.user-details-list p {
+  margin: 8px 0;
+  text-align: left;
+  padding-left: 20px; /* Indent details slightly */
+  color: var(--text-color);
+}
+
+.user-details-list strong {
+ color: var(--text-color);
+}
+
+/* --- Placeholder cards for stats --- */
+.dashboard-stat-card {
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    color: #1890ff;
+    margin-bottom: 12px;
+}
+
+.dashboard-stat-card h3 {
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+
+/* --- Media Queries for Responsiveness --- */
+
+/* For tablets and mobile phones */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 16px;
+  }
+
+  .dashboard-title {
+    font-size: 2rem; /* Reduce title font size */
+  }
+
+  .user-name {
+    font-size: 1.25rem; /* Reduce user name font size */
+  }
+
+  /* You could also make the avatar smaller on mobile if needed */
+  .profile-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    line-height: 80px !important; /* Ant Design specific override */
+    font-size: 40px !important; /* Ant Design specific override */
+  }
+}
+
+/* For small mobile phones */
+@media (max-width: 480px) {
+  .admin-dashboard {
+    padding: 8px;
+  }
+  
+  .dashboard-title {
+    font-size: 1.8rem;
+  }
+
+  .user-details-list p {
+    padding-left: 10px; /* Reduce indentation */
+  }
+}
+

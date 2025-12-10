@@ -1,0 +1,246 @@
+/* Unrepaired Page Styles */
+.unrepaired-page {
+    min-height: 100%;
+    background: #f0f2f5;
+}
+
+/* Header Section */
+.unrepaired-header {
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    padding: 24px 32px;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 20px rgba(24, 144, 255, 0.3);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-icon {
+    font-size: 36px;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.2);
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.refresh-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    color: #fff !important;
+}
+
+/* Stats Row */
+.stats-row {
+    margin-top: 16px;
+}
+
+.stat-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 16px 20px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    color: #fff;
+}
+
+.stat-box .anticon {
+    font-size: 24px;
+    opacity: 0.9;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+}
+
+/* Content Section */
+.unrepaired-content {
+    padding: 24px 32px;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state {
+    padding: 80px 0;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* RMA Groups */
+.rma-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.rma-group-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+.rma-group-card .ant-card-head {
+    background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+    border-bottom: 1px solid #91d5ff;
+    padding: 16px 24px;
+}
+
+.rma-group-card .ant-card-body {
+    padding: 20px;
+    background: #fafafa;
+}
+
+.rma-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Item Cards */
+.item-card {
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.15);
+    border-color: #69c0ff;
+}
+
+.item-card .ant-card-body {
+    padding: 16px;
+}
+
+.item-card .ant-card-actions {
+    background: #e6f7ff;
+    border-top: 1px solid #91d5ff;
+    padding: 8px 12px;
+}
+
+.item-card .ant-card-actions>li {
+    margin: 0;
+}
+
+.item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-row .ant-typography-secondary {
+    font-size: 12px;
+}
+
+.fault-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fault-text {
+    margin: 0 !important;
+    color: #595959;
+    font-size: 13px;
+}
+
+.assign-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+    border: none;
+    height: 36px;
+    font-weight: 500;
+    border-radius: 8px;
+}
+
+.assign-btn:hover {
+    background: linear-gradient(135deg, #40a9ff 0%, #69c0ff 100%) !important;
+}
+
+/* Modal Styles */
+.assign-modal .ant-modal-header {
+    border-bottom: 1px solid #91d5ff;
+    padding: 16px 24px;
+    background: #e6f7ff;
+}
+
+.assign-modal .ant-modal-body {
+    padding: 20px 24px;
+}
+
+.assign-modal .ant-modal-footer {
+    border-top: 1px solid #f0f0f0;
+    padding: 12px 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .unrepaired-header {
+        padding: 16px 20px;
+    }
+
+    .unrepaired-content {
+        padding: 16px 20px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .refresh-btn {
+        width: 100%;
+    }
+
+    .header-icon {
+        font-size: 28px;
+        padding: 10px;
+    }
+}
