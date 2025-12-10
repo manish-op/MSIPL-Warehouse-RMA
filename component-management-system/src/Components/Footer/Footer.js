@@ -2,6 +2,9 @@ import "./Footer.css";
 // 1. Import useLocation from react-router-dom
 import { useLocation } from "react-router-dom";
 
+
+// testing git branch
+
 function Footer() {
   // 2. Get the current location object
   const location = useLocation();
