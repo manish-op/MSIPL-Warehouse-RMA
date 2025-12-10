@@ -20,6 +20,8 @@ public class RmaItemWorkflowDTO {
     private String repairedByName;
     private ZonedDateTime repairedDate;
     private String repairRemarks;
+    private String itemRmaNo; // Item-level RMA number (distinct from request number)
+    private String issueFixed; // Description of issue that was fixed
 
     // Getters and Setters
     public Long getId() {
@@ -132,5 +134,21 @@ public class RmaItemWorkflowDTO {
 
     public void setRepairRemarks(String repairRemarks) {
         this.repairRemarks = repairRemarks;
+    }
+
+    public String getItemRmaNo() {
+        return itemRmaNo;
+    }
+
+    public void setItemRmaNo(String itemRmaNo) {
+        this.itemRmaNo = itemRmaNo;
+    }
+
+    public String getIssueFixed() {
+        return issueFixed;
+    }
+
+    public void setIssueFixed(String issueFixed) {
+        this.issueFixed = issueFixed;
     }
 }

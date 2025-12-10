@@ -21,6 +21,7 @@ import {
     ExclamationCircleOutlined,
     AppstoreOutlined,
     ReloadOutlined,
+    EditOutlined,
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
@@ -40,6 +41,10 @@ export default function UnrepairedPage() {
     const [bulkAssignModalVisible, setBulkAssignModalVisible] = useState(false);
     const [selectedRmaNo, setSelectedRmaNo] = useState(null);
     const [selectedRmaItemCount, setSelectedRmaItemCount] = useState(0);
+    // Edit RMA state
+    const [editRmaModalVisible, setEditRmaModalVisible] = useState(false);
+    const [newRmaNo, setNewRmaNo] = useState("");
+    const [updatingRma, setUpdatingRma] = useState(false);
 
     const loadItems = async () => {
         setLoading(true);
@@ -127,6 +132,37 @@ export default function UnrepairedPage() {
             message.error(result.error || "Failed to assign items");
         }
         setAssigning(false);
+    };
+
+    const openEditRmaModal = (item) => {
+        setSelectedItem(item);
+        setNewRmaNo("");
+        setEditRmaModalVisible(true);
+    };
+
+    const handleUpdateRma = async () => {
+        if (!newRmaNo.trim()) {
+            message.warning("Please enter RMA Number");
+            return;
+        }
+
+        setUpdatingRma(true);
+        const result = await RmaApi.updateItemRmaNumber(selectedItem.id, newRmaNo);
+        if (result.success) {
+            message.success("RMA Number updated successfully!");
+            setEditRmaModalVisible(false);
+            loadItems();
+        } else {
+            message.error(result.error || "Failed to update RMA Number");
+        }
+        setUpdatingRma(false);
+    };
+
+    // Check if item has a custom RMA number (not inherited from request)
+    const hasCustomRmaNo = (item) => {
+        // Item has custom RMA if rmaNo field is directly set on the item
+        // This checks the item-level rmaNo, not the parent request's requestNumber
+        return item.itemRmaNo && item.itemRmaNo.trim() !== "";
     };
 
     return (
@@ -237,7 +273,16 @@ export default function UnrepairedPage() {
                                                             className="assign-btn"
                                                         >
                                                             Assign Technician
-                                                        </Button>
+                                                        </Button>,
+                                                        !item.itemRmaNo && (
+                                                            <Button
+                                                                key="add-rma"
+                                                                icon={<EditOutlined />}
+                                                                onClick={() => openEditRmaModal(item)}
+                                                            >
+                                                                Add RMA
+                                                            </Button>
+                                                        )
                                                     ]}
                                                 >
                                                     <div className="item-content">
@@ -263,6 +308,12 @@ export default function UnrepairedPage() {
                                                                 {item.faultDescription || "No description"}
                                                             </Paragraph>
                                                         </div>
+                                                        {item.itemRmaNo && (
+                                                            <div className="item-row" style={{ marginTop: 8 }}>
+                                                                <Text type="secondary">RMA Number</Text>
+                                                                <Tag color="green">{item.itemRmaNo}</Tag>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </Card>
                                             </Col>
@@ -405,6 +456,34 @@ export default function UnrepairedPage() {
                             />
                         </div>
                     </Space>
+                </Modal>
+
+                {/* Add RMA Modal */}
+                <Modal
+                    title="Add RMA Number"
+                    open={editRmaModalVisible}
+                    onCancel={() => setEditRmaModalVisible(false)}
+                    footer={[
+                        <Button key="cancel" onClick={() => setEditRmaModalVisible(false)}>
+                            Cancel
+                        </Button>,
+                        <Button
+                            key="submit"
+                            type="primary"
+                            loading={updatingRma}
+                            onClick={handleUpdateRma}
+                        >
+                            Add
+                        </Button>
+                    ]}
+                >
+                    <Text strong>RMA Number:</Text>
+                    <Input
+                        placeholder="Enter RMA Number"
+                        value={newRmaNo}
+                        onChange={(e) => setNewRmaNo(e.target.value)}
+                        style={{ marginTop: 8 }}
+                    />
                 </Modal>
             </div>
         </RmaLayout>

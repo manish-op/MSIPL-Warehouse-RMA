@@ -482,7 +482,8 @@ public class RmaService {
      * Security: Logs all status changes for audit trail
      */
     @Transactional
-    public ResponseEntity<?> updateItemStatus(HttpServletRequest request, Long itemId, String status, String remarks) {
+    public ResponseEntity<?> updateItemStatus(HttpServletRequest request, Long itemId, String status, String remarks,
+            String issueFixed) {
         try {
             RmaItemEntity item = rmaItemDAO.findById(itemId).orElse(null);
             if (item == null) {
@@ -507,9 +508,14 @@ public class RmaService {
 
             String normalizedStatus = status.toUpperCase().trim();
             if (!normalizedStatus.equals("REPAIRING") && !normalizedStatus.equals("REPAIRED")
-                    && !normalizedStatus.equals("CANT_BE_REPAIRED")) {
+                    && !normalizedStatus.equals("CANT_BE_REPAIRED") && !normalizedStatus.equals("BER")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Invalid status. Must be: REPAIRING, REPAIRED, or CANT_BE_REPAIRED");
+                        .body("Invalid status. Must be: REPAIRING, REPAIRED, CANT_BE_REPAIRED, or BER");
+            }
+
+            // Validate issueFixed is mandatory
+            if (issueFixed == null || issueFixed.trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Issue Fixed is required");
             }
 
             // Capture old values for audit
@@ -518,6 +524,7 @@ public class RmaService {
 
             item.setRepairStatus(normalizedStatus);
             item.setRepairRemarks(remarks);
+            item.setIssueFixed(issueFixed.trim());
 
             // If marked as repaired, record who repaired it
             if (normalizedStatus.equals("REPAIRED")) {
@@ -553,6 +560,63 @@ public class RmaService {
     }
 
     /**
+     * Update the RMA number for an RMA item
+     * Security: Logs all changes for audit trail
+     */
+    @Transactional
+    public ResponseEntity<?> updateItemRmaNumber(HttpServletRequest request, Long itemId, String rmaNo) {
+        try {
+            RmaItemEntity item = rmaItemDAO.findById(itemId).orElse(null);
+            if (item == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found");
+            }
+
+            // Get logged in user
+            String loggedInUserEmail = null;
+            String loggedInUserName = null;
+            try {
+                loggedInUserEmail = request.getUserPrincipal().getName();
+                AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+                loggedInUserName = loggedInUser != null ? loggedInUser.getName() : loggedInUserEmail;
+            } catch (NullPointerException e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            }
+
+            // Validate RMA number
+            if (rmaNo == null || rmaNo.trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("RMA Number is required");
+            }
+
+            String newRmaNo = rmaNo.trim();
+            String oldRmaNo = item.getRmaNo();
+
+            // Update item
+            item.setRmaNo(newRmaNo);
+            rmaItemDAO.save(item);
+
+            // Create Audit Log Entry
+            RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
+            auditLog.setRmaItemId(itemId);
+            auditLog.setRmaNo(newRmaNo);
+            auditLog.setAction("RMA_NUMBER_UPDATE");
+            auditLog.setOldValue("RMA No: " + (oldRmaNo != null ? oldRmaNo : "null"));
+            auditLog.setNewValue("RMA No: " + newRmaNo);
+            auditLog.setPerformedByEmail(loggedInUserEmail);
+            auditLog.setPerformedByName(loggedInUserName);
+            auditLog.setIpAddress(getClientIpAddress(request));
+            auditLog.setRemarks("RMA Number updated manually");
+
+            rmaAuditLogDAO.save(auditLog);
+
+            return ResponseEntity.ok("RMA Number updated successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update RMA Number");
+        }
+    }
+
+    /**
      * Helper method to convert entity list to DTO list
      */
     private List<RmaItemWorkflowDTO> convertToItemDTOList(List<RmaItemEntity> items) {
@@ -571,6 +635,7 @@ public class RmaService {
             dto.setRepairedByEmail(item.getRepairedByEmail());
             dto.setRepairedByName(item.getRepairedByName());
             dto.setRepairedDate(item.getRepairedDate());
+
             dto.setRepairRemarks(item.getRepairRemarks());
             // Get Request Number from parent request (for display)
             // Note: rmaNo is for actual RMA number assigned later, requestNumber is
@@ -578,6 +643,9 @@ public class RmaService {
             if (item.getRmaRequest() != null) {
                 dto.setRmaNo(item.getRmaRequest().getRequestNumber()); // Display request number
             }
+            // Set the item-level RMA number (distinct from parent request number)
+            dto.setItemRmaNo(item.getRmaNo());
+            dto.setIssueFixed(item.getIssueFixed());
             dtoList.add(dto);
         }
         return dtoList;

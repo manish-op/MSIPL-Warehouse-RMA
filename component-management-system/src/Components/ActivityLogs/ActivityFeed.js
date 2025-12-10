@@ -5,11 +5,14 @@ import { formatDistanceToNow } from "date-fns";
 import { URL } from "../API/URL";
 import "./ActivityFeed.css";
 
+//testing git merge
+//testing git merge
+
 function getToken() {
   try {
     const cookie = Cookies.get("authToken");
     if (cookie) return atob(cookie);
-  } catch (e) {}
+  } catch (e) { }
   return null;
 }
 
@@ -73,8 +76,8 @@ export default function ActivityFeed({ limit = 10 }) {
                 }
                 description={
                   <div className="activity-desc">
-                    {item.serialNo ? <strong>{"Serial No. "+item.serialNo}</strong> : null}
-                    {item.region ? <span> • {"updated for region "+item.region}</span> : null}
+                    {item.serialNo ? <strong>{"Serial No. " + item.serialNo}</strong> : null}
+                    {item.region ? <span> • {"updated for region " + item.region}</span> : null}
                     <div className="activity-time">
                       {item.updateDate ? formatDistanceToNow(new Date(item.updateDate), { addSuffix: true }) : null}
                     </div>

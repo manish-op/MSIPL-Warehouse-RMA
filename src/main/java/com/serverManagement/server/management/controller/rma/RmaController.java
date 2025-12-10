@@ -134,13 +134,26 @@ public class RmaController {
         }
     }
 
+    @PutMapping("/items/{id}/rma-number")
+    public ResponseEntity<?> updateItemRmaNumber(HttpServletRequest request, @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
+        try {
+            String rmaNo = payload.get("rmaNo");
+            return rmaService.updateItemRmaNumber(request, id, rmaNo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
     @PutMapping("/items/{id}/status")
     public ResponseEntity<?> updateItemStatus(HttpServletRequest request, @PathVariable Long id,
             @RequestBody Map<String, String> payload) {
         try {
             String status = payload.get("status");
             String remarks = payload.get("remarks");
-            return rmaService.updateItemStatus(request, id, status, remarks);
+            String issueFixed = payload.get("issueFixed");
+            return rmaService.updateItemStatus(request, id, status, remarks, issueFixed);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
