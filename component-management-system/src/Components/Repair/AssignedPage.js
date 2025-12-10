@@ -37,12 +37,14 @@ export default function AssignedPage() {
     const [selectedItem, setSelectedItem] = useState(null);
     const [newStatus, setNewStatus] = useState("");
     const [remarks, setRemarks] = useState("");
+    const [issueFixed, setIssueFixed] = useState("");
     const [updating, setUpdating] = useState(false);
 
     const getStatusColor = (status) => {
         switch (status?.toUpperCase()) {
             case "ASSIGNED": return "blue";
             case "REPAIRING": return "orange";
+            case "BER": return "red";
             default: return "default";
         }
     };
@@ -79,6 +81,7 @@ export default function AssignedPage() {
         setSelectedItem(item);
         setNewStatus(item.repairStatus || "");
         setRemarks(item.repairRemarks || "");
+        setIssueFixed(item.issueFixed || "");
         setStatusModalVisible(true);
     };
 
@@ -87,9 +90,13 @@ export default function AssignedPage() {
             message.warning("Please select a status");
             return;
         }
+        if (!issueFixed.trim()) {
+            message.warning("Please enter Issue Fixed description");
+            return;
+        }
 
         setUpdating(true);
-        const result = await RmaApi.updateItemStatus(selectedItem.id, newStatus, remarks);
+        const result = await RmaApi.updateItemStatus(selectedItem.id, newStatus, remarks, issueFixed);
         if (result.success) {
             message.success("Status updated successfully!");
             setStatusModalVisible(false);
@@ -221,6 +228,12 @@ export default function AssignedPage() {
                                                                 {item.repairStatus || "ASSIGNED"}
                                                             </Tag>
                                                         </div>
+                                                        {item.itemRmaNo && (
+                                                            <div className="item-row">
+                                                                <Text type="secondary">RMA Number</Text>
+                                                                <Tag color="green">{item.itemRmaNo}</Tag>
+                                                            </div>
+                                                        )}
                                                         <Divider style={{ margin: "8px 0" }} />
                                                         <div className="fault-section">
                                                             <Text type="secondary">Fault Description</Text>
@@ -298,7 +311,18 @@ export default function AssignedPage() {
                                 <Option value="REPAIRING">Repairing</Option>
                                 <Option value="REPAIRED">Repaired</Option>
                                 <Option value="CANT_BE_REPAIRED">Can't Be Repaired</Option>
+                                <Option value="BER">BER</Option>
                             </Select>
+                        </div>
+                        <div>
+                            <Text strong>Issue Fixed *</Text>
+                            <TextArea
+                                rows={3}
+                                placeholder="Describe the issue that was fixed (mandatory)"
+                                value={issueFixed}
+                                onChange={(e) => setIssueFixed(e.target.value)}
+                                style={{ marginTop: 4 }}
+                            />
                         </div>
                         <div>
                             <Text strong>Remarks</Text>

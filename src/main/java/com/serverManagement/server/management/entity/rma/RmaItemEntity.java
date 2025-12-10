@@ -79,6 +79,9 @@ public class RmaItemEntity {
     @Column(name = "repair_remarks", length = 2000)
     private String repairRemarks;
 
+    @Column(name = "issue_fixed", length = 2000)
+    private String issueFixed;
+
     // Relationship with RMA Request
     @ManyToOne
     @JoinColumn(name = "rma_request_id", nullable = false)
@@ -306,6 +309,14 @@ public class RmaItemEntity {
 
     public void setRepairRemarks(String repairRemarks) {
         this.repairRemarks = repairRemarks;
+    }
+
+    public String getIssueFixed() {
+        return issueFixed;
+    }
+
+    public void setIssueFixed(String issueFixed) {
+        this.issueFixed = issueFixed;
     }
 
     @Override

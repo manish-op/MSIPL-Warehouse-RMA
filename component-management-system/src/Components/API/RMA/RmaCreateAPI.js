@@ -121,8 +121,13 @@ export const RmaApi = {
   },
 
   // Update item status
-  updateItemStatus: async (itemId, status, remarks) => {
-    return apiPut(`/rma/items/${itemId}/status`, { status, remarks });
+  updateItemStatus: async (itemId, status, remarks, issueFixed) => {
+    return apiPut(`/rma/items/${itemId}/status`, { status, remarks, issueFixed });
+  },
+
+  // Update item RMA Number
+  updateItemRmaNumber: async (itemId, rmaNo) => {
+    return apiPut(`/rma/items/${itemId}/rma-number`, { rmaNo });
   },
 
   // Bulk assign all items in an RMA to a technician

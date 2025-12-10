@@ -179,6 +179,12 @@ export default function CantBeRepairedPage() {
                                                                 CAN'T BE REPAIRED
                                                             </Tag>
                                                         </div>
+                                                        {item.itemRmaNo && (
+                                                            <div className="item-row">
+                                                                <Text type="secondary">RMA Number</Text>
+                                                                <Tag color="green">{item.itemRmaNo}</Tag>
+                                                            </div>
+                                                        )}
                                                         <Divider style={{ margin: "8px 0" }} />
                                                         <div className="fault-section">
                                                             <Text type="secondary">Remarks</Text>
