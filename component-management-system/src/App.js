@@ -8,8 +8,7 @@ import Logout from "./Components/Logout/Logout";
 import ChangePassword from "./Components/UserProfile/ChangePassword";
 import AddEmployee from "./Components/Employee/AddEmployee/AddEmployee";
 import EmployeeManagement from "./Components/Employee/EmployeeManagement";
-import AddRegion from "./Components/Region/Add/AddRegion";
-import UpdateRegion from "./Components/Region/Update/UpdateRegion";
+import RegionManagement from "./Components/Region/RegionManagement";
 import KeywordManagement from "./Components/Keyword/KeywordManagement.js";
 import AddItem from "./Components/Items/AddItem/AddItem.js";
 import GetItemSearchBySerialNo from "./Components/Items/GetItem/GetItemSearchBySerialNo.js";
@@ -75,9 +74,8 @@ function App() {
               <Route path="addEmployee" element={<AddEmployee />} />
               <Route path="employeeManagement" element={<EmployeeManagement />} />
 
-              {/* Region */}
-              <Route path="addNewRegion" element={<AddRegion />} />
-              <Route path="updateRegion" element={<UpdateRegion />} />
+              {/* Region Management */}
+              <Route path="regionManagement" element={<RegionManagement />} />
 
               {/* Keyword Management */}
               <Route path="keywordManagement" element={<KeywordManagement />} />

@@ -77,8 +77,7 @@ function Sidebar() {
         key: "region",
         icon: <RiMapPinLine />,
         children: [
-          { label: "Add Region", key: "addNewRegion" },
-          { label: "Update Region", key: "updateRegion" },
+          { label: "Manage Regions", key: "regionManagement" },
         ],
       },
       {
