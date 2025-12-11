@@ -205,8 +205,46 @@ export default function UnrepairedPage() {
         setGeneratingGatepass(null);
     };
 
+    // Check if all items in the RMA request have RMA numbers assigned
+    const checkRmaNumbersAssigned = (rmaItems) => {
+        const itemsWithoutRma = rmaItems.filter(item => !item.itemRmaNo || item.itemRmaNo.trim() === "");
+        return {
+            allAssigned: itemsWithoutRma.length === 0,
+            missingCount: itemsWithoutRma.length,
+            totalCount: rmaItems.length
+        };
+    };
+
+    // Show warning for missing RMA numbers
+    const showRmaWarning = (missingCount, totalCount, action) => {
+        Modal.warning({
+            title: 'RMA Number Not Available',
+            content: (
+                <div>
+                    <p style={{ marginBottom: 16 }}>
+                        <strong>{missingCount}</strong> out of <strong>{totalCount}</strong> item(s)
+                        do not have an RMA number assigned.
+                    </p>
+                    <p>
+                        Please assign RMA numbers to all items before {action}.
+                    </p>
+                </div>
+            ),
+            okText: 'OK',
+            centered: true,
+        });
+    };
+
     // Open Gatepass Preview Modal
     const openGatepassPreview = (rmaItems, rmaNo) => {
+        // Check if all items have RMA numbers assigned
+        const { allAssigned, missingCount, totalCount } = checkRmaNumbersAssigned(rmaItems);
+
+        if (!allAssigned) {
+            showRmaWarning(missingCount, totalCount, 'generating gatepass');
+            return;
+        }
+
         setGatepassItems(rmaItems);
         setGatepassRmaNo(rmaNo);
         setGatepassPreviewVisible(true);
@@ -214,6 +252,14 @@ export default function UnrepairedPage() {
 
     // Open FRU Sticker Modal for an RMA request
     const openStickerModal = (rmaItems, rmaNo) => {
+        // Check if all items have RMA numbers assigned
+        const { allAssigned, missingCount, totalCount } = checkRmaNumbersAssigned(rmaItems);
+
+        if (!allAssigned) {
+            showRmaWarning(missingCount, totalCount, 'printing stickers');
+            return;
+        }
+
         // Use itemRmaNo (manually updated) if available, otherwise fall back to the request number
         const itemsWithRma = rmaItems.map(item => ({
             ...item,
