@@ -205,46 +205,75 @@ export default function UnrepairedPage() {
         setGeneratingGatepass(null);
     };
 
-    // Check if all items in the RMA request have RMA numbers assigned
-    const checkRmaNumbersAssigned = (rmaItems) => {
+    // Filter items that have RMA numbers assigned
+    const getItemsWithRmaNumbers = (rmaItems) => {
+        return rmaItems.filter(item => item.itemRmaNo && item.itemRmaNo.trim() !== "");
+    };
+
+    // Check RMA assignment status
+    const checkRmaStatus = (rmaItems) => {
+        const itemsWithRma = getItemsWithRmaNumbers(rmaItems);
         const itemsWithoutRma = rmaItems.filter(item => !item.itemRmaNo || item.itemRmaNo.trim() === "");
         return {
-            allAssigned: itemsWithoutRma.length === 0,
+            itemsWithRma,
+            itemsWithoutRma,
+            hasAnyRma: itemsWithRma.length > 0,
+            allHaveRma: itemsWithoutRma.length === 0,
             missingCount: itemsWithoutRma.length,
+            availableCount: itemsWithRma.length,
             totalCount: rmaItems.length
         };
     };
 
-    // Show warning for missing RMA numbers
-    const showRmaWarning = (missingCount, totalCount, action) => {
-        Modal.warning({
-            title: 'RMA Number Not Available',
-            content: (
-                <div>
-                    <p style={{ marginBottom: 16 }}>
-                        <strong>{missingCount}</strong> out of <strong>{totalCount}</strong> item(s)
-                        do not have an RMA number assigned.
-                    </p>
-                    <p>
-                        Please assign RMA numbers to all items before {action}.
-                    </p>
-                </div>
-            ),
-            okText: 'OK',
-            centered: true,
-        });
-    };
-
     // Open Gatepass Preview Modal
     const openGatepassPreview = (rmaItems, rmaNo) => {
-        // Check if all items have RMA numbers assigned
-        const { allAssigned, missingCount, totalCount } = checkRmaNumbersAssigned(rmaItems);
+        const status = checkRmaStatus(rmaItems);
 
-        if (!allAssigned) {
-            showRmaWarning(missingCount, totalCount, 'generating gatepass');
+        // If no items have RMA numbers, show warning and return
+        if (!status.hasAnyRma) {
+            Modal.warning({
+                title: 'RMA Number Not Available',
+                content: (
+                    <div>
+                        <p>None of the items have an RMA number assigned.</p>
+                        <p>Please assign RMA numbers to items before generating gatepass.</p>
+                    </div>
+                ),
+                okText: 'OK',
+                centered: true,
+            });
             return;
         }
 
+        // If some items are missing RMA numbers, show confirmation
+        if (!status.allHaveRma) {
+            Modal.confirm({
+                title: 'Some Items Missing RMA Numbers',
+                icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+                content: (
+                    <div>
+                        <p style={{ marginBottom: 8 }}>
+                            <strong>{status.missingCount}</strong> out of <strong>{status.totalCount}</strong> item(s)
+                            do not have RMA numbers assigned and will be <strong>excluded</strong>.
+                        </p>
+                        <p>
+                            Only <strong>{status.availableCount}</strong> item(s) with RMA numbers will be included in the gatepass.
+                        </p>
+                    </div>
+                ),
+                okText: 'Proceed',
+                cancelText: 'Cancel',
+                centered: true,
+                onOk: () => {
+                    setGatepassItems(status.itemsWithRma);
+                    setGatepassRmaNo(rmaNo);
+                    setGatepassPreviewVisible(true);
+                }
+            });
+            return;
+        }
+
+        // All items have RMA numbers, proceed directly
         setGatepassItems(rmaItems);
         setGatepassRmaNo(rmaNo);
         setGatepassPreviewVisible(true);
@@ -252,20 +281,61 @@ export default function UnrepairedPage() {
 
     // Open FRU Sticker Modal for an RMA request
     const openStickerModal = (rmaItems, rmaNo) => {
-        // Check if all items have RMA numbers assigned
-        const { allAssigned, missingCount, totalCount } = checkRmaNumbersAssigned(rmaItems);
+        const status = checkRmaStatus(rmaItems);
 
-        if (!allAssigned) {
-            showRmaWarning(missingCount, totalCount, 'printing stickers');
+        // If no items have RMA numbers, show warning and return
+        if (!status.hasAnyRma) {
+            Modal.warning({
+                title: 'RMA Number Not Available',
+                content: (
+                    <div>
+                        <p>None of the items have an RMA number assigned.</p>
+                        <p>Please assign RMA numbers to items before printing stickers.</p>
+                    </div>
+                ),
+                okText: 'OK',
+                centered: true,
+            });
             return;
         }
 
-        // Use itemRmaNo (manually updated) if available, otherwise fall back to the request number
-        const itemsWithRma = rmaItems.map(item => ({
-            ...item,
-            displayRmaNo: item.itemRmaNo || rmaNo // Prioritize manually assigned RMA number
-        }));
-        setStickerItems(itemsWithRma);
+        // Prepare items with display RMA number
+        const prepareItemsForStickers = (items) => {
+            return items.map(item => ({
+                ...item,
+                displayRmaNo: item.itemRmaNo || rmaNo
+            }));
+        };
+
+        // If some items are missing RMA numbers, show confirmation
+        if (!status.allHaveRma) {
+            Modal.confirm({
+                title: 'Some Items Missing RMA Numbers',
+                icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+                content: (
+                    <div>
+                        <p style={{ marginBottom: 8 }}>
+                            <strong>{status.missingCount}</strong> out of <strong>{status.totalCount}</strong> item(s)
+                            do not have RMA numbers assigned and will be <strong>excluded</strong>.
+                        </p>
+                        <p>
+                            Only <strong>{status.availableCount}</strong> item(s) with RMA numbers will have stickers printed.
+                        </p>
+                    </div>
+                ),
+                okText: 'Proceed',
+                cancelText: 'Cancel',
+                centered: true,
+                onOk: () => {
+                    setStickerItems(prepareItemsForStickers(status.itemsWithRma));
+                    setStickerModalVisible(true);
+                }
+            });
+            return;
+        }
+
+        // All items have RMA numbers, proceed directly
+        setStickerItems(prepareItemsForStickers(rmaItems));
         setStickerModalVisible(true);
     };
 
