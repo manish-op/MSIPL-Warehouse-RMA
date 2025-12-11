@@ -1,82 +1,225 @@
-/* Main container for the entire page */
+/* ============================================
+   Inward GatePass Page - Modern Design
+   ============================================ */
+
+/* --- Page Container --- */
 .inward-gate-pass-container {
-  background-color: var(--background-color, #f0f2f5);
+  background-color: var(--background-color);
   min-height: 100vh;
-  padding: 20px;
-  transition: padding 0.3s ease;
+  padding: 24px;
 }
 
+/* --- Page Header --- */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
 
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 28px;
+  color: #fff;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  margin: 0 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 14px;
+}
+
+/* --- Main Card --- */
 .gate-pass-card {
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   max-width: 1100px;
   margin: 0 auto;
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
 }
 
-.gate-pass-title {
-  text-align: center;
-  color: var(--primary-color, #1f3b57);
-  font-weight: bold;
-  margin-bottom: 20px;
-  font-size: 24px;
-  transition: font-size 0.3s ease;
+.gate-pass-card .ant-card-body {
+  padding: 24px;
 }
 
-
+/* --- Divider --- */
 .item-details-divider {
-  border-color: var(--primary-color, #1f3b57) !important;
+  border-color: var(--primary-color) !important;
   margin: 10px 0 20px;
-  color:var( --text-color, #e8e6e3);
-  
 }
 
+.item-details-divider .ant-divider-inner-text {
+  color: var(--text-color) !important;
+  font-weight: 600;
+  font-size: 14px;
+}
 
+/* --- Item List Container --- */
 .item-list-container {
-  max-height: 400px;
+  max-height: 450px;
   overflow-y: auto;
-  padding-right: 8px; 
-  background-color: var(--background-color, #f0f2f5);
+  padding-right: 8px;
+  margin-bottom: 16px;
 }
 
+/* --- Item Detail Card --- */
 .item-detail-card {
-  border-color: var(--primary-color, #1f3b57);
+  border-color: var(--border-color) !important;
   border-width: 1px;
   border-radius: 10px;
   margin-bottom: 16px;
-  background-color: var(--component-background, #f9fbfd);
+  background-color: var(--component-background) !important;
 }
 
+.item-detail-card .ant-card-head {
+  border-bottom: 1px solid var(--border-color) !important;
+  background: linear-gradient(135deg, rgba(31, 59, 87, 0.05) 0%, rgba(45, 90, 135, 0.05) 100%);
+}
 
+.item-detail-card .ant-card-head-title {
+  color: var(--text-color) !important;
+  font-weight: 600;
+}
+
+/* --- Form Styling --- */
+.gate-pass-card .ant-form-item-label>label {
+  color: var(--text-color) !important;
+  font-weight: 500;
+}
+
+/* --- Add Item Button --- */
 .add-item-button {
-  border-color: var(--primary-color, #1f3b57);
-  color: var(--primary-color, #1f3b57);
+  border-color: #1f3b57 !important;
+  color: #1f3b57 !important;
+  height: 44px;
+  border-radius: 8px;
 }
 
+.add-item-button:hover {
+  border-color: #2d5a87 !important;
+  color: #2d5a87 !important;
+}
 
+/* --- Submit Button --- */
 .submit-gatepass-button {
-  background-color: var(--primary-color, #1f3b57);
-  border-color: var(--primary-color, #1f3b57);
-  min-width: 220px;
-  height: 40px;
-  font-weight: bold;
+  min-width: 250px;
+  height: 48px !important;
+  border-radius: 8px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
+  transition: all 0.2s ease;
 }
 
-/* --- Responsive Styles --- */
+.submit-gatepass-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 59, 87, 0.4);
+}
+
+/* --- Responsive Design --- */
 @media (max-width: 768px) {
   .inward-gate-pass-container {
-    padding: 15px;
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+  }
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .header-title {
+    font-size: 20px !important;
   }
 
   .gate-pass-card .ant-card-body {
-    padding: 15px; 
-  }
-
-  .gate-pass-title {
-    font-size: 20px; 
+    padding: 16px;
   }
 
   .submit-gatepass-button {
-    width: 100%; 
+    width: 100%;
   }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 14px 16px;
+  }
+
+  .header-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .header-title {
+    font-size: 18px !important;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+  }
+}
+
+/* --- Dark Theme Enhancements --- */
+[data-theme='dark'] .page-header {
+  background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .gate-pass-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .item-detail-card {
+  background-color: #1d1d1d !important;
+}
+
+[data-theme='dark'] .item-detail-card .ant-card-head {
+  background: linear-gradient(135deg, rgba(31, 59, 87, 0.15) 0%, rgba(45, 90, 135, 0.15) 100%);
+}
+
+[data-theme='dark'] .submit-gatepass-button {
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.2);
+}
+
+[data-theme='dark'] .add-item-button {
+  border-color: #5a9fd4 !important;
+  color: #5a9fd4 !important;
 }
