@@ -1,61 +1,77 @@
-import React from "react";
-import { Form, Input, Button, Card } from "antd";
-import { useState } from "react";
+import React, { useState } from "react";
+import { Form, Input, Button, Modal, message } from "antd";
+import { LockOutlined, KeyOutlined } from "@ant-design/icons";
 import UserChangePasswordAPI from "../API/User/UserChangePassword/UserChangePasswordAPI";
 
-const ChangePassword = () => {
+/**
+ * ChangePasswordModal - A reusable modal component for changing password
+ * Can be opened from Profile page or anywhere else in the app
+ */
+const ChangePasswordModal = ({ visible, onClose }) => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
-  const [changePass, setchangePass] = useState({
-    oldPassword: "",
-    newPassword: "",
-  });
-
-  const handleChange = (event, field) => {
-    let actualValue = event.target.value;
-    setchangePass({
-      ...changePass,
-      [field]: actualValue,
-    });
-  };
-  const onFinish = async (event) => {
-    //event.preventDefault();
-    console.log(changePass);
-    if (
-      changePass.oldPassword.trim() === "" ||
-      changePass.newPassword.trim() === ""
-    ) {
-      console.log("username and password cant be blank");
+  const handleSubmit = async (values) => {
+    if (values.oldPassword.trim() === "" || values.newPassword.trim() === "") {
+      message.warning("Password fields cannot be empty");
       return;
-    } else {
-     await UserChangePasswordAPI(changePass);
+    }
+
+    setLoading(true);
+    try {
+      const changePass = {
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+      };
+      await UserChangePasswordAPI(changePass);
+      // API already shows success/error messages
+      form.resetFields();
+      onClose();
+    } catch (error) {
+      // API handles error messages
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleCancel = () => {
+    form.resetFields();
+    onClose();
+  };
+
   return (
-    <div style={{display:'flex', flex:'1', justifyContent:'center', alignItems:'center'}}>
-    <Card>
-      <h2 style={{ fontSize: "20px", color: "orange", textAlign:'center', padding:'2px', marginBottom:'20px'}}>Change Password</h2>
+    <Modal
+      title={
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <KeyOutlined style={{ color: "#1890ff" }} />
+          <span>Change Password</span>
+        </div>
+      }
+      open={visible}
+      onCancel={handleCancel}
+      footer={null}
+      centered
+      destroyOnClose
+      width={400}
+    >
       <Form
         form={form}
-        name="change-password"
-        //onSubmit={handleFormSubmit}
-        //onFinish={handleFormSubmit}
-        onFinish={onFinish}
-        //validateTrigger={['onSubmit']}
-        //... any layout or styling props...
+        name="change-password-modal"
+        onFinish={handleSubmit}
+        layout="vertical"
+        style={{ marginTop: 16 }}
       >
         <Form.Item
-          style={{ marginTop: "50px" }}
-          label="Old Password"
+          label="Current Password"
           name="oldPassword"
           rules={[
-            { required: true, message: "Please enter your old password!" },
+            { required: true, message: "Please enter your current password!" },
           ]}
         >
           <Input.Password
-            value={changePass.oldPasswordpassword}
-            onChange={(e) => handleChange(e, "oldPassword")}
+            prefix={<LockOutlined style={{ color: "#bfbfbf" }} />}
+            placeholder="Enter current password"
+            size="large"
           />
         </Form.Item>
 
@@ -64,11 +80,13 @@ const ChangePassword = () => {
           name="newPassword"
           rules={[
             { required: true, message: "Please enter your new password!" },
+            { min: 6, message: "Password must be at least 6 characters!" },
           ]}
         >
           <Input.Password
-            value={changePass.newPasswordPasswordpassword}
-            onChange={(e) => handleChange(e, "newPassword")}
+            prefix={<LockOutlined style={{ color: "#bfbfbf" }} />}
+            placeholder="Enter new password"
+            size="large"
           />
         </Form.Item>
 
@@ -85,24 +103,32 @@ const ChangePassword = () => {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error("The two passwords that you entered do not match!")
+                  new Error("The two passwords do not match!")
                 );
               },
             }),
           ]}
         >
-          <Input.Password />
+          <Input.Password
+            prefix={<LockOutlined style={{ color: "#bfbfbf" }} />}
+            placeholder="Confirm new password"
+            size="large"
+          />
         </Form.Item>
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Change Password
-          </Button>
+        <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>
+          <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+            <Button onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              Change Password
+            </Button>
+          </div>
         </Form.Item>
       </Form>
-    </Card>
-    </div>
+    </Modal>
   );
 };
 
-export default ChangePassword;
+export default ChangePasswordModal;

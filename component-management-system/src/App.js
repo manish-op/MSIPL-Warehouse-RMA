@@ -7,22 +7,16 @@ import Profile from "./Components/UserProfile/Profile";
 import Logout from "./Components/Logout/Logout";
 import ChangePassword from "./Components/UserProfile/ChangePassword";
 import AddEmployee from "./Components/Employee/AddEmployee/AddEmployee";
-import ChangeEmployeePassword from "./Components/Employee/ChnageEmployeePassword/ChangeEmployeePassword";
-import AssignEmployeeRegion from "./Components/Region/EmployeeRelated/AssignEmployeeRegion";
-import ChangeEmployeeRole from "./Components/Role/ChangeEmployeeRole";
+import EmployeeManagement from "./Components/Employee/EmployeeManagement";
 import AddRegion from "./Components/Region/Add/AddRegion";
 import UpdateRegion from "./Components/Region/Update/UpdateRegion";
-import AddKeyword from "./Components/Keyword/Add/Keyword/AddKeyword";
-import AddSubKeyword from "./Components/Keyword/Add/SubKeyword/AddSubKeyword.js";
+import KeywordManagement from "./Components/Keyword/KeywordManagement.js";
 import AddItem from "./Components/Items/AddItem/AddItem.js";
 import GetItemSearchBySerialNo from "./Components/Items/GetItem/GetItemSearchBySerialNo.js";
 import UpdateItem from "./Components/Items/UpdateItem/UpdateItem.js";
 import GetItemByKeyword from "./Components/Items/GetItem/GetItemByKeyword.js";
 import GetHistoryBySerialNo from "./Components/Items/HistoryRelated/GetHistoryBySerialNo.js";
 import HistoryTable from "./Components/Items/HistoryRelated/HistoryTable.js";
-import UpdateKeyword from "./Components/Keyword/Update/Keyword/UpdateKeyword.js";
-import UpdateSubKeyword from "./Components/Keyword/Update/SubKeyword/UpdateSubKeyword.js";
-import KeywordManagement from "./Components/Keyword/KeywordManagement.js";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute.js";
 import RepairingPage from "./Components/FRU/Repairing/RepairingPage.js";
 import RepairingDashboardForManager from "./Components/FRU/Repairing/AdminOrManagerSection/RepairingDashboardForManager.js";
@@ -79,28 +73,13 @@ function App() {
 
               {/* Employee related */}
               <Route path="addEmployee" element={<AddEmployee />} />
-              <Route
-                path="changEmployeePass"
-                element={<ChangeEmployeePassword />}
-              />
-              <Route
-                path="changEmployeeRegion"
-                element={<AssignEmployeeRegion />}
-              />
-              <Route
-                path="changEmployeeRole"
-                element={<ChangeEmployeeRole />}
-              />
+              <Route path="employeeManagement" element={<EmployeeManagement />} />
 
               {/* Region */}
               <Route path="addNewRegion" element={<AddRegion />} />
               <Route path="updateRegion" element={<UpdateRegion />} />
 
-              {/* Keyword / SubKeyword */}
-              <Route path="addKeyword" element={<AddKeyword />} />
-              <Route path="updateKeyword" element={<UpdateKeyword />} />
-              <Route path="addSubKeyword" element={<AddSubKeyword />} />
-              <Route path="updateSubKeyword" element={<UpdateSubKeyword />} />
+              {/* Keyword Management */}
               <Route path="keywordManagement" element={<KeywordManagement />} />
 
               {/* Items */}

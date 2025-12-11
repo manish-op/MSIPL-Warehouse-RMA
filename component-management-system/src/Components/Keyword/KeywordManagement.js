@@ -30,7 +30,6 @@ import UpdateSubKeywordAPI from "../API/Keyword/SubKeyword/UpdateSubKeyword/Upda
 import "./KeywordManagement.css";
 
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 
 const KeywordManagement = () => {
     const [keywords, setKeywords] = useState([]);
@@ -48,6 +47,7 @@ const KeywordManagement = () => {
     const [addSubKeywordSubs, setAddSubKeywordSubs] = useState([{ subKeyword: "" }]);
 
     // State for update subkeyword
+    // eslint-disable-next-line no-unused-vars
     const [selectedKeyword, setSelectedKeyword] = useState("");
     const [subkeywords, setSubkeywords] = useState([]);
 

@@ -1,245 +1,502 @@
-/* src/Components/UserProfile/Profile.css */
+/* ============================================
+   Profile Page - Modern Dark Theme Design
+   ============================================ */
 
-/* ---------------------------------------------------------
-   1. SELF-CONTAINED THEME DEFINITIONS (Guarantees Text Color)
-   --------------------------------------------------------- */
-:root {
-  /* Light Mode Defaults */
-  --profile-text-main: #333333;
-  --profile-text-muted: #666666;
-  --profile-bg: #ffffff;
-  --profile-border: #f0f0f0;
-  
-  /* Brand Colors */
-  --brand-1: #0f6fff;
-  --brand-2: #00bfa6;
-  --brand-3: #ffb300;
-  --brand-4: #8e44ad;
-  --brand-5: #ef5350;
-  
-  /* Component specifics */
-  --progress-track: #eef2ff;
-  --stat-secondary-bg: #2d3748;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+/* --- Page Container --- */
+.profile-page {
+  min-height: 100dvh;
+  padding: 24px;
+  background-color: var(--background-color);
 }
 
-/* DETECT DARK MODE 
-   (If your app uses a class .dark-mode instead of data-theme, change this selector)
-*/
-[data-theme='dark'] {
-  /* Dark Mode Overrides */
-  --profile-text-main: #ffffff;      /* Pure white text */
-  --profile-text-muted: #b0b0b0;     /* Light grey text */
-  --profile-bg: #1f1f1f;             /* Dark card background */
-  --profile-border: #444444;         /* Dark border */
-  
-  --progress-track: #303030;
-  --stat-secondary-bg: #3a3a3a;
-  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+/* --- Page Header --- */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-/* ------------------------
-   2. Main Layout
-   ------------------------ */
-.profile-dashboard {
-  padding: 18px;
-  max-width: 1100px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  color: var(--profile-text-main);
-  /* Uses variable if available, fallback to transparent */
-  background-color: var(--background-color, transparent); 
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.dashboard-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  text-align: center;
-  /* FORCE COLOR */
-  color: var(--profile-text-main) !important;
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 28px;
+  color: #fff;
 }
 
-/* ------------------------
-   3. Card Styles
-   ------------------------ */
-.user-profile-card,
-.stats-card {
-  /* Force background and border color */
-  background-color: var(--profile-bg) !important;
-  border: 1px solid var(--profile-border) !important;
-  border-radius: 10px;
-  box-shadow: var(--card-shadow);
-  padding: 18px;
+.header-text {
   display: flex;
   flex-direction: column;
+}
+
+.header-title {
+  margin: 0 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 14px;
+}
+
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #fff !important;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* --- Profile Card --- */
+.profile-card {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   height: 100%;
-  transition: background-color 0.3s, border-color 0.3s;
 }
 
-.user-profile-card .ant-card-body,
-.stats-card .ant-card-body {
-  padding: 0 !important;
-  width: 100%;
+.profile-card .ant-card-body {
+  padding: 24px;
 }
 
-/* ------------------------
-   4. Profile Text (Crucial Fixes)
-   ------------------------ */
-.profile-header {
+.profile-avatar-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  text-align: center;
 }
 
-.user-name {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  /* FORCE COLOR */
-  color: var(--profile-text-main) !important;
+.profile-avatar {
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%) !important;
+  font-size: 40px !important;
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
 }
 
-.user-details-list p {
-  margin: 8px 0;
-  font-size: 14px;
-  /* FORCE COLOR */
-  color: var(--profile-text-main) !important;
-  padding-left: 10px;
-  border-left: 2px solid transparent;
+.profile-name-section {
+  margin-top: 16px;
 }
 
-.user-details-list strong {
-  /* Ensure labels (Email, Mobile) are also colored */
-  color: var(--profile-text-main) !important;
-  opacity: 0.9;
+.profile-name {
+  margin: 0 0 8px 0 !important;
+  color: var(--text-color) !important;
 }
 
-/* ------------------------
-   5. Stats & Graphs
-   ------------------------ */
-.stat-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 14px;
+.role-tag {
+  font-size: 12px;
+  padding: 2px 12px;
+  border-radius: 12px;
 }
 
-.stat-box {
-  border-radius: 8px;
-  color: #fff; /* Box text is always white because box has color bg */
-  padding: 12px;
+.profile-divider {
+  margin: 20px 0 !important;
+  border-color: var(--border-color) !important;
+}
+
+/* --- Profile Details --- */
+.profile-details {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 86px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  gap: 16px;
 }
 
-.stat-box.main {
-  flex: 1 1 0;
-  background: var(--brand-1);
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.detail-item:hover {
+  background-color: var(--hover-color);
+}
+
+.detail-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--text-color-secondary) !important;
+  margin-bottom: 2px;
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color) !important;
+  word-break: break-word;
+}
+
+/* --- Profile Actions --- */
+.profile-actions {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.change-password-btn {
+  height: 44px !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
+}
+
+.change-password-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 59, 87, 0.4);
+}
+
+/* --- Stats Card --- */
+.stats-card {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  height: 100%;
+}
+
+.stats-card .ant-card-body {
+  padding: 24px;
+}
+
+.stats-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stats-header-icon {
+  font-size: 18px;
+  color: var(--primary-color);
+}
+
+.stats-header-title {
+  font-size: 16px;
+  color: var(--text-color) !important;
+}
+
+.stats-divider {
+  margin: 16px 0 20px 0 !important;
+  border-color: var(--border-color) !important;
+}
+
+/* --- Stat Boxes --- */
+.stat-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-2px);
+}
+
+.stat-box.primary {
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
 }
 
 .stat-box.secondary {
-  width: 120px;
-  background: var(--stat-secondary-bg);
-  border: 1px solid var(--profile-border);
-  /* Ensure text inside the secondary box adapts if background is light/dark */
-  color: #fff; 
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 24px;
+  color: #fff;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-label {
-  font-size: 12px;
-  opacity: 0.9;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85) !important;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .stat-number {
   font-size: 28px;
-  font-weight: 800;
-  margin-top: 4px;
+  font-weight: 700;
+  color: #fff !important;
+  line-height: 1.2;
 }
 
-/* ------------------------
-   6. Region Grid Text
-   ------------------------ */
-.region-cards-grid {
+/* --- Progress Section --- */
+.progress-section {
+  margin: 20px 0;
+}
+
+.progress-bar {
+  height: 8px;
+  width: 100%;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), #52c41a);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+/* --- Section Header --- */
+.section-header {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.section-icon {
+  font-size: 16px;
+  color: var(--primary-color);
+}
+
+.section-title {
+  font-size: 14px;
+  color: var(--text-color) !important;
+}
+
+/* --- Region Cards Grid --- */
+.region-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
-  margin-top: 4px;
 }
 
 .region-card {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1 1 180px;
-  
-  /* Background and Border */
-  background-color: var(--profile-bg);
-  border: 1px solid var(--profile-border);
-  
-  border-radius: 8px;
-  padding: 10px;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  padding: 14px;
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  transition: all 0.2s ease;
 }
 
 .region-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--region-hover-shadow);
-  border-color: var(--brand-1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color);
+}
+
+.region-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
 }
 
 .region-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-.region-info .region-name {
-  font-weight: 700;
+.region-name {
   font-size: 13px;
-  /* FORCE COLOR */
-  color: var(--profile-text-main) !important;
+  font-weight: 600;
+  color: var(--text-color) !important;
 }
 
-.region-info .region-count {
-  font-size: 13px;
-  /* FORCE COLOR (Muted) */
-  color: var(--profile-text-muted) !important;
+.region-count {
+  font-size: 12px;
+  color: var(--text-color-secondary) !important;
 }
 
-/* ------------------------
-   7. Utilities & Responsive
-   ------------------------ */
-.profile-avatar {
-  background: var(--brand-1) !important;
-  color: #fff !important;
-  font-size: 40px !important;
-}
-
+/* --- Loading & Error States --- */
 .centered-spin {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 180px;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.loading-text {
+  color: var(--text-color-secondary) !important;
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
 }
 
 .error-text {
-  color: #ff4d4f;
-  text-align: center;
-  padding: 20px;
+  color: var(--color-error) !important;
+  font-size: 14px;
 }
 
-@media (max-width: 900px) {
-  .profile-row { flex-direction: column; }
-  .left-col, .right-col { width: 100%; flex: 0 0 auto; }
+/* --- Responsive Design --- */
+@media (max-width: 992px) {
+  .profile-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+  }
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .header-title {
+    font-size: 20px !important;
+  }
+
+  .refresh-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
 }
 
-@media (max-width: 480px) {
-  .stat-row { flex-direction: column; }
-  .stat-box.secondary { width: 100%; }
-  .stat-number { font-size: 22px; }
+@media (max-width: 576px) {
+  .page-header {
+    padding: 14px 16px;
+  }
+
+  .header-content {
+    gap: 12px;
+  }
+
+  .header-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .header-title {
+    font-size: 18px !important;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+  }
+
+  .profile-card .ant-card-body,
+  .stats-card .ant-card-body {
+    padding: 16px;
+  }
+
+  .stat-box {
+    padding: 16px;
+  }
+
+  .stat-number {
+    font-size: 24px;
+  }
+
+  .region-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Dark Theme Enhancements --- */
+[data-theme='dark'] .page-header {
+  background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .profile-card,
+[data-theme='dark'] .stats-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .detail-item {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .detail-item:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .region-card {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .region-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .change-password-btn {
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.2);
 }

@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Menu, Layout, Button } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
-  RiMenu3Line, 
-  RiMenuFold4Line, 
-  RiDashboardLine, 
-  RiUserSettingsLine, 
-  RiShieldUserLine, 
-  RiPriceTag3Line, 
-  RiMapPinLine, 
-  RiBox3Line, 
+import {
+  RiMenu3Line,
+  RiMenuFold4Line,
+  RiDashboardLine,
+  RiUserSettingsLine,
+  RiShieldUserLine,
+  RiPriceTag3Line,
+  RiMapPinLine,
+  RiBox3Line,
   RiLogoutBoxRLine,
   RiFileExcel2Line,      // For Import/Export
   RiFileList3Line,       // For Activity Logs
@@ -24,7 +24,7 @@ function Sidebar() {
   const role = localStorage.getItem("_User_role_for_MSIPL");
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // 1. Initialize state based on screen size
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -53,7 +53,6 @@ function Sidebar() {
         icon: <RiDashboardLine />,
         children: [
           { label: "Profile", key: "profile" },
-          { label: "Change Password", key: "changePassword" },
         ],
       },
       (role === "admin" || role === "manager") && {
@@ -62,9 +61,7 @@ function Sidebar() {
         icon: <RiUserSettingsLine />,
         children: [
           { label: "Add Employee", key: "addEmployee" },
-          role === "admin" && { label: "Change Role", key: "changEmployeeRole" },
-          role === "admin" && { label: "Change Region", key: "changEmployeeRegion" },
-          { label: "Reset Password", key: "changEmployeePass" },
+          { label: "Manage Employees", key: "employeeManagement" },
         ].filter(Boolean),
       },
       role === "admin" && {
@@ -72,10 +69,7 @@ function Sidebar() {
         key: "keyword",
         icon: <RiPriceTag3Line />,
         children: [
-          { label: "Add Keyword", key: "addKeyword" },
-          { label: "Update Keyword", key: "updateKeyword" },
-          { label: "Add SubKeyword", key: "addSubKeyword" },
-          { label: "Update SubKeyword", key: "updateSubKeyword" },
+          { label: "Manage Keywords", key: "keywordManagement" },
         ],
       },
       role === "admin" && {
@@ -111,7 +105,7 @@ function Sidebar() {
       role === "admin" && {
         label: "Options & Status",
         key: "options_group",
-        icon: <RiSettings4Line />, 
+        icon: <RiSettings4Line />,
         children: [
           { label: "Add Avail. Option", key: "addAvailStatus" },
           { label: "Update Avail. Option", key: "updateAvailStatus" },
@@ -134,7 +128,7 @@ function Sidebar() {
         children: [
           { label: "Chat", key: "activity-logs" },
           { label: "Users List", key: "all-users" },
-           { label: "Activity Logs", key: "items/activity" },
+          { label: "Activity Logs", key: "items/activity" },
         ],
       },
       (role === "admin" || role === "manager") && {
@@ -176,8 +170,8 @@ function Sidebar() {
   return (
     <>
       {/* Mobile Overlay */}
-      <div 
-        className={`sidebar-overlay ${isMobile && !collapsed ? "visible" : ""}`} 
+      <div
+        className={`sidebar-overlay ${isMobile && !collapsed ? "visible" : ""}`}
         onClick={() => setCollapsed(true)}
       />
 
@@ -200,25 +194,25 @@ function Sidebar() {
         trigger={null}
         collapsedWidth={isMobile ? 0 : 80}
         style={{
-            height: '100vh',
-            position: isMobile ? 'fixed' : 'sticky',
-            top: 0,
-            left: 0,
-            zIndex: 1001
+          height: '100vh',
+          position: isMobile ? 'fixed' : 'sticky',
+          top: 0,
+          left: 0,
+          zIndex: 1001
         }}
       >
         <div className="sidebar-header">
-           <div className="logo-text">{collapsed }</div>
-           {!isMobile && (
-             <div className="desktop-toggle" onClick={() => setCollapsed(!collapsed)}>
-                {collapsed ? <RiMenu3Line /> : <RiMenuFold4Line />}
-             </div>
-           )}
-           {isMobile && !collapsed && (
-              <div className="mobile-close" onClick={() => setCollapsed(true)}>
-                  <RiMenuFold4Line />
-              </div>
-           )}
+          <div className="logo-text">{collapsed}</div>
+          {!isMobile && (
+            <div className="desktop-toggle" onClick={() => setCollapsed(!collapsed)}>
+              {collapsed ? <RiMenu3Line /> : <RiMenuFold4Line />}
+            </div>
+          )}
+          {isMobile && !collapsed && (
+            <div className="mobile-close" onClick={() => setCollapsed(true)}>
+              <RiMenuFold4Line />
+            </div>
+          )}
         </div>
 
         <Menu

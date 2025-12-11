@@ -1,18 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Card, Form, Button, Input, Select, message,
-  Typography, Space, Spin, Progress, Divider,
+  Typography, Space, Spin, Progress, Divider, Row, Col,
 } from "antd";
 import {
-  UserOutlined, MailOutlined, PhoneOutlined, GlobalOutlined, // Kept 'GlobalOutlined'
-  LockOutlined, SafetyOutlined, PlusCircleOutlined, ReloadOutlined,
+  UserOutlined, MailOutlined, PhoneOutlined, GlobalOutlined,
+  LockOutlined, SafetyOutlined, UserAddOutlined, ReloadOutlined,
+  CheckCircleOutlined, CloseCircleOutlined,
 } from "@ant-design/icons";
 
 import AddEmployeeAPI from "../../API/AddEmployee/AddEmployeeAPI";
 import GetRegionAPI from "../../API/Region/GetRegion/GetRegionAPI";
 import "./AddEmployee.css";
 
-const { Text } = Typography;
+const { Title, Text } = Typography;
 
 function AddEmployee() {
   const [form] = Form.useForm();
@@ -21,12 +22,6 @@ function AddEmployee() {
   const [loadingRegions, setLoadingRegions] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const passwordValue = Form.useWatch("password", form);
-
-  const themeColors = {
-      error: 'var(--color-error)',
-      warning: 'var(--color-warning)',
-      success: 'var(--color-success)',
-  };
 
   useEffect(() => {
     document.title = "Add New Employee";
@@ -54,14 +49,27 @@ function AddEmployee() {
     fetchRegions();
   }, []);
 
-  const passwordScore = (pwd = "") => {
-    let score = 0;
-    if (pwd.length >= 8) score += 20;
-    if (/[A-Z]/.test(pwd)) score += 20;
-    if (/[a-z]/.test(pwd)) score += 20;
-    if (/\d/.test(pwd)) score += 20;
-    if (/[@$!%*#?&^._-]/.test(pwd)) score += 20;
-    return score;
+  // Password strength calculation
+  const getPasswordStrength = (pwd = "") => {
+    const checks = {
+      length: pwd.length >= 8,
+      uppercase: /[A-Z]/.test(pwd),
+      lowercase: /[a-z]/.test(pwd),
+      number: /\d/.test(pwd),
+      special: /[@$!%*#?&^._-]/.test(pwd),
+    };
+    const score = Object.values(checks).filter(Boolean).length * 20;
+    return { checks, score };
+  };
+
+  const { checks: passwordChecks, score: passwordScore } = getPasswordStrength(passwordValue);
+
+  const getStrengthLabel = (score) => {
+    if (score <= 20) return { text: "Very Weak", color: "var(--color-error)" };
+    if (score <= 40) return { text: "Weak", color: "var(--color-error)" };
+    if (score <= 60) return { text: "Fair", color: "var(--color-warning)" };
+    if (score <= 80) return { text: "Good", color: "var(--color-warning)" };
+    return { text: "Strong", color: "var(--color-success)" };
   };
 
   const onFinish = async (values) => {
@@ -88,7 +96,6 @@ function AddEmployee() {
       setSubmitting(false);
     }
   };
-  
 
   const validateMessages = {
     // eslint-disable-next-line no-template-curly-in-string
@@ -100,109 +107,280 @@ function AddEmployee() {
     },
   };
 
+  const strengthInfo = getStrengthLabel(passwordScore);
+
   return (
-    <div className="add-employee-wrapper">
-      <Card
-        className="add-employee-card"
-        bordered={false}
-        title={
-          <Space align="center">
-            <PlusCircleOutlined style={{ color: "var(--primary-color)" }} />
-            <span>Add New Employee</span>
-          </Space>
-        }
-        extra={
-          <Button icon={<ReloadOutlined />} onClick={fetchRegions} size="small" type="text" style={{ color: "var(--primary-color)" }} >
-            Refresh Regions
-          </Button>
-        }
-      >
-        <Text type="secondary"  style={{ color: "var(--text-color-secondary)" }}>
-          Fill in the employee details below. Fields marked with * are required.
-        </Text>
+    <div className="add-employee-page">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="header-content">
+          <div className="header-icon">
+            <UserAddOutlined />
+          </div>
+          <div className="header-text">
+            <Title level={3} className="header-title">Add New Employee</Title>
+            <Text className="header-subtitle">
+              Create a new employee account with access credentials
+            </Text>
+          </div>
+        </div>
+        <Button
+          icon={<ReloadOutlined spin={loadingRegions} />}
+          onClick={fetchRegions}
+          className="refresh-btn"
+        >
+          Refresh Regions
+        </Button>
+      </div>
 
-        <Divider style={{ margin: "16px 0" }} />
-
-        <Spin spinning={submitting} tip="Creating employee...">
+      {/* Main Form Card */}
+      <Card className="form-card" bordered={false}>
+        <Spin spinning={submitting} tip="Creating employee account...">
           <Form
-          className="compact-form"
             form={form}
             layout="vertical"
             name="add-employee"
             onFinish={onFinish}
             validateMessages={validateMessages}
-            size="large"
             requiredMark={false}
             scrollToFirstError={{ behavior: "smooth", block: "center" }}
           >
-            <Form.Item label="Employee Name" name="name" rules={[{ required: true }, { whitespace: true, message: "Name cannot be empty" }, { min: 2 }]}>
-                <Input placeholder="Enter name here" prefix={<UserOutlined />} allowClear autoComplete="name" />
-            </Form.Item>
-
-            <Form.Item label="Employee Email" name="email" rules={[{ required: true, type: "email" }]}>
-                <Input placeholder="e.g., email@company.com" prefix={<MailOutlined />} allowClear autoComplete="email" />
-            </Form.Item>
-
-            <Form.Item label="Employee Mobile Number" name="mobile" rules={[{ required: true }, { pattern: /^\+?[0-9]{10,15}$/, message: "Enter a valid phone number (10–15 digits, optionally starting with +)" }]}>
-                <Input placeholder="e.g., +XXXXXXXXXX" prefix={<PhoneOutlined />} allowClear inputMode="tel" autoComplete="tel" maxLength={16} />
-            </Form.Item>
-            
-            {role === "admin" && (
-                <Form.Item label="Region" name="region" rules={[{ required: true, message: "Please select a region" }]}>
-                    <Select
-                      showSearch
-                      placeholder={loadingRegions ? "Loading regions..." : "Choose a region"}
-                      //  Added the GlobalOutlined icon here
-                      prefix={<GlobalOutlined />}
-                      loading={loadingRegions}
-                      disabled={loadingRegions || regions.length === 0}
-                      allowClear
-                      optionFilterProp="children"
-                      filterOption={(input, option) => (option?.children ?? "").toLowerCase().includes(input.toLowerCase())}
-                    >
-                      {regions.map((region) => (
-                          <Select.Option key={region} value={region}>{region}</Select.Option>
-                      ))}
-                    </Select>
-                </Form.Item>
-            )}
-
-            <Form.Item label="Password" name="password" rules={[{ required: true, message: "Please enter a password" }, { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&^._-]).{8,}$/, message: "Min 8 chars with uppercase, lowercase, number & special character" }]} hasFeedback>
-                <Input.Password placeholder="Create a strong password" prefix={<LockOutlined />} autoComplete="new-password" />
-            </Form.Item>
-            
-            {passwordValue && (
-              <div className="password-meter">
-                <Space align="center">
-                  <SafetyOutlined />
-                  <Text type="secondary">Password strength</Text>
-                </Space>
-                <Progress
-                  percent={passwordScore(passwordValue)}
-                  showInfo={false}
-                  strokeColor={{
-                      "0%": themeColors.error,
-                      "50%": themeColors.warning,
-                      "100%": themeColors.success,
-                  }}
-                  status={
-                    passwordScore(passwordValue) < 40 ? "exception"
-                      : passwordScore(passwordValue) < 80 ? "normal"
-                      : "success"
-                  }
-                />
+            {/* Personal Information Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <UserOutlined className="section-icon" />
+                <Text strong className="section-title">Personal Information</Text>
               </div>
-            )}
+              <Divider className="section-divider" />
 
-            <Form.Item label="Confirm Password" name="confirmPassword" dependencies={["password"]} hasFeedback rules={[{ required: true, message: "Please confirm your password" }, ({ getFieldValue }) => ({ validator(_, value) { if (!value || getFieldValue("password") === value) { return Promise.resolve(); } return Promise.reject(new Error("The two passwords do not match")); } })]}>
-                <Input.Password placeholder="Re-enter password" prefix={<LockOutlined />} autoComplete="new-password" />
-            </Form.Item>
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Full Name"
+                    name="name"
+                    rules={[
+                      { required: true },
+                      { whitespace: true, message: "Name cannot be empty" },
+                      { min: 2 },
+                    ]}
+                  >
+                    <Input
+                      placeholder="Enter employee's full name"
+                      prefix={<UserOutlined className="input-icon" />}
+                      allowClear
+                      autoComplete="name"
+                      size="large"
+                    />
+                  </Form.Item>
+                </Col>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit" icon={<PlusCircleOutlined />} block size="large" loading={submitting}>
-                Add New Employee
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Email Address"
+                    name="email"
+                    rules={[{ required: true, type: "email" }]}
+                  >
+                    <Input
+                      placeholder="employee@company.com"
+                      prefix={<MailOutlined className="input-icon" />}
+                      allowClear
+                      autoComplete="email"
+                      size="large"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={role === "admin" ? 12 : 24}>
+                  <Form.Item
+                    label="Mobile Number"
+                    name="mobile"
+                    rules={[
+                      { required: true },
+                      {
+                        pattern: /^\+?[0-9]{10,15}$/,
+                        message: "Enter a valid phone number (10–15 digits)",
+                      },
+                    ]}
+                  >
+                    <Input
+                      placeholder="+91 XXXXXXXXXX"
+                      prefix={<PhoneOutlined className="input-icon" />}
+                      allowClear
+                      inputMode="tel"
+                      autoComplete="tel"
+                      maxLength={16}
+                      size="large"
+                    />
+                  </Form.Item>
+                </Col>
+
+                {role === "admin" && (
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      label="Assign Region"
+                      name="region"
+                      rules={[{ required: true, message: "Please select a region" }]}
+                    >
+                      <Select
+                        showSearch
+                        placeholder={loadingRegions ? "Loading regions..." : "Select a region"}
+                        suffixIcon={<GlobalOutlined className="input-icon" />}
+                        loading={loadingRegions}
+                        disabled={loadingRegions || regions.length === 0}
+                        allowClear
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                          (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                        }
+                        size="large"
+                      >
+                        {regions.map((region) => (
+                          <Select.Option key={region} value={region}>
+                            {region}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                )}
+              </Row>
+            </div>
+
+            {/* Security Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <LockOutlined className="section-icon" />
+                <Text strong className="section-title"> Credentials</Text>
+              </div>
+              <Divider className="section-divider" />
+
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Password"
+                    name="password"
+                    rules={[
+                      { required: true, message: "Please enter a password" },
+                      {
+                        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&^._-]).{8,}$/,
+                        message: "Password doesn't meet requirements",
+                      },
+                    ]}
+                    hasFeedback
+                  >
+                    <Input.Password
+                      placeholder="Create a strong password"
+                      prefix={<LockOutlined className="input-icon" />}
+                      autoComplete="new-password"
+                      size="large"
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Confirm Password"
+                    name="confirmPassword"
+                    dependencies={["password"]}
+                    hasFeedback
+                    rules={[
+                      { required: true, message: "Please confirm the password" },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || getFieldValue("password") === value) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(new Error("Passwords do not match"));
+                        },
+                      }),
+                    ]}
+                  >
+                    <Input.Password
+                      placeholder="Re-enter password"
+                      prefix={<LockOutlined className="input-icon" />}
+                      autoComplete="new-password"
+                      size="large"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              {/* Password Strength Indicator */}
+              {passwordValue && (
+                <div className="password-strength-section">
+                  <div className="strength-header">
+                    <Space>
+                      <SafetyOutlined />
+                      <Text className="strength-label">Password Strength:</Text>
+                      <Text strong style={{ color: strengthInfo.color }}>
+                        {strengthInfo.text}
+                      </Text>
+                    </Space>
+                  </div>
+                  <Progress
+                    percent={passwordScore}
+                    showInfo={false}
+                    strokeColor={{
+                      "0%": "var(--color-error)",
+                      "50%": "var(--color-warning)",
+                      "100%": "var(--color-success)",
+                    }}
+                    trailColor="var(--border-color)"
+                    size="small"
+                  />
+                  <div className="password-requirements">
+                    <Row gutter={[16, 8]}>
+                      <Col xs={12}>
+                        <div className={`requirement ${passwordChecks.length ? "met" : ""}`}>
+                          {passwordChecks.length ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                          <span>At least 8 characters</span>
+                        </div>
+                      </Col>
+                      <Col xs={12}>
+                        <div className={`requirement ${passwordChecks.uppercase ? "met" : ""}`}>
+                          {passwordChecks.uppercase ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                          <span>Uppercase letter</span>
+                        </div>
+                      </Col>
+                      <Col xs={12}>
+                        <div className={`requirement ${passwordChecks.lowercase ? "met" : ""}`}>
+                          {passwordChecks.lowercase ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                          <span>Lowercase letter</span>
+                        </div>
+                      </Col>
+                      <Col xs={12}>
+                        <div className={`requirement ${passwordChecks.number ? "met" : ""}`}>
+                          {passwordChecks.number ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                          <span>Number</span>
+                        </div>
+                      </Col>
+                      <Col xs={24}>
+                        <div className={`requirement ${passwordChecks.special ? "met" : ""}`}>
+                          {passwordChecks.special ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                          <span>Special character (@$!%*#?&^._-)</span>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <div className="form-actions">
+              <Button
+                type="primary"
+                htmlType="submit"
+                icon={<UserAddOutlined />}
+                size="large"
+                loading={submitting}
+                className="submit-btn"
+              >
+                Create Employee Account
               </Button>
-            </Form.Item>
+            </div>
           </Form>
         </Spin>
       </Card>
