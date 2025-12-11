@@ -1,8 +1,3 @@
-/* ============================================
-   Region Management Page - Modern Design
-   ============================================ */
-
-/* --- Page Container --- */
 .region-management-page {
     min-height: 100dvh;
     padding: 24px;
@@ -284,4 +279,30 @@
 
 [data-theme='dark'] .management-tabs .ant-tabs-tab:hover {
     color: #5a9fd4;
+}
+
+/* Dark Theme Form Label and Input Fix */
+[data-theme='dark'] .management-card .ant-form-item-label>label {
+    color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .management-card .ant-input,
+[data-theme='dark'] .management-card .ant-input-affix-wrapper {
+    color: #e8e6e3 !important;
+    background-color: #2d2d2d !important;
+    border-color: #434343 !important;
+}
+
+[data-theme='dark'] .management-card .ant-input::placeholder {
+    color: #888888 !important;
+}
+
+[data-theme='dark'] .management-card .ant-select-selector {
+    background-color: #2d2d2d !important;
+    border-color: #434343 !important;
+}
+
+[data-theme='dark'] .management-card .ant-select-selection-item,
+[data-theme='dark'] .management-card .ant-select-selection-placeholder {
+    color: #e8e6e3 !important;
 }

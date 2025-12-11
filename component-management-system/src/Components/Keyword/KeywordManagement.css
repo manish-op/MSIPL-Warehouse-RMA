@@ -1,8 +1,3 @@
-/* ============================================
-   Keyword Management Page - Modern Design
-   ============================================ */
-
-/* --- Page Container --- */
 .keyword-management-container {
     padding: 24px;
     min-height: 100vh;
@@ -268,4 +263,34 @@
 
 [data-theme='dark'] .keyword-management-card .ant-tabs-tab:hover {
     color: #5a9fd4;
+}
+
+/* Dark Theme Form Label and Input Fix */
+[data-theme='dark'] .keyword-management-card .ant-form-item-label>label {
+    color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-input,
+[data-theme='dark'] .keyword-management-card .ant-input-affix-wrapper {
+    color: #e8e6e3 !important;
+    background-color: #2d2d2d !important;
+    border-color: #434343 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-input::placeholder {
+    color: #888888 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-select-selector {
+    background-color: #2d2d2d !important;
+    border-color: #434343 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-select-selection-item,
+[data-theme='dark'] .keyword-management-card .ant-select-selection-placeholder {
+    color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .tab-content .ant-divider-inner-text {
+    color: #a0a0a0 !important;
 }

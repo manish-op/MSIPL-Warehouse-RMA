@@ -500,3 +500,40 @@
 [data-theme='dark'] .change-password-btn {
   box-shadow: 0 4px 12px rgba(31, 59, 87, 0.2);
 }
+
+/* Dark Theme Text Visibility Fixes */
+[data-theme='dark'] .profile-name {
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .profile-role {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .detail-label {
+  color: #a0a0a0 !important;
+}
+
+[data-theme='dark'] .detail-value {
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .section-title {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .stat-value {
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .stat-label {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme='dark'] .region-name {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .region-count {
+  color: #ffffff !important;
+}
