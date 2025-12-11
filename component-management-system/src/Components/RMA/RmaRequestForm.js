@@ -50,6 +50,7 @@ function RmaRequestForm() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [rmaNumbers, setRmaNumbers] = useState([]);
+  const [rmaRequestNumber, setRmaRequestNumber] = useState(""); // Store the RMA request number
   const [sameAsReturn, setSameAsReturn] = useState(false);
   const [productCatalog, setProductCatalog] = useState(DEFAULT_PRODUCT_CATALOG);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -277,6 +278,25 @@ function RmaRequestForm() {
         // Store form data for Excel export before resetting
         setSubmittedFormData({ formData: payload, items: itemsWithRma });
         setRmaNumbers(rmaItems);
+        setRmaRequestNumber(result.data?.rmaNo || ""); // Store the RMA request number
+
+        // Save company info for reuse in next request
+        const companyInfo = {
+          companyName: payload.companyName,
+          email: payload.email,
+          contactName: payload.contactName,
+          telephone: payload.telephone,
+          mobile: payload.mobile,
+          returnAddress: payload.returnAddress,
+          invoiceCompanyName: payload.invoiceCompanyName,
+          invoiceEmail: payload.invoiceEmail,
+          invoiceContactName: payload.invoiceContactName,
+          invoiceTelephone: payload.invoiceTelephone,
+          invoiceMobile: payload.invoiceMobile,
+          invoiceAddress: payload.invoiceAddress,
+        };
+        localStorage.setItem("rmaLastCompanyInfo", JSON.stringify(companyInfo));
+
         setSubmitted(true);
         form.resetFields();
         localStorage.removeItem("rmaFormData");
@@ -322,7 +342,24 @@ function RmaRequestForm() {
                 >
                   📥 Export to Excel
                 </Button>,
-                <Button key="new" onClick={() => { setSubmitted(false); setCurrentStep(0); setSubmittedFormData(null); }}>
+                <Button key="new" onClick={() => {
+                  // Load saved company info for reuse
+                  const savedCompanyInfo = localStorage.getItem("rmaLastCompanyInfo");
+                  setSubmitted(false);
+                  setCurrentStep(0);
+                  setSubmittedFormData(null);
+                  // Pre-fill company info after a brief delay to ensure form is ready
+                  if (savedCompanyInfo) {
+                    setTimeout(() => {
+                      try {
+                        const companyInfo = JSON.parse(savedCompanyInfo);
+                        form.setFieldsValue(companyInfo);
+                      } catch (e) {
+                        console.error("Failed to load saved company info:", e);
+                      }
+                    }, 100);
+                  }
+                }}>
                   Create New Request
                 </Button>,
                 <Button key="dashboard" onClick={() => navigate("/rma-dashboard")}>
@@ -331,9 +368,22 @@ function RmaRequestForm() {
               ]}
             />
 
+            {/* Display RMA Request Number prominently */}
+            {rmaRequestNumber && (
+              <div className="rma-request-number-display" style={{ textAlign: 'center', marginBottom: 24 }}>
+                <Title level={5} style={{ marginBottom: 8 }}>RMA Request Number:</Title>
+                <Tag color="blue" style={{ fontSize: 24, padding: "12px 24px", fontWeight: 'bold' }}>
+                  {rmaRequestNumber}
+                </Tag>
+                <Paragraph type="secondary" style={{ marginTop: 8 }}>
+                  Please save this number for tracking your request.
+                </Paragraph>
+              </div>
+            )}
+
             {rmaNumbers.length > 0 && (
               <div className="rma-numbers-list">
-                <Title level={5}>Generated RMA Number:</Title>
+                <Title level={5}>Items Submitted:</Title>
                 {rmaNumbers.map((item, idx) => (
                   <Card key={idx} size="small" className="rma-number-card">
                     <Row justify="space-between" align="middle">
@@ -534,7 +584,6 @@ function RmaRequestForm() {
                     <Select placeholder="Select transport mode" size="large">
                       <Option value="Air">Air</Option>
                       <Option value="Road">Road</Option>
-                      <Option value="Sea">Sea</Option>
                       <Option value="Courier">Courier</Option>
                     </Select>
                   </Form.Item>

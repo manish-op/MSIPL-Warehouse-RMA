@@ -14,6 +14,7 @@ import {
     Badge,
     Empty,
     Divider,
+    Table,
 } from "antd";
 import {
     UserAddOutlined,
@@ -22,6 +23,10 @@ import {
     AppstoreOutlined,
     ReloadOutlined,
     EditOutlined,
+    FileTextOutlined,
+    PrinterOutlined,
+    EyeOutlined,
+    DownloadOutlined,
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
@@ -45,6 +50,15 @@ export default function UnrepairedPage() {
     const [editRmaModalVisible, setEditRmaModalVisible] = useState(false);
     const [newRmaNo, setNewRmaNo] = useState("");
     const [updatingRma, setUpdatingRma] = useState(false);
+    // Gatepass state
+    const [generatingGatepass, setGeneratingGatepass] = useState(null);
+    // FRU Sticker state
+    const [stickerModalVisible, setStickerModalVisible] = useState(false);
+    const [stickerItems, setStickerItems] = useState([]);
+    // Gatepass Preview state
+    const [gatepassPreviewVisible, setGatepassPreviewVisible] = useState(false);
+    const [gatepassItems, setGatepassItems] = useState([]);
+    const [gatepassRmaNo, setGatepassRmaNo] = useState("");
 
     const loadItems = async () => {
         setLoading(true);
@@ -146,12 +160,17 @@ export default function UnrepairedPage() {
             return;
         }
 
+        // Save scroll position before update
+        const scrollY = window.scrollY;
+
         setUpdatingRma(true);
         const result = await RmaApi.updateItemRmaNumber(selectedItem.id, newRmaNo);
         if (result.success) {
             message.success("RMA Number updated successfully!");
             setEditRmaModalVisible(false);
-            loadItems();
+            await loadItems();
+            // Restore scroll position after data reloads
+            setTimeout(() => window.scrollTo(0, scrollY), 50);
         } else {
             message.error(result.error || "Failed to update RMA Number");
         }
@@ -163,6 +182,190 @@ export default function UnrepairedPage() {
         // Item has custom RMA if rmaNo field is directly set on the item
         // This checks the item-level rmaNo, not the parent request's requestNumber
         return item.itemRmaNo && item.itemRmaNo.trim() !== "";
+    };
+
+    // Generate Inward Gatepass PDF
+    const handleGenerateGatepass = async (requestNumber) => {
+        setGeneratingGatepass(requestNumber);
+        const result = await RmaApi.generateInwardGatepass(requestNumber);
+        if (result.success && result.blob) {
+            // Create download link
+            const url = window.URL.createObjectURL(result.blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `InwardGatepass_${requestNumber}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            message.success('Gatepass generated and downloaded!');
+        } else {
+            message.error(result.error || 'Failed to generate gatepass');
+        }
+        setGeneratingGatepass(null);
+    };
+
+    // Open Gatepass Preview Modal
+    const openGatepassPreview = (rmaItems, rmaNo) => {
+        setGatepassItems(rmaItems);
+        setGatepassRmaNo(rmaNo);
+        setGatepassPreviewVisible(true);
+    };
+
+    // Open FRU Sticker Modal for an RMA request
+    const openStickerModal = (rmaItems, rmaNo) => {
+        // Use itemRmaNo (manually updated) if available, otherwise fall back to the request number
+        const itemsWithRma = rmaItems.map(item => ({
+            ...item,
+            displayRmaNo: item.itemRmaNo || rmaNo // Prioritize manually assigned RMA number
+        }));
+        setStickerItems(itemsWithRma);
+        setStickerModalVisible(true);
+    };
+
+    // Print stickers function
+    const handlePrintStickers = () => {
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            message.error('Please allow popups to print stickers');
+            return;
+        }
+
+        const stickersHtml = stickerItems.map((item, index) => `
+            <div class="sticker">
+                <div class="sticker-header">
+                    <img src="/companyLogo.png" alt="Company Logo" class="company-logo" onerror="this.style.display='none'" />
+                    <span class="company-name">Motorola Solutions India Pvt. Ltd.</span>
+                </div>
+                <div class="sticker-divider"></div>
+                <div class="sticker-content">
+                    <div class="sticker-row">
+                        <span class="label">RMA No:</span>
+                        <span class="value">${item.displayRmaNo || 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="label">Customer:</span>
+                        <span class="value">${item.companyName || 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="label">Received:</span>
+                        <span class="value">${item.receivedDate ? new Date(item.receivedDate).toLocaleDateString('en-IN') : 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="label">Product:</span>
+                        <span class="value">${item.product || 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="label">Serial No:</span>
+                        <span class="value">${item.serialNo || 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row fault-row">
+                        <span class="label">Fault:</span>
+                        <span class="value fault-text">${item.faultDescription || 'No description'}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>FRU Stickers - ${stickerItems[0]?.displayRmaNo || 'RMA'}</title>
+                <style>
+                    * {
+                        box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        padding: 10mm;
+                        background: #f5f5f5;
+                    }
+                    .stickers-container {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 10mm;
+                    }
+                    .sticker {
+                        width: 85mm;
+                        min-height: 55mm;
+                        border: 1.5px solid #333;
+                        border-radius: 4px;
+                        background: #fff;
+                        padding: 3mm;
+                        page-break-inside: avoid;
+                    }
+                    .sticker-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 3mm;
+                        padding-bottom: 2mm;
+                    }
+                    .company-logo {
+                        width: 8mm;
+                        height: 8mm;
+                        object-fit: contain;
+                    }
+                    .company-name {
+                        font-weight: 600;
+                        font-size: 9pt;
+                        color: #333;
+                    }
+                    .sticker-divider {
+                        height: 1px;
+                        background: #333;
+                        margin-bottom: 2mm;
+                    }
+                    .sticker-content {
+                        font-size: 8pt;
+                    }
+                    .sticker-row {
+                        display: flex;
+                        margin-bottom: 1.5mm;
+                    }
+                    .label {
+                        font-weight: 600;
+                        width: 20mm;
+                        color: #555;
+                        flex-shrink: 0;
+                    }
+                    .value {
+                        color: #333;
+                        word-break: break-word;
+                    }
+                    .fault-row {
+                        margin-top: 1mm;
+                    }
+                    .fault-text {
+                        font-size: 7.5pt;
+                        line-height: 1.3;
+                    }
+                    @media print {
+                        body {
+                            background: #fff;
+                            padding: 5mm;
+                        }
+                        .stickers-container {
+                            gap: 5mm;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="stickers-container">
+                    ${stickersHtml}
+                </div>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
     };
 
     return (
@@ -246,15 +449,32 @@ export default function UnrepairedPage() {
                                                     overflowCount={99}
                                                 />
                                             </div>
-                                            <Button
-                                                type="primary"
-                                                icon={<UserAddOutlined />}
-                                                onClick={() => openBulkAssignModal(rmaNo, rmaItems.length)}
-                                                size="small"
-                                                style={{ background: "#52c41a", borderColor: "#52c41a" }}
-                                            >
-                                                Assign All ({rmaItems.length})
-                                            </Button>
+                                            <Space>
+                                                <Button
+                                                    icon={<FileTextOutlined />}
+                                                    onClick={() => openGatepassPreview(rmaItems, rmaNo)}
+                                                    size="small"
+                                                >
+                                                    Preview Gatepass
+                                                </Button>
+                                                <Button
+                                                    icon={<PrinterOutlined />}
+                                                    onClick={() => openStickerModal(rmaItems, rmaNo)}
+                                                    size="small"
+                                                    style={{ background: "#722ed1", borderColor: "#722ed1", color: "#fff" }}
+                                                >
+                                                    Print Stickers ({rmaItems.length})
+                                                </Button>
+                                                <Button
+                                                    type="primary"
+                                                    icon={<UserAddOutlined />}
+                                                    onClick={() => openBulkAssignModal(rmaNo, rmaItems.length)}
+                                                    size="small"
+                                                    style={{ background: "#52c41a", borderColor: "#52c41a" }}
+                                                >
+                                                    Assign All ({rmaItems.length})
+                                                </Button>
+                                            </Space>
                                         </div>
                                     }
                                 >
@@ -485,7 +705,205 @@ export default function UnrepairedPage() {
                         style={{ marginTop: 8 }}
                     />
                 </Modal>
-            </div>
-        </RmaLayout>
+
+                {/* FRU Sticker Preview Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <PrinterOutlined style={{ color: "#722ed1" }} />
+                            <span>FRU Stickers Preview</span>
+                        </div>
+                    }
+                    open={stickerModalVisible}
+                    onCancel={() => setStickerModalVisible(false)}
+                    width={800}
+                    footer={[
+                        <Button key="cancel" onClick={() => setStickerModalVisible(false)}>
+                            Close
+                        </Button>,
+                        <Button
+                            key="print"
+                            type="primary"
+                            icon={<PrinterOutlined />}
+                            onClick={handlePrintStickers}
+                            style={{ background: "#722ed1", borderColor: "#722ed1" }}
+                        >
+                            Print All Stickers ({stickerItems.length})
+                        </Button>
+                    ]}
+                    className="sticker-modal"
+                >
+                    <div className="sticker-preview-container">
+                        <Row gutter={[16, 16]}>
+                            {stickerItems.map((item, index) => (
+                                <Col xs={24} md={12} key={item.id || index}>
+                                    <div className="sticker-preview">
+                                        <div className="sticker-preview-header">
+                                            <img
+                                                src="/companyLogo.png"
+                                                alt="Logo"
+                                                className="sticker-preview-logo"
+                                                onError={(e) => { e.target.style.display = 'none'; }}
+                                            />
+                                            <span className="sticker-preview-company">
+                                                Motorola Solutions India Pvt. Ltd.
+                                            </span>
+                                        </div>
+                                        <Divider style={{ margin: "8px 0" }} />
+                                        <div className="sticker-preview-content">
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">RMA No:</Text>
+                                                <Text strong>{item.displayRmaNo || 'N/A'}</Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Customer:</Text>
+                                                <Text>{item.companyName || 'N/A'}</Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Received:</Text>
+                                                <Text>
+                                                    {item.receivedDate
+                                                        ? new Date(item.receivedDate).toLocaleDateString('en-IN')
+                                                        : 'N/A'}
+                                                </Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Product:</Text>
+                                                <Text>{item.product || 'N/A'}</Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Serial No:</Text>
+                                                <Text code>{item.serialNo || 'N/A'}</Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Fault:</Text>
+                                                <Paragraph
+                                                    ellipsis={{ rows: 2 }}
+                                                    style={{ margin: 0, fontSize: 12 }}
+                                                >
+                                                    {item.faultDescription || 'No description'}
+                                                </Paragraph>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Col>
+                            ))}
+                        </Row>
+                    </div>
+                </Modal>
+
+                {/* Gatepass Preview Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <EyeOutlined style={{ color: "#1890ff" }} />
+                            <span>Gatepass Preview - {gatepassRmaNo}</span>
+                        </div>
+                    }
+                    open={gatepassPreviewVisible}
+                    onCancel={() => setGatepassPreviewVisible(false)}
+                    width={900}
+                    footer={[
+                        <Button key="cancel" onClick={() => setGatepassPreviewVisible(false)}>
+                            Close
+                        </Button>,
+                        <Button
+                            key="download"
+                            type="primary"
+                            icon={<DownloadOutlined />}
+                            onClick={() => {
+                                handleGenerateGatepass(gatepassRmaNo);
+                                setGatepassPreviewVisible(false);
+                            }}
+                            loading={generatingGatepass === gatepassRmaNo}
+                        >
+                            Download PDF
+                        </Button>
+                    ]}
+                    className="gatepass-modal"
+                >
+                    <div className="gatepass-preview-container">
+                        {/* Header Info */}
+                        <Card size="small" className="gatepass-info-card">
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Text type="secondary">RMA Request Number</Text>
+                                    <div>
+                                        <Tag color="blue" style={{ fontSize: 14, padding: "4px 12px" }}>
+                                            {gatepassRmaNo}
+                                        </Tag>
+                                    </div>
+                                </Col>
+                                <Col span={8}>
+                                    <Text type="secondary">Customer</Text>
+                                    <div>
+                                        <Text strong>{gatepassItems[0]?.companyName || 'N/A'}</Text>
+                                    </div>
+                                </Col>
+                                <Col span={8}>
+                                    <Text type="secondary">Total Items</Text>
+                                    <div>
+                                        <Badge
+                                            count={gatepassItems.length}
+                                            style={{ backgroundColor: "#52c41a" }}
+                                            showZero
+                                        />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Card>
+
+                        {/* Items Table */}
+                        <Table
+                            dataSource={gatepassItems.map((item, index) => ({ ...item, key: item.id || index, slNo: index + 1 }))}
+                            columns={[
+                                {
+                                    title: 'Sl.No',
+                                    dataIndex: 'slNo',
+                                    key: 'slNo',
+                                    width: 60,
+                                    align: 'center',
+                                },
+                                {
+                                    title: 'Product',
+                                    dataIndex: 'product',
+                                    key: 'product',
+                                    render: (text) => text || 'N/A',
+                                },
+                                {
+                                    title: 'Model',
+                                    dataIndex: 'model',
+                                    key: 'model',
+                                    render: (text) => text || 'N/A',
+                                },
+                                {
+                                    title: 'Serial No',
+                                    dataIndex: 'serialNo',
+                                    key: 'serialNo',
+                                    render: (text) => <Text code>{text || 'N/A'}</Text>,
+                                },
+                                {
+                                    title: 'Fault Description',
+                                    dataIndex: 'faultDescription',
+                                    key: 'faultDescription',
+                                    ellipsis: true,
+                                    render: (text) => text || 'No description',
+                                },
+                                {
+                                    title: 'RMA No',
+                                    dataIndex: 'itemRmaNo',
+                                    key: 'itemRmaNo',
+                                    render: (text) => text ? <Tag color="green">{text}</Tag> : <Text type="secondary">Not assigned</Text>,
+                                },
+                            ]}
+                            pagination={false}
+                            size="small"
+                            bordered
+                            style={{ marginTop: 16 }}
+                        />
+                    </div>
+                </Modal>
+            </div >
+        </RmaLayout >
     );
 }

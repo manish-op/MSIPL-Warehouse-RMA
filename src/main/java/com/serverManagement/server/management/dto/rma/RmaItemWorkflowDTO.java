@@ -22,6 +22,8 @@ public class RmaItemWorkflowDTO {
     private String repairRemarks;
     private String itemRmaNo; // Item-level RMA number (distinct from request number)
     private String issueFixed; // Description of issue that was fixed
+    private String companyName; // Customer company name from parent RMA request
+    private ZonedDateTime receivedDate; // Date when RMA request was created/received
 
     // Getters and Setters
     public Long getId() {
@@ -150,5 +152,21 @@ public class RmaItemWorkflowDTO {
 
     public void setIssueFixed(String issueFixed) {
         this.issueFixed = issueFixed;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public ZonedDateTime getReceivedDate() {
+        return receivedDate;
+    }
+
+    public void setReceivedDate(ZonedDateTime receivedDate) {
+        this.receivedDate = receivedDate;
     }
 }

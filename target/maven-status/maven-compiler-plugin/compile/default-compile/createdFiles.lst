@@ -51,6 +51,7 @@ com\serverManagement\server\management\request\changePassword\PasswordRequest.cl
 com\serverManagement\server\management\response\itemDetails\ItemDetailsResponse.class
 com\serverManagement\server\management\controller\rma\RmaController.class
 com\serverManagement\server\management\filter\JwtChannelInterceptor.class
+com\serverManagement\server\management\dao\rma\RmaInwardGatepassDAO.class
 com\serverManagement\server\management\dao\option\ItemStatusOptionDAO.class
 com\serverManagement\server\management\entity\itemRepairOption\RepairingOptionEntity.class
 com\serverManagement\server\management\dao\rma\RmaAuditLogDAO.class
@@ -136,6 +137,7 @@ com\serverManagement\server\management\request\changePassword\ChangeEmployeePass
 com\serverManagement\server\management\service\rma\RmaExcelExportService.class
 com\serverManagement\server\management\request\itemRepairingDetails\ManagerGetTicketRequest.class
 com\serverManagement\server\management\response\rma\RmaResponse.class
+com\serverManagement\server\management\entity\rma\RmaInwardGatepassEntity.class
 com\serverManagement\server\management\dao\itemRepairDetails\FruDAO.class
 com\serverManagement\server\management\response\globalException\GlobalExceptionResponse.class
 com\serverManagement\server\management\controller\itemRepairOption\RepairingOptionController.class
@@ -159,6 +161,7 @@ com\serverManagement\server\management\request\itemRepairingDetails\AssignTechni
 com\serverManagement\server\management\request\gatepass\OutwardGatepassRequest.class
 com\serverManagement\server\management\response\keyword\KeywordResponse.class
 com\serverManagement\server\management\request\rma\CreateRmaRequest.class
+com\serverManagement\server\management\service\rma\RmaInwardGatepassService.class
 com\serverManagement\server\management\response\keyword\SubKeywordResponse.class
 com\serverManagement\server\management\request\itemDetails\AssignItemDetailsRequest.class
 com\serverManagement\server\management\controller\employeeList\GetEmployeeListController.class

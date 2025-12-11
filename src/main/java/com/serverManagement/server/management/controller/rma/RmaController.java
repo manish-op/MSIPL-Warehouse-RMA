@@ -265,4 +265,23 @@ public class RmaController {
             return ResponseEntity.status(500).body("Failed to fetch customer");
         }
     }
+
+    // ============ INWARD GATEPASS ENDPOINTS ============
+
+    @Autowired
+    private com.serverManagement.server.management.service.rma.RmaInwardGatepassService rmaInwardGatepassService;
+
+    /**
+     * Generate Inward Gatepass PDF for items in an RMA request
+     */
+    @PostMapping("/gatepass/generate/{requestNumber}")
+    public ResponseEntity<?> generateInwardGatepass(HttpServletRequest request,
+            @PathVariable String requestNumber) {
+        try {
+            return rmaInwardGatepassService.generateGatepass(request, requestNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to generate gatepass: " + e.getMessage());
+        }
+    }
 }

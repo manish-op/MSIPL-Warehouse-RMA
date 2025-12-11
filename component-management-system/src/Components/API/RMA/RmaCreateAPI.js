@@ -167,5 +167,32 @@ export const RmaApi = {
   searchCustomers: async (searchTerm) => apiGet(`/rma/customers/search?q=${encodeURIComponent(searchTerm || '')}`),
 
   getCustomerById: async (customerId) => apiGet(`/rma/customers/${customerId}`),
-};
 
+  // Generate Inward Gatepass PDF
+  generateInwardGatepass: async (requestNumber) => {
+    const token = getAuthToken();
+    if (!token) {
+      return { success: false, error: "No authentication token" };
+    }
+    try {
+      const response = await fetch(
+        `${URL}/rma/gatepass/generate/${requestNumber}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { success: false, error: errorText };
+      }
+      // Return blob for PDF download
+      const blob = await response.blob();
+      return { success: true, blob };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+};

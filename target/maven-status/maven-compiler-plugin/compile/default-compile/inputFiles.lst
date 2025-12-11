@@ -26,6 +26,7 @@ C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\request\option\UpdateItemStatusOtionRequest.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\filter\JWTRequestFilter.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\service\rma\CustomerService.java
+C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\service\rma\RmaInwardGatepassService.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\request\role\ChangeEmployeeRoleRequest.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\dto\rma\RmaItemWorkflowDTO.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\request\keyword\SubKeywordRequest.java
@@ -109,8 +110,10 @@ C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\controller\itemRepairOption\RepairingOptionController.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\request\keyword\GetSubkeywordRequest.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\request\changePassword\PasswordRequest.java
+C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\dao\rma\RmaInwardGatepassDAO.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\request\region\UpdateRegionRequest.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\entity\region\RegionEntity.java
+C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\entity\rma\RmaInwardGatepassEntity.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\request\region\UpdateEmployeeRegionRequest.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\globalException\UnathorizedException.java
 C:\Users\secmoto\Downloads\server-management\src\main\java\com\serverManagement\server\management\response\keyword\KeywordResponse.java

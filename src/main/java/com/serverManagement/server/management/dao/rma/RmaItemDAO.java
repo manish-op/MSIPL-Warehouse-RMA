@@ -33,17 +33,18 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     @Query("SELECT r FROM RmaItemEntity r WHERE r.assignedToEmail IS NULL OR r.assignedToEmail = ''")
     List<RmaItemEntity> findUnassignedItems();
 
-    // Find assigned items (has assignee, not yet repaired or cant be repaired)
+    // Find assigned items (has assignee, not yet repaired or cant be repaired or
+    // BER)
     @Query("SELECT r FROM RmaItemEntity r WHERE r.assignedToEmail IS NOT NULL AND r.assignedToEmail != '' " +
-            "AND (r.repairStatus IS NULL OR (LOWER(r.repairStatus) != 'repaired' AND LOWER(r.repairStatus) != 'cant_be_repaired'))")
+            "AND (r.repairStatus IS NULL OR (LOWER(r.repairStatus) != 'repaired' AND LOWER(r.repairStatus) != 'cant_be_repaired' AND LOWER(r.repairStatus) != 'ber'))")
     List<RmaItemEntity> findAssignedItems();
 
     // Find repaired items
     @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'repaired'")
     List<RmaItemEntity> findRepairedItems();
 
-    // Find items that can't be repaired
-    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'cant_be_repaired'")
+    // Find items that can't be repaired (includes CANT_BE_REPAIRED and BER)
+    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'cant_be_repaired' OR LOWER(r.repairStatus) = 'ber'")
     List<RmaItemEntity> findCantBeRepairedItems();
 
     // Find items assigned to a specific user

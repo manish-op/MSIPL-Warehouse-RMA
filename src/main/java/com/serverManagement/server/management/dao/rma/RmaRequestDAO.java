@@ -15,4 +15,6 @@ public interface RmaRequestDAO extends JpaRepository<RmaRequestEntity, Long> {
     @Query("SELECT DISTINCT r FROM RmaRequestEntity r LEFT JOIN FETCH r.items")
     List<RmaRequestEntity> findAllWithItems();
 
+    // Find RMA request by request number
+    RmaRequestEntity findByRequestNumber(String requestNumber);
 }

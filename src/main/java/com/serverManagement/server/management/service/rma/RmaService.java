@@ -248,15 +248,15 @@ public class RmaService {
 
     /**
      * Generate unique RMA number
-     * Format: RMA-YYYYMMDD-HHMMSS
+     * Format: RMA-DDMMYYYY-HHMMSS
      * Note: This number is shared by all items in a single RMA request
      */
     private String generateRmaNumber() {
         ZonedDateTime now = ZonedDateTime.now();
-        String timestamp = String.format("%04d%02d%02d-%02d%02d%02d",
-                now.getYear(),
-                now.getMonthValue(),
+        String timestamp = String.format("%02d%02d%04d-%02d%02d%02d",
                 now.getDayOfMonth(),
+                now.getMonthValue(),
+                now.getYear(),
                 now.getHour(),
                 now.getMinute(),
                 now.getSecond());
@@ -642,6 +642,9 @@ public class RmaService {
             // auto-generated
             if (item.getRmaRequest() != null) {
                 dto.setRmaNo(item.getRmaRequest().getRequestNumber()); // Display request number
+                // Set customer and date info for FRU sticker display
+                dto.setCompanyName(item.getRmaRequest().getCompanyName());
+                dto.setReceivedDate(item.getRmaRequest().getCreatedDate());
             }
             // Set the item-level RMA number (distinct from parent request number)
             dto.setItemRmaNo(item.getRmaNo());
