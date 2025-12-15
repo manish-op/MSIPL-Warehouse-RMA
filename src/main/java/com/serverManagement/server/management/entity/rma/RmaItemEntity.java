@@ -1,5 +1,6 @@
 package com.serverManagement.server.management.entity.rma;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -81,6 +82,19 @@ public class RmaItemEntity {
 
     @Column(name = "issue_fixed", length = 2000)
     private String issueFixed;
+
+    @Column(name = "repair_type")
+    private String repairType; // for local or depot
+
+    @Column(name = "local_stage")
+    private String localStage; // unassigned,under repair or dispatched
+
+    @Column(name = "depot_stage")
+    private String depotStage; // for depot flow: pending dispatch to depot or In transit to depot
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "depot_dispatch_id")
+    private DepotDispatchEntity depotDispatch;
 
     // Relationship with RMA Request
     @ManyToOne
@@ -317,6 +331,90 @@ public class RmaItemEntity {
 
     public void setIssueFixed(String issueFixed) {
         this.issueFixed = issueFixed;
+    }
+
+    // for depot dispatch page
+    public String getRepairType() {
+        return repairType;
+    }
+
+    public void setRepairType(String repairType) {
+        this.repairType = repairType;
+    }
+
+    public String getDepotStage() {
+        return depotStage;
+    }
+
+    public void setDepotStage(String depotStage) {
+        this.depotStage = depotStage;
+    }
+
+    public String getLocalStage() {
+        return localStage;
+    }
+
+    public void setLocalStage(String localStage) {
+        this.localStage = localStage;
+    }
+
+    public DepotDispatchEntity getDepotDispatch() {
+        return depotDispatch;
+    }
+
+    public void setDepotDispatch(DepotDispatchEntity depotDispatch) {
+        this.depotDispatch = depotDispatch;
+    }
+
+    // Delegated Getters/Setters
+    public String getDcNo() {
+        return depotDispatch != null ? depotDispatch.getDcNo() : null;
+    }
+
+    public void setDcNo(String dcNo) {
+        if (this.depotDispatch == null)
+            this.depotDispatch = new DepotDispatchEntity();
+        this.depotDispatch.setDcNo(dcNo);
+    }
+
+    public String getEwayBillNo() {
+        return depotDispatch != null ? depotDispatch.getEwayBillNo() : null;
+    }
+
+    public void setEwayBillNo(String ewayBillNo) {
+        if (this.depotDispatch == null)
+            this.depotDispatch = new DepotDispatchEntity();
+        this.depotDispatch.setEwayBillNo(ewayBillNo);
+    }
+
+    public ZonedDateTime getDispatchDate() {
+        return depotDispatch != null ? depotDispatch.getDispatchDate() : null;
+    }
+
+    public void setDispatchDate(ZonedDateTime dispatchDate) {
+        if (this.depotDispatch == null)
+            this.depotDispatch = new DepotDispatchEntity();
+        this.depotDispatch.setDispatchDate(dispatchDate);
+    }
+
+    public String getCourierName() {
+        return depotDispatch != null ? depotDispatch.getCourierName() : null;
+    }
+
+    public void setCourierName(String courierName) {
+        if (this.depotDispatch == null)
+            this.depotDispatch = new DepotDispatchEntity();
+        this.depotDispatch.setCourierName(courierName);
+    }
+
+    public String getTrackingNo() {
+        return depotDispatch != null ? depotDispatch.getTrackingNo() : null;
+    }
+
+    public void setTrackingNo(String trackingNo) {
+        if (this.depotDispatch == null)
+            this.depotDispatch = new DepotDispatchEntity();
+        this.depotDispatch.setTrackingNo(trackingNo);
     }
 
     @Override

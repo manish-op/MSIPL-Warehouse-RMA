@@ -1,11 +1,13 @@
 package com.serverManagement.server.management.dao.rma;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import com.serverManagement.server.management.dto.rma.DepotDispatchItemDto;
 import com.serverManagement.server.management.entity.rma.RmaItemEntity;
 
 @Repository
@@ -55,4 +57,12 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     // Note: Uses requestNumber (auto-generated) since rmaNo is assigned later
     @Query("SELECT r FROM RmaItemEntity r WHERE r.rmaRequest.requestNumber = :rmaNo AND (r.assignedToEmail IS NULL OR r.assignedToEmail = '')")
     List<RmaItemEntity> findUnassignedByRmaNo(String rmaNo);
+
+    // -----------New Methods for Depot Dispatch------------------
+    // Depot: items waiting for dispatch to bangalore
+    List<RmaItemEntity> findByRepairTypeAndDepotStage(String repairType, String depotStage);
+
+    // Depot: items in specific stages (e.g., In Transit, Received, etc.)
+    List<RmaItemEntity> findByRepairTypeAndDepotStageIn(String repairType, List<String> depotStages);
+
 }
