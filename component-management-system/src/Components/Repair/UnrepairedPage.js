@@ -75,7 +75,6 @@ export default function UnrepairedPage() {
     const [gatepassPreviewVisible, setGatepassPreviewVisible] = useState(false);
     const [gatepassItems, setGatepassItems] = useState([]);
     const [gatepassRmaNo, setGatepassRmaNo] = useState("");
-<<<<<<< HEAD
     
     // DC Modal State
     const [dcModalVisble, setDcModalVisible] = useState(false);
@@ -198,8 +197,6 @@ export default function UnrepairedPage() {
     const [editingId, setEditingId] = useState(null);
     const [updating, setUpdating] = useState(false);
     const [form] = Form.useForm();
-=======
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
 
     const loadItems = async () => {
         setLoading(true);
@@ -327,13 +324,10 @@ export default function UnrepairedPage() {
 
     // Generate Inward Gatepass PDF
     const handleGenerateGatepass = async (requestNumber) => {
-<<<<<<< HEAD
         if (!requestNumber || requestNumber === "Unknown") {
             message.error("Cannot generate Gatepass: Invalid or Missing RMA Number. Please update the items with a valid RMA Number.");
             return;
         }
-=======
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
         setGeneratingGatepass(requestNumber);
         const result = await RmaApi.generateInwardGatepass(requestNumber);
         if (result.success && result.blob) {
@@ -353,10 +347,8 @@ export default function UnrepairedPage() {
         setGeneratingGatepass(null);
     };
 
-<<<<<<< HEAD
     // Open Gatepass Preview Modal
     const openGatepassPreview = (rmaItems, rmaNo) => {
-=======
     // Filter items that have RMA numbers assigned
     const getItemsWithRmaNumbers = (rmaItems) => {
         return rmaItems.filter(item => item.itemRmaNo && item.itemRmaNo.trim() !== "");
@@ -426,7 +418,6 @@ export default function UnrepairedPage() {
         }
 
         // All items have RMA numbers, proceed directly
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
         setGatepassItems(rmaItems);
         setGatepassRmaNo(rmaNo);
         setGatepassPreviewVisible(true);
@@ -434,14 +425,12 @@ export default function UnrepairedPage() {
 
     // Open FRU Sticker Modal for an RMA request
     const openStickerModal = (rmaItems, rmaNo) => {
-<<<<<<< HEAD
         // Use itemRmaNo (manually updated) if available, otherwise fall back to the request number
         const itemsWithRma = rmaItems.map(item => ({
             ...item,
             displayRmaNo: item.itemRmaNo || rmaNo // Prioritize manually assigned RMA number
         }));
         setStickerItems(itemsWithRma);
-=======
         const status = checkRmaStatus(rmaItems);
 
         // If no items have RMA numbers, show warning and return
@@ -497,7 +486,6 @@ export default function UnrepairedPage() {
 
         // All items have RMA numbers, proceed directly
         setStickerItems(prepareItemsForStickers(rmaItems));
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
         setStickerModalVisible(true);
     };
 
@@ -734,7 +722,6 @@ export default function UnrepairedPage() {
                                                 )}
                                             </div>
                                             <Space>
-<<<<<<< HEAD
                                                 {rmaItems[0]?.repairType !== "Depot Repair" && (
                                                     <>
                                                         <Button
@@ -763,7 +750,6 @@ export default function UnrepairedPage() {
                                                     >
                                                         Assign All ({rmaItems.length})
                                                     </Button>
-=======
                                                 <Button
                                                     icon={<FileTextOutlined />}
                                                     onClick={() => openGatepassPreview(rmaItems, rmaNo)}
@@ -788,7 +774,6 @@ export default function UnrepairedPage() {
                                                 >
                                                     Assign All ({rmaItems.length})
                                                 </Button>
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
                                             </Space>
                                         </div>
                                     }
@@ -1218,7 +1203,6 @@ export default function UnrepairedPage() {
                         />
                     </div>
                 </Modal>
-<<<<<<< HEAD
 
                 {/* Delivery Challan Modal */}
                 <Modal
@@ -1405,11 +1389,17 @@ export default function UnrepairedPage() {
                                 </Form.Item>
                             </Col>
                         </Row>
+                        <Row gutter={16} justify="end" style={{marginTop: 16}}>
+                            <Col>
+                                <Button onClick={() => setDcModalVisible(false)} style={{marginRight: 8}}>Cancel</Button>
+                                <Button type="primary" htmlType="submit" loading={dcSubmitting}>Generate DC</Button>
+                            </Col>
+                        </Row>
                     </Form>
                 </Modal>
-=======
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
             </div >
         </RmaLayout >
     );
 }
+
+export default UnrepairedPage;
