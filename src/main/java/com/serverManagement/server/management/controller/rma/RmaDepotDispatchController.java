@@ -3,6 +3,7 @@ package com.serverManagement.server.management.controller.rma;
 import com.serverManagement.server.management.dao.rma.RmaItemDAO;
 import com.serverManagement.server.management.dto.rma.DepotDispatchItemDto;
 import com.serverManagement.server.management.dto.rma.DepotDispatchRequest;
+import com.serverManagement.server.management.entity.rma.DepotDispatchEntity;
 import com.serverManagement.server.management.entity.rma.RmaItemEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class RmaDepotDispatchController {
         }
 
         // Create new Dispatch Entity
-        com.serverManagement.server.management.entity.rma.DepotDispatchEntity dispatch = new com.serverManagement.server.management.entity.rma.DepotDispatchEntity();
+        DepotDispatchEntity dispatch = new DepotDispatchEntity();
         dispatch.setDcNo(req.getDcNo());
         dispatch.setEwayBillNo(req.getEwayBillNo());
         dispatch.setCourierName(req.getCourierName());
