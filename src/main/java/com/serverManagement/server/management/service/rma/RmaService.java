@@ -357,6 +357,55 @@ public class RmaService {
         }
     }
 
+    /**
+     * Get RMA requests with optional date filtering
+     */
+    public ResponseEntity<?> getRmaRequests(String filter) {
+        try {
+            List<RmaRequestEntity> requests;
+            ZonedDateTime now = ZonedDateTime.now();
+
+            if (filter == null || filter.equalsIgnoreCase("all")) {
+                requests = rmaRequestDAO.findAll();
+            } else {
+                ZonedDateTime startDate;
+                switch (filter.toLowerCase()) {
+                    case "year":
+                        startDate = now.minusYears(1);
+                        break;
+                    case "month":
+                        startDate = now.minusMonths(1);
+                        break;
+                    case "week":
+                        startDate = now.minusWeeks(1);
+                        break;
+                    default:
+                        startDate = now.minusYears(100); // Default to all
+                }
+                requests = rmaRequestDAO.findByCreatedDateBetween(startDate, now);
+            }
+            return ResponseEntity.ok(requests);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch RMA requests: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get all RMA items
+     */
+    public ResponseEntity<?> getAllItems() {
+        try {
+            List<RmaItemEntity> items = rmaItemDAO.findAll();
+            return ResponseEntity.ok(convertToItemDTOList(items));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch all items: " + e.getMessage());
+        }
+    }
+
     // ============ WORKFLOW METHODS ============
 
     /**

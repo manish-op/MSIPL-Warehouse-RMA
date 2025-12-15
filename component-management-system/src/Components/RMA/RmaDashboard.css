@@ -376,3 +376,14 @@
 .msipl-sider.theme-purple .msipl-sider-toggle:hover {
   background: rgba(114, 46, 209, 0.3);
 }
+
+/* Clickable Card Styling */
+.clickable-card {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.clickable-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

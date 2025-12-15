@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import com.serverManagement.server.management.entity.rma.RmaRequestEntity;
 
+import java.time.ZonedDateTime;
+
 @Repository
 public interface RmaRequestDAO extends JpaRepository<RmaRequestEntity, Long> {
 
@@ -17,4 +19,6 @@ public interface RmaRequestDAO extends JpaRepository<RmaRequestEntity, Long> {
 
     // Find RMA request by request number
     RmaRequestEntity findByRequestNumber(String requestNumber);
+
+    List<RmaRequestEntity> findByCreatedDateBetween(ZonedDateTime startDate, ZonedDateTime endDate);
 }
