@@ -15,13 +15,10 @@ import {
     Empty,
     Divider,
     Table,
-<<<<<<< HEAD
     Form,
     Tooltip,
     Select,
     DatePicker,
-=======
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
 } from "antd";
 import {
     UserAddOutlined,
@@ -34,10 +31,7 @@ import {
     PrinterOutlined,
     EyeOutlined,
     DownloadOutlined,
-<<<<<<< HEAD
     FilePdfOutlined,
-=======
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
@@ -156,7 +150,6 @@ export default function UnrepairedPage() {
             } else if (Array.isArray(values.transporterName)) {
                  values.transporterName = values.transporterName[0];
             }
-
 
             // Merge the form values (which might only have 'rate') with the full item details
             // We use dcTableData as the source of truth for the items list structure
@@ -1402,4 +1395,3 @@ export default function UnrepairedPage() {
     );
 }
 
-export default UnrepairedPage;
