@@ -265,4 +265,46 @@ public class RmaController {
             return ResponseEntity.status(500).body("Failed to fetch customer");
         }
     }
+
+    // ============ INWARD GATEPASS ENDPOINTS ============
+
+    @Autowired
+    private com.serverManagement.server.management.service.rma.RmaInwardGatepassService rmaInwardGatepassService;
+
+    /**
+     * Generate Inward Gatepass PDF for items in an RMA request
+     */
+    @PostMapping("/gatepass/generate/{requestNumber}")
+    public ResponseEntity<?> generateInwardGatepass(HttpServletRequest request,
+            @PathVariable String requestNumber) {
+        try {
+            return rmaInwardGatepassService.generateGatepass(request, requestNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to generate gatepass: " + e.getMessage());
+        }
+    }
+
+    @Autowired
+    private com.serverManagement.server.management.service.rma.RmaPdfService rmaPdfService;
+
+    @PostMapping("/delivery-challan/generate")
+    public ResponseEntity<?> generateDeliveryChallan(
+            @RequestBody com.serverManagement.server.management.dto.rma.DeliveryChallanRequest payload) {
+        try {
+            byte[] pdfBytes = rmaPdfService.generateDeliveryChallan(payload);
+
+            ByteArrayResource resource = new ByteArrayResource(pdfBytes);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"DeliveryChallan_" + payload.getRmaNo() + ".pdf\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .contentLength(resource.contentLength())
+                    .body(resource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to generate Delivery Challan: " + e.getMessage());
+        }
+    }
 }

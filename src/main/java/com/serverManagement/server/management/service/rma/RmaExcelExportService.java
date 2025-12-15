@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Service for exporting RMA data to Excel using the original template
+ * Service for exporting RMA data to Excel using the template
+ * Cell positions mapped from RMA_Request_Template.xlsx (Sheet: India Repair
+ * Request Form)
  */
 @Service
 public class RmaExcelExportService {
@@ -25,6 +27,7 @@ public class RmaExcelExportService {
         System.out.println("=== RMA EXCEL EXPORT DEBUG ===");
         System.out.println("Items received: " + items.size());
         if (!items.isEmpty()) {
+            System.out.println("First item keys: " + items.get(0).keySet());
             System.out.println("First item: " + items.get(0));
         }
 
@@ -34,137 +37,127 @@ public class RmaExcelExportService {
                 Workbook workbook = new XSSFWorkbook(templateStream);
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            // Find the India Repair Request Form sheet
-            Sheet sheet = null;
-            for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-                String name = workbook.getSheetName(i).toLowerCase();
-                if (name.contains("india") || name.contains("repair") || name.contains("form")) {
-                    sheet = workbook.getSheetAt(i);
-                    System.out.println("Using sheet: " + workbook.getSheetName(i));
-                    break;
-                }
-            }
-            if (sheet == null && workbook.getNumberOfSheets() > 1) {
-                sheet = workbook.getSheetAt(1); // Try second sheet
-            }
+            // Get the India Repair Request Form sheet
+            Sheet sheet = workbook.getSheet("India Repair Request Form");
             if (sheet == null) {
-                sheet = workbook.getSheetAt(0);
+                throw new IllegalStateException("Sheet 'India Repair Request Form' not found in template");
             }
+            System.out.println("Using sheet: " + sheet.getSheetName());
 
-            // Based on the actual template screenshot:
-            // Row 4 (0-indexed): MODE OF TRANSPORT section
-            // Col E (4): "Motorola Courier Service" etc - value for mode of transport
-            // Col K area: DPL LICENSE: | value | DATE: | 2025-12-09
+            // ===== Transport block (Rows 4-8, 0-indexed) =====
+            // Labels are in column A, values go in column G (index 6)
+            setCellValue(sheet, 4, 6, getString(formData, "modeOfTransport")); // MODE OF TRANSPORT
+            setCellValue(sheet, 5, 6, getString(formData, "shippingMethod")); // SHIPPING METHOD
+            setCellValue(sheet, 6, 6, getString(formData, "courierCompanyName")); // COURIER COMPANY NAME
+            setCellValue(sheet, 7, 6, getString(formData, "dplLicense")); // DPL LICENSE
+            setCellValue(sheet, 8, 6, getString(formData, "date")); // DATE
 
-            // Row 5: RETURNING SHIPMENT SHIPPING METHOD...
-            // Row 6: RETURNING SHIPMENT COURIER COMPANY NAME...
+            // ===== Return Address block (Rows 11-13, 0-indexed) =====
+            // Row 11: COMPANY NAME (A) -> value in C(2), EMAIL (F) -> value in G(6)
+            // Row 12: CONTACT NAME (A) -> value in C(2), TELEPHONE (F) -> value in G(6),
+            // MOBILE (H) -> value in J(9)
+            // Row 13: RETURN ADDRESS (A) -> value in C(2)
+            setCellValue(sheet, 11, 2, getString(formData, "companyName")); // Col C
+            setCellValue(sheet, 11, 6, getString(formData, "email")); // Col G
+            setCellValue(sheet, 12, 2, getString(formData, "contactName")); // Col C
+            setCellValue(sheet, 12, 6, getString(formData, "telephone")); // Col G
+            setCellValue(sheet, 12, 9, getString(formData, "mobile")); // Col J
+            setCellValue(sheet, 13, 2, getString(formData, "returnAddress")); // Col C
 
-            // Row 8: RETURN ADDRESS DETAILS header
-            // Row 9: COMPANY NAME * | value | EMAIL ADDRESS * | value
-            // Row 10: CONTACT NAME * | value | TELEPHONE NUMBER * | value | MOBILE NUMBER *
-            // | value
-            // Row 11: RETURN ADDRESS | value (spans multiple columns)
+            // ===== Invoice Address block (Rows 15-17, 0-indexed) =====
+            setCellValue(sheet, 15, 2, getString(formData, "invoiceCompanyName")); // Col C
+            setCellValue(sheet, 15, 6, getString(formData, "invoiceEmail")); // Col G
+            setCellValue(sheet, 16, 2, getString(formData, "invoiceContactName")); // Col C
+            setCellValue(sheet, 16, 6, getString(formData, "invoiceTelephone")); // Col G
+            setCellValue(sheet, 16, 9, getString(formData, "invoiceMobile")); // Col J
+            setCellValue(sheet, 17, 2, getString(formData, "invoiceAddress")); // Col C
 
-            // Row 12: INVOICE ADDRESS DETAILS header
-            // Row 13: Same structure as return address
-            // Row 14: Same structure
-            // Row 15: INVOICE ADDRESS
+            // ===== Fault Details Items (Starting Row 21, 0-indexed) =====
+            // Row 20 has column headers, data starts at row 21
+            // Columns: A(0)=ITEM NO, B(1)=PRODUCT, C(2)=MODEL, D(3)=SERIAL, E(4)=RMA,
+            // F(5)=FAULT, G(6)=CODEPLUG, H(7)=FLASH, I(8)=STATUS, J(9)=INVOICE,
+            // K(10)=DATE CODE, L(11)=FM/UL, M(12)=ENCRYPTION, N(13)=FIRMWARE,
+            // O(14)=LOWER FIRMWARE, P(15)=REMARKS
+            int itemStartRow = 22; // Row 22 (0-indexed) = Excel row 23
 
-            // Row 19: FAULT DETAILS header
-            // Row 20: Column headers: ITEM NO | PRODUCT* | MODEL NO./PART NO.* | SERIAL
-            // NO.* | RMA NO. | FAULT DESC | CODEPLUG | FLASH CODE | STATUS | INVOICE NO |
-            // DATE CODE | FM/UL/ATEX | ENCRYPTION | FIRMWARE | LOWER FIRMWARE | REMARKS
-            // Row 21+: Data rows
-
-            // Fill header fields
-            // Mode of Transport - Row 4, Column D-E area
-            setCellValue(sheet, 6, 3, getString(formData, "modeOfTransport"));
-
-            // DPL LICENSE and DATE - Row 4, right side
-            setCellValue(sheet, 6, 14, getString(formData, "dplLicense"));
-            setCellValue(sheet, 7, 14, getString(formData, "date"));
-
-            // Shipping Method - Row 5
-            setCellValue(sheet, 6, 3, getString(formData, "shippingMethod"));
-
-            // Courier Company - Row 6
-            setCellValue(sheet, 7, 8, getString(formData, "courierCompanyName"));
-
-            // RETURN ADDRESS DETAILS (Row 9-11)
-            setCellValue(sheet, 11, 3, getString(formData, "companyName"));
-            setCellValue(sheet, 11, 7, getString(formData, "email"));
-            setCellValue(sheet, 12, 3, getString(formData, "contactName"));
-            setCellValue(sheet, 12, 7, getString(formData, "telephone"));
-            setCellValue(sheet, 12, 10, getString(formData, "mobile"));
-            setCellValue(sheet, 13, 3, getString(formData, "returnAddress"));
-
-            // INVOICE ADDRESS DETAILS (Row 13-15)
-            setCellValue(sheet, 13, 1, getString(formData, "invoiceCompanyName"));
-            setCellValue(sheet, 13, 4, getString(formData, "invoiceEmail"));
-            setCellValue(sheet, 14, 1, getString(formData, "invoiceContactName"));
-            setCellValue(sheet, 14, 4, getString(formData, "invoiceTelephone"));
-            setCellValue(sheet, 14, 7, getString(formData, "invoiceMobile"));
-            setCellValue(sheet, 15, 1, getString(formData, "invoiceAddress"));
-
-            // FAULT DETAILS - Items start from Row 21 (0-indexed = 20, after header row 20)
-            int itemStartRow = 21;
-
-            // If there are more than 1 item, shift existing rows down to make room
-            // Row 22 onwards contains PARTIAL SHIPMENT, Terms & Conditions, etc.
+            // If there are more than 1 item, shift rows down to make room
+            // The template has 1 item row by default. Additional items need space.
+            // Row 23 onwards has PARTIAL SHIPMENT, Terms & Conditions, etc.
             int additionalItemsCount = items.size() - 1;
             if (additionalItemsCount > 0) {
-                // Shift rows starting from row 22 (after first item row) down by the number of
-                // additional items
-                int shiftStartRow = itemStartRow + 1; // Row 22
+                int shiftStartRow = itemStartRow + 1; // Start shifting from row after first item
                 int lastRowNum = sheet.getLastRowNum();
-                sheet.shiftRows(shiftStartRow, lastRowNum, additionalItemsCount);
-                System.out.println(
-                        "Shifted rows " + shiftStartRow + " to " + lastRowNum + " down by " + additionalItemsCount);
+                if (lastRowNum >= shiftStartRow) {
+                    sheet.shiftRows(shiftStartRow, lastRowNum, additionalItemsCount);
+                    System.out.println(
+                            "Shifted rows " + shiftStartRow + " to " + lastRowNum + " down by " + additionalItemsCount);
+                }
             }
 
-            // Get the template row's height for consistent sizing
-            Row templateRow = sheet.getRow(itemStartRow);
-            short templateRowHeight = templateRow != null ? templateRow.getHeight() : 400; // Default 20pt
+            System.out.println("Writing " + items.size() + " items starting at row " + itemStartRow);
+
+            // Set a consistent shorter row height for all item rows
+            // 300 = ~15pt, 400 = ~20pt, 500 = ~25pt (Excel uses 1/20th of a point)
+            short itemRowHeight = 300;
+            System.out.println("Using item row height: " + itemRowHeight);
 
             for (int i = 0; i < items.size(); i++) {
                 Map<String, Object> item = items.get(i);
                 int rowNum = itemStartRow + i;
 
+                // Debug: print all item values
+                System.out.println("=== ITEM " + (i + 1) + " DEBUG ===");
+                System.out.println("  Keys in item map: " + item.keySet());
+                for (String key : item.keySet()) {
+                    System.out.println("  " + key + " = '" + item.get(key) + "'");
+                }
+                System.out.println("Writing to row " + rowNum);
+
                 // Get or create row
                 Row row = sheet.getRow(rowNum);
                 if (row == null) {
                     row = sheet.createRow(rowNum);
+                    System.out.println("Created new row " + rowNum);
                 }
 
                 // Set consistent row height for all item rows
-                row.setHeight(templateRowHeight);
+                row.setHeight(itemRowHeight);
 
-                // Columns based on screenshot header row:
-                // A=ITEM NO, B=PRODUCT, C=MODEL NO./PART NO., D=SERIAL NO., E=RMA NO.,
-                // F=FAULT DESCRIPTION, G=CODEPLUG, H=FLASH CODE, I=STATUS, J=INVOICE NO,
-                // K=DATE CODE, L=FM/UL/ATEX, M=ENCRYPTION, N=FIRMWARE, O=LOWER FIRMWARE,
-                // P=REMARKS
+                // Get cell style from the first item row template for consistent font
+                Row firstItemRow = sheet.getRow(itemStartRow);
+                CellStyle templateStyle = null;
+                if (firstItemRow != null && firstItemRow.getCell(1) != null) {
+                    templateStyle = firstItemRow.getCell(1).getCellStyle();
+                }
 
-                setCellValue(sheet, rowNum, 0, String.valueOf(i + 1)); // Col A: ITEM NO
-                setCellValue(sheet, rowNum, 1, getString(item, "product")); // Col B: PRODUCT
-                setCellValue(sheet, rowNum, 2, getString(item, "model")); // Col C: MODEL NO./PART NO.
-                setCellValue(sheet, rowNum, 3, getString(item, "serialNo")); // Col D: SERIAL NO.
-                setCellValue(sheet, rowNum, 4, getString(item, "rmaNo")); // Col E: RMA NO.
-                setCellValue(sheet, rowNum, 5, getString(item, "faultDescription")); // Col F: FAULT DESCRIPTION
-                setCellValue(sheet, rowNum, 6, getString(item, "codeplug")); // Col G: CODEPLUG
-                setCellValue(sheet, rowNum, 7, getString(item, "flashCode")); // Col H: FLASH CODE
-                setCellValue(sheet, rowNum, 8, getString(item, "repairStatus")); // Col I: STATUS
-                setCellValue(sheet, rowNum, 9, getString(item, "invoiceNo")); // Col J: INVOICE NO
-                setCellValue(sheet, rowNum, 10, getString(item, "dateCode")); // Col K: DATE CODE
-                setCellValue(sheet, rowNum, 11, getString(item, "fmUlatex")); // Col L: FM/UL/ATEX
-                setCellValue(sheet, rowNum, 12, getString(item, "encryption")); // Col M: ENCRYPTION
-                setCellValue(sheet, rowNum, 13, getString(item, "firmwareVersion")); // Col N: FIRMWARE
-                setCellValue(sheet, rowNum, 14, getString(item, "lowerFirmwareVersion")); // Col O: LOWER FIRMWARE
-                setCellValue(sheet, rowNum, 15, getString(item, "remarks")); // Col P: REMARKS
-
-                System.out.println("Filled item row " + rowNum + ": " + getString(item, "product") + " / "
-                        + getString(item, "serialNo"));
+                // Write each cell value with template style
+                setCellValueWithStyle(row, 0, String.valueOf(i + 1), templateStyle); // Col A: ITEM NO.
+                setCellValueWithStyle(row, 1, getString(item, "product"), templateStyle); // Col B: PRODUCT *
+                setCellValueWithStyle(row, 2, getString(item, "model"), templateStyle); // Col C: MODEL NO./PART NO. *
+                setCellValueWithStyle(row, 3, getString(item, "serialNo"), templateStyle); // Col D: SERIAL NO. *
+                setCellValueWithStyle(row, 4, getString(item, "rmaNo"), templateStyle); // Col E: RMA NO.
+                setCellValueWithStyle(row, 5, getString(item, "faultDescription"), templateStyle); // Col F: FAULT
+                                                                                                   // DESCRIPTION *
+                setCellValueWithStyle(row, 6, getString(item, "codeplug"), templateStyle); // Col G: CODEPLUG
+                                                                                           // PROGRAMMING
+                setCellValueWithStyle(row, 7, getString(item, "flashCode"), templateStyle); // Col H: FLASH CODE
+                setCellValueWithStyle(row, 8, getString(item, "repairStatus"), templateStyle); // Col I: STATUS
+                setCellValueWithStyle(row, 9, getString(item, "invoiceNo"), templateStyle); // Col J: INVOICE NO.
+                setCellValueWithStyle(row, 10, getString(item, "dateCode"), templateStyle); // Col K: DATE CODE
+                setCellValueWithStyle(row, 11, getString(item, "fmUlatex"), templateStyle); // Col L: FM/UL/ATEX
+                setCellValueWithStyle(row, 12, getString(item, "encryption"), templateStyle); // Col M: ENCRYPTION
+                setCellValueWithStyle(row, 13, getString(item, "firmwareVersion"), templateStyle); // Col N: FIRMWARE
+                                                                                                   // VERSION
+                setCellValueWithStyle(row, 14, getString(item, "lowerFirmwareVersion"), templateStyle); // Col O: LOWER
+                                                                                                        // FIRMWARE
+                setCellValueWithStyle(row, 15, getString(item, "remarks"), templateStyle); // Col P: REMARKS
             }
+
+            // ===== Signature =====
+            // Original signature row is 36 (0-indexed), but shifts down when additional
+            // items are added
+            int signatureRow = 35 + additionalItemsCount;
+            setCellValue(sheet, signatureRow, 3, getString(formData, "signature")); // Col D
 
             workbook.setForceFormulaRecalculation(true);
             workbook.write(outputStream);
@@ -190,6 +183,27 @@ public class RmaExcelExportService {
         }
 
         cell.setCellValue(value);
+    }
+
+    // Direct write to row - always creates/updates cell even if value is empty
+    private void setCellValueDirect(Row row, int colNum, String value) {
+        Cell cell = row.getCell(colNum);
+        if (cell == null) {
+            cell = row.createCell(colNum, CellType.STRING);
+        }
+        cell.setCellValue(value != null ? value : "");
+    }
+
+    // Write cell value with template style for consistent font formatting
+    private void setCellValueWithStyle(Row row, int colNum, String value, CellStyle style) {
+        Cell cell = row.getCell(colNum);
+        if (cell == null) {
+            cell = row.createCell(colNum, CellType.STRING);
+        }
+        cell.setCellValue(value != null ? value : "");
+        if (style != null) {
+            cell.setCellStyle(style);
+        }
     }
 
     private String getString(Map<String, Object> map, String key) {

@@ -51,6 +51,7 @@ import RepairedPage from "./Components/Repair/RepairedPage.js";
 import AssignedPage from "./Components/Repair/AssignedPage.js";
 import CantBeRepairedPage from "./Components/Repair/CantBeRepairedPage.js";
 import AuditTrail from "./Components/RMA/AuditTrail.js";
+import DepotDispatchPage from "./Components/RMA/DepotDispatchPage.js";
 
 // checking the branch changes
 
@@ -165,6 +166,7 @@ function App() {
             <Route path="/assigned" element={<AssignedPage />} />
             <Route path="/repaired" element={<RepairedPage />} />
             <Route path="/cant-be-repaired" element={<CantBeRepairedPage />} />
+            <Route path="/depot-dispatch" element={<DepotDispatchPage />} />
             <Route path="/audit-trail" element={<AuditTrail />} />
           </Route>
         </Routes>

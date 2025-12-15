@@ -19,6 +19,10 @@ public class RmaItemRequest {
     private String encryption;
     private String firmwareVersion;
     private String lowerFirmwareVersion;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("partialshipment")
+    private String partialShipment;
+
     private String remarks;
 
     // Constructors
@@ -149,6 +153,14 @@ public class RmaItemRequest {
 
     public void setLowerFirmwareVersion(String lowerFirmwareVersion) {
         this.lowerFirmwareVersion = lowerFirmwareVersion;
+    }
+
+    public String getPartialShipment() {
+        return partialShipment;
+    }
+
+    public void setPartialShipment(String partialShipment) {
+        this.partialShipment = partialShipment;
     }
 
     public String getRemarks() {

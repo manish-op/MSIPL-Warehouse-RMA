@@ -30,28 +30,53 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     // ============ WORKFLOW QUERIES ============
 
     // Find unassigned items (no assignee yet)
-    @Query("SELECT r FROM RmaItemEntity r WHERE r.assignedToEmail IS NULL OR r.assignedToEmail = ''")
+    // Local: all unassigned
+    // Depot: only those received at depot (AT_DEPOT_UNREPAIRED)
+    @Query("""
+            SELECT r FROM RmaItemEntity r
+            WHERE (r.assignedToEmail IS NULL OR r.assignedToEmail = '')
+                AND (
+                    r.repairType IS NULL
+                    OR r.repairType <> 'DEPOT'
+                    OR r.depotStage = 'AT_DEPOT_UNREPAIRED'
+                )
+            """)
     List<RmaItemEntity> findUnassignedItems();
 
-    // Find assigned items (has assignee, not yet repaired or cant be repaired)
+    // Find assigned items (has assignee, not yet repaired or cant be repaired or
+    // BER)
     @Query("SELECT r FROM RmaItemEntity r WHERE r.assignedToEmail IS NOT NULL AND r.assignedToEmail != '' " +
-            "AND (r.repairStatus IS NULL OR (LOWER(r.repairStatus) != 'repaired' AND LOWER(r.repairStatus) != 'cant_be_repaired'))")
+            "AND (r.repairStatus IS NULL OR (LOWER(r.repairStatus) != 'repaired' AND LOWER(r.repairStatus) != 'cant_be_repaired' AND LOWER(r.repairStatus) != 'ber'))")
     List<RmaItemEntity> findAssignedItems();
 
     // Find repaired items
     @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'repaired'")
     List<RmaItemEntity> findRepairedItems();
 
-    // Find items that can't be repaired
-    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'cant_be_repaired'")
+    // Find items that can't be repaired (includes CANT_BE_REPAIRED and BER)
+    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'cant_be_repaired' OR LOWER(r.repairStatus) = 'ber'")
     List<RmaItemEntity> findCantBeRepairedItems();
 
     // Find items assigned to a specific user
     @Query("SELECT r FROM RmaItemEntity r WHERE r.assignedToEmail = :email")
     List<RmaItemEntity> findByAssignedToEmail(String email);
 
+    // Find items by their item-level RMA number (legacy)
+    List<RmaItemEntity> findByRmaNo(String rmaNo);
+
     // Find unassigned items by RMA number (for bulk assignment)
     // Note: Uses requestNumber (auto-generated) since rmaNo is assigned later
     @Query("SELECT r FROM RmaItemEntity r WHERE r.rmaRequest.requestNumber = :rmaNo AND (r.assignedToEmail IS NULL OR r.assignedToEmail = '')")
     List<RmaItemEntity> findUnassignedByRmaNo(String rmaNo);
+
+    // -----------New Methods for Depot Dispatch------------------
+    // Depot: items waiting for dispatch to bangalore
+    List<RmaItemEntity> findByRepairTypeAndDepotStage(String repairType, String depotStage);
+
+    // Depot: items in specific stages (e.g., In Transit, Received, etc.)
+    List<RmaItemEntity> findByRepairTypeAndDepotStageIn(String repairType, List<String> depotStages);
+
+    // Explicit
+    List<RmaItemEntity> findAllById(Iterable<Long> ids);
+
 }

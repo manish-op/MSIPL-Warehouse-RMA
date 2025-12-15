@@ -14,6 +14,11 @@ import {
     Badge,
     Empty,
     Divider,
+    Table,
+    Form,
+    Tooltip,
+    Select,
+    DatePicker,
 } from "antd";
 import {
     UserAddOutlined,
@@ -22,12 +27,22 @@ import {
     AppstoreOutlined,
     ReloadOutlined,
     EditOutlined,
+    FileTextOutlined,
+    PrinterOutlined,
+    EyeOutlined,
+    DownloadOutlined,
+    FilePdfOutlined,
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
 import "./UnrepairedPage.css";
 
 const { Title, Text, Paragraph } = Typography;
+
+const PREDEFINED_TRANSPORTERS = {
+    "Blue Dart Express": "27AAACB0446L1ZS",
+    "Safe Express": "27AAECS4363H2Z7"
+};
 
 export default function UnrepairedPage() {
     const [items, setItems] = useState([]);
@@ -45,6 +60,137 @@ export default function UnrepairedPage() {
     const [editRmaModalVisible, setEditRmaModalVisible] = useState(false);
     const [newRmaNo, setNewRmaNo] = useState("");
     const [updatingRma, setUpdatingRma] = useState(false);
+    // Gatepass state
+    const [generatingGatepass, setGeneratingGatepass] = useState(null);
+    // FRU Sticker state
+    const [stickerModalVisible, setStickerModalVisible] = useState(false);
+    const [stickerItems, setStickerItems] = useState([]);
+    // Gatepass Preview state
+    const [gatepassPreviewVisible, setGatepassPreviewVisible] = useState(false);
+    const [gatepassItems, setGatepassItems] = useState([]);
+    const [gatepassRmaNo, setGatepassRmaNo] = useState("");
+    
+    // DC Modal State
+    const [dcModalVisble, setDcModalVisible] = useState(false);
+    const [dcForm] = Form.useForm();
+    const [dcSubmitting, setDcSubmitting] = useState(false);
+    const [selectedDcRmaNo, setSelectedDcRmaNo] = useState("");
+    const [dcTableData, setDcTableData] = useState([]);
+
+
+    // Transporter State
+    const [transporters, setTransporters] = useState([]);
+    const [isNewTransporter, setIsNewTransporter] = useState(false);
+
+    const fetchTransporters = async () => {
+        try {
+            const response = await fetch('/api/transporters', {
+                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setTransporters(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch transporters", error);
+        }
+    };
+
+    const openDcModal = (items, rmaNo) => {
+        setSelectedDcRmaNo(rmaNo);
+        fetchTransporters(); // Load transporters when modal opens
+        
+        const mappedItems = items.map((item, index) => ({
+            ...item,
+            slNo: index + 1,
+            // rate: 0 // user must input
+        }));
+        
+        setDcTableData(mappedItems);
+
+        // Pre-fill form
+        dcForm.setFieldsValue({
+            consigneeName: items[0]?.companyName || "",
+            consigneeAddress: "", 
+            items: mappedItems,
+            boxes: "1",
+            modeOfShipment: "ROAD",
+            transporterName: [], // Reset transporter fields
+            transporterId: ""   
+        });
+        setDcModalVisible(true);
+    };
+
+    const handleGenerateDC = async (values) => {
+        setDcSubmitting(true);
+        try {
+            // Save new transporter if needed
+            if (isNewTransporter && values.transporterName && values.transporterId) {
+                // If it's an array (from mode="tags"), get the last one or the string
+                const name = Array.isArray(values.transporterName) ? values.transporterName[values.transporterName.length - 1] : values.transporterName;
+                
+                const newTransporter = {
+                    name: name,
+                    transporterId: values.transporterId
+                };
+
+                // Save to backend
+                await fetch('/api/transporters', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(newTransporter)
+                });
+                // Refresh list
+                await fetchTransporters();
+                
+                 values.transporterName = name;
+            } else if (Array.isArray(values.transporterName)) {
+                 values.transporterName = values.transporterName[0];
+            }
+
+
+            // Merge the form values (which might only have 'rate') with the full item details
+            // We use dcTableData as the source of truth for the items list structure
+            const currentItems = dcTableData;
+            
+            // formatting items to ensure all fields are present
+            const formattedItems = currentItems.map((item, index) => ({
+                ...item,
+                // Ensure rate is taken from the form submission values if present, otherwise fallback to item.rate
+                rate: values.items && values.items[index] && values.items[index].rate ? values.items[index].rate : item.rate,
+                // Explicitly ensure these fields are passed
+                product: item.product,
+                model: item.model,
+                serialNo: item.serialNo,
+                slNo: item.slNo,
+                itemRmaNo: item.itemRmaNo
+            }));
+
+            await RmaApi.generateDeliveryChallan({
+                rmaNo: selectedDcRmaNo,
+                ...values,
+                items: formattedItems
+            });
+            message.success("Delivery Challan generated successfully");
+            setDcModalVisible(false);
+        } catch (error) {
+            console.error("DC Generation Error:", error);
+            message.error("Failed to generate Delivery Challan");
+        } finally {
+            setDcSubmitting(false);
+        }
+    };
+
+    //Assign Modal State
+    const [assignModalState, setAssignModalState] = useState(false);
+    //Update or Edit Modal State
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [updating, setUpdating] = useState(false);
+    const [form] = Form.useForm();
 
     const loadItems = async () => {
         setLoading(true);
@@ -146,12 +292,17 @@ export default function UnrepairedPage() {
             return;
         }
 
+        // Save scroll position before update
+        const scrollY = window.scrollY;
+
         setUpdatingRma(true);
         const result = await RmaApi.updateItemRmaNumber(selectedItem.id, newRmaNo);
         if (result.success) {
             message.success("RMA Number updated successfully!");
             setEditRmaModalVisible(false);
-            loadItems();
+            await loadItems();
+            // Restore scroll position after data reloads
+            setTimeout(() => window.scrollTo(0, scrollY), 50);
         } else {
             message.error(result.error || "Failed to update RMA Number");
         }
@@ -163,6 +314,194 @@ export default function UnrepairedPage() {
         // Item has custom RMA if rmaNo field is directly set on the item
         // This checks the item-level rmaNo, not the parent request's requestNumber
         return item.itemRmaNo && item.itemRmaNo.trim() !== "";
+    };
+
+    // Generate Inward Gatepass PDF
+    const handleGenerateGatepass = async (requestNumber) => {
+        if (!requestNumber || requestNumber === "Unknown") {
+            message.error("Cannot generate Gatepass: Invalid or Missing RMA Number. Please update the items with a valid RMA Number.");
+            return;
+        }
+        setGeneratingGatepass(requestNumber);
+        const result = await RmaApi.generateInwardGatepass(requestNumber);
+        if (result.success && result.blob) {
+            // Create download link
+            const url = window.URL.createObjectURL(result.blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `InwardGatepass_${requestNumber}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            message.success('Gatepass generated and downloaded!');
+        } else {
+            message.error(result.error || 'Failed to generate gatepass');
+        }
+        setGeneratingGatepass(null);
+    };
+
+    // Open Gatepass Preview Modal
+    const openGatepassPreview = (rmaItems, rmaNo) => {
+        setGatepassItems(rmaItems);
+        setGatepassRmaNo(rmaNo);
+        setGatepassPreviewVisible(true);
+    };
+
+    // Open FRU Sticker Modal for an RMA request
+    const openStickerModal = (rmaItems, rmaNo) => {
+        // Use itemRmaNo (manually updated) if available, otherwise fall back to the request number
+        const itemsWithRma = rmaItems.map(item => ({
+            ...item,
+            displayRmaNo: item.itemRmaNo || rmaNo // Prioritize manually assigned RMA number
+        }));
+        setStickerItems(itemsWithRma);
+        setStickerModalVisible(true);
+    };
+
+    // Print stickers function
+    const handlePrintStickers = () => {
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            message.error('Please allow popups to print stickers');
+            return;
+        }
+
+        const stickersHtml = stickerItems.map((item, index) => `
+            <div class="sticker">
+                <div class="sticker-header">
+                    <img src="/companyLogo.png" alt="Company Logo" class="company-logo" onerror="this.style.display='none'" />
+                    <span class="company-name">Motorola Solutions India Pvt. Ltd.</span>
+                </div>
+                <div class="sticker-divider"></div>
+                <div class="sticker-content">
+                    <div class="sticker-row">
+                        <span class="label">RMA No:</span>
+                        <span class="value">${item.displayRmaNo || 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="label">Customer:</span>
+                        <span class="value">${item.companyName || 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="label">Received:</span>
+                        <span class="value">${item.receivedDate ? new Date(item.receivedDate).toLocaleDateString('en-IN') : 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="label">Product:</span>
+                        <span class="value">${item.product || 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="label">Serial No:</span>
+                        <span class="value">${item.serialNo || 'N/A'}</span>
+                    </div>
+                    <div class="sticker-row fault-row">
+                        <span class="label">Fault:</span>
+                        <span class="value fault-text">${item.faultDescription || 'No description'}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>FRU Stickers - ${stickerItems[0]?.displayRmaNo || 'RMA'}</title>
+                <style>
+                    * {
+                        box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        padding: 10mm;
+                        background: #f5f5f5;
+                    }
+                    .stickers-container {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 10mm;
+                    }
+                    .sticker {
+                        width: 85mm;
+                        min-height: 55mm;
+                        border: 1.5px solid #333;
+                        border-radius: 4px;
+                        background: #fff;
+                        padding: 3mm;
+                        page-break-inside: avoid;
+                    }
+                    .sticker-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 3mm;
+                        padding-bottom: 2mm;
+                    }
+                    .company-logo {
+                        width: 8mm;
+                        height: 8mm;
+                        object-fit: contain;
+                    }
+                    .company-name {
+                        font-weight: 600;
+                        font-size: 9pt;
+                        color: #333;
+                    }
+                    .sticker-divider {
+                        height: 1px;
+                        background: #333;
+                        margin-bottom: 2mm;
+                    }
+                    .sticker-content {
+                        font-size: 8pt;
+                    }
+                    .sticker-row {
+                        display: flex;
+                        margin-bottom: 1.5mm;
+                    }
+                    .label {
+                        font-weight: 600;
+                        width: 20mm;
+                        color: #555;
+                        flex-shrink: 0;
+                    }
+                    .value {
+                        color: #333;
+                        word-break: break-word;
+                    }
+                    .fault-row {
+                        margin-top: 1mm;
+                    }
+                    .fault-text {
+                        font-size: 7.5pt;
+                        line-height: 1.3;
+                    }
+                    @media print {
+                        body {
+                            background: #fff;
+                            padding: 5mm;
+                        }
+                        .stickers-container {
+                            gap: 5mm;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="stickers-container">
+                    ${stickersHtml}
+                </div>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
     };
 
     return (
@@ -245,16 +584,43 @@ export default function UnrepairedPage() {
                                                     style={{ backgroundColor: "#1890ff" }}
                                                     overflowCount={99}
                                                 />
+                                                {/* Display Repair Type if available */}
+                                                {rmaItems[0]?.repairType && (
+                                                    <Tag color={rmaItems[0].repairType === "Local Repair" ? "purple" : "orange"} style={{ fontSize: 13, marginLeft: 8 }}>
+                                                        {rmaItems[0].repairType}
+                                                    </Tag>
+                                                )}
                                             </div>
-                                            <Button
-                                                type="primary"
-                                                icon={<UserAddOutlined />}
-                                                onClick={() => openBulkAssignModal(rmaNo, rmaItems.length)}
-                                                size="small"
-                                                style={{ background: "#52c41a", borderColor: "#52c41a" }}
-                                            >
-                                                Assign All ({rmaItems.length})
-                                            </Button>
+                                            <Space>
+                                                {rmaItems[0]?.repairType !== "Depot Repair" && (
+                                                    <>
+                                                        <Button
+                                                            icon={<FileTextOutlined />}
+                                                            onClick={() => openGatepassPreview(rmaItems, rmaNo)}
+                                                            size="small"
+                                                        >
+                                                            Preview Gatepass
+                                                        </Button>
+                                                        <Button
+                                                            icon={<PrinterOutlined />}
+                                                            onClick={() => openStickerModal(rmaItems, rmaNo)}
+                                                            size="small"
+                                                            style={{ background: "#722ed1", borderColor: "#722ed1", color: "#fff" }}
+                                                        >
+                                                            Print Stickers ({rmaItems.length})
+                                                        </Button>
+                                                    </>
+                                                )}
+                                                    <Button
+                                                        type="primary"
+                                                        icon={<UserAddOutlined />}
+                                                        onClick={() => openBulkAssignModal(rmaNo, rmaItems.length)}
+                                                        size="small"
+                                                        style={{ background: "#52c41a", borderColor: "#52c41a" }}
+                                                    >
+                                                        Assign All ({rmaItems.length})
+                                                    </Button>
+                                            </Space>
                                         </div>
                                     }
                                 >
@@ -485,7 +851,393 @@ export default function UnrepairedPage() {
                         style={{ marginTop: 8 }}
                     />
                 </Modal>
-            </div>
-        </RmaLayout>
+
+                {/* FRU Sticker Preview Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <PrinterOutlined style={{ color: "#722ed1" }} />
+                            <span>FRU Stickers Preview</span>
+                        </div>
+                    }
+                    open={stickerModalVisible}
+                    onCancel={() => setStickerModalVisible(false)}
+                    width={800}
+                    footer={[
+                        <Button key="cancel" onClick={() => setStickerModalVisible(false)}>
+                            Close
+                        </Button>,
+                        <Button
+                            key="print"
+                            type="primary"
+                            icon={<PrinterOutlined />}
+                            onClick={handlePrintStickers}
+                            style={{ background: "#722ed1", borderColor: "#722ed1" }}
+                        >
+                            Print All Stickers ({stickerItems.length})
+                        </Button>
+                    ]}
+                    className="sticker-modal"
+                >
+                    <div className="sticker-preview-container">
+                        <Row gutter={[16, 16]}>
+                            {stickerItems.map((item, index) => (
+                                <Col xs={24} md={12} key={item.id || index}>
+                                    <div className="sticker-preview">
+                                        <div className="sticker-preview-header">
+                                            <img
+                                                src="/companyLogo.png"
+                                                alt="Logo"
+                                                className="sticker-preview-logo"
+                                                onError={(e) => { e.target.style.display = 'none'; }}
+                                            />
+                                            <span className="sticker-preview-company">
+                                                Motorola Solutions India Pvt. Ltd.
+                                            </span>
+                                        </div>
+                                        <Divider style={{ margin: "8px 0" }} />
+                                        <div className="sticker-preview-content">
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">RMA No:</Text>
+                                                <Text strong>{item.displayRmaNo || 'N/A'}</Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Customer:</Text>
+                                                <Text>{item.companyName || 'N/A'}</Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Received:</Text>
+                                                <Text>
+                                                    {item.receivedDate
+                                                        ? new Date(item.receivedDate).toLocaleDateString('en-IN')
+                                                        : 'N/A'}
+                                                </Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Product:</Text>
+                                                <Text>{item.product || 'N/A'}</Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Serial No:</Text>
+                                                <Text code>{item.serialNo || 'N/A'}</Text>
+                                            </div>
+                                            <div className="sticker-preview-row">
+                                                <Text type="secondary" className="sticker-label">Fault:</Text>
+                                                <Paragraph
+                                                    ellipsis={{ rows: 2 }}
+                                                    style={{ margin: 0, fontSize: 12 }}
+                                                >
+                                                    {item.faultDescription || 'No description'}
+                                                </Paragraph>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Col>
+                            ))}
+                        </Row>
+                    </div>
+                </Modal>
+
+                {/* Gatepass Preview Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <EyeOutlined style={{ color: "#1890ff" }} />
+                            <span>Gatepass Preview - {gatepassRmaNo}</span>
+                        </div>
+                    }
+                    open={gatepassPreviewVisible}
+                    onCancel={() => setGatepassPreviewVisible(false)}
+                    width={900}
+                    footer={[
+                        <Button key="cancel" onClick={() => setGatepassPreviewVisible(false)}>
+                            Close
+                        </Button>,
+                        <Button
+                            key="download"
+                            type="primary"
+                            icon={<DownloadOutlined />}
+                            onClick={() => {
+                                handleGenerateGatepass(gatepassRmaNo);
+                                setGatepassPreviewVisible(false);
+                            }}
+                            loading={generatingGatepass === gatepassRmaNo}
+                        >
+                            Download PDF
+                        </Button>
+                    ]}
+                    className="gatepass-modal"
+                >
+                    <div className="gatepass-preview-container">
+                        {/* Header Info */}
+                        <Card size="small" className="gatepass-info-card">
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Text type="secondary">RMA Request Number</Text>
+                                    <div>
+                                        <Tag color="blue" style={{ fontSize: 14, padding: "4px 12px" }}>
+                                            {gatepassRmaNo}
+                                        </Tag>
+                                    </div>
+                                </Col>
+                                <Col span={8}>
+                                    <Text type="secondary">Customer</Text>
+                                    <div>
+                                        <Text strong>{gatepassItems[0]?.companyName || 'N/A'}</Text>
+                                    </div>
+                                </Col>
+                                <Col span={8}>
+                                    <Text type="secondary">Total Items</Text>
+                                    <div>
+                                        <Badge
+                                            count={gatepassItems.length}
+                                            style={{ backgroundColor: "#52c41a" }}
+                                            showZero
+                                        />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Card>
+
+                        {/* Items Table */}
+                        <Table
+                            dataSource={gatepassItems.map((item, index) => ({ ...item, key: item.id || index, slNo: index + 1 }))}
+                            columns={[
+                                {
+                                    title: 'Sl.No',
+                                    dataIndex: 'slNo',
+                                    key: 'slNo',
+                                    width: 60,
+                                    align: 'center',
+                                },
+                                {
+                                    title: 'Product',
+                                    dataIndex: 'product',
+                                    key: 'product',
+                                    render: (text) => text || 'N/A',
+                                },
+                                {
+                                    title: 'Model',
+                                    dataIndex: 'model',
+                                    key: 'model',
+                                    render: (text) => text || 'N/A',
+                                },
+                                {
+                                    title: 'Serial No',
+                                    dataIndex: 'serialNo',
+                                    key: 'serialNo',
+                                    render: (text) => <Text code>{text || 'N/A'}</Text>,
+                                },
+                                {
+                                    title: 'Fault Description',
+                                    dataIndex: 'faultDescription',
+                                    key: 'faultDescription',
+                                    ellipsis: true,
+                                    render: (text) => text || 'No description',
+                                },
+                                {
+                                    title: 'RMA No',
+                                    dataIndex: 'itemRmaNo',
+                                    key: 'itemRmaNo',
+                                    render: (text) => text ? <Tag color="green">{text}</Tag> : <Text type="secondary">Not assigned</Text>,
+                                },
+                            ]}
+                            pagination={false}
+                            size="small"
+                            bordered
+                            style={{ marginTop: 16 }}
+                        />
+                    </div>
+                </Modal>
+
+                {/* Delivery Challan Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <FilePdfOutlined style={{ color: "#faad14" }} />
+                            <span>Generate Delivery Challan</span>
+                        </div>
+                    }
+                    open={dcModalVisble}
+                    onCancel={() => setDcModalVisible(false)}
+                    width={1000}
+                    footer={[
+                        <Button key="cancel" onClick={() => setDcModalVisible(false)}>
+                            Cancel
+                        </Button>,
+                        <Button
+                            key="generate"
+                            type="primary"
+                            icon={<FilePdfOutlined />}
+                            onClick={() => dcForm.submit()}
+                            loading={dcSubmitting}
+                            style={{ background: "#faad14", borderColor: "#faad14" }}
+                        >
+                            Generate DC
+                        </Button>
+                    ]}
+                >
+                     <Form
+                        form={dcForm}
+                        layout="vertical"
+                        onFinish={handleGenerateDC}
+                        initialValues={{
+                            modeOfShipment: "ROAD",
+                            boxes: "1"
+                        }}
+                    >
+                        <Row gutter={16}>
+                             {/* Consignor (Fixed for now, or display only) */}
+                            <Col span={12}>
+                                <Card title="Consignor Details" size="small" style={{background: '#f9f9f9'}}>
+                                    <p><strong>Motorola Solutions India</strong></p>
+                                    <p>A, Building 8, DLF</p>
+                                    <p>Gurgaon, Haryana, India</p>
+                                </Card>
+                            </Col>
+                            {/* Consignee */}
+                            <Col span={12}>
+                                <Card title="Consignee Details" size="small">
+                                    <Form.Item name="consigneeName" label="Name">
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item name="consigneeAddress" label="Address">
+                                        <Input.TextArea rows={2} />
+                                    </Form.Item>
+                                    <Form.Item name="gstIn" label="GST IN">
+                                        <Input placeholder="Enter GST IN" />
+                                    </Form.Item>
+                                </Card>
+                            </Col>
+                        </Row>
+
+                        <Divider orientation="left">Item Details</Divider>
+                        
+                        <Table
+                            dataSource={dcTableData}
+                            pagination={false}
+                            size="small"
+                            columns={[
+                                { title: 'Sr No', dataIndex: 'slNo', key: 'slNo', width: 60 },
+                                { title: 'Material Code', dataIndex: 'serialNo', key: 'serialNo' },
+                                { 
+                                    title: 'Description', 
+                                    key: 'product', 
+                                    render: (_, record) => `${record.product || ''}${record.model ? ' - ' + record.model : ''}` 
+                                },
+                                { title: 'Qty', dataIndex: 'qty', key: 'qty', render: () => 1 }, // Always 1 per item row
+                                {
+                                    title: 'Rate (Value)',
+                                    key: 'rate',
+                                    render: (_, record, index) => (
+                                        <Form.Item
+                                            name={['items', index, 'rate']}
+                                            rules={[{ required: true, message: 'Required' }]}
+                                            style={{ margin: 0 }}
+                                        >
+                                            <Input prefix="₹" type="number" placeholder="Value" />
+                                        </Form.Item>
+                                    )
+                                }
+                            ]}
+                        />
+
+                        <Divider orientation="left">Shipment Details</Divider>
+                        <Row gutter={16}>
+                            <Col span={6}>
+                                <Form.Item name="boxes" label="No of Boxes" rules={[{ required: true }]}>
+                                    <Input type="number" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="dimensions" label="Dimensions" rules={[{ required: true }]}>
+                                    <Input placeholder="e.g. 10x10x10" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="weight" label="Weight (kg)" rules={[{ required: true }]}>
+                                    <Input placeholder="e.g. 5kg" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="modeOfShipment" label="Mode of Shipment">
+                                    <Select>
+                                        <Select.Option value="ROAD">ROAD</Select.Option>
+                                        <Select.Option value="AIR">AIR</Select.Option>
+                                        <Select.Option value="HAND_CARRY">HAND CARRY</Select.Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <Row gutter={16}>
+                             <Col span={12}>
+                                <Form.Item name="transporterName" label="Transporter Name">
+                                    <Select
+                                        showSearch
+                                        placeholder="Select or Type New Transporter"
+                                        optionFilterProp="children"
+                                        onSelect={(value) => {
+                                             const t = transporters.find(t => t.name === value);
+                                             if(t) {
+                                                 dcForm.setFieldsValue({ transporterId: t.transporterId });
+                                                 setIsNewTransporter(false);
+                                             }
+                                        }}
+                                        onSearch={(val) => {
+                                            // Ensure we can type new values. 
+                                            // Logic: if val not in transporters, we set a flag
+                                            const exists = transporters.some(t => t.name.toLowerCase() === val.toLowerCase());
+                                            setIsNewTransporter(!exists && val.length > 0);
+                                        }}
+                                        onChange={(val) => {
+                                             // If user clears or types custom
+                                             // val might be array in tags mode, take last
+                                             const selectedValue = Array.isArray(val) ? val[val.length - 1] : val;
+                                             
+                                             const exists = transporters.find(t => t.name === selectedValue);
+                                             
+                                             if(!exists) {
+                                                 setIsNewTransporter(true);
+                                                 // Check predefined
+                                                 if (PREDEFINED_TRANSPORTERS[selectedValue]) {
+                                                     dcForm.setFieldsValue({ transporterId: PREDEFINED_TRANSPORTERS[selectedValue] });
+                                                 } else {
+                                                     dcForm.setFieldsValue({ transporterId: '' });
+                                                 }
+                                             } else {
+                                                 setIsNewTransporter(false);
+                                                 dcForm.setFieldsValue({ transporterId: exists.transporterId });
+                                             }
+                                        }}
+                                        mode="tags" // Allows creating new items
+                                        notFoundContent="Type to add new transporter"
+                                    >
+                                        {/* Combine fetched transporters with predefined ones, removing duplicates */}
+                                        {[
+                                            ...transporters,
+                                            ...Object.keys(PREDEFINED_TRANSPORTERS)
+                                                .filter(name => !transporters.some(t => t.name === name))
+                                                .map(name => ({ id: `pre-${name}`, name: name }))
+                                        ].map(t => (
+                                            <Select.Option key={t.id} value={t.name}>{t.name}</Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item 
+                                    name="transporterId" 
+                                    label="Transporter ID" 
+                                    rules={[{ required: true, message: 'Please enter Transporter ID' }]}
+                                    help={isNewTransporter ? "Enter ID for new transporter to save it" : ""}
+                                >
+                                    <Input placeholder="Auto-filled or Enter New ID" />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Modal>
+            </div >
+        </RmaLayout >
     );
 }

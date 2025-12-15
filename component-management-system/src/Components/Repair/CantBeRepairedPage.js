@@ -175,9 +175,15 @@ export default function CantBeRepairedPage() {
                                                         </div>
                                                         <div className="item-row">
                                                             <Text type="secondary">Status</Text>
-                                                            <Tag color="red" icon={<WarningOutlined />}>
-                                                                CAN'T BE REPAIRED
-                                                            </Tag>
+                                                            {item.repairStatus === "BER" ? (
+                                                                <Tag color="red" icon={<WarningOutlined />}>
+                                                                    BER (Beyond Economic Repair)
+                                                                </Tag>
+                                                            ) : (
+                                                                <Tag color="red" icon={<WarningOutlined />}>
+                                                                    CAN'T BE REPAIRED
+                                                                </Tag>
+                                                            )}
                                                         </div>
                                                         {item.itemRmaNo && (
                                                             <div className="item-row">
