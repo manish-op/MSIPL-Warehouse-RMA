@@ -134,28 +134,48 @@ public class ItemHistoryUpdatedByAdminService {
             String action = "UPDATED";
             String remark = h.getRemark() != null ? h.getRemark().toLowerCase() : "";
 
+            // Check remark first for explicit action hints
             if (remark.contains("region changed") || remark.contains("quick update: region")) {
                 action = "REGION_CHANGED";
             } else if (remark.contains("added") || remark.contains("created") || remark.contains("new item")) {
                 action = "ADDED";
-            } else if (h.getAvailableStatusId() != null) {
-                String status = h.getAvailableStatusId().getItemAvailableOption().toLowerCase();
-                if (status.equals("issue")) {
-                    action = "ISSUED";
-                } else if (status.equals("available")) {
-                    // Check if the item was previously issued (it's a return)
-                    // or if it's a new addition to inventory
-                    // For first-time entries, we check if this is the only/first history record
-                    if (remark.isEmpty() && h.getKeywordEntity() != null && h.getItemStatusId() != null) {
-                        // If multiple fields are set together (keyword, status, etc), it's likely a new
-                        // addition
-                        action = "ADDED";
-                    } else {
-                        action = "RETURNED";
+            } else if (h.getItemStatusId() != null) {
+                // Check item status for NEW status
+                String itemStatus = h.getItemStatusId().getItemStatus().toLowerCase();
+                if (itemStatus.contains("new") || itemStatus.equals("added")) {
+                    action = "ADDED";
+                } else if (itemStatus.contains("repair")) {
+                    action = "REPAIRING";
+                } else if (itemStatus.contains("fault")) {
+                    action = "FAULTY";
+                } else if (h.getAvailableStatusId() != null) {
+                    // Check availability status
+                    String availStatus = h.getAvailableStatusId().getItemAvailableOption().toLowerCase();
+                    if (availStatus.equals("issue") || availStatus.contains("issued")) {
+                        action = "ISSUED";
+                    } else if (availStatus.equals("available")) {
+                        // For available items - check if it looks like a return based on remark
+                        if (remark.contains("return")) {
+                            action = "RETURNED";
+                        } else {
+                            action = "AVAILABLE";
+                        }
+                    } else if (availStatus.contains("repair")) {
+                        action = "REPAIRING";
+                    } else if (availStatus.equals("delete") || availStatus.contains("deleted")) {
+                        action = "DELETED";
                     }
-                } else if (status.equals("repairing")) {
-                    action = "SENT_FOR_REPAIR";
-                } else if (status.equals("delete")) {
+                }
+            } else if (h.getAvailableStatusId() != null) {
+                // Fallback: check availability status alone
+                String availStatus = h.getAvailableStatusId().getItemAvailableOption().toLowerCase();
+                if (availStatus.equals("issue") || availStatus.contains("issued")) {
+                    action = "ISSUED";
+                } else if (availStatus.equals("available")) {
+                    action = "AVAILABLE";
+                } else if (availStatus.contains("repair")) {
+                    action = "REPAIRING";
+                } else if (availStatus.equals("delete")) {
                     action = "DELETED";
                 }
             }

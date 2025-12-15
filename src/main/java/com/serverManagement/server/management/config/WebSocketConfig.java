@@ -14,7 +14,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("https://mswarehouse.store") // This is correct
+                .setAllowedOrigins(
+                        "https://mswarehouse.store",
+                        "http://localhost:3000")
                 .withSockJS();
     }
 

@@ -64,6 +64,43 @@
   transform: rotate(180deg);
 }
 
+/* Module Switcher for RMA */
+.module-switcher-rma {
+  padding: 12px 16px;
+  margin: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.module-switcher-label-rma {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.module-switcher-rma .ant-segmented {
+  background: rgba(0, 0, 0, 0.3) !important;
+  padding: 2px !important;
+}
+
+.module-switcher-rma .ant-segmented-item {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.module-switcher-rma .ant-segmented-item-selected {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #fff !important;
+}
+
+.module-switcher-rma .ant-segmented-thumb {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+}
+
 /* Footer Styling */
 .msipl-footer {
   background: #001529;
