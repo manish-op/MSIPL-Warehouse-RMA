@@ -284,7 +284,6 @@ public class RmaController {
             return ResponseEntity.status(500).body("Failed to generate gatepass: " + e.getMessage());
         }
     }
-<<<<<<< HEAD
 
     @Autowired
     private com.serverManagement.server.management.service.rma.RmaPdfService rmaPdfService;
@@ -308,6 +307,4 @@ public class RmaController {
             return ResponseEntity.status(500).body("Failed to generate Delivery Challan: " + e.getMessage());
         }
     }
-=======
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
 }
