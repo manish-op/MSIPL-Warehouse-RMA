@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Menu, Layout, Button } from "antd";
+import { Menu, Layout, Button, Segmented, Modal } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   RiMenu3Line,
@@ -14,7 +14,8 @@ import {
   RiFileExcel2Line,      // For Import/Export
   RiFileList3Line,       // For Activity Logs
   RiAlarmWarningLine,    // For Thresholds/Alerts
-  RiSettings4Line        // For Options
+  RiSettings4Line,       // For Options
+  RiExchangeLine,        // For Module Switch
 } from "react-icons/ri";
 import "./Sidebar.css";
 
@@ -24,6 +25,11 @@ function Sidebar() {
   const role = localStorage.getItem("_User_role_for_MSIPL");
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Module state (warehouse or rma)
+  const [currentModule, setCurrentModule] = useState(() => {
+    return sessionStorage.getItem("msipl_service_mode") || "warehouse";
+  });
 
   // 1. Initialize state based on screen size
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
@@ -43,6 +49,27 @@ function Sidebar() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Handle module switch with confirmation
+  const handleModuleSwitch = (newModule) => {
+    if (newModule === currentModule) return;
+
+    Modal.confirm({
+      title: `Switch to ${newModule === "rma" ? "RMA Portal" : "Warehouse"}?`,
+      content: `You are about to switch to the ${newModule === "rma" ? "RMA Request Portal" : "Warehouse Management System"}. Continue?`,
+      okText: "Switch",
+      cancelText: "Cancel",
+      onOk: () => {
+        setCurrentModule(newModule);
+        sessionStorage.setItem("msipl_service_mode", newModule);
+        if (newModule === "rma") {
+          navigate("/rma-dashboard");
+        } else {
+          navigate("/dashboard/profile");
+        }
+      },
+    });
+  };
 
   // 3. Define Menu Items (Restored All Original Options)
   const menuItems = useMemo(() => {
@@ -86,9 +113,7 @@ function Sidebar() {
         icon: <RiBox3Line />,
         children: [
           (role === "admin" || role === "manager") && { label: "Add Item", key: "addItem" },
-          { label: "Search By Keyword", key: "getItemByKeyword" },
-          { label: "Search By Serial", key: "getItemBySerial" },
-          { label: "Item History", key: "itemHistory" },
+          { label: "Search Items", key: "itemSearch" },
         ].filter(Boolean),
       },
       {
@@ -106,10 +131,7 @@ function Sidebar() {
         key: "options_group",
         icon: <RiSettings4Line />,
         children: [
-          { label: "Add Avail. Option", key: "addAvailStatus" },
-          { label: "Update Avail. Option", key: "updateAvailStatus" },
-          { label: "Add Item Status", key: "addItemStatus" },
-          { label: "Update Item Status", key: "UpdateItemStatus" },
+          { label: "Manage Status", key: "statusManagement" },
         ],
       },
       (role === "admin" || role === "manager") && {
@@ -213,6 +235,26 @@ function Sidebar() {
             </div>
           )}
         </div>
+
+        {/* Module Switcher */}
+        {!collapsed && (
+          <div className="module-switcher">
+            <div className="module-switcher-label">
+              <RiExchangeLine style={{ marginRight: 6 }} />
+              <span>Switch Module </span>
+            </div>
+            <Segmented
+              value={currentModule}
+              onChange={handleModuleSwitch}
+              options={[
+                { label: "Warehouse", value: "warehouse" },
+                { label: "RMA", value: "rma" },
+              ]}
+              block
+              size="small"
+            />
+          </div>
+        )}
 
         <Menu
           mode="inline"

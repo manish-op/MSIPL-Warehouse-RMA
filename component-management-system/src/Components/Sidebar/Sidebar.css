@@ -35,7 +35,8 @@
 }
 
 /* Desktop Toggle Icon inside Header */
-.desktop-toggle, .mobile-close {
+.desktop-toggle,
+.mobile-close {
   color: #a6adb4;
   font-size: 20px;
   cursor: pointer;
@@ -44,8 +45,46 @@
   align-items: center;
 }
 
-.desktop-toggle:hover, .mobile-close:hover {
+.desktop-toggle:hover,
+.mobile-close:hover {
   color: var(--text-white);
+}
+
+/* --- Module Switcher --- */
+.module-switcher {
+  padding: 12px 16px;
+  margin: 0 8px 8px;
+  background: linear-gradient(135deg, #002140 0%, #003366 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.module-switcher-label {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.module-switcher .ant-segmented {
+  background: rgba(0, 0, 0, 0.3) !important;
+  padding: 2px !important;
+}
+
+.module-switcher .ant-segmented-item {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.module-switcher .ant-segmented-item-selected {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #fff !important;
+}
+
+.module-switcher .ant-segmented-thumb {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
 }
 
 /* --- Menu Styling --- */
@@ -57,13 +96,14 @@
 
 /* Scrollbar styling for the menu if it gets too long */
 .ant-layout-sider-children {
-    overflow-y: auto;
-    overflow-x: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .ant-layout-sider-children::-webkit-scrollbar {
   width: 6px;
 }
+
 .ant-layout-sider-children::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
@@ -79,11 +119,13 @@
   width: 100vw;
   height: 100vh;
   background-color: var(--overlay-bg);
-  z-index: 1000; /* Behind sidebar (1001), above content */
+  z-index: 1000;
+  /* Behind sidebar (1001), above content */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
-  backdrop-filter: blur(2px); /* Modern blur effect */
+  backdrop-filter: blur(2px);
+  /* Modern blur effect */
 }
 
 .sidebar-overlay.visible {
@@ -97,7 +139,7 @@
   top: 15px;
   left: 15px;
   z-index: 999;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,11 +150,12 @@
 
 /* 3. Mobile Sidebar Behavior */
 @media (max-width: 768px) {
+
   /* On mobile, sidebar is fixed and slides in from left */
   .custom-sidebar.mobile-sider {
     height: 100vh !important;
   }
-  
+
   /* Hide desktop toggle logic */
   .desktop-toggle {
     display: none;
@@ -120,11 +163,13 @@
 }
 
 @media (min-width: 769px) {
-    /* Hide mobile elements on desktop */
-    .mobile-toggle-btn {
-        display: none;
-    }
-    .mobile-close {
-        display: none;
-    }
+
+  /* Hide mobile elements on desktop */
+  .mobile-toggle-btn {
+    display: none;
+  }
+
+  .mobile-close {
+    display: none;
+  }
 }

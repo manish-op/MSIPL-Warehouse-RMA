@@ -134,6 +134,28 @@ export default function EnhancedActivityFeed() {
         return matchesSearch && matchesRegion;
     });
 
+    // Derive action from item status if action is not explicitly set
+    const deriveActionFromStatus = (record) => {
+        // If action is explicitly set, use it
+        if (record.action) return record.action;
+
+        const status = record.itemStatus?.toLowerCase() || "";
+        const availability = record.availabilityStatus?.toLowerCase() || "";
+
+        // Map status to action - ORDER MATTERS! Check most specific first
+        if (status.includes("new") || status.includes("added")) return "ADDED";
+        if (status.includes("delete") || status.includes("removed")) return "DELETED";
+        if (status.includes("repair") || availability.includes("repair")) return "REPAIRING";
+        if (status.includes("faulty") || status.includes("fault")) return "FAULTY";
+        if (status.includes("issue") || availability.includes("issue")) return "ISSUED";
+        // AVAILABLE must come BEFORE RETURNED to avoid false positives
+        if (status.includes("available") || availability.includes("available")) return "AVAILABLE";
+        if (status.includes("return") || availability.includes("return")) return "RETURNED";
+        if (record.remark?.toLowerCase().includes("region")) return "REGION_CHANGED";
+
+        return "UPDATED";
+    };
+
     const getActionColor = (action) => {
         const colors = {
             ADDED: "cyan",
@@ -141,10 +163,27 @@ export default function EnhancedActivityFeed() {
             RETURNED: "green",
             UPDATED: "blue",
             REGION_CHANGED: "purple",
-            SENT_FOR_REPAIR: "orange",
+            REPAIRING: "orange",
             DELETED: "red",
+            FAULTY: "magenta",
+            AVAILABLE: "success",
         };
         return colors[action] || "default";
+    };
+
+    const getActionIcon = (action) => {
+        const icons = {
+            ADDED: "➕",
+            ISSUED: "📤",
+            RETURNED: "📥",
+            UPDATED: "✏️",
+            REGION_CHANGED: "📍",
+            REPAIRING: "🔧",
+            DELETED: "🗑️",
+            FAULTY: "⚠️",
+            AVAILABLE: "✅",
+        };
+        return icons[action] || "📋";
     };
 
     const columns = [
@@ -169,24 +208,28 @@ export default function EnhancedActivityFeed() {
         },
         {
             title: "Action",
-            dataIndex: "action",
             key: "action",
-            width: 120,
-            render: (action) => (
-                <Tag color={getActionColor(action)} style={{ fontWeight: 500 }}>
-                    {action || "UPDATED"}
-                </Tag>
-            ),
+            width: 150,
+            render: (_, record) => {
+                const action = deriveActionFromStatus(record);
+                return (
+                    <Tag color={getActionColor(action)} style={{ fontWeight: 500 }}>
+                        {getActionIcon(action)} {action.replace(/_/g, " ")}
+                    </Tag>
+                );
+            },
             filters: [
-                { text: "Added", value: "ADDED" },
-                { text: "Issued", value: "ISSUED" },
-                { text: "Returned", value: "RETURNED" },
-                { text: "Updated", value: "UPDATED" },
-                { text: "Region Changed", value: "REGION_CHANGED" },
-                { text: "Sent for Repair", value: "SENT_FOR_REPAIR" },
-                { text: "Deleted", value: "DELETED" },
+                { text: "➕ Added", value: "ADDED" },
+                { text: "📤 Issued", value: "ISSUED" },
+                { text: "📥 Returned", value: "RETURNED" },
+                { text: "✏️ Updated", value: "UPDATED" },
+                { text: "📍 Region Changed", value: "REGION_CHANGED" },
+                { text: "🔧 Repairing", value: "REPAIRING" },
+                { text: "⚠️ Faulty", value: "FAULTY" },
+                { text: "✅ Available", value: "AVAILABLE" },
+                { text: "🗑️ Deleted", value: "DELETED" },
             ],
-            onFilter: (value, record) => record.action === value,
+            onFilter: (value, record) => deriveActionFromStatus(record) === value,
         },
         {
             title: "Serial No.",

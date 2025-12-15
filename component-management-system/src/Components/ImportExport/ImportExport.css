@@ -1,0 +1,332 @@
+/* --- Page Container --- */
+.import-export-page {
+    min-height: 100dvh;
+    padding: 24px;
+    background-color: var(--background-color);
+}
+
+/* --- Page Header --- */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+    border-radius: 12px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 28px;
+    color: #fff;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-title {
+    margin: 0 !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+}
+
+.header-subtitle {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 14px;
+}
+
+/* --- Main Card --- */
+.import-export-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: var(--component-background) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.import-export-card .ant-card-body {
+    padding: 24px;
+}
+
+/* --- Segmented Control --- */
+.segmented-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.view-segmented {
+    background-color: var(--background-color) !important;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.view-segmented .ant-segmented-item {
+    border-radius: 6px;
+    min-width: 120px;
+    transition: all 0.2s ease;
+}
+
+.view-segmented .ant-segmented-item-selected {
+    background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%) !important;
+    color: #fff !important;
+}
+
+/* --- View Container --- */
+.view-container {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- View Description --- */
+.view-description {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.import-desc {
+    background-color: rgba(24, 144, 255, 0.08);
+    border-left-color: #1890ff;
+}
+
+.export-desc {
+    background-color: rgba(82, 196, 26, 0.08);
+    border-left-color: #52c41a;
+}
+
+.desc-icon {
+    font-size: 24px;
+}
+
+.import-desc .desc-icon {
+    color: #1890ff;
+}
+
+.export-desc .desc-icon {
+    color: #52c41a;
+}
+
+.desc-text {
+    color: var(--text-color) !important;
+    font-size: 14px;
+}
+
+/* --- Form Styling --- */
+.import-export-card .ant-form-item-label>label {
+    color: var(--text-color) !important;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.import-export-card .ant-select-lg .ant-select-selector {
+    border-radius: 8px !important;
+    height: 48px !important;
+}
+
+.import-export-card .ant-select-lg .ant-select-selection-item,
+.import-export-card .ant-select-lg .ant-select-selection-placeholder {
+    line-height: 46px !important;
+}
+
+/* --- Upload Dragger --- */
+.upload-dragger {
+    border-radius: 10px !important;
+    border-color: var(--border-color) !important;
+    background-color: var(--background-color) !important;
+    transition: all 0.2s ease;
+}
+
+.upload-dragger:hover {
+    border-color: var(--primary-color) !important;
+}
+
+.upload-dragger .ant-upload-drag-icon {
+    color: #1890ff;
+}
+
+.upload-dragger .ant-upload-drag-icon .anticon {
+    font-size: 48px;
+    color: #1890ff;
+}
+
+.upload-dragger .ant-upload-text {
+    color: var(--text-color) !important;
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+.upload-dragger .ant-upload-hint {
+    color: var(--text-color-secondary) !important;
+    font-size: 13px;
+}
+
+/* --- Submit Buttons --- */
+.submit-btn {
+    height: 48px !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.import-btn {
+    background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+}
+
+.import-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4);
+}
+
+.export-btn {
+    background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%) !important;
+}
+
+.export-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .import-export-page {
+        padding: 16px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 20px;
+    }
+
+    .header-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+    }
+
+    .header-title {
+        font-size: 20px !important;
+    }
+
+    .import-export-card .ant-card-body {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        padding: 14px 16px;
+    }
+
+    .header-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+        border-radius: 10px;
+    }
+
+    .header-title {
+        font-size: 18px !important;
+    }
+
+    .header-subtitle {
+        font-size: 13px;
+    }
+
+    .view-segmented .ant-segmented-item {
+        min-width: 100px;
+        font-size: 13px;
+    }
+
+    .view-description {
+        flex-direction: column;
+        text-align: center;
+        padding: 14px;
+    }
+}
+
+/* --- Dark Theme Enhancements --- */
+[data-theme='dark'] .page-header {
+    background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .import-export-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .view-segmented {
+    background-color: #2d2d2d !important;
+}
+
+[data-theme='dark'] .view-segmented .ant-segmented-item {
+    color: var(--text-color);
+}
+
+[data-theme='dark'] .import-desc {
+    background-color: rgba(24, 144, 255, 0.12);
+}
+
+[data-theme='dark'] .export-desc {
+    background-color: rgba(82, 196, 26, 0.12);
+}
+
+[data-theme='dark'] .upload-dragger {
+    background-color: #1d1d1d !important;
+}
+
+[data-theme='dark'] .upload-dragger:hover {
+    border-color: #1890ff !important;
+}
+
+/* Dark Theme Form Fixes */
+[data-theme='dark'] .import-export-card .ant-form-item-label>label {
+    color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .import-export-card .ant-select-selector {
+    background-color: #2d2d2d !important;
+    border-color: #434343 !important;
+}
+
+[data-theme='dark'] .import-export-card .ant-select-selection-item,
+[data-theme='dark'] .import-export-card .ant-select-selection-placeholder {
+    color: #e8e6e3 !important;
+}

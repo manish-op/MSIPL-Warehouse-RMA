@@ -11,10 +11,8 @@ import EmployeeManagement from "./Components/Employee/EmployeeManagement";
 import RegionManagement from "./Components/Region/RegionManagement";
 import KeywordManagement from "./Components/Keyword/KeywordManagement.js";
 import AddItem from "./Components/Items/AddItem/AddItem.js";
-import GetItemSearchBySerialNo from "./Components/Items/GetItem/GetItemSearchBySerialNo.js";
+import ItemSearch from "./Components/Items/ItemSearch/ItemSearch.js";
 import UpdateItem from "./Components/Items/UpdateItem/UpdateItem.js";
-import GetItemByKeyword from "./Components/Items/GetItem/GetItemByKeyword.js";
-import GetHistoryBySerialNo from "./Components/Items/HistoryRelated/GetHistoryBySerialNo.js";
 import HistoryTable from "./Components/Items/HistoryRelated/HistoryTable.js";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute.js";
 import RepairingPage from "./Components/FRU/Repairing/RepairingPage.js";
@@ -23,17 +21,13 @@ import InwardGatePass from "./Components/GatePass/InwardGatePass.js";
 import ImportExport from "./Components/ImportExport/ImportExport.js";
 import OutwardGatePass from "./Components/GatePass/OutwardGatePass.js";
 import "@ant-design/v5-patch-for-react-19";
-import AddAvailabilityStatus from "./Components/StatusOptionComp/AvailabilityStatus/AddAvailabilityStatus.js";
-import UpdateAvailabilityStatus from "./Components/StatusOptionComp/AvailabilityStatus/UpdateAvailabilityStatus.js";
-import AddItemStatusOption from "./Components/StatusOptionComp/ItemStatus/AddItemStatusOption.js";
-import UpdateItemStatusOption from "./Components/StatusOptionComp/ItemStatus/UpdateItemStatusOption.js";
+import StatusManagement from "./Components/StatusOptionComp/StatusManagement.js";
 import { ThemeProvider } from "./context/ThemeContext.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ChatComponent from "./Components/Chat/ChatComponent.js";
 import EmployeeList from "./Components/EmployeeList/EmployeeList.js";
 import ThresholdManager from "./Components/Threshold/ThresholdManager.js";
-import NotificationBell from "./Components/NotificationBell/NotificationBell.js";
-import ActivityFeed from "./Components/ActivityLogs/ActivityFeed.js";
+import ActiveAlerts from "./Components/Alerts/ActiveAlerts.js";
 import EnhancedActivityFeed from "./Components/ActivityLogs/EnhancedActivityFeed.js";
 import RmaDashboard from "./Components/RMA/RMADashboard.js";
 import RmaRequestForm from "./Components/RMA/RmaRequestForm.js";
@@ -83,29 +77,15 @@ function App() {
 
               {/* Items */}
               <Route path="addItem" element={<AddItem />} />
-              <Route
-                path="getItemBySerial"
-                element={<GetItemSearchBySerialNo />}
-              />
-              <Route
-                path="getItemByKeyword"
-                element={<GetItemByKeyword />}
-              />
+              <Route path="itemSearch" element={<ItemSearch />} />
+              <Route path="getItemBySerial" element={<ItemSearch />} />
+              <Route path="getItemByKeyword" element={<ItemSearch />} />
               <Route path="updateItem" element={<UpdateItem />} />
-              <Route path="itemHistory" element={<GetHistoryBySerialNo />} />
+              <Route path="itemHistory" element={<ItemSearch />} />
               <Route path="historyTable" element={<HistoryTable />} />
               <Route
-                path="addAvailStatus"
-                element={<AddAvailabilityStatus />}
-              />
-              <Route
-                path="updateAvailStatus"
-                element={<UpdateAvailabilityStatus />}
-              />
-              <Route path="addItemStatus" element={<AddItemStatusOption />} />
-              <Route
-                path="UpdateItemStatus"
-                element={<UpdateItemStatusOption />}
+                path="statusManagement"
+                element={<StatusManagement />}
               />
 
               {/* Item repairing */}
@@ -131,7 +111,7 @@ function App() {
               <Route path="activity-logs" element={<ChatComponent />} />
               <Route path="all-users" element={<EmployeeList />} />
               <Route path="thresholds" element={<ThresholdManager />} />
-              <Route path="alerts/active" element={<NotificationBell />} />
+              <Route path="alerts/active" element={<ActiveAlerts />} />
               <Route path="items/activity" element={<EnhancedActivityFeed />} />
             </Route>
 

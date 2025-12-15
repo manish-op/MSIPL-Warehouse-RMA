@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b2c0eebb-d806-4626-991e-c7ee62b74b8e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/serverManagement/server/management/controller/rma/RmaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/serverManagement/server/management/controller/rma/RmaController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/serverManagement/server/management/dto/rma/RmaItemWorkflowDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/serverManagement/server/management/dto/rma/RmaItemWorkflowDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/serverManagement/server/management/service/rma/RmaService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/serverManagement/server/management/service/rma/RmaService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/CSV/CSVFileToItemListConverter.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/CSV/CSVFileToItemListConverter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/ServerManagementApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/ServerManagementApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/config/SecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/config/SecurityConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/config/SwaggerConfiguration.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/config/SwaggerConfiguration.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/config/WebSocketConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/config/WebSocketConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/activityLog/ActivityController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/activityLog/ActivityController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/activityLog/ActivityLog.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/activityLog/ActivityLog.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/admin/user/AdminUserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/admin/user/AdminUserController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/admin/user/role/UserRoleController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/admin/user/role/UserRoleController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/chat/ChatController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/chat/ChatController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/employeeList/GetEmployeeListController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/employeeList/GetEmployeeListController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/gatepass/InwardGatePassController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/gatepass/InwardGatePassController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemDetails/ItemDetailsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemDetails/ItemDetailsController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemDetails/ItemHistoryUpdatedByAdminController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemDetails/ItemHistoryUpdatedByAdminController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemDetails/UploadViaCsvFileController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemDetails/UploadViaCsvFileController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemRepairOption/RepairingOptionController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemRepairOption/RepairingOptionController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemRepairingDetails/ItemRepairingController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemRepairingDetails/ItemRepairingController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemstock/AlertController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemstock/AlertController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemstock/InventoryThresholdController$ThresholdRequestDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemstock/InventoryThresholdController$ThresholdRequestDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemstock/InventoryThresholdController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/itemstock/InventoryThresholdController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/keyword/KeywordController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/keyword/KeywordController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/option/ItemAvailableStatusOptionController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/option/ItemAvailableStatusOptionController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/option/ItemStatusOptionController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/option/ItemStatusOptionController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/region/RegionController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/region/RegionController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/rma/RmaController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/controller/rma/RmaController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/admin/user/AdminUserDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/admin/user/AdminUserDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/gatepass/InwardGatePassDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/gatepass/InwardGatePassDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/gatepass/ItemListViaGatePassInwardDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/gatepass/ItemListViaGatePassInwardDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/gatepass/OutwardGatepassDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/gatepass/OutwardGatepassDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/ItemDetailsDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/ItemDetailsDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/ItemDetailsDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/ItemDetailsDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/ItemDetailsDynamicQueryBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/ItemDetailsDynamicQueryBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/ItemHistoryUpdatedByAdminDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/ItemHistoryUpdatedByAdminDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/WarehouseAuditLogDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemDetails/WarehouseAuditLogDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairDetails/FruDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairDetails/FruDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairDetails/ItemRepairingDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairDetails/ItemRepairingDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairDetails/ItemRepairingDetilsDynamicQueryForManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairDetails/ItemRepairingDetilsDynamicQueryForManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairOption/RepairingOptionDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairOption/RepairingOptionDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairOption/TechnicianStatusDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairOption/TechnicianStatusDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairOption/WarrantyOptionDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemRepairOption/WarrantyOptionDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemstock/InventoryThresholdRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/itemstock/InventoryThresholdRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/keyword/KeywordDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/keyword/KeywordDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/keyword/SubKeywordDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/keyword/SubKeywordDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/option/ItemAvailableStatusOptionDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/option/ItemAvailableStatusOptionDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/option/ItemStatusOptionDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/option/ItemStatusOptionDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/region/RegionDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/region/RegionDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/rma/CustomerDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/rma/CustomerDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/rma/RmaAuditLogDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/rma/RmaAuditLogDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/rma/RmaItemDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/rma/RmaItemDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/rma/RmaRequestDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/rma/RmaRequestDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/role/RoleDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dao/role/RoleDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/ActivityDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/ActivityDto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/DashboardSummaryDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/DashboardSummaryDto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/RegionCountDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/RegionCountDto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/RegionUpdateDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/RegionUpdateDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/TicketDetailsViaIdDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/TicketDetailsViaIdDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/UserResponseDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/itemRepairDetails/UserResponseDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/rma/ProductCatalogDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/rma/ProductCatalogDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/rma/RmaDashboardStatsDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/rma/RmaDashboardStatsDto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/rma/RmaItemWorkflowDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/dto/rma/RmaItemWorkflowDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/adminUser/AdminUserEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/adminUser/AdminUserEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/adminUser/UserEmailRegionDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/adminUser/UserEmailRegionDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/chat/ChatMessage$MessageType.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/chat/ChatMessage$MessageType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/chat/ChatMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/chat/ChatMessage.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/gatePass/InwardGatePassEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/gatePass/InwardGatePassEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/gatePass/ItemListViaGatePassInward.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/gatePass/ItemListViaGatePassInward.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/gatePass/ItemListViaGatePassOutwardEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/gatePass/ItemListViaGatePassOutwardEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/gatePass/OutwardGatepassEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/gatePass/OutwardGatepassEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/ItemDetailsDTOForCSV.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/ItemDetailsDTOForCSV.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/ItemDetailsEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/ItemDetailsEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/ItemHistoryUpdatedByAdminEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/ItemHistoryUpdatedByAdminEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/RegionUpdateDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/RegionUpdateDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/WarehouseAuditLogEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemDetails/WarehouseAuditLogEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/FruEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/FruEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/ItemDetailsDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/ItemDetailsDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/ItemRepairingEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/ItemRepairingEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/ItemRepairingEntityDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/ItemRepairingEntityDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/RepairingCommentsEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairDetails/RepairingCommentsEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairOption/RepairingOptionEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairOption/RepairingOptionEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairOption/TechnicianStatusEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairOption/TechnicianStatusEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairOption/WarrantyOptionEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemRepairOption/WarrantyOptionEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemstock/InventoryThreshold.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/itemstock/InventoryThreshold.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/keyword/KeywordEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/keyword/KeywordEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/keyword/SubKeywordEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/keyword/SubKeywordEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/options/ItemAvailableStatusOptionEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/options/ItemAvailableStatusOptionEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/options/ItemStatusOptionEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/options/ItemStatusOptionEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/region/RegionEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/region/RegionEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/rma/CustomerEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/rma/CustomerEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/rma/RmaAuditLogEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/rma/RmaAuditLogEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/rma/RmaItemEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/rma/RmaItemEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/rma/RmaRequestEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/rma/RmaRequestEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/role/RoleEntity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/entity/role/RoleEntity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/filter/JWTRequestFilter.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/filter/JWTRequestFilter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/filter/JwtChannelInterceptor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/filter/JwtChannelInterceptor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/globalException/DuplicateValueException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/globalException/DuplicateValueException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/globalException/GlobalExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/globalException/GlobalExceptionHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/globalException/NullValueException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/globalException/NullValueException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/globalException/UnathorizedException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/globalException/UnathorizedException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/changePassword/ChangeEmployeePasswordRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/changePassword/ChangeEmployeePasswordRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/changePassword/PasswordRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/changePassword/PasswordRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/AfterGatePassFruMakingRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/AfterGatePassFruMakingRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/InwardGatepassItemList.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/InwardGatepassItemList.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/InwardGatepassRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/InwardGatepassRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/OutwardGatepassItemList.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/OutwardGatepassItemList.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/OutwardGatepassRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/gatepass/OutwardGatepassRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemDetails/AddItemRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemDetails/AddItemRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemDetails/AssignItemDetailsRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemDetails/AssignItemDetailsRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemDetails/GetItemByKeywordRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemDetails/GetItemByKeywordRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemDetails/StockTransferRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemDetails/StockTransferRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/AssignTechnicianRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/AssignTechnicianRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/EngineerUpdateTicketStatusRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/EngineerUpdateTicketStatusRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/FruTicketRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/FruTicketRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/GetAssignTicketDetailsRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/GetAssignTicketDetailsRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/ItemRepairingRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/ItemRepairingRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/ManagerGetTicketRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/ManagerGetTicketRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/UpdateTicketStatus.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/itemRepairingDetails/UpdateTicketStatus.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/GetSubkeywordRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/GetSubkeywordRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/KeywordRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/KeywordRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/SubKeywordRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/SubKeywordRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/UpdateKeywordName.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/UpdateKeywordName.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/UpdateSubKeywordName.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/keyword/UpdateSubKeywordName.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/login/LoginRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/login/LoginRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/option/UpdateAvailableStatusRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/option/UpdateAvailableStatusRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/option/UpdateItemStatusOtionRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/option/UpdateItemStatusOtionRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/region/AddRegionRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/region/AddRegionRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/region/UpdateEmployeeRegionRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/region/UpdateEmployeeRegionRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/region/UpdateRegionRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/region/UpdateRegionRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/CreateRmaRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/CreateRmaRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaCreateRequest$AddressDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaCreateRequest$AddressDto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaCreateRequest$CourierDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaCreateRequest$CourierDto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaCreateRequest$RmaItemDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaCreateRequest$RmaItemDto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaCreateRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaCreateRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaItemRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/rma/RmaItemRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/role/ChangeEmployeeRoleRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/role/ChangeEmployeeRoleRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/role/UpdateRole.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/role/UpdateRole.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/user/AddUserRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/request/user/AddUserRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/globalException/GlobalExceptionResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/globalException/GlobalExceptionResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/itemDetails/ItemDetailsResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/itemDetails/ItemDetailsResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/keyword/KeywordResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/keyword/KeywordResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/keyword/SubKeywordResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/keyword/SubKeywordResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/login/LoginResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/login/LoginResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/region/RegionResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/region/RegionResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/rma/RmaItemsGroupedResponse$RmaItemDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/rma/RmaItemsGroupedResponse$RmaItemDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/rma/RmaItemsGroupedResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/rma/RmaItemsGroupedResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/rma/RmaResponse$RmaItemResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/rma/RmaResponse$RmaItemResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/rma/RmaResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/response/rma/RmaResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/admin/login/AdminUserLogin.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/admin/login/AdminUserLogin.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/admin/user/AdminUserService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/admin/user/AdminUserService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/admin/user/role/UserRoleService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/admin/user/role/UserRoleService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/employeeList/GetEmployeeListService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/employeeList/GetEmployeeListService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepass/FruMakingAfterGatePassService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepass/FruMakingAfterGatePassService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepass/InwardGatePassService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepass/InwardGatePassService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepasspdf/AfterGatepassFruTicketPringtPDF.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepasspdf/AfterGatepassFruTicketPringtPDF.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepasspdf/GatepassPassService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepasspdf/GatepassPassService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepasspdf/OutwardGatepassPDFService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/gatepasspdf/OutwardGatepassPDFService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemDetails/CSVConverterService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemDetails/CSVConverterService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemDetails/GetSerialIdOnly.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemDetails/GetSerialIdOnly.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemDetails/ItemDetailsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemDetails/ItemDetailsService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemDetails/ItemHistoryUpdatedByAdminService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemDetails/ItemHistoryUpdatedByAdminService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemRepairOption/RepairingOptionService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemRepairOption/RepairingOptionService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemRepairingDetails/ItemRepairingService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemRepairingDetails/ItemRepairingService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemstock/AlertService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/itemstock/AlertService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/keyword/KeywordService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/keyword/KeywordService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/option/ItemAvailableStatusOptionService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/option/ItemAvailableStatusOptionService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/option/ItemStatusOptionService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/option/ItemStatusOptionService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/region/RegionService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/region/RegionService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/rma/CustomerService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/rma/CustomerService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/rma/RmaExcelExportService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/rma/RmaExcelExportService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/rma/RmaService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/service/rma/RmaService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/shared/utils/CommonUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/shared/utils/CommonUtils.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/utils/jwt/JWTUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/serverManagement/server/management/utils/jwt/JWTUtils.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="33m1aLIYSlbYQ8bA0IodizA9zkq" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.ServerManagementApplication.executor": "Run",
+    "JUnit.ServerManagementApplicationTests.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "mani",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/secmoto/Downloads/server-management",
+    "settings.editor.selected.configurable": "vcs.Git"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\secmoto\Downloads\server-management\src\main\resources" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.ServerManagementApplication">
+    <configuration name="ServerManagementApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.serverManagement.server.management.ServerManagementApplication" />
+      <module name="server-management" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.serverManagement.server.management.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ServerManagementApplicationTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="server-management" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.serverManagement.server.management.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.serverManagement.server.management" />
+      <option name="MAIN_CLASS_NAME" value="com.serverManagement.server.management.ServerManagementApplicationTests" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.ServerManagementApplication" />
+        <item itemvalue="JUnit.ServerManagementApplicationTests" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b2c0eebb-d806-4626-991e-c7ee62b74b8e" name="Changes" comment="" />
+      <created>1759907495958</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759907495958</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

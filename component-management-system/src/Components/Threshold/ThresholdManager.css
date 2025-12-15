@@ -1,71 +1,266 @@
-.p-4 {
-  padding: 1rem;
-}
-.sm\:p-8 {
-  padding: 2rem;
-}
-.md\:p-12 {
-  padding: 3rem;
-}
+/* ============================================
+   Threshold Manager Page - Modern Design
+   ============================================ */
 
-/*
- * This uses the main background color from your theme file.
- */
-.bg-gray-100 {
+/* --- Page Container --- */
+.threshold-page {
+  min-height: 100dvh;
+  padding: 24px;
   background-color: var(--background-color);
 }
 
-.min-h-screen {
-  min-height: 100vh;
-}
-
-.flex {
+/* --- Page Header --- */
+.page-header {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.items-center {
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 28px;
+  color: #fff;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  margin: 0 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 14px;
+}
+
+/* --- Main Card --- */
+.threshold-card {
+  max-width: 500px;
+  margin: 0 auto;
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.threshold-card .ant-card-body {
+  padding: 24px;
+}
+
+/* --- Card Description --- */
+.card-description {
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(250, 173, 20, 0.08) 0%, rgba(255, 193, 7, 0.08) 100%);
+  border-radius: 10px;
+  border-left: 4px solid #faad14;
+}
+
+.desc-text {
+  color: var(--text-color) !important;
+  font-size: 14px;
+}
+
+/* --- Form Styling --- */
+.threshold-card .ant-form-item-label>label {
+  color: var(--text-color) !important;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.input-icon {
+  color: var(--text-color-secondary) !important;
+}
+
+.threshold-card .ant-input-affix-wrapper-lg {
+  border-radius: 8px !important;
+  min-height: 48px;
+  padding: 0 12px;
+  display: flex;
   align-items: center;
 }
 
-.justify-center {
-  justify-content: center;
+.threshold-card .ant-input-affix-wrapper-lg .ant-input {
+  height: auto;
 }
 
-.w-full {
-  width: 100%;
+.threshold-card .ant-select-lg .ant-select-selector {
+  border-radius: 8px !important;
+  height: 48px !important;
 }
 
-.max-w-lg {
-  max-width: 32rem; /* 512px */
+.threshold-card .ant-select-lg .ant-select-selection-item,
+.threshold-card .ant-select-lg .ant-select-selection-placeholder {
+  line-height: 46px !important;
 }
 
-.rounded-xl {
-  border-radius: 0.75rem; /* 12px */
+.threshold-card .ant-input-number-lg {
+  border-radius: 8px !important;
+  height: 48px;
 }
 
-/* * This creates a shadow that works in both light and dark mode.
- */
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+.threshold-card .ant-input-number-lg .ant-input-number-input {
+  height: 46px;
 }
 
-[data-theme='dark'] .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
-    0 4px 6px -2px rgba(0, 0, 0, 0.25);
+/* --- Submit Button --- */
+.submit-btn {
+  height: 48px !important;
+  border-radius: 8px !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
+  transition: all 0.2s ease;
+  margin-top: 8px;
 }
 
-.text-center {
-  text-align: center;
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 59, 87, 0.4);
 }
 
-.mb-4 {
-  margin-bottom: 1rem;
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
-/*
- * This uses the main text color from your theme file.
- */
-.text-gray-800 {
-  color: var(--text-color);
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .threshold-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+  }
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .header-title {
+    font-size: 20px !important;
+  }
+
+  .threshold-card .ant-card-body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 14px 16px;
+  }
+
+  .header-content {
+    gap: 12px;
+  }
+
+  .header-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .header-title {
+    font-size: 18px !important;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+  }
+
+  .card-description {
+    padding: 12px 14px;
+  }
+
+  .submit-btn {
+    height: 44px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* --- Dark Theme Enhancements --- */
+[data-theme='dark'] .page-header {
+  background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .threshold-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .card-description {
+  background: linear-gradient(135deg, rgba(250, 173, 20, 0.12) 0%, rgba(255, 193, 7, 0.12) 100%);
+}
+
+[data-theme='dark'] .submit-btn {
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.2);
+}
+
+/* Dark Theme Form Fixes */
+[data-theme='dark'] .threshold-card .ant-form-item-label>label {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .threshold-card .ant-input,
+[data-theme='dark'] .threshold-card .ant-input-affix-wrapper {
+  color: #e8e6e3 !important;
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+[data-theme='dark'] .threshold-card .ant-input::placeholder {
+  color: #888888 !important;
+}
+
+[data-theme='dark'] .threshold-card .ant-select-selector {
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+[data-theme='dark'] .threshold-card .ant-select-selection-item,
+[data-theme='dark'] .threshold-card .ant-select-selection-placeholder {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .threshold-card .ant-input-number {
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+[data-theme='dark'] .threshold-card .ant-input-number-input {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .threshold-card .ant-input-number-input::placeholder {
+  color: #888888 !important;
 }

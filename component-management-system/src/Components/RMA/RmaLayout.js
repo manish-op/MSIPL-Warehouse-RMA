@@ -1,6 +1,6 @@
 // src/Components/RMA/RmaLayout.js
 import React, { useState } from "react";
-import { Layout, Menu, Modal } from "antd";
+import { Layout, Menu, Modal, Segmented } from "antd";
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -13,6 +13,7 @@ import {
   UserSwitchOutlined,
   WarningOutlined,
   HistoryOutlined,
+  SwapOutlined,
   CarOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -28,8 +29,35 @@ const RmaLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
 
+  // Module state
+  const [currentModule, setCurrentModule] = useState(() => {
+    return sessionStorage.getItem("msipl_service_mode") || "rma";
+  });
+
   // Protect navigation from RMA to Warehouse
   useNavigationGuard("rma");
+
+  // Handle module switch with confirmation
+  const handleModuleSwitch = (newModule) => {
+    if (newModule === currentModule) return;
+
+    confirm({
+      title: `Switch to ${newModule === "warehouse" ? "Warehouse" : "RMA Portal"}?`,
+      icon: <SwapOutlined />,
+      content: `You are about to switch to the ${newModule === "warehouse" ? "Warehouse Management System" : "RMA Request Portal"}. Continue?`,
+      okText: "Switch",
+      cancelText: "Cancel",
+      onOk() {
+        setCurrentModule(newModule);
+        sessionStorage.setItem("msipl_service_mode", newModule);
+        if (newModule === "warehouse") {
+          navigate("/dashboard/profile");
+        } else {
+          navigate("/rma-dashboard");
+        }
+      },
+    });
+  };
 
   const showLogoutConfirm = () => {
     confirm({
@@ -102,6 +130,26 @@ const RmaLayout = ({ children }) => {
           >
             {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           </div>
+
+          {/* Module Switcher */}
+          {!collapsed && (
+            <div className="module-switcher-rma">
+              <div className="module-switcher-label-rma">
+                <SwapOutlined style={{ marginRight: 6 }} />
+                <span>Switch Module</span>
+              </div>
+              <Segmented
+                value={currentModule}
+                onChange={handleModuleSwitch}
+                options={[
+                  { label: "Warehouse", value: "warehouse" },
+                  { label: "RMA", value: "rma" },
+                ]}
+                block
+                size="small"
+              />
+            </div>
+          )}
 
           <Menu
             mode="inline"
