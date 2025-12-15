@@ -1,4 +1,4 @@
-package com.serverManagement.server.management.entity;
+package com.serverManagement.server.management.entity.rma;
 
 import jakarta.persistence.*;
 

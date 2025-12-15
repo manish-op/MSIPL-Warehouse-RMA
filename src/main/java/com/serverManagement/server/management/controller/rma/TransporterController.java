@@ -1,7 +1,8 @@
-package com.serverManagement.server.management.controller;
+package com.serverManagement.server.management.controller.rma;
 
-import com.serverManagement.server.management.dao.TransporterDAO;
-import com.serverManagement.server.management.entity.Transporter;
+import com.serverManagement.server.management.dao.rma.TransporterDAO;
+import com.serverManagement.server.management.entity.rma.Transporter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
