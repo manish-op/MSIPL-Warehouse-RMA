@@ -340,8 +340,7 @@ export default function UnrepairedPage() {
         setGeneratingGatepass(null);
     };
 
-    // Open Gatepass Preview Modal
-    const openGatepassPreview = (rmaItems, rmaNo) => {
+
     // Filter items that have RMA numbers assigned
     const getItemsWithRmaNumbers = (rmaItems) => {
         return rmaItems.filter(item => item.itemRmaNo && item.itemRmaNo.trim() !== "");
@@ -1393,6 +1392,4 @@ export default function UnrepairedPage() {
             </div >
         </RmaLayout >
     );
-    }
 }
-
