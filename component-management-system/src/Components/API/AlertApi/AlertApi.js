@@ -6,7 +6,9 @@ import { message } from "antd";
 export const AlertApi = {
 
   getActiveAlerts: async () => {
-    const token = atob(Cookies.get("authToken"));
+    const tokenRaw = Cookies.get("authToken");
+    if (!tokenRaw) return null;
+    const token = atob(tokenRaw);
 
     try {
       // This calls the GET /api/alerts/active endpoint
