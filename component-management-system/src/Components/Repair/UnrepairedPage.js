@@ -1393,5 +1393,6 @@ export default function UnrepairedPage() {
             </div >
         </RmaLayout >
     );
+    }
 }
 
