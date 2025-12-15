@@ -79,6 +79,7 @@ public class RmaInwardGatepassService {
         try {
             // Find RMA request by request number
             RmaRequestEntity rmaRequest = rmaRequestDAO.findByRequestNumber(requestNumber);
+<<<<<<< HEAD
             List<RmaItemEntity> items;
 
             if (rmaRequest == null) {
@@ -110,6 +111,15 @@ public class RmaInwardGatepassService {
                 items = rmaItemDAO.findUnassignedByRmaNo(requestNumber);
             }
 
+=======
+            if (rmaRequest == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("RMA Request not found: " + requestNumber);
+            }
+
+            // Get unassigned items for this request
+            List<RmaItemEntity> items = rmaItemDAO.findUnassignedByRmaNo(requestNumber);
+>>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
             if (items.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("No unassigned items found for RMA: " + requestNumber);
@@ -133,6 +143,7 @@ public class RmaInwardGatepassService {
             // Create gatepass record
             RmaInwardGatepassEntity gatepass = new RmaInwardGatepassEntity();
             gatepass.setGatepassNumber(gatepassNumber);
+<<<<<<< HEAD
             // gatepass.setRmaRequest(rmaRequest); // Handle null if it's a dummy?
             // If it's a dummy request, we can't save it as a relationship if it's not
             // persisted.
@@ -163,6 +174,9 @@ public class RmaInwardGatepassService {
             }
             gatepass.setRmaRequest(rmaRequest);
 
+=======
+            gatepass.setRmaRequest(rmaRequest);
+>>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
             gatepass.setSupplierName(rmaRequest.getCompanyName());
             gatepass.setSupplierAddress(rmaRequest.getReturnAddress());
             gatepass.setGeneratedDate(ZonedDateTime.now());

@@ -24,7 +24,10 @@ public class RmaItemWorkflowDTO {
     private String issueFixed; // Description of issue that was fixed
     private String companyName; // Customer company name from parent RMA request
     private ZonedDateTime receivedDate; // Date when RMA request was created/received
+<<<<<<< HEAD
     private String repairType;
+=======
+>>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
 
     // Getters and Setters
     public Long getId() {

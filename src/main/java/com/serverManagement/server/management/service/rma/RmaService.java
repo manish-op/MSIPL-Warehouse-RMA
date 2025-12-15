@@ -672,6 +672,7 @@ public class RmaService {
                 // Fallback for items with missing parent request (Legacy data)
                 dto.setRmaNo(item.getRmaNo());
             }
+
             // Set the item-level RMA number (distinct from parent request number)
             dto.setItemRmaNo(item.getRmaNo());
             dto.setIssueFixed(item.getIssueFixed());

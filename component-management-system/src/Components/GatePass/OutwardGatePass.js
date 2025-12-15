@@ -13,11 +13,12 @@ import {
   Divider,
   Modal,
 } from "antd";
+import { ExportOutlined } from "@ant-design/icons";
 import GetRegionAPI from "../API/Region/GetRegion/GetRegionAPI";
 import GatepassOutwardAPI from "../API/GatePassAPI/GatepassOutwardAPI";
 import "./OutwardGatePass.css";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 function OutwardGatePass() {
@@ -113,207 +114,213 @@ function OutwardGatePass() {
   };
 
   return (
+    <div className="outward-gate-pass-wrapper">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="header-content">
+          <div className="header-icon">
+            <ExportOutlined />
+          </div>
+          <div className="header-text">
+            <Title level={3} className="header-title">Outward GatePass</Title>
+            <Text className="header-subtitle">
+              Generate outward gate pass for dispatched items
+            </Text>
+          </div>
+        </div>
+      </div>
 
-    <div className="outward-gate-pass-wrapper" > 
-    <Card
-      className="outward-gate-pass-card"
-    >
-      <Title
-        level={3}
-        className="outward-gate-pass-title"
-      >
-        Outward GatePass
-      </Title>
+      <Card className="outward-gate-pass-card" bordered={false}>
 
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        style={{ width: "100%" }}
-      >
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              label="Party Name"
-              name="partyName"
-              rules={[{ required: true, message: "Please enter party name" }]}
-            >
-              <Input placeholder="Enter party name" />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} sm={12}>
-            <Form.Item
-              label="Party Contact"
-              name="partyContact"
-              rules={[
-                {
-                  validator: (_, value) => {
-                    if (!value || value === "") {
-                      return Promise.resolve();
-                    }
-                    if (!/^[0-9]{10}$/.test(value)) {
-                      return Promise.reject("Please enter a valid 10-digit number");
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
-            >
-              <Input placeholder="Enter contact number" maxLength={10} />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24}>
-            <Form.Item
-              label="Party Address"
-              name="partyAddress"
-              rules={[{ required: true, message: "Please enter address" }]}
-            >
-              <Input.TextArea rows={2} placeholder="Enter party address" />
-            </Form.Item>
-          </Col>
-
-          {role === "admin" && (
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          style={{ width: "100%" }}
+        >
+          <Row gutter={16}>
             <Col xs={24} sm={12}>
               <Form.Item
-                label="Region"
-                name="region"
-                rules={[{ required: true, message: "Please select region" }]}
+                label="Party Name"
+                name="partyName"
+                rules={[{ required: true, message: "Please enter party name" }]}
               >
-                <Select
-                  placeholder="Select region"
-                  showSearch
-                  allowClear
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
-                  }
-                  // --- FIX 2: Corrected the sorting function ---
-                  filterSort={(optionA, optionB) =>
-                    String(optionA?.value ?? '')
-                      .toLowerCase()
-                      .localeCompare(String(optionB?.value ?? '').toLowerCase())
-                  }
-                >
-                  {regions.map((region) => (
-                    <Option key={region} value={region}>
-                      {region}
-                    </Option>
-                  ))}
-                </Select>
+                <Input placeholder="Enter party name" />
               </Form.Item>
             </Col>
-          )}
-        </Row>
 
-        <Divider />
+            <Col xs={24} sm={12}>
+              <Form.Item
+                label="Party Contact"
+                name="partyContact"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (!value || value === "") {
+                        return Promise.resolve();
+                      }
+                      if (!/^[0-9]{10}$/.test(value)) {
+                        return Promise.reject("Please enter a valid 10-digit number");
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <Input placeholder="Enter contact number" maxLength={10} />
+              </Form.Item>
+            </Col>
 
-        <Title
-          level={4}
-          style={{ marginTop: "12px", color: "#283593", fontSize: "16px" }}
-        >
-          Item Details
-        </Title>
+            <Col xs={24}>
+              <Form.Item
+                label="Party Address"
+                name="partyAddress"
+                rules={[{ required: true, message: "Please enter address" }]}
+              >
+                <Input.TextArea rows={2} placeholder="Enter party address" />
+              </Form.Item>
+            </Col>
 
-        {ItemDetails.map((_, index) => (
-          <Card
-            key={index}
-            type="inner"
-            style={{
-              marginBottom: "16px",
-              background: "#fafafa",
-              border: "1px solid #e0e0e0",
-              borderRadius: "10px",
-            }}
+            {role === "admin" && (
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  label="Region"
+                  name="region"
+                  rules={[{ required: true, message: "Please select region" }]}
+                >
+                  <Select
+                    placeholder="Select region"
+                    showSearch
+                    allowClear
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                    }
+                    // --- FIX 2: Corrected the sorting function ---
+                    filterSort={(optionA, optionB) =>
+                      String(optionA?.value ?? '')
+                        .toLowerCase()
+                        .localeCompare(String(optionB?.value ?? '').toLowerCase())
+                    }
+                  >
+                    {regions.map((region) => (
+                      <Option key={region} value={region}>
+                        {region}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            )}
+          </Row>
+
+          <Divider />
+
+          <Title
+            level={4}
+            style={{ marginTop: "12px", color: "#283593", fontSize: "16px" }}
           >
-            <Row gutter={12}>
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item
-                  name={["ItemList", index, "serialNo"]}
-                  label="Serial No"
-                  rules={[{ required: true, message: "Please enter Serial No!" }]}
-                >
-                  <Input placeholder="Enter serial number" />
-                </Form.Item>
-              </Col>
+            Item Details
+          </Title>
 
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item
-                  name={["ItemList", index, "docketOutward"]}
-                  label="Docket Outward"
-                >
-                  <Input placeholder="Enter Docket Outward" />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item
-                  name={["ItemList", index, "remark"]}
-                  label="Remark"
-                >
-                  <Input placeholder="Enter remark (optional)" />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} sm={12} md={6}>
-                <Form.Item
-                  name={["ItemList", index, "fru"]}
-                  label="With RMA"
-                  valuePropName="checked"
-                >
-                  <Switch
-                    checked={fruValue[index] || false}
-                    onChange={(checked) => handleFruChange(index, checked)}
-                  />
-                </Form.Item>
-              </Col>
-
-              {fruValue[index] && (
+          {ItemDetails.map((_, index) => (
+            <Card
+              key={index}
+              type="inner"
+              style={{
+                marginBottom: "16px",
+                background: "#fafafa",
+                border: "1px solid #e0e0e0",
+                borderRadius: "10px",
+              }}
+            >
+              <Row gutter={12}>
                 <Col xs={24} sm={12} md={8}>
                   <Form.Item
-                    name={["ItemList", index, "rmaNo"]}
-                    label="RMA No."
-                    rules={[{ required: true, message: "Please enter RMA No." }]}
+                    name={["ItemList", index, "serialNo"]}
+                    label="Serial No"
+                    rules={[{ required: true, message: "Please enter Serial No!" }]}
                   >
-                    {/* --- FIX 1: Added the missing Input component --- */}
-                    <Input placeholder="Enter RMA No." />
+                    <Input placeholder="Enter serial number" />
                   </Form.Item>
                 </Col>
-              )}
-            </Row>
 
-            <Button
-              type="text"
-              danger
-              onClick={() => removeItemDetail(index)}
-               className="remove-item-button"
-              
-            >
-              Remove Item
+                <Col xs={24} sm={12} md={8}>
+                  <Form.Item
+                    name={["ItemList", index, "docketOutward"]}
+                    label="Docket Outward"
+                  >
+                    <Input placeholder="Enter Docket Outward" />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} sm={12} md={8}>
+                  <Form.Item
+                    name={["ItemList", index, "remark"]}
+                    label="Remark"
+                  >
+                    <Input placeholder="Enter remark (optional)" />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} sm={12} md={6}>
+                  <Form.Item
+                    name={["ItemList", index, "fru"]}
+                    label="With RMA"
+                    valuePropName="checked"
+                  >
+                    <Switch
+                      checked={fruValue[index] || false}
+                      onChange={(checked) => handleFruChange(index, checked)}
+                    />
+                  </Form.Item>
+                </Col>
+
+                {fruValue[index] && (
+                  <Col xs={24} sm={12} md={8}>
+                    <Form.Item
+                      name={["ItemList", index, "rmaNo"]}
+                      label="RMA No."
+                      rules={[{ required: true, message: "Please enter RMA No." }]}
+                    >
+                      {/* --- FIX 1: Added the missing Input component --- */}
+                      <Input placeholder="Enter RMA No." />
+                    </Form.Item>
+                  </Col>
+                )}
+              </Row>
+
+              <Button
+                type="text"
+                danger
+                onClick={() => removeItemDetail(index)}
+                className="remove-item-button"
+
+              >
+                Remove Item
+              </Button>
+            </Card>
+          ))}
+
+          <Form.Item>
+            <Button type="dashed" onClick={addItemDetail} block>
+              + Add Another Item
             </Button>
-          </Card>
-        ))}
+          </Form.Item>
 
-        <Form.Item>
-          <Button type="dashed" onClick={addItemDetail} block>
-            + Add Another Item
-          </Button>
-        </Form.Item>
+          <Divider />
 
-        <Divider />
-
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            style={{ width: "100%", height: "40px", fontWeight: 500 }}
-          >
-            Generate GatePass Outward
-          </Button>
-        </Form.Item>
-      </Form>
-    </Card>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              style={{ width: "100%", height: "40px", fontWeight: 500 }}
+            >
+              Generate GatePass Outward
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
     </div>
   );
 }

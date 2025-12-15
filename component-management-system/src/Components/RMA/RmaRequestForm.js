@@ -302,8 +302,14 @@ function RmaRequestForm() {
         }));
         setSubmittedFormData({ formData: payload, items: itemsWithRma });
         setRmaNumbers(rmaItems);
+<<<<<<< HEAD
         setRmaRequestNumber(result.data?.rmaNo || "");
 
+=======
+        setRmaRequestNumber(result.data?.rmaNo || ""); // Store the RMA request number
+
+        // Save company info for reuse in next request
+>>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
         const companyInfo = {
           companyName: payload.companyName,
           email: payload.email,

@@ -10,8 +10,9 @@ import {
   Col,
   message,
   Divider,
+  Typography,
 } from "antd";
-import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { PlusOutlined, MinusCircleOutlined, ImportOutlined } from "@ant-design/icons";
 import GetItemStatusOptionAPI from "../API/StatusOptions/ItemStatusOption/GetItemStatusOptionAPI";
 import GetRegionAPI from "../API/Region/GetRegion/GetRegionAPI";
 import GetKeywordAPI from "../API/Keyword/GetKeyword/GetKeywordAPI";
@@ -20,6 +21,7 @@ import WarrantyOptionAPI from "../API/RepairingOption/WarrantyOptionAPI";
 import GatepassInwardAPI from "../API/GatePassAPI/GatepassInwardAPI";
 import "./InwardGatePass.css";
 
+const { Title, Text } = Typography;
 const themeColor = "#1f3b57";
 
 function InwardGatePass() {
@@ -54,11 +56,11 @@ function InwardGatePass() {
 
   const updateSubKeyword = (index, selectedKeyword) => {
     if (!selectedKeyword) {
-        setSubKeywords((prev) => {
-            const updated = [...prev];
-            updated[index] = [];
-            return updated;
-          });
+      setSubKeywords((prev) => {
+        const updated = [...prev];
+        updated[index] = [];
+        return updated;
+      });
       return;
     };
     (async () => {
@@ -129,8 +131,22 @@ function InwardGatePass() {
 
   return (
     <div className="inward-gate-pass-container">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="header-content">
+          <div className="header-icon">
+            <ImportOutlined />
+          </div>
+          <div className="header-text">
+            <Title level={3} className="header-title">Inward GatePass</Title>
+            <Text className="header-subtitle">
+              Generate inward gate pass for incoming items
+            </Text>
+          </div>
+        </div>
+      </div>
+
       <Card bordered={false} className="gate-pass-card">
-        <h2 className="gate-pass-title">Inward GatePass</h2>
 
         <Form
           layout="vertical"
@@ -213,7 +229,7 @@ function InwardGatePass() {
           </Row>
 
           <Divider className="item-details-divider">Item Details</Divider>
-          
+
           <div className="item-list-container">
             {itemDetails.map((_, index) => (
               <Card
@@ -222,16 +238,16 @@ function InwardGatePass() {
                 className="item-detail-card"
                 title={`Item ${index + 1}`}
                 extra={
-                    itemDetails.length > 1 && (
+                  itemDetails.length > 1 && (
                     <Button
-                        type="link"
-                        icon={<MinusCircleOutlined />}
-                        danger
-                        onClick={() => removeItemDetail(index)}
+                      type="link"
+                      icon={<MinusCircleOutlined />}
+                      danger
+                      onClick={() => removeItemDetail(index)}
                     >
-                        Remove
+                      Remove
                     </Button>
-                    )
+                  )
                 }
               >
                 <Row gutter={16}>
@@ -323,7 +339,7 @@ function InwardGatePass() {
                       </Form.Item>
                     </Col>
                   )}
-                   <Col xs={24} sm={12} md={8}>
+                  <Col xs={24} sm={12} md={8}>
                     <Form.Item name={["itemList", index, "spareLocation"]} label="Spare Location">
                       <Input placeholder="Enter spare location" />
                     </Form.Item>

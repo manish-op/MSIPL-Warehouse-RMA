@@ -1,132 +1,237 @@
-/* KeywordManagement.css */
-
 .keyword-management-container {
-    padding: 0;
+    padding: 24px;
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    background-color: var(--background-color);
 }
 
+/* --- Page Header --- */
 .keyword-management-header {
-    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-    padding: 32px 40px;
     display: flex;
     align-items: center;
-    gap: 20px;
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    justify-content: flex-start;
+    margin-bottom: 24px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+    border-radius: 12px;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .keyword-management-header .header-icon {
-    font-size: 48px;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 12px;
+    font-size: 28px;
+    color: #fff;
 }
 
+.keyword-management-header .ant-typography {
+    margin: 0 !important;
+    color: #fff !important;
+}
+
+.keyword-management-header h2.ant-typography {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* --- Management Card --- */
 .keyword-management-card {
-    margin: 24px;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    border: none;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--component-background) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
+.keyword-management-card .ant-card-body {
+    padding: 24px;
+}
+
+/* --- Tabs Styling --- */
 .keyword-management-card .ant-tabs-nav {
     margin-bottom: 24px;
 }
 
 .keyword-management-card .ant-tabs-tab {
-    padding: 12px 24px;
-    font-size: 15px;
-    transition: all 0.3s ease;
+    padding: 12px 20px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    color: var(--text-color-secondary);
 }
 
 .keyword-management-card .ant-tabs-tab:hover {
-    color: #1890ff;
+    color: var(--primary-color);
 }
 
 .keyword-management-card .ant-tabs-tab-active {
     font-weight: 600;
+    color: var(--primary-color) !important;
 }
 
 .keyword-management-card .ant-tabs-ink-bar {
-    background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%);
+    background: linear-gradient(90deg, #1f3b57, #2d5a87);
     height: 3px;
+    border-radius: 2px;
 }
 
+/* --- Tab Content --- */
 .tab-content {
     padding: 16px 0;
-    max-width: 600px;
+    max-width: 100%;
+    animation: fadeIn 0.3s ease;
 }
 
 .tab-content .ant-form-item-label>label {
     font-weight: 500;
-    color: #333;
+    color: var(--text-color) !important;
+    font-size: 14px;
 }
 
+/* --- Input Styling --- */
 .tab-content .ant-input,
 .tab-content .ant-select-selector {
-    border-radius: 8px;
+    border-radius: 8px !important;
+    background-color: var(--component-background) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
 }
 
 .tab-content .ant-input:focus,
 .tab-content .ant-input:hover,
 .tab-content .ant-select-selector:hover {
-    border-color: #1890ff;
+    border-color: var(--primary-color) !important;
 }
 
+.tab-content .ant-input-prefix {
+    color: var(--text-color-secondary) !important;
+}
+
+/* --- Submit Button --- */
 .tab-content .ant-btn-primary {
     height: 48px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     border-radius: 8px;
-    background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%);
-    border: none;
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
+    transition: all 0.2s ease;
 }
 
-.tab-content .ant-btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4);
+.tab-content .ant-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(31, 59, 87, 0.4);
 }
 
+.tab-content .ant-btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* --- Dashed Button --- */
 .tab-content .ant-btn-dashed {
     border-radius: 8px;
     border-width: 2px;
+    color: var(--text-color-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.tab-content .ant-btn-dashed:hover {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* --- Divider --- */
+.tab-content .ant-divider {
+    border-color: var(--border-color) !important;
 }
 
 .tab-content .ant-divider-inner-text {
-    color: #666;
+    color: var(--text-color-secondary) !important;
     font-weight: 500;
+    font-size: 13px;
 }
 
-/* Responsive adjustments */
+/* --- Responsive Design --- */
 @media (max-width: 768px) {
+    .keyword-management-container {
+        padding: 16px;
+    }
+
     .keyword-management-header {
-        padding: 20px;
         flex-direction: column;
-        text-align: center;
+        align-items: flex-start;
+        padding: 16px 20px;
+    }
+
+    .keyword-management-header .header-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+    }
+
+    .keyword-management-header h2.ant-typography {
+        font-size: 20px !important;
     }
 
     .keyword-management-card {
-        margin: 16px;
+        margin: 0;
     }
 
-    .tab-content {
-        max-width: 100%;
+    .keyword-management-card .ant-card-body {
+        padding: 16px;
     }
 
     .keyword-management-card .ant-tabs-tab {
-        padding: 8px 12px;
-        font-size: 13px;
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .tab-content .ant-btn-primary {
+        height: 44px;
+        font-size: 14px;
     }
 }
 
-/* Animation */
-.tab-content {
-    animation: fadeIn 0.3s ease;
+@media (max-width: 480px) {
+    .keyword-management-header {
+        padding: 14px 16px;
+    }
+
+    .keyword-management-header .header-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+        border-radius: 10px;
+    }
+
+    .keyword-management-card .ant-tabs-tab {
+        padding: 8px 8px;
+        font-size: 10px;
+    }
+
+    /* Make tabs horizontally scrollable on very small screens */
+    .keyword-management-card .ant-tabs-nav-list {
+        flex-wrap: nowrap;
+    }
+
+    .keyword-management-card .ant-tabs-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Keep tab labels visible with nowrap */
+    .keyword-management-card .ant-tabs-tab span {
+        white-space: nowrap;
+    }
 }
 
+/* --- Animation --- */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -137,4 +242,55 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* --- Dark Theme Enhancements --- */
+[data-theme='dark'] .keyword-management-header {
+    background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .keyword-management-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .tab-content .ant-btn-primary {
+    box-shadow: 0 4px 12px rgba(31, 59, 87, 0.2);
+}
+
+[data-theme='dark'] .keyword-management-card .ant-tabs-tab-active {
+    color: #5a9fd4 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-tabs-tab:hover {
+    color: #5a9fd4;
+}
+
+/* Dark Theme Form Label and Input Fix */
+[data-theme='dark'] .keyword-management-card .ant-form-item-label>label {
+    color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-input,
+[data-theme='dark'] .keyword-management-card .ant-input-affix-wrapper {
+    color: #e8e6e3 !important;
+    background-color: #2d2d2d !important;
+    border-color: #434343 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-input::placeholder {
+    color: #888888 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-select-selector {
+    background-color: #2d2d2d !important;
+    border-color: #434343 !important;
+}
+
+[data-theme='dark'] .keyword-management-card .ant-select-selection-item,
+[data-theme='dark'] .keyword-management-card .ant-select-selection-placeholder {
+    color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .tab-content .ant-divider-inner-text {
+    color: #a0a0a0 !important;
 }

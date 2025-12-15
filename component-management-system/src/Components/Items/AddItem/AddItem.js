@@ -18,6 +18,9 @@ import {
   Menu,
   Grid,
 } from "antd";
+import {
+  AppstoreAddOutlined,
+} from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import GetRegionAPI from "../../API/Region/GetRegion/GetRegionAPI";
 import GetKeywordAPI from "../../API/Keyword/GetKeyword/GetKeywordAPI";
@@ -26,7 +29,7 @@ import GetItemAvailabilityStatusOptionAPI from "../../API/StatusOptions/ItemAvai
 import GetItemStatusOptionAPI from "../../API/StatusOptions/ItemStatusOption/GetItemStatusOptionAPI";
 import AddItemAPI from "../../API/ItemRelatedApi/AddItem/AddItemAPI";
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 const { useBreakpoint } = Grid;
 
 const DRAFT_KEY = "additem:draft";
@@ -347,7 +350,7 @@ function AddItem() {
       try {
         localStorage.setItem(LAST_KEY, JSON.stringify(payload));
         localStorage.removeItem(DRAFT_KEY);
-      } catch {}
+      } catch { }
       form.resetFields();
     } catch (err) {
       console.error("Add item error:", err);
@@ -367,9 +370,25 @@ function AddItem() {
   );
 
   return (
-    <>
-      <title>Add New Item</title>
+    <div className="add-item-page">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="header-content">
+          <div className="header-icon">
+            <AppstoreAddOutlined />
+          </div>
+          <div className="header-text">
+            <Title level={3} className="header-title">Add New Item</Title>
+            <Text className="header-subtitle">
+              Add new inventory items to the system
+            </Text>
+          </div>
+        </div>
+      </div>
+
       <Card
+        className="add-item-card"
+        bordered={false}
         title={
           <div className="toolbar-wrap" style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -494,7 +513,7 @@ function AddItem() {
                 rules={[
                   { required: true, message: "Please select Availability Status!" },
                 ]}
-              > 
+              >
                 <Select showSearch allowClear placeholder="Select Availability">
                   {itemAvailabilityOption?.map((itemAvailStatus) => (
                     <Select.Option key={itemAvailStatus} value={itemAvailStatus}>
@@ -638,7 +657,7 @@ function AddItem() {
           )}
         </Form>
       </Card>
-    </>
+    </div>
   );
 }
 
