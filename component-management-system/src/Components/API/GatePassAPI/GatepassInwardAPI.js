@@ -29,9 +29,19 @@ const getFilenameFromContentDisposition = (contentDisposition) => {
 
 // API Function
 async function GatepassInwardAPI(data) {
+  const authCookie = Cookies.get("authToken");
+  if (!authCookie) {
+    message.error("Not authenticated. Please login first.", 5);
+    return;
+  }
 
-  const token = atob(Cookies.get("authToken"));
-  // const token = Cookies.get("authToken"); // <-- Use this if it's a normal JWT
+  let token;
+  try {
+    token = atob(authCookie);
+  } catch (e) {
+    message.error("Invalid authentication token. Please login again.", 5);
+    return;
+  }
 
   await fetch(manualURL + "/gatepass/inwardGatepass", {
     method: "POST",

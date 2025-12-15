@@ -108,7 +108,7 @@ public class RmaController {
     }
 
     @PutMapping("/items/{id}/assign")
-    public ResponseEntity<?> assignItem(HttpServletRequest request, @PathVariable Long id,
+    public ResponseEntity<?> assignItem(HttpServletRequest request, @PathVariable("id") Long id,
             @RequestBody Map<String, String> payload) {
         try {
             String assigneeEmail = payload.get("assigneeEmail");
@@ -135,7 +135,7 @@ public class RmaController {
     }
 
     @PutMapping("/items/{id}/rma-number")
-    public ResponseEntity<?> updateItemRmaNumber(HttpServletRequest request, @PathVariable Long id,
+    public ResponseEntity<?> updateItemRmaNumber(HttpServletRequest request, @PathVariable("id") Long id,
             @RequestBody Map<String, String> payload) {
         try {
             String rmaNo = payload.get("rmaNo");
@@ -147,7 +147,7 @@ public class RmaController {
     }
 
     @PutMapping("/items/{id}/status")
-    public ResponseEntity<?> updateItemStatus(HttpServletRequest request, @PathVariable Long id,
+    public ResponseEntity<?> updateItemStatus(HttpServletRequest request, @PathVariable("id") Long id,
             @RequestBody Map<String, String> payload) {
         try {
             String status = payload.get("status");
@@ -181,7 +181,7 @@ public class RmaController {
     }
 
     @GetMapping("/audit-logs/item/{itemId}")
-    public ResponseEntity<?> getAuditLogsByItemId(@PathVariable Long itemId) {
+    public ResponseEntity<?> getAuditLogsByItemId(@PathVariable("itemId") Long itemId) {
         try {
             return rmaService.getAuditLogsByItemId(itemId);
         } catch (Exception e) {
@@ -244,7 +244,7 @@ public class RmaController {
      * Search customers by company name or email (for auto-complete)
      */
     @GetMapping("/customers/search")
-    public ResponseEntity<?> searchCustomers(@RequestParam(required = false) String q) {
+    public ResponseEntity<?> searchCustomers(@RequestParam(name = "q", required = false) String q) {
         try {
             return customerService.searchCustomers(q);
         } catch (Exception e) {
@@ -257,7 +257,7 @@ public class RmaController {
      * Get customer by ID
      */
     @GetMapping("/customers/{id}")
-    public ResponseEntity<?> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<?> getCustomerById(@PathVariable("id") Long id) {
         try {
             return customerService.getCustomerById(id);
         } catch (Exception e) {
@@ -276,7 +276,7 @@ public class RmaController {
      */
     @PostMapping("/gatepass/generate/{requestNumber}")
     public ResponseEntity<?> generateInwardGatepass(HttpServletRequest request,
-            @PathVariable String requestNumber) {
+            @PathVariable("requestNumber") String requestNumber) {
         try {
             return rmaInwardGatepassService.generateGatepass(request, requestNumber);
         } catch (Exception e) {
@@ -284,7 +284,6 @@ public class RmaController {
             return ResponseEntity.status(500).body("Failed to generate gatepass: " + e.getMessage());
         }
     }
-<<<<<<< HEAD
 
     @Autowired
     private com.serverManagement.server.management.service.rma.RmaPdfService rmaPdfService;
@@ -308,6 +307,4 @@ public class RmaController {
             return ResponseEntity.status(500).body("Failed to generate Delivery Challan: " + e.getMessage());
         }
     }
-=======
->>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
 }

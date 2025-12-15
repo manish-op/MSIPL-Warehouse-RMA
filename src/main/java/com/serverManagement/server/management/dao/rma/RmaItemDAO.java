@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.serverManagement.server.management.entity.rma.RmaItemEntity;
@@ -13,11 +14,11 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
 
     // Count items by repair status (case-insensitive)
     @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = LOWER(:status)")
-    long countByRepairStatusIgnoreCase(String status);
+    long countByRepairStatusIgnoreCase(@Param("status") String status);
 
     // Count items where repair status contains a keyword (for flexible matching)
     @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    long countByRepairStatusContaining(String keyword);
+    long countByRepairStatusContaining(@Param("keyword") String keyword);
 
     // Count items that are NOT repaired (null, empty, or not containing 'repaired')
     @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE r.repairStatus IS NULL OR r.repairStatus = '' OR LOWER(r.repairStatus) NOT LIKE '%repaired%'")
@@ -59,7 +60,7 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
 
     // Find items assigned to a specific user
     @Query("SELECT r FROM RmaItemEntity r WHERE r.assignedToEmail = :email")
-    List<RmaItemEntity> findByAssignedToEmail(String email);
+    List<RmaItemEntity> findByAssignedToEmail(@Param("email") String email);
 
     // Find items by their item-level RMA number (legacy)
     List<RmaItemEntity> findByRmaNo(String rmaNo);
@@ -67,7 +68,7 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     // Find unassigned items by RMA number (for bulk assignment)
     // Note: Uses requestNumber (auto-generated) since rmaNo is assigned later
     @Query("SELECT r FROM RmaItemEntity r WHERE r.rmaRequest.requestNumber = :rmaNo AND (r.assignedToEmail IS NULL OR r.assignedToEmail = '')")
-    List<RmaItemEntity> findUnassignedByRmaNo(String rmaNo);
+    List<RmaItemEntity> findUnassignedByRmaNo(@Param("rmaNo") String rmaNo);
 
     // -----------New Methods for Depot Dispatch------------------
     // Depot: items waiting for dispatch to bangalore

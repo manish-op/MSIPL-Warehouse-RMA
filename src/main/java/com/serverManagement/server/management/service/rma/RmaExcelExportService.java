@@ -24,13 +24,6 @@ public class RmaExcelExportService {
     public ByteArrayResource exportToExcel(Map<String, Object> formData, List<Map<String, Object>> items)
             throws Exception {
 
-        System.out.println("=== RMA EXCEL EXPORT DEBUG ===");
-        System.out.println("Items received: " + items.size());
-        if (!items.isEmpty()) {
-            System.out.println("First item keys: " + items.get(0).keySet());
-            System.out.println("First item: " + items.get(0));
-        }
-
         ClassPathResource resource = new ClassPathResource(TEMPLATE_PATH);
 
         try (InputStream templateStream = resource.getInputStream();
@@ -42,7 +35,6 @@ public class RmaExcelExportService {
             if (sheet == null) {
                 throw new IllegalStateException("Sheet 'India Repair Request Form' not found in template");
             }
-            System.out.println("Using sheet: " + sheet.getSheetName());
 
             // ===== Transport block (Rows 4-8, 0-indexed) =====
             // Labels are in column A, values go in column G (index 6)
@@ -89,35 +81,21 @@ public class RmaExcelExportService {
                 int lastRowNum = sheet.getLastRowNum();
                 if (lastRowNum >= shiftStartRow) {
                     sheet.shiftRows(shiftStartRow, lastRowNum, additionalItemsCount);
-                    System.out.println(
-                            "Shifted rows " + shiftStartRow + " to " + lastRowNum + " down by " + additionalItemsCount);
                 }
             }
-
-            System.out.println("Writing " + items.size() + " items starting at row " + itemStartRow);
 
             // Set a consistent shorter row height for all item rows
             // 300 = ~15pt, 400 = ~20pt, 500 = ~25pt (Excel uses 1/20th of a point)
             short itemRowHeight = 300;
-            System.out.println("Using item row height: " + itemRowHeight);
 
             for (int i = 0; i < items.size(); i++) {
                 Map<String, Object> item = items.get(i);
                 int rowNum = itemStartRow + i;
 
-                // Debug: print all item values
-                System.out.println("=== ITEM " + (i + 1) + " DEBUG ===");
-                System.out.println("  Keys in item map: " + item.keySet());
-                for (String key : item.keySet()) {
-                    System.out.println("  " + key + " = '" + item.get(key) + "'");
-                }
-                System.out.println("Writing to row " + rowNum);
-
                 // Get or create row
                 Row row = sheet.getRow(rowNum);
                 if (row == null) {
                     row = sheet.createRow(rowNum);
-                    System.out.println("Created new row " + rowNum);
                 }
 
                 // Set consistent row height for all item rows
@@ -161,7 +139,6 @@ public class RmaExcelExportService {
 
             workbook.setForceFormulaRecalculation(true);
             workbook.write(outputStream);
-            System.out.println("Excel export completed successfully");
 
             return new ByteArrayResource(outputStream.toByteArray());
         }

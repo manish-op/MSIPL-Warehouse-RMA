@@ -22,9 +22,9 @@ export const AlertApi = {
         message.error(mess || "Failed to fetch alerts.", 5);
         return null;
       }
-      
+
       return await response.json(); // Returns { count, messages }
-    
+
     } catch (error) {
       // This will catch network errors
       message.error("API Network Error: " + error.message, 5);

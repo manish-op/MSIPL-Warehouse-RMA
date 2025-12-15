@@ -1,14 +1,19 @@
 package com.serverManagement.server.management.controller.rma;
 
+import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
+import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
 import com.serverManagement.server.management.dao.rma.RmaItemDAO;
 import com.serverManagement.server.management.dto.rma.DepotDispatchItemDto;
 import com.serverManagement.server.management.dto.rma.DepotDispatchRequest;
+import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import com.serverManagement.server.management.entity.rma.DepotDispatchEntity;
+import com.serverManagement.server.management.entity.rma.RmaAuditLogEntity;
 import com.serverManagement.server.management.entity.rma.RmaItemEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -16,9 +21,13 @@ import java.util.List;
 public class RmaDepotDispatchController {
 
     private final RmaItemDAO rmaItemDAO;
+    private final RmaAuditLogDAO rmaAuditLogDAO;
+    private final AdminUserDAO adminUserDAO;
 
-    public RmaDepotDispatchController(RmaItemDAO rmaItemDAO) {
+    public RmaDepotDispatchController(RmaItemDAO rmaItemDAO, RmaAuditLogDAO rmaAuditLogDAO, AdminUserDAO adminUserDAO) {
         this.rmaItemDAO = rmaItemDAO;
+        this.rmaAuditLogDAO = rmaAuditLogDAO;
+        this.adminUserDAO = adminUserDAO;
     }
 
     // 1) GET: depot items waiting for first dispatch
@@ -33,7 +42,18 @@ public class RmaDepotDispatchController {
 
     // 2) POST: mark as dispatched to Bangalore
     @PostMapping("/depot/dispatch-to-bangalore")
-    public ResponseEntity<?> dispatchToBangalore(@RequestBody DepotDispatchRequest req) {
+    public ResponseEntity<?> dispatchToBangalore(HttpServletRequest request, @RequestBody DepotDispatchRequest req) {
+        // Get logged in user for audit
+        String loggedInUserEmail = null;
+        String loggedInUserName = null;
+        try {
+            loggedInUserEmail = request.getUserPrincipal().getName();
+            AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+            loggedInUserName = loggedInUser != null ? loggedInUser.getName() : loggedInUserEmail;
+        } catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
         List<RmaItemEntity> items = rmaItemDAO.findAllById(req.getItemIds());
         if (items.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -58,18 +78,28 @@ public class RmaDepotDispatchController {
             if (!"DEPOT".equalsIgnoreCase(item.getRepairType())) {
                 continue;
             }
-            item.setDepotStage("IN_TRANSIT_TO_DEPOT");
 
-            // Link to the new dispatch entity
-            // Since CascadeType.ALL is on RmaItemEntity.depotDispatch, saving items should
-            // save the dispatch too.
-            // However, we want them to share the SAME dispatch instance.
+            String oldStage = item.getDepotStage();
+            item.setDepotStage("IN_TRANSIT_TO_DEPOT");
             item.setDepotDispatch(dispatch);
 
-            // We do NOT need to set the individual fields on item anymore as they delegate
-            // to this entity
-            // But we must ensure the getter/setter delegation in RmaItemEntity works if
-            // called (which we did).
+            // Create Audit Log for DC Generation / Dispatch
+            RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
+            auditLog.setRmaItemId(item.getId());
+            // Use assigned RMA number if available, otherwise fallback to request number
+            String rmaNo = item.getRmaNo() != null ? item.getRmaNo()
+                    : (item.getRmaRequest() != null ? item.getRmaRequest().getRequestNumber() : null);
+            auditLog.setRmaNo(rmaNo);
+            auditLog.setAction("DISPATCHED_TO_DEPOT");
+            auditLog.setOldValue("Stage: " + (oldStage != null ? oldStage : "PENDING"));
+            auditLog.setNewValue("Stage: IN_TRANSIT_TO_DEPOT, DC No: " + req.getDcNo() +
+                    ", Courier: " + req.getCourierName() + ", Tracking: " + req.getTrackingNo());
+            auditLog.setPerformedByEmail(loggedInUserEmail);
+            auditLog.setPerformedByName(loggedInUserName);
+            auditLog.setIpAddress(getClientIpAddress(request));
+            auditLog.setRemarks("DC generated and item dispatched to Bangalore depot");
+
+            rmaAuditLogDAO.save(auditLog);
         }
 
         rmaItemDAO.saveAll(items);
@@ -93,7 +123,18 @@ public class RmaDepotDispatchController {
 
     // 4) POST: mark as received at depot
     @PostMapping("/depot/mark-received")
-    public ResponseEntity<?> markAsReceived(@RequestBody DepotDispatchRequest req) {
+    public ResponseEntity<?> markAsReceived(HttpServletRequest request, @RequestBody DepotDispatchRequest req) {
+        // Get logged in user for audit
+        String loggedInUserEmail = null;
+        String loggedInUserName = null;
+        try {
+            loggedInUserEmail = request.getUserPrincipal().getName();
+            AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+            loggedInUserName = loggedInUser != null ? loggedInUser.getName() : loggedInUserEmail;
+        } catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
         List<RmaItemEntity> items = rmaItemDAO.findAllById(req.getItemIds());
         if (items.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -104,14 +145,44 @@ public class RmaDepotDispatchController {
             if (!"DEPOT".equalsIgnoreCase(item.getRepairType())) {
                 continue;
             }
-            // Update stage to specific received status, NOT 'REPAIRED' status
+
+            String oldStage = item.getDepotStage();
             item.setDepotStage("AT_DEPOT_RECEIVED");
-            // We do NOT touch repairStatus, so it remains active/unrepaired in the main
-            // flow
-            // giving visibility in this specific Depot page tabs if needed later
+
+            // Create Audit Log for status change
+            RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
+            auditLog.setRmaItemId(item.getId());
+            // Use assigned RMA number if available, otherwise fallback to request number
+            String rmaNo = item.getRmaNo() != null ? item.getRmaNo()
+                    : (item.getRmaRequest() != null ? item.getRmaRequest().getRequestNumber() : null);
+            auditLog.setRmaNo(rmaNo);
+            auditLog.setAction("DEPOT_STATUS_CHANGED");
+            auditLog.setOldValue("Stage: " + (oldStage != null ? oldStage : "UNKNOWN"));
+            auditLog.setNewValue("Stage: AT_DEPOT_RECEIVED");
+            auditLog.setPerformedByEmail(loggedInUserEmail);
+            auditLog.setPerformedByName(loggedInUserName);
+            auditLog.setIpAddress(getClientIpAddress(request));
+            auditLog.setRemarks("Item marked as received at Bangalore depot");
+
+            rmaAuditLogDAO.save(auditLog);
         }
 
         rmaItemDAO.saveAll(items);
         return ResponseEntity.ok("Items marked as Received at Depot");
+    }
+
+    /**
+     * Helper method to extract client IP address from request
+     */
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+        return request.getRemoteAddr();
     }
 }

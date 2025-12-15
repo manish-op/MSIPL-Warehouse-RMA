@@ -56,10 +56,22 @@ public class ItemHistoryUpdatedByAdminService {
                         .body("Serial number is required");
             }
 
-            List<ItemHistoryUpdatedByAdminEntity> historyDetailsList = itemDetailsDAO
-                    .getComponentHistorySerialNo(serialNo.trim().toLowerCase());
+            // Clean the serial number - remove quotes if present from JSON string
+            String cleanSerialNo = serialNo.trim().toLowerCase();
+            if (cleanSerialNo.startsWith("\"") && cleanSerialNo.endsWith("\"")) {
+                cleanSerialNo = cleanSerialNo.substring(1, cleanSerialNo.length() - 1);
+            }
 
-            if (historyDetailsList.isEmpty()) {
+            // First try direct query from history table
+            List<ItemHistoryUpdatedByAdminEntity> historyDetailsList = historyDAO
+                    .getHistoryDetailsBySerialNo(cleanSerialNo);
+
+            // Fallback to ItemDetailsEntity relationship if direct query returns empty
+            if (historyDetailsList == null || historyDetailsList.isEmpty()) {
+                historyDetailsList = itemDetailsDAO.getComponentHistorySerialNo(cleanSerialNo);
+            }
+
+            if (historyDetailsList == null || historyDetailsList.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No history found for this serial number");
             }
@@ -71,7 +83,8 @@ public class ItemHistoryUpdatedByAdminService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
         }
     }
 

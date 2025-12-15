@@ -3,35 +3,56 @@ import { URL } from "../../URL";
 import { message } from "antd";
 
 async function GetItemHistoryBySerialNoAPI(values, setItemHistory, navigate) {
-  const token = atob(Cookies.get("authToken"));
+  const authCookie = Cookies.get("authToken");
+  if (!authCookie) {
+    message.error("Not authenticated. Please login first.", 5);
+    return;
+  }
 
-  await fetch(URL+"/componentDetails/history", {
+  let token;
+  try {
+    token = atob(authCookie);
+  } catch (e) {
+    message.error("Invalid authentication token. Please login again.", 5);
+    return;
+  }
+
+  console.log("Fetching history for serialNo:", values.serialNo);
+
+  await fetch(URL + "/componentDetails/history", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: values.serialNo,
+    body: JSON.stringify(values.serialNo),
   })
     .then(async (response) => {
       if (!response.ok) {
-        const mess= await response.text(); 
-          return message.warning(mess, 5);
-        
+        const mess = await response.text();
+        console.error("API Error:", mess);
+        return message.warning(mess, 5);
+
       } else {
         const data = await response.json();
-        if(data){
-        setItemHistory(data);
-        return navigate("/dashboard/historyTable");
-        }else{
-          message.warning("Not get any data",5);
+        console.log("History data received:", data);
+        if (data && Array.isArray(data) && data.length > 0) {
+          // Save to localStorage first to ensure data persists across navigation
+          localStorage.setItem('itemHistory', JSON.stringify(data));
+          setItemHistory(data);
+          // Small delay to ensure state update completes before navigation
+          setTimeout(() => {
+            navigate("/dashboard/historyTable");
+          }, 100);
+        } else {
+          message.warning("No history found for this serial number", 5);
         }
-        
+
       }
     })
     .catch((error) => {
-      
-        message.error("API Error:"+ error.message,5);
+      console.error("API Error:", error);
+      message.error("API Error:" + error.message, 5);
     });
 }
 
