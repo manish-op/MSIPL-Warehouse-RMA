@@ -16,6 +16,8 @@ import {
   message,
   Result,
   AutoComplete,
+  Modal,
+  Radio,
 } from "antd";
 import {
   PlusOutlined,
@@ -55,6 +57,10 @@ function RmaRequestForm() {
   const [productCatalog, setProductCatalog] = useState(DEFAULT_PRODUCT_CATALOG);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [submittedFormData, setSubmittedFormData] = useState(null); // Store form data for Excel export
+  const [repairType, setRepairType] = useState(null);
+  const [previewData, setPreviewData] = useState(null);
+  const [conformVisible, setConfrimVisible] = useState(false);
+  const [finalSubmitting, setFinalSubmitting] = useState(false);
 
   // Customer auto-complete state
   const [customerOptions, setCustomerOptions] = useState([]);
@@ -225,10 +231,28 @@ function RmaRequestForm() {
 
   // Handle form submission
   const handleSubmit = async () => {
-    setLoading(true);
     try {
       const values = await form.validateFields();
+      setPreviewData(values);
+      setRepairType(null); // Reset repair type
+      setConfrimVisible(true);
+    } catch (error) {
+      console.error("Validation failed:", error);
+      message.error("Please fill all required fields");
+    }
+  };
 
+  const finalSubmit = async () => {
+    if (!repairType) {
+      message.warning("Please select Local Repair or Depot Repair");
+      return;
+    }
+    setFinalSubmitting(true);
+    setLoading(true);
+
+    try {
+      const values = await form.validateFields();
+      
       const payload = {
         dplLicense: values.dplLicense || "",
         date: new Date().toISOString().split('T')[0],
@@ -248,6 +272,8 @@ function RmaRequestForm() {
         invoiceMobile: values.invoiceMobile || "",
         invoiceAddress: values.invoiceAddress || "",
         signature: values.signature || values.contactName,
+        repairType: repairType,
+        
         items: (values.items || []).map(item => ({
           product: item.product,
           model: item.partNo || "",
@@ -270,12 +296,10 @@ function RmaRequestForm() {
 
       if (result.success) {
         const rmaItems = result.data?.items || [];
-        // Merge RMA numbers from response with full payload items for Excel export
         const itemsWithRma = payload.items.map((item, index) => ({
           ...item,
           rmaNo: rmaItems[index]?.rmaNo || ""
         }));
-        // Store form data for Excel export before resetting
         setSubmittedFormData({ formData: payload, items: itemsWithRma });
         setRmaNumbers(rmaItems);
         setRmaRequestNumber(result.data?.rmaNo || ""); // Store the RMA request number
@@ -300,6 +324,7 @@ function RmaRequestForm() {
         setSubmitted(true);
         form.resetFields();
         localStorage.removeItem("rmaFormData");
+        setConfrimVisible(false); // Close modal
       } else {
         message.error(result.error || "Failed to submit RMA request");
       }
@@ -308,8 +333,10 @@ function RmaRequestForm() {
       message.error("Please fill all required fields");
     } finally {
       setLoading(false);
+      setFinalSubmitting(false);
     }
   };
+
 
   // Steps configuration
   const steps = [
@@ -756,17 +783,39 @@ function RmaRequestForm() {
                         <Row gutter={[16, 0]}>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Encryption" name={[name, "encryption"]}>
-                              <Input placeholder="e.g., None, AES, DES" />
+                              <Select placeholder="Select" defaultValue="None">
+                                <Option value="TETRA">Tetra</Option>
+                                <Option value="ASTRO">Astro</Option>
+                              </Select>
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Firmware Version" name={[name, "firmwareVersion"]}>
-                              <Input placeholder="e.g., R02.01.00" />
+                              <Select placeholder="Select">
+                                <Option value="TETRA">Tetra</Option>
+                                <Option value="ASTRO">Astro</Option>
+                              </Select>
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Invoice No." name={[name, "invoiceNo"]}>
                               <Input placeholder="For accessories" />
+                            </Form.Item>
+                          </Col>
+                          <Col xs={24} md={8}>
+                          <Form.Item {...restField} label="Lower Firmaware Version" name={[name, "lowerFirmwareVersion"]}>
+                            <Select placeholder="Select">
+                             <Option value="Follow Depot Mainboard Inventory Version">Follow Depot Mainboard Inventory Version</Option>
+                             <Option value="Return Unrepaired">Return Unrepaired</Option>
+                            </Select>
+                          </Form.Item>
+                          </Col>
+                          <Col xs={12} md={8}>
+                            <Form.Item {...restField} label="Partial Shipment" name={[name, "partialshipment"]}>
+                              <Select placeholder="Select">
+                                <Option value="Y">Yes</Option>
+                                <Option value="N">No</Option>
+                              </Select>
                             </Form.Item>
                           </Col>
                         </Row>
@@ -902,6 +951,73 @@ function RmaRequestForm() {
             </Space>
           </div>
         </Card>
+
+        <Modal
+          title="Confirm RMA Submission"
+          open={conformVisible}
+          onCancel={() => setConfrimVisible(false)}
+          footer={[
+            <Button key="back" onClick={() => setConfrimVisible(false)}>
+              Cancel
+            </Button>,
+            <Button 
+              key="submit" 
+              type="primary" 
+              loading={finalSubmitting}
+              onClick={finalSubmit}
+            >
+              Confirm Submit
+            </Button>,
+          ]}
+          width={700}
+        >
+          <div style={{ padding: "10px 0" }}>
+            <Title level={5}>Select Repair Type</Title>
+            <Radio.Group 
+              onChange={(e) => setRepairType(e.target.value)} 
+              value={repairType}
+              style={{ marginBottom: 20 }}
+            >
+              <Radio value="Local Repair">Local Repair</Radio>
+              <Radio value="Depot Repair">Depot Repair</Radio>
+            </Radio.Group>
+
+            {previewData && (
+              <div style={{ background: "#f5f5f5", padding: 15, borderRadius: 8 }}>
+                <Title level={5}>Request Preview</Title>
+                <Row gutter={[16, 8]}>
+                  <Col span={12}>
+                    <Text type="secondary">Company:</Text> <Text strong>{previewData.companyName}</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Contact:</Text> <Text strong>{previewData.contactName}</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Transport:</Text> <Text strong>{previewData.modeOfTransport}</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Total Items:</Text> <Text strong>{previewData.items?.length || 0}</Text>
+                  </Col>
+                </Row>
+                
+                <Divider style={{ margin: "12px 0" }} />
+                
+                <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                  <Text strong>Items:</Text>
+                  <ul style={{ paddingLeft: 20, margin: "5px 0" }}>
+                    {previewData.items?.map((item, idx) => (
+                      <li key={idx}>
+                        <Text>{item.product} ({item.serialNo})</Text>
+                        <br/>
+                        <Text type="secondary" style={{fontSize: 12}}>{item.faultDescription}</Text>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+        </Modal>
       </div>
     </RmaLayout>
   );

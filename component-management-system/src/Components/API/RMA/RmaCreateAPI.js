@@ -111,6 +111,57 @@ export const RmaApi = {
   getAssignedItems: async () => apiGet("/rma/items/assigned"),
   getRepairedItems: async () => apiGet("/rma/items/repaired"),
   getCantBeRepairedItems: async () => apiGet("/rma/items/cant-be-repaired"),
+  //Depot Dispatch APIs
+  getDepotReadyToDispatch: async ()=> apiGet("/rma/depot/ready-to-dispatch"),
+  dispatchToBangalore :async (payload)=>{
+    const token = getAuthToken();
+    if(!token) return {success:false,error:"No authentication token found"};
+
+    try{
+      const response = await fetch(`${URL}/rma/depot/dispatch-to-bangalore`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          Authorization:`Bearer ${token}`,
+        },
+        body: JSON.stringify(payload)
+      });
+      if(!response.ok){
+        const errorText = await response.text();
+        return {success: false,error:errorText || "Failed to dispatch to Bangalore"};
+      }
+      const text = await response.text();
+      return {success:true, message:text};
+    }catch(error){
+      return {success: false, error:error.message};
+    }
+  },
+  getDepotInTransit: async () => apiGet("/rma/depot/in-transit"),
+  markDepotReceived: async (payload) => {
+    const token = getAuthToken();
+    if(!token) return {success:false,error:"No authentication token found"};
+
+    try{
+      const response = await fetch(`${URL}/rma/depot/mark-received`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          Authorization:`Bearer ${token}`,
+        },
+        body: JSON.stringify(payload)
+      });
+      if(!response.ok){
+        const errorText = await response.text();
+        return {success: false,error:errorText || "Failed to mark as received"};
+      }
+      const text = await response.text();
+      return {success:true, message:text};
+    }catch(error){
+      return {success: false, error:error.message};
+    }
+  },
+
+  getAllTransporters: async () => apiGet("/transporters"),
 
   // Get product catalog from ItemDetailsEntity
   getProductCatalog: async () => apiGet("/rma/product-catalog"),
@@ -193,6 +244,46 @@ export const RmaApi = {
       return { success: true, blob };
     } catch (error) {
       return { success: false, error: error.message };
+    }
+  },
+
+  // Generate Delivery Challan PDF
+  generateDeliveryChallan: async (data) => {
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error("No authentication token");
+    }
+    try {
+        const response = await fetch(`${URL}/rma/delivery-challan/generate`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+             const errorText = await response.text();
+             throw new Error(errorText);
+        }
+        const blob = await response.blob();
+        // Trigger download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `DeliveryChallan_${data.rmaNo}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Delay cleanup to allow download to start
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }, 1000);
+
+        return { success: true };
+    } catch (error) {
+        throw error;
     }
   },
 };

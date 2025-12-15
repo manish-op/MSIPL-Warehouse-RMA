@@ -139,6 +139,7 @@ public class RmaService {
 
         // Map signature
         rmaRequestEntity.setSignature(createRmaRequest.getSignature());
+        rmaRequestEntity.setRepairType(createRmaRequest.getRepairType());
 
         // Set audit fields
         ZonedDateTime now = ZonedDateTime.now();
@@ -190,6 +191,9 @@ public class RmaService {
         List<RmaItemEntity> rmaItemEntities = new ArrayList<>();
         List<RmaItemResponse> itemResponses = new ArrayList<>();
 
+        // request level repair type
+        String repairType = createRmaRequest.getRepairType(); // local or depot
+
         for (int i = 0; i < createRmaRequest.getItems().size(); i++) {
             RmaItemRequest itemRequest = createRmaRequest.getItems().get(i);
 
@@ -209,6 +213,7 @@ public class RmaService {
             itemEntity.setEncryption(itemRequest.getEncryption());
             itemEntity.setFirmwareVersion(itemRequest.getFirmwareVersion());
             itemEntity.setLowerFirmwareVersion(itemRequest.getLowerFirmwareVersion());
+            itemEntity.setPartialShipment(itemRequest.getPartialShipment());
             itemEntity.setRemarks(itemRequest.getRemarks());
 
             // Note: RMA number is now stored at request level, not item level
@@ -218,6 +223,20 @@ public class RmaService {
 
             // Set relationship
             itemEntity.setRmaRequest(rmaRequestEntity);
+
+            // -------------DEPOT VS LOCAL STAGE LOGIC-------------
+
+            if ("DEPOT".equalsIgnoreCase(repairType) || "Depot Repair".equalsIgnoreCase(repairType)) {
+                itemEntity.setRepairType("DEPOT"); // Normalize to DEPOT
+                // First for depot items:waiting to be dispatched
+                itemEntity.setDepotStage("PENDING_DISPATCH_TO_DEPOT");
+                itemEntity.setLocalStage(null);
+            } else {
+                itemEntity.setRepairType(repairType); // Keep original for others
+                // local repair starts at unrepaired page
+                itemEntity.setLocalStage("UNASSIGNED");
+                itemEntity.setDepotStage(null);
+            }
 
             rmaItemEntities.add(itemEntity);
 
@@ -641,11 +660,19 @@ public class RmaService {
             // Note: rmaNo is for actual RMA number assigned later, requestNumber is
             // auto-generated
             if (item.getRmaRequest() != null) {
-                dto.setRmaNo(item.getRmaRequest().getRequestNumber()); // Display request number
+                String reqNo = item.getRmaRequest().getRequestNumber();
+                dto.setRmaNo(reqNo != null ? reqNo : item.getRmaNo()); // Fallback to item rmaNo if request number is
+                                                                       // null
+
                 // Set customer and date info for FRU sticker display
                 dto.setCompanyName(item.getRmaRequest().getCompanyName());
                 dto.setReceivedDate(item.getRmaRequest().getCreatedDate());
+                dto.setRepairType(item.getRmaRequest().getRepairType());
+            } else {
+                // Fallback for items with missing parent request (Legacy data)
+                dto.setRmaNo(item.getRmaNo());
             }
+
             // Set the item-level RMA number (distinct from parent request number)
             dto.setItemRmaNo(item.getRmaNo());
             dto.setIssueFixed(item.getIssueFixed());

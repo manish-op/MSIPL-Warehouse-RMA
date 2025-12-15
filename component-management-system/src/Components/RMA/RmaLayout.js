@@ -14,6 +14,7 @@ import {
   WarningOutlined,
   HistoryOutlined,
   SwapOutlined,
+  CarOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../Header/Header"; // Import Global Header
@@ -85,6 +86,7 @@ const RmaLayout = ({ children }) => {
   if (location.pathname.includes("assigned")) selectedKey = "assigned";
   if (location.pathname.includes("repaired") && !location.pathname.includes("cant") && !location.pathname.includes("unrepaired")) selectedKey = "repaired";
   if (location.pathname.includes("cant-be-repaired")) selectedKey = "cant-be-repaired";
+  if (location.pathname.includes("depot-dispatch")) selectedKey = "depot-dispatch";
   if (location.pathname.includes("audit-trail")) selectedKey = "audit-trail";
 
   const handleMenuClick = ({ key }) => {
@@ -94,6 +96,7 @@ const RmaLayout = ({ children }) => {
     if (key === "assigned") navigate("/assigned");
     if (key === "repaired") navigate("/repaired");
     if (key === "cant-be-repaired") navigate("/cant-be-repaired");
+    if (key === "depot-dispatch") navigate("/depot-dispatch");
     if (key === "audit-trail") navigate("/audit-trail");
     if (key === "logout") showLogoutConfirm();
   };
@@ -102,7 +105,7 @@ const RmaLayout = ({ children }) => {
   const getSidebarTheme = () => {
     if (selectedKey === "repaired") return "theme-green";
     if (selectedKey === "cant-be-repaired") return "theme-red";
-    if (selectedKey === "audit-trail") return "theme-purple";
+    if (selectedKey === "audit-trail" || selectedKey === "depot-dispatch") return "theme-purple";
     return "theme-blue"; // default for dashboard, unrepaired, assigned, rma-request
   };
 
@@ -183,6 +186,11 @@ const RmaLayout = ({ children }) => {
                 key: "cant-be-repaired",
                 icon: <WarningOutlined />,
                 label: "Can't Be Repaired",
+              },
+              {
+                key: "depot-dispatch",
+                icon: <CarOutlined />,
+                label: "Depot Dispatch",
               },
               {
                 key: "audit-trail",

@@ -57,8 +57,12 @@ public class RmaRequestEntity {
     // Signature
     private String signature;
 
+    // Repair Type (Local Repair / Depot Repair)
+    @Column(name = "repair_type")
+    private String repairType;
+
     // Auto-generated Request Number (created when request is submitted)
-    @Column(name = "request_number", unique = true, nullable = false)
+    @Column(name = "request_number", unique = true, nullable = true)
     private String requestNumber;
 
     // RMA Number (assigned manually by service team after approval)
@@ -276,6 +280,14 @@ public class RmaRequestEntity {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public String getRepairType() {
+        return repairType;
+    }
+
+    public void setRepairType(String repairType) {
+        this.repairType = repairType;
     }
 
     public String getRequestNumber() {

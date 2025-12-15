@@ -79,6 +79,39 @@ public class RmaInwardGatepassService {
         try {
             // Find RMA request by request number
             RmaRequestEntity rmaRequest = rmaRequestDAO.findByRequestNumber(requestNumber);
+<<<<<<< HEAD
+            List<RmaItemEntity> items;
+
+            if (rmaRequest == null) {
+                // Fallback: Try to find items by their item-level RMA number (legacy support)
+                // We need a method in DAO for this, or use existing if compatible.
+                // Using a custom query logic here or we need to add findByRmaNo to DAO.
+                // Let's assume we can add/use findByRmaNo.
+                // Actually, let's use the property 'rmaNo' on RmaItemEntity.
+                items = rmaItemDAO.findByRmaNo(requestNumber);
+
+                if (items.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("RMA Request/Items not found for number: " + requestNumber);
+                }
+
+                // Create a dummy request entity for PDF generation context
+                rmaRequest = new RmaRequestEntity();
+                rmaRequest.setRequestNumber(requestNumber);
+                // Try to infer details from first item if possible (but items don't have
+                // company name usually)
+                // If legacy items have no request, we explicitly set defaults.
+                rmaRequest.setCompanyName("N/A (Legacy Item)");
+                rmaRequest.setReturnAddress("N/A");
+                rmaRequest.setCreatedDate(ZonedDateTime.now());
+
+            } else {
+                // Get unassigned items for this request
+                // Note: 'findUnassignedByRmaNo' uses rmaRequest.requestNumber.
+                items = rmaItemDAO.findUnassignedByRmaNo(requestNumber);
+            }
+
+=======
             if (rmaRequest == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("RMA Request not found: " + requestNumber);
@@ -86,6 +119,7 @@ public class RmaInwardGatepassService {
 
             // Get unassigned items for this request
             List<RmaItemEntity> items = rmaItemDAO.findUnassignedByRmaNo(requestNumber);
+>>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
             if (items.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("No unassigned items found for RMA: " + requestNumber);
@@ -109,7 +143,40 @@ public class RmaInwardGatepassService {
             // Create gatepass record
             RmaInwardGatepassEntity gatepass = new RmaInwardGatepassEntity();
             gatepass.setGatepassNumber(gatepassNumber);
+<<<<<<< HEAD
+            // gatepass.setRmaRequest(rmaRequest); // Handle null if it's a dummy?
+            // If it's a dummy request, we can't save it as a relationship if it's not
+            // persisted.
+            // But RmaInwardGatepassEntity likely has @ManyToOne to RmaRequest. This might
+            // fail DB constraint.
+            // If legacy support is critical, we might need to skip saving the relationship
+            // or persist the dummy.
+            // Ideally, we persist the dummy request so we have a record? Or just leave it
+            // null if allowed.
+            // Let's check Entity definition. If nullable, set null. If not, we have a
+            // problem.
+            // Assuming for now we set fields directly on GatepassEntity:
+
+            if (rmaRequest.getId() == null) {
+                // Persist the dummy request so we can link it
+                // Ensure unique request number for legacy
+                rmaRequest.setRequestNumber(requestNumber); // Reuse the item's RMA number
+                rmaRequest.setCompanyName("N/A (Legacy Item)");
+                rmaRequest.setReturnAddress("N/A");
+                rmaRequest.setEmail("legacy@placeholder.com");
+                rmaRequest.setContactName("N/A");
+                rmaRequest.setTelephone("0000000000");
+                rmaRequest.setMobile("0000000000");
+                rmaRequest.setCreatedDate(ZonedDateTime.now());
+                // Try to save. If it conflicts (already exists but find failed?), handle
+                // exception or use saveAndFlush
+                rmaRequest = rmaRequestDAO.save(rmaRequest);
+            }
             gatepass.setRmaRequest(rmaRequest);
+
+=======
+            gatepass.setRmaRequest(rmaRequest);
+>>>>>>> 4b696b9936a28222d4f1ee66323e246c86f5a4f3
             gatepass.setSupplierName(rmaRequest.getCompanyName());
             gatepass.setSupplierAddress(rmaRequest.getReturnAddress());
             gatepass.setGeneratedDate(ZonedDateTime.now());

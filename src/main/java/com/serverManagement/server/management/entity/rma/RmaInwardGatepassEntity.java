@@ -26,7 +26,7 @@ public class RmaInwardGatepassEntity {
     private String gatepassNumber; // Auto-generated: IGP-XXXX
 
     @ManyToOne
-    @JoinColumn(name = "rma_request_id", nullable = false)
+    @JoinColumn(name = "rma_request_id", nullable = true)
     private RmaRequestEntity rmaRequest;
 
     @Column(name = "supplier_name", nullable = false)
