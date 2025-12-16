@@ -63,7 +63,7 @@ function ItemSearch() {
     const navigate = useNavigate();
     const token = atob(Cookies.get("authToken") || "");
     const role = localStorage.getItem("_User_role_for_MSIPL");
-    const { setItemHistory, setItemDetails } = useItemDetails();
+    const { setItemDetails } = useItemDetails();
 
     // Tab state
     const [activeTab, setActiveTab] = useState(() => {
@@ -139,7 +139,7 @@ function ItemSearch() {
                 // Silent fail
             }
         }
-    }, [advancedForm]);
+    }, [advancedForm]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Save active tab
     useEffect(() => {

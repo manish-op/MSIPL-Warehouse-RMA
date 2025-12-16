@@ -16,9 +16,7 @@ import {
     Divider,
     Table,
     Form,
-    Tooltip,
     Select,
-    DatePicker,
 } from "antd";
 import {
     UserAddOutlined,
@@ -34,6 +32,7 @@ import {
     FilePdfOutlined,
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { URL as API_URL } from "../API/URL";
 import RmaLayout from "../RMA/RmaLayout";
 import "./UnrepairedPage.css";
 
@@ -52,10 +51,16 @@ export default function UnrepairedPage() {
     const [assigneeName, setAssigneeName] = useState("");
     const [assigneeEmail, setAssigneeEmail] = useState("");
     const [assigning, setAssigning] = useState(false);
+
+    // Current user state for role-based assignment
+    const [currentUser, setCurrentUser] = useState(null);
+    // Check both role (from DTO) and roleName (legacy/alternative)
+    const isAdmin = currentUser?.role?.toLowerCase() === "admin" || currentUser?.roleName?.toLowerCase() === "admin";
     // Bulk assign state
     const [bulkAssignModalVisible, setBulkAssignModalVisible] = useState(false);
     const [selectedRmaNo, setSelectedRmaNo] = useState(null);
     const [selectedRmaItemCount, setSelectedRmaItemCount] = useState(0);
+    const [bulkAssignItems, setBulkAssignItems] = useState([]);
     // Edit RMA state
     const [editRmaModalVisible, setEditRmaModalVisible] = useState(false);
     const [newRmaNo, setNewRmaNo] = useState("");
@@ -74,8 +79,8 @@ export default function UnrepairedPage() {
     const [dcModalVisble, setDcModalVisible] = useState(false);
     const [dcForm] = Form.useForm();
     const [dcSubmitting, setDcSubmitting] = useState(false);
-    const [selectedDcRmaNo, setSelectedDcRmaNo] = useState("");
-    const [dcTableData, setDcTableData] = useState([]);
+    const [selectedDcRmaNo] = useState("");
+    const [dcTableData] = useState([]);
 
 
     // Transporter State
@@ -84,7 +89,7 @@ export default function UnrepairedPage() {
 
     const fetchTransporters = async () => {
         try {
-            const response = await fetch('/api/transporters', {
+            const response = await fetch(`${API_URL}/api/transporters`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
             if (response.ok) {
@@ -96,30 +101,7 @@ export default function UnrepairedPage() {
         }
     };
 
-    const openDcModal = (items, rmaNo) => {
-        setSelectedDcRmaNo(rmaNo);
-        fetchTransporters(); // Load transporters when modal opens
 
-        const mappedItems = items.map((item, index) => ({
-            ...item,
-            slNo: index + 1,
-            // rate: 0 // user must input
-        }));
-
-        setDcTableData(mappedItems);
-
-        // Pre-fill form
-        dcForm.setFieldsValue({
-            consigneeName: items[0]?.companyName || "",
-            consigneeAddress: "",
-            items: mappedItems,
-            boxes: "1",
-            modeOfShipment: "ROAD",
-            transporterName: [], // Reset transporter fields
-            transporterId: ""
-        });
-        setDcModalVisible(true);
-    };
 
     const handleGenerateDC = async (values) => {
         setDcSubmitting(true);
@@ -135,7 +117,7 @@ export default function UnrepairedPage() {
                 };
 
                 // Save to backend
-                await fetch('/api/transporters', {
+                await fetch(`${API_URL}/api/transporters`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -183,13 +165,7 @@ export default function UnrepairedPage() {
         }
     };
 
-    //Assign Modal State
-    const [assignModalState, setAssignModalState] = useState(false);
-    //Update or Edit Modal State
-    const [editModalVisible, setEditModalVisible] = useState(false);
-    const [editingId, setEditingId] = useState(null);
-    const [updating, setUpdating] = useState(false);
-    const [form] = Form.useForm();
+
 
     const loadItems = async () => {
         setLoading(true);
@@ -202,8 +178,54 @@ export default function UnrepairedPage() {
         setLoading(false);
     };
 
+    // Employees state for technician dropdown
+    const [employees, setEmployees] = useState([]);
+
+    const loadEmployees = async () => {
+        try {
+            // Use unified API call
+            const result = await RmaApi.getAllUsers();
+            let allEmployees = [];
+
+            if (result.success) {
+                allEmployees = result.data || [];
+                setEmployees(allEmployees);
+            }
+
+            // Identify current user from token
+            const encodedToken = document.cookie.split("authToken=")[1]?.split(";")[0];
+            let userEmail = null;
+
+            if (encodedToken) {
+                try {
+                    const token = atob(encodedToken);
+                    const tokenParts = token.split('.');
+                    if (tokenParts.length > 1) {
+                        const payload = JSON.parse(atob(tokenParts[1]));
+                        userEmail = payload.sub || payload.email;
+                    }
+                } catch (e) {
+                    console.error("Could not decode JWT payload", e);
+                }
+            }
+
+            // Set current user logic
+            if (userEmail && allEmployees.length > 0) {
+                const currentEmp = allEmployees.find(e => e.email?.toLowerCase() === userEmail?.toLowerCase());
+                if (currentEmp) {
+                    setCurrentUser(currentEmp);
+                }
+            }
+
+        } catch (error) {
+            console.error("Failed to load employees debug:", error);
+        }
+    };
+
     useEffect(() => {
         loadItems();
+        loadEmployees();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Group items by RMA number
@@ -220,9 +242,28 @@ export default function UnrepairedPage() {
     const totalItems = items.length;
 
     const openAssignModal = (item) => {
+        // Check if RMA number is available and valid
+        // Strict validation: Allow only if a valid RMA number exists matches
+        const hasItemRma = item.itemRmaNo && item.itemRmaNo.trim() !== "";
+        // Legacy support: also check rmaNo, but ensure it's not "Unknown"
+        const hasRmaNo = item.rmaNo && item.rmaNo.trim() !== "" && item.rmaNo !== "Unknown";
+
+        if (!hasItemRma && !hasRmaNo) {
+            message.warning("RMA Number is required. Please update the item with a valid RMA Number before assigning.");
+            return;
+        }
+
         setSelectedItem(item);
-        setAssigneeName("");
-        setAssigneeEmail("");
+
+        // If non-admin, auto-select self
+        if (!isAdmin && currentUser) {
+            setAssigneeName(currentUser.name);
+            setAssigneeEmail(currentUser.email);
+        } else {
+            setAssigneeName("");
+            setAssigneeEmail("");
+        }
+
         setAssignModalVisible(true);
     };
 
@@ -249,12 +290,82 @@ export default function UnrepairedPage() {
     };
 
     // Bulk assign handlers
-    const openBulkAssignModal = (rmaNo, itemCount) => {
-        setSelectedRmaNo(rmaNo);
-        setSelectedRmaItemCount(itemCount);
-        setAssigneeName("");
-        setAssigneeEmail("");
-        setBulkAssignModalVisible(true);
+    // Bulk assign handlers
+    const openBulkAssignModal = (rmaNo, rmaItems) => {
+        const status = checkRmaStatus(rmaItems);
+
+        // If no items have RMA numbers, show warning and return
+        if (!status.hasAnyRma) {
+            Modal.warning({
+                title: 'RMA Number Not Available',
+                content: (
+                    <div>
+                        <p>None of the items have an RMA number assigned.</p>
+                        <p>Please assign RMA numbers to items before assigning technicians.</p>
+                    </div>
+                ),
+                okText: 'OK',
+                centered: true,
+            });
+            return;
+        }
+
+        const proceedWithItems = (validItems) => {
+            // We'll store the specific items to assign, not just the RMA group
+            // This allows us to assign ONLY the valid ones
+            setSelectedItem(validItems); // Reusing selectedItem to store the array, or should add new state?
+            // Actually UnrepairedPage has 'selectedItem' for single assign.
+            // Let's use a new state or repurpose 'itemsToAssign'
+            // But verify existing state usage.
+            // existing: selectedRmaNo, selectedRmaItemCount.
+            // Let's add 'bulkAssignItems' state.
+            // For now, I'll store it in a temporary variable inside the modal? No, handled in 'handleBulkAssign'.
+            // I'll attach the items to a ref or state.
+            // Let's modify 'selectedItem' to be 'selectedItems' (array) for bulk?
+            // Or easier: just add a new state `bulkAssignItems`
+
+            setBulkAssignItems(validItems);
+            setSelectedRmaNo(rmaNo);
+            setSelectedRmaItemCount(validItems.length);
+
+            // If non-admin, auto-select self
+            if (!isAdmin && currentUser) {
+                setAssigneeName(currentUser.name);
+                setAssigneeEmail(currentUser.email);
+            } else {
+                setAssigneeName("");
+                setAssigneeEmail("");
+            }
+
+            setBulkAssignModalVisible(true);
+        };
+
+        // If some items are missing RMA numbers, show confirmation
+        if (!status.allHaveRma) {
+            Modal.confirm({
+                title: 'Some Items Missing RMA Numbers',
+                icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+                content: (
+                    <div>
+                        <p style={{ marginBottom: 8 }}>
+                            <strong>{status.missingCount}</strong> out of <strong>{status.totalCount}</strong> item(s)
+                            do not have RMA numbers assigned and will be <strong>excluded</strong>.
+                        </p>
+                        <p>
+                            Only <strong>{status.availableCount}</strong> item(s) with RMA numbers will be assigned.
+                        </p>
+                    </div>
+                ),
+                okText: 'Proceed',
+                cancelText: 'Cancel',
+                centered: true,
+                onOk: () => proceedWithItems(status.itemsWithRma)
+            });
+            return;
+        }
+
+        // All items valid
+        proceedWithItems(status.itemsWithRma);
     };
 
     const handleBulkAssign = async () => {
@@ -268,13 +379,32 @@ export default function UnrepairedPage() {
         }
 
         setAssigning(true);
-        const result = await RmaApi.bulkAssignByRmaNo(selectedRmaNo, assigneeEmail, assigneeName);
-        if (result.success) {
-            message.success(`All ${selectedRmaItemCount} items assigned successfully!`);
-            setBulkAssignModalVisible(false);
-            loadItems();
-        } else {
-            message.error(result.error || "Failed to assign items");
+        try {
+            // Iterate and assign only the validated items
+            // We use Promise.all to run them concurrently (or could do sequential if preferred)
+            const promises = bulkAssignItems.map(item =>
+                RmaApi.assignItem(item.id, assigneeEmail, assigneeName)
+            );
+
+            const results = await Promise.all(promises);
+
+            // Check if all succeeded
+            const allSuccess = results.every(r => r.success);
+            const failureCount = results.filter(r => !r.success).length;
+
+            if (allSuccess) {
+                message.success(`All ${bulkAssignItems.length} items assigned successfully!`);
+                setBulkAssignModalVisible(false);
+                loadItems();
+            } else {
+                message.warning(`Assigned with some errors. ${failureCount} items failed.`);
+                setBulkAssignModalVisible(false); // Close anyway so they can refresh/see status
+                loadItems();
+            }
+
+        } catch (error) {
+            console.error("Bulk assign error:", error);
+            message.error("An error occurred during bulk assignment");
         }
         setAssigning(false);
     };
@@ -308,12 +438,7 @@ export default function UnrepairedPage() {
         setUpdatingRma(false);
     };
 
-    // Check if item has a custom RMA number (not inherited from request)
-    const hasCustomRmaNo = (item) => {
-        // Item has custom RMA if rmaNo field is directly set on the item
-        // This checks the item-level rmaNo, not the parent request's requestNumber
-        return item.itemRmaNo && item.itemRmaNo.trim() !== "";
-    };
+
 
     // Generate Inward Gatepass PDF
     const handleGenerateGatepass = async (requestNumber) => {
@@ -729,7 +854,7 @@ export default function UnrepairedPage() {
                                                 <Button
                                                     type="primary"
                                                     icon={<UserAddOutlined />}
-                                                    onClick={() => openBulkAssignModal(rmaNo, rmaItems.length)}
+                                                    onClick={() => openBulkAssignModal(rmaNo, rmaItems)}
                                                     size="small"
                                                     style={{ background: "#52c41a", borderColor: "#52c41a" }}
                                                 >
@@ -852,26 +977,51 @@ export default function UnrepairedPage() {
                     </div>
                     <Space direction="vertical" style={{ width: "100%" }} size="middle">
                         <div>
-                            <Text strong>Technician Name *</Text>
-                            <Input
-                                placeholder="Enter technician name"
-                                value={assigneeName}
-                                onChange={(e) => setAssigneeName(e.target.value)}
-                                prefix={<UserAddOutlined style={{ color: "#bfbfbf" }} />}
+                            <Text strong>Select Technician *</Text>
+                            {!isAdmin && currentUser && (
+                                <div style={{ marginTop: 4, padding: 8, backgroundColor: "#fff7e6", borderRadius: 4 }}>
+                                    <Text type="secondary" style={{ fontSize: 12 }}>
+                                        <ExclamationCircleOutlined style={{ marginRight: 4 }} />
+                                        You can only assign items to yourself
+                                    </Text>
+                                </div>
+                            )}
+                            {!currentUser && (
+                                <div style={{ marginTop: 4, padding: 8, backgroundColor: "#ffccc7", borderRadius: 4 }}>
+                                    <Text type="secondary" style={{ fontSize: 12, color: "#a8071a" }}>
+                                        <ExclamationCircleOutlined style={{ marginRight: 4 }} />
+                                        Unable to verify user identity. Please refresh or relogin.
+                                    </Text>
+                                </div>
+                            )}
+                            <Select
+                                style={{ width: "100%", marginTop: 4 }}
                                 size="large"
-                                style={{ marginTop: 4 }}
-                            />
-                        </div>
-                        <div>
-                            <Text strong>Technician Email *</Text>
-                            <Input
-                                placeholder="Enter technician email"
-                                value={assigneeEmail}
-                                onChange={(e) => setAssigneeEmail(e.target.value)}
-                                type="email"
-                                size="large"
-                                style={{ marginTop: 4 }}
-                            />
+                                placeholder="Select a technician"
+                                value={assigneeEmail || undefined}
+                                onChange={(value) => {
+                                    const emp = employees.find(e => e.email === value);
+                                    if (emp) {
+                                        setAssigneeEmail(emp.email);
+                                        setAssigneeName(emp.name);
+                                    }
+                                }}
+                                showSearch
+                                filterOption={(input, option) =>
+                                    option.children.toLowerCase().includes(input.toLowerCase())
+                                }
+                                disabled={!isAdmin}
+                            >
+                                {/* Admin sees all employees, non-admin sees only self */}
+                                {(isAdmin
+                                    ? employees
+                                    : (currentUser ? employees.filter(emp => emp.email === currentUser.email) : [])
+                                ).map(emp => (
+                                    <Select.Option key={emp.email} value={emp.email}>
+                                        {emp.name} ({emp.email})
+                                    </Select.Option>
+                                ))}
+                            </Select>
                         </div>
                     </Space>
                 </Modal>
@@ -915,26 +1065,51 @@ export default function UnrepairedPage() {
                     </Card>
                     <Space direction="vertical" style={{ width: "100%" }} size="middle">
                         <div>
-                            <Text strong>Technician Name *</Text>
-                            <Input
-                                placeholder="Enter technician name"
-                                value={assigneeName}
-                                onChange={(e) => setAssigneeName(e.target.value)}
-                                prefix={<UserAddOutlined style={{ color: "#bfbfbf" }} />}
+                            <Text strong>Select Technician *</Text>
+                            {!isAdmin && currentUser && (
+                                <div style={{ marginTop: 4, padding: 8, backgroundColor: "#fff7e6", borderRadius: 4 }}>
+                                    <Text type="secondary" style={{ fontSize: 12 }}>
+                                        <ExclamationCircleOutlined style={{ marginRight: 4 }} />
+                                        You can only assign items to yourself
+                                    </Text>
+                                </div>
+                            )}
+                            {!currentUser && (
+                                <div style={{ marginTop: 4, padding: 8, backgroundColor: "#ffccc7", borderRadius: 4 }}>
+                                    <Text type="secondary" style={{ fontSize: 12, color: "#a8071a" }}>
+                                        <ExclamationCircleOutlined style={{ marginRight: 4 }} />
+                                        Unable to verify user identity. Please refresh or relogin.
+                                    </Text>
+                                </div>
+                            )}
+                            <Select
+                                style={{ width: "100%", marginTop: 4 }}
                                 size="large"
-                                style={{ marginTop: 4 }}
-                            />
-                        </div>
-                        <div>
-                            <Text strong>Technician Email *</Text>
-                            <Input
-                                placeholder="Enter technician email"
-                                value={assigneeEmail}
-                                onChange={(e) => setAssigneeEmail(e.target.value)}
-                                type="email"
-                                size="large"
-                                style={{ marginTop: 4 }}
-                            />
+                                placeholder="Select a technician"
+                                value={assigneeEmail || undefined}
+                                onChange={(value) => {
+                                    const emp = employees.find(e => e.email === value);
+                                    if (emp) {
+                                        setAssigneeEmail(emp.email);
+                                        setAssigneeName(emp.name);
+                                    }
+                                }}
+                                showSearch
+                                filterOption={(input, option) =>
+                                    option.children.toLowerCase().includes(input.toLowerCase())
+                                }
+                                disabled={!isAdmin}
+                            >
+                                {/* Admin sees all employees, non-admin sees only self */}
+                                {(isAdmin
+                                    ? employees
+                                    : (currentUser ? employees.filter(emp => emp.email === currentUser.email) : [])
+                                ).map(emp => (
+                                    <Select.Option key={emp.email} value={emp.email}>
+                                        {emp.name} ({emp.email})
+                                    </Select.Option>
+                                ))}
+                            </Select>
                         </div>
                     </Space>
                 </Modal>

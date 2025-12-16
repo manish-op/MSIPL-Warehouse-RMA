@@ -110,6 +110,15 @@ public class DeliveryChallanRequest {
         private String rate; // Input by user
         private String serialNo;
         private int slNo;
+        private Long itemId;
+
+        public Long getItemId() {
+            return itemId;
+        }
+
+        public void setItemId(Long itemId) {
+            this.itemId = itemId;
+        }
 
         public String getProduct() {
             return product;

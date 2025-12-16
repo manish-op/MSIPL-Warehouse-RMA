@@ -44,6 +44,7 @@ const NotificationBell = () => {
     fetchAlerts();
     const interval = setInterval(fetchAlerts, 60000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Determine severity based on message content

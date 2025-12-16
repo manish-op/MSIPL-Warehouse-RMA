@@ -120,6 +120,20 @@ public class RmaController {
         }
     }
 
+    @PutMapping("/items/{id}/reassign")
+    public ResponseEntity<?> reassignItem(HttpServletRequest request, @PathVariable("id") Long id,
+            @RequestBody Map<String, String> payload) {
+        try {
+            String newAssigneeEmail = payload.get("assigneeEmail");
+            String newAssigneeName = payload.get("assigneeName");
+            String reason = payload.get("reason");
+            return rmaService.reassignItem(request, id, newAssigneeEmail, newAssigneeName, reason);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error");
+        }
+    }
+
     @PostMapping("/bulk-assign")
     public ResponseEntity<?> bulkAssign(HttpServletRequest request,
             @RequestBody Map<String, String> payload) {
@@ -292,6 +306,9 @@ public class RmaController {
     public ResponseEntity<?> generateDeliveryChallan(
             @RequestBody com.serverManagement.server.management.dto.rma.DeliveryChallanRequest payload) {
         try {
+            // Save Transporter and Dispatch details
+            rmaService.saveDcDetails(payload);
+
             byte[] pdfBytes = rmaPdfService.generateDeliveryChallan(payload);
 
             ByteArrayResource resource = new ByteArrayResource(pdfBytes);

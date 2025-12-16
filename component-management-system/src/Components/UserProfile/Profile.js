@@ -47,7 +47,7 @@ function useCountUp(target, duration = 1000) {
 function useCountUpArray(targetArray = [], duration = 1000) {
   // Use JSON.stringify for stable dependency to avoid useMemo size warning
   const targetArrayString = JSON.stringify(targetArray);
-  const targetValues = useMemo(() => targetArray.map((v) => Number(v) || 0), [targetArrayString]);
+  const targetValues = useMemo(() => targetArray.map((v) => Number(v) || 0), [targetArrayString]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [values, setValues] = useState(() => targetValues.map(() => 0));
   const [progress, setProgress] = useState(0);

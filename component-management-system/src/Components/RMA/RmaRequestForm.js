@@ -252,7 +252,7 @@ function RmaRequestForm() {
 
     try {
       const values = await form.validateFields();
-      
+
       const payload = {
         dplLicense: values.dplLicense || "",
         date: new Date().toISOString().split('T')[0],
@@ -273,7 +273,7 @@ function RmaRequestForm() {
         invoiceAddress: values.invoiceAddress || "",
         signature: values.signature || values.contactName,
         repairType: repairType,
-        
+
         items: (values.items || []).map(item => ({
           product: item.product,
           model: item.partNo || "",
@@ -696,23 +696,18 @@ function RmaRequestForm() {
                               name={[name, "product"]}
                               rules={[{ required: true, message: "Product is required" }]}
                             >
-                              <Select
-                                placeholder={loadingProducts ? "Loading products..." : "Select product"}
+                              <AutoComplete
+                                placeholder={loadingProducts ? "Loading products..." : "Enter or Select product"}
                                 size="large"
-                                showSearch
-                                loading={loadingProducts}
-                                onChange={(val) => handleProductSelect(val, index)}
-                                filterOption={(input, option) => {
-                                  const label = option.value || "";
-                                  return label.toLowerCase().includes(input.toLowerCase());
-                                }}
-                              >
-                                {productCatalog.map(p => (
-                                  <Option key={p.name} value={p.name}>
-                                    {p.name}{p.model ? ` - ${p.model}` : ""}
-                                  </Option>
-                                ))}
-                              </Select>
+                                options={productCatalog.map(p => ({
+                                  value: p.name,
+                                  label: `${p.name}${p.model ? ` - ${p.model}` : ""}`
+                                }))}
+                                filterOption={(inputValue, option) =>
+                                  option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                                }
+                                onSelect={(val) => handleProductSelect(val, index)}
+                              />
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
@@ -803,12 +798,12 @@ function RmaRequestForm() {
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
-                          <Form.Item {...restField} label="Lower Firmaware Version" name={[name, "lowerFirmwareVersion"]}>
-                            <Select placeholder="Select">
-                             <Option value="Follow Depot Mainboard Inventory Version">Follow Depot Mainboard Inventory Version</Option>
-                             <Option value="Return Unrepaired">Return Unrepaired</Option>
-                            </Select>
-                          </Form.Item>
+                            <Form.Item {...restField} label="Lower Firmaware Version" name={[name, "lowerFirmwareVersion"]}>
+                              <Select placeholder="Select">
+                                <Option value="Follow Depot Mainboard Inventory Version">Follow Depot Mainboard Inventory Version</Option>
+                                <Option value="Return Unrepaired">Return Unrepaired</Option>
+                              </Select>
+                            </Form.Item>
                           </Col>
                           <Col xs={12} md={8}>
                             <Form.Item {...restField} label="Partial Shipment" name={[name, "partialshipment"]}>
@@ -908,7 +903,7 @@ function RmaRequestForm() {
                   ))}
                 </Card>
 
-                <Form.Item
+                {/* <Form.Item
                   label="Authorized Signature (Print Name)"
                   name="signature"
                   style={{ marginTop: 24 }}
@@ -918,7 +913,8 @@ function RmaRequestForm() {
                     size="large"
                     defaultValue={form.getFieldValue("contactName")}
                   />
-                </Form.Item>
+
+                </Form.Item> */}
               </div>
             </div>
           </Form>
@@ -960,9 +956,9 @@ function RmaRequestForm() {
             <Button key="back" onClick={() => setConfrimVisible(false)}>
               Cancel
             </Button>,
-            <Button 
-              key="submit" 
-              type="primary" 
+            <Button
+              key="submit"
+              type="primary"
               loading={finalSubmitting}
               onClick={finalSubmit}
             >
@@ -973,13 +969,13 @@ function RmaRequestForm() {
         >
           <div style={{ padding: "10px 0" }}>
             <Title level={5}>Select Repair Type</Title>
-            <Radio.Group 
-              onChange={(e) => setRepairType(e.target.value)} 
+            <Radio.Group
+              onChange={(e) => setRepairType(e.target.value)}
               value={repairType}
               style={{ marginBottom: 20 }}
             >
-              <Radio value="Local Repair">Local Repair</Radio>
-              <Radio value="Depot Repair">Depot Repair</Radio>
+              <Radio value="LOCAL">Local Repair</Radio>
+              <Radio value="DEPOT">Depot Repair</Radio>
             </Radio.Group>
 
             {previewData && (
@@ -999,17 +995,17 @@ function RmaRequestForm() {
                     <Text type="secondary">Total Items:</Text> <Text strong>{previewData.items?.length || 0}</Text>
                   </Col>
                 </Row>
-                
+
                 <Divider style={{ margin: "12px 0" }} />
-                
+
                 <div style={{ maxHeight: 200, overflowY: "auto" }}>
                   <Text strong>Items:</Text>
                   <ul style={{ paddingLeft: 20, margin: "5px 0" }}>
                     {previewData.items?.map((item, idx) => (
                       <li key={idx}>
                         <Text>{item.product} ({item.serialNo})</Text>
-                        <br/>
-                        <Text type="secondary" style={{fontSize: 12}}>{item.faultDescription}</Text>
+                        <br />
+                        <Text type="secondary" style={{ fontSize: 12 }}>{item.faultDescription}</Text>
                       </li>
                     ))}
                   </ul>

@@ -177,20 +177,22 @@ const RmaLayout = ({ children }) => {
                 icon: <UserSwitchOutlined />,
                 label: "Assigned",
               },
+
+
               {
                 key: "repaired",
                 icon: <CheckCircleOutlined />,
-                label: "Repaired",
-              },
-              {
-                key: "cant-be-repaired",
-                icon: <WarningOutlined />,
-                label: "Can't Be Repaired",
+                label: "Local Repaired",
               },
               {
                 key: "depot-dispatch",
                 icon: <CarOutlined />,
                 label: "Depot Dispatch",
+              },
+              {
+                key: "cant-be-repaired",
+                icon: <WarningOutlined />,
+                label: "Can't Be Repaired",
               },
               {
                 key: "audit-trail",

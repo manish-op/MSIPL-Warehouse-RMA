@@ -70,6 +70,10 @@ public class RmaItemEntity {
     @Column(name = "assigned_date")
     private ZonedDateTime assignedDate;
 
+    // Track reason for last reassignment
+    @Column(name = "last_reassignment_reason", length = 500)
+    private String lastReassignmentReason;
+
     // Repair completion tracking
     @Column(name = "repaired_by_email")
     private String repairedByEmail;
@@ -316,6 +320,14 @@ public class RmaItemEntity {
 
     public void setAssignedDate(ZonedDateTime assignedDate) {
         this.assignedDate = assignedDate;
+    }
+
+    public String getLastReassignmentReason() {
+        return lastReassignmentReason;
+    }
+
+    public void setLastReassignmentReason(String lastReassignmentReason) {
+        this.lastReassignmentReason = lastReassignmentReason;
     }
 
     // Repair completion getters and setters

@@ -20,6 +20,7 @@ import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class GetEmployeeListService {
 
     // Online timeout in minutes

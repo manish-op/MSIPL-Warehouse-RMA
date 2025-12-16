@@ -11,11 +11,15 @@ import {
     Empty,
     Divider,
     Button,
+    Modal,
+    Table,
 } from "antd";
 import {
     CheckCircleOutlined,
     TrophyOutlined,
     ReloadOutlined,
+    EyeOutlined,
+    DownloadOutlined,
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
@@ -26,12 +30,17 @@ const { Title, Text, Paragraph } = Typography;
 export default function RepairedPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [generatingGatepass, setGeneratingGatepass] = useState(null);
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const [previewData, setPreviewData] = useState({ rmaNo: "", items: [] });
 
     const loadItems = async () => {
         setLoading(true);
         const result = await RmaApi.getRepairedItems();
         if (result.success) {
-            setItems(result.data || []);
+            // Filter for Local Repair items only (as per requirement)
+            const localItems = (result.data || []).filter(item => item.repairType === 'LOCAL');
+            setItems(localItems);
         } else {
             message.error("Failed to load repaired items");
         }
@@ -41,6 +50,39 @@ export default function RepairedPage() {
     useEffect(() => {
         loadItems();
     }, []);
+
+    // Open Preview Modal
+    const openPreview = (rmaItems, rmaNo) => {
+        setPreviewData({ rmaNo, items: rmaItems });
+        setPreviewVisible(true);
+    };
+
+    // Confirm and Generate Outward Gatepass PDF
+    const confirmGenerateGatepass = async () => {
+        const { rmaNo } = previewData;
+        if (!rmaNo || rmaNo === "Unknown") {
+            message.error("Cannot generate Gatepass: Invalid RMA Number.");
+            return;
+        }
+        setGeneratingGatepass(rmaNo);
+        const result = await RmaApi.generateOutwardGatepass(rmaNo);
+        if (result.success && result.blob) {
+            // Create download link
+            const url = window.URL.createObjectURL(result.blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `OutwardGatepass_${rmaNo}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            message.success('Outward Gatepass generated and downloaded!');
+            setPreviewVisible(false); // Close modal on success
+        } else {
+            message.error(result.error || 'Failed to generate gatepass');
+        }
+        setGeneratingGatepass(null);
+    };
 
     // Group items by RMA number
     const groupedItems = items.reduce((acc, item) => {
@@ -65,10 +107,10 @@ export default function RepairedPage() {
                             <CheckCircleOutlined className="header-icon" />
                             <div>
                                 <Title level={2} style={{ margin: 0, color: "#fff" }}>
-                                    Repaired Items
+                                    Local Repaired Items
                                 </Title>
                                 <Text style={{ color: "rgba(255,255,255,0.85)" }}>
-                                    Successfully repaired items
+                                    Items repaired locally and ready for dispatch
                                 </Text>
                             </div>
                         </div>
@@ -89,7 +131,7 @@ export default function RepairedPage() {
                                 <TrophyOutlined />
                                 <div>
                                     <div className="stat-value">{totalRmaRequests}</div>
-                                    <div className="stat-label">Completed RMAs</div>
+                                    <div className="stat-label">Pending Dispatch</div>
                                 </div>
                             </div>
                         </Col>
@@ -98,7 +140,7 @@ export default function RepairedPage() {
                                 <CheckCircleOutlined />
                                 <div>
                                     <div className="stat-value">{totalItems}</div>
-                                    <div className="stat-label">Items Repaired</div>
+                                    <div className="stat-label">Ready Items</div>
                                 </div>
                             </div>
                         </Col>
@@ -115,7 +157,7 @@ export default function RepairedPage() {
                     ) : totalRmaRequests === 0 ? (
                         <Empty
                             image={Empty.PRESENTED_IMAGE_SIMPLE}
-                            description="No repaired items found"
+                            description="No local repaired items found"
                             className="empty-state"
                         />
                     ) : (
@@ -138,6 +180,16 @@ export default function RepairedPage() {
                                                 overflowCount={99}
                                             />
                                         </div>
+                                    }
+                                    extra={
+                                        <Button
+                                            type="primary"
+                                            // Pass items and the best available RMA Key (Request Number preferred for backend, fallback to Group Key)
+                                            onClick={() => openPreview(rmaItems, rmaItems[0].rmaRequest?.requestNumber || rmaNo)}
+                                            style={{ backgroundColor: "#135200", borderColor: "#135200" }}
+                                        >
+                                            Generate Outward Gatepass
+                                        </Button>
                                     }
                                 >
                                     <Row gutter={[16, 16]}>
@@ -198,6 +250,109 @@ export default function RepairedPage() {
                         </div>
                     )}
                 </div>
+
+                {/* Outward Gatepass Preview Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <EyeOutlined style={{ color: "#1890ff" }} />
+                            <span>Outward Gatepass Preview - {previewData.rmaNo}</span>
+                        </div>
+                    }
+                    open={previewVisible}
+                    onCancel={() => setPreviewVisible(false)}
+                    width={900}
+                    footer={[
+                        <Button key="cancel" onClick={() => setPreviewVisible(false)}>
+                            Cancel
+                        </Button>,
+                        <Button
+                            key="download"
+                            type="primary"
+                            icon={<DownloadOutlined />}
+                            onClick={confirmGenerateGatepass}
+                            loading={generatingGatepass === previewData.rmaNo}
+                            style={{ backgroundColor: "#135200", borderColor: "#135200" }}
+                        >
+                            Confirm & Generate PDF
+                        </Button>
+                    ]}
+                    className="gatepass-modal"
+                >
+                    <div className="gatepass-preview-container">
+                        {/* Header Info */}
+                        <Card size="small" className="gatepass-info-card" style={{ marginBottom: 16 }}>
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Text type="secondary">RMA Number</Text>
+                                    <div>
+                                        <Tag color="green" style={{ fontSize: 14 }}>
+                                            {previewData.rmaNo}
+                                        </Tag>
+                                    </div>
+                                </Col>
+                                <Col span={8}>
+                                    <Text type="secondary">Consignee (Customer)</Text>
+                                    <div>
+                                        <Text strong>{previewData.items[0]?.rmaRequest?.companyName || previewData.items[0]?.companyName || 'N/A'}</Text>
+                                    </div>
+                                </Col>
+                                <Col span={8}>
+                                    <Text type="secondary">Total Items</Text>
+                                    <div>
+                                        <Badge
+                                            count={previewData.items.length}
+                                            style={{ backgroundColor: "#52c41a" }}
+                                            showZero
+                                        />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Card>
+
+                        {/* Items Table */}
+                        <Table
+                            dataSource={previewData.items.map((item, index) => ({ ...item, key: item.id || index, slNo: index + 1 }))}
+                            columns={[
+                                {
+                                    title: 'Sl.No',
+                                    dataIndex: 'slNo',
+                                    key: 'slNo',
+                                    width: 80,
+                                    align: 'center',
+                                },
+                                {
+                                    title: 'Product',
+                                    dataIndex: 'product',
+                                    key: 'product',
+                                    render: (text) => text || 'N/A',
+                                },
+                                {
+                                    title: 'Serial No',
+                                    dataIndex: 'serialNo',
+                                    key: 'serialNo',
+                                    render: (text) => <Text code>{text || 'N/A'}</Text>,
+                                },
+                                {
+                                    title: 'Model',
+                                    dataIndex: 'model',
+                                    key: 'model',
+                                    render: (text) => text || 'N/A',
+                                },
+                                {
+                                    title: 'Repair Remarks',
+                                    dataIndex: 'repairRemarks',
+                                    key: 'repairRemarks',
+                                    ellipsis: true,
+                                    render: (text) => text || 'N/A',
+                                },
+                            ]}
+                            pagination={false}
+                            size="small"
+                            bordered
+                        />
+                    </div>
+                </Modal>
             </div>
         </RmaLayout>
     );

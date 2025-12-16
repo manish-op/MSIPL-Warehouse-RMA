@@ -40,11 +40,22 @@ export default function AssignedPage() {
     const [issueFixed, setIssueFixed] = useState("");
     const [updating, setUpdating] = useState(false);
 
+    // Status options from backend
+    const [repairStatuses, setRepairStatuses] = useState([]);
+
+    // Reassignment state
+    const [reassignModalVisible, setReassignModalVisible] = useState(false);
+    const [employees, setEmployees] = useState([]);
+    const [newAssignee, setNewAssignee] = useState(null);
+    const [reassignReason, setReassignReason] = useState("");
+
     const getStatusColor = (status) => {
         switch (status?.toUpperCase()) {
             case "ASSIGNED": return "blue";
             case "REPAIRING": return "orange";
             case "BER": return "red";
+            case "REPAIRED": return "green";
+            case "CANT_BE_REPAIRED": return "purple";
             default: return "default";
         }
     };
@@ -53,15 +64,51 @@ export default function AssignedPage() {
         setLoading(true);
         const result = await RmaApi.getAssignedItems();
         if (result.success) {
-            setItems(result.data || []);
+            // Filter to show ONLY Local Repair items
+            const localItems = (result.data || []).filter(item => item.repairType === 'LOCAL');
+            setItems(localItems);
         } else {
             message.error("Failed to load assigned items");
         }
         setLoading(false);
     };
 
+    const loadEmployees = async () => {
+        try {
+            const encodedToken = document.cookie.split("authToken=")[1]?.split(";")[0];
+            if (!encodedToken) return;
+
+            const response = await fetch("http://localhost:8081/api/all-users", {
+                headers: {
+                    Authorization: `Bearer ${atob(encodedToken)}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                // Map to consistent format: email and name
+                setEmployees(data || []);
+            }
+        } catch (error) {
+            console.error("Failed to load employees:", error);
+        }
+    };
+
+    const loadRepairStatuses = async () => {
+        const result = await RmaApi.getRepairStatuses();
+        if (result.success) {
+            setRepairStatuses(result.data || []);
+        } else {
+            // Fallback if API fails
+            console.error("Failed to load statuses: ", result.error);
+            message.error("Could not load repair statuses");
+            setRepairStatuses([]);
+        }
+    };
+
     useEffect(() => {
         loadItems();
+        loadEmployees();
+        loadRepairStatuses();
     }, []);
 
     // Group items by RMA number
@@ -103,6 +150,40 @@ export default function AssignedPage() {
             loadItems();
         } else {
             message.error(result.error || "Failed to update status");
+        }
+        setUpdating(false);
+    };
+
+    const openReassignModal = (item) => {
+        setSelectedItem(item);
+        setNewAssignee(null);
+        setReassignReason("");
+        setReassignModalVisible(true);
+    };
+
+    const handleReassign = async () => {
+        if (!newAssignee) {
+            message.warning("Please select a new technician");
+            return;
+        }
+        if (!reassignReason.trim()) {
+            message.warning("Please enter a reason for reassignment");
+            return;
+        }
+
+        setUpdating(true);
+        const result = await RmaApi.reassignItem(
+            selectedItem.id,
+            newAssignee.email,
+            newAssignee.name,
+            reassignReason
+        );
+        if (result.success) {
+            message.success(result.message || "Item reassigned successfully!");
+            setReassignModalVisible(false);
+            loadItems();
+        } else {
+            message.error(result.error || "Failed to reassign item");
         }
         setUpdating(false);
     };
@@ -203,9 +284,17 @@ export default function AssignedPage() {
                                                             type="primary"
                                                             icon={<EditOutlined />}
                                                             onClick={() => openStatusModal(item)}
-                                                            className="assign-btn"
+                                                            size="small"
                                                         >
                                                             Update Status
+                                                        </Button>,
+                                                        <Button
+                                                            type="default"
+                                                            icon={<UserSwitchOutlined />}
+                                                            onClick={() => openReassignModal(item)}
+                                                            size="small"
+                                                        >
+                                                            Reassign
                                                         </Button>
                                                     ]}
                                                 >
@@ -220,7 +309,16 @@ export default function AssignedPage() {
                                                         </div>
                                                         <div className="item-row">
                                                             <Text type="secondary">Assigned To</Text>
-                                                            <Text>{item.assignedToName || "N/A"}</Text>
+                                                            <div>
+                                                                <Text>{item.assignedToName || "N/A"}</Text>
+                                                                {item.lastReassignmentReason && (
+                                                                    <div style={{ marginTop: 4, lineHeight: "1.2" }}>
+                                                                        <Text type="secondary" style={{ fontSize: 12, color: "#fa8c16" }}>
+                                                                            Re-Reason: {item.lastReassignmentReason}
+                                                                        </Text>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                         <div className="item-row">
                                                             <Text type="secondary">Status</Text>
@@ -308,10 +406,11 @@ export default function AssignedPage() {
                                 onChange={(val) => setNewStatus(val)}
                                 placeholder="Select status"
                             >
-                                <Option value="REPAIRING">Repairing</Option>
-                                <Option value="REPAIRED">Repaired</Option>
-                                <Option value="CANT_BE_REPAIRED">Can't Be Repaired</Option>
-                                <Option value="BER">BER</Option>
+                                {repairStatuses.map(status => (
+                                    <Option key={status.value} value={status.value}>
+                                        {status.label}
+                                    </Option>
+                                ))}
                             </Select>
                         </div>
                         <div>
@@ -331,6 +430,89 @@ export default function AssignedPage() {
                                 placeholder="Enter remarks about the repair"
                                 value={remarks}
                                 onChange={(e) => setRemarks(e.target.value)}
+                                style={{ marginTop: 4 }}
+                            />
+                        </div>
+                    </Space>
+                </Modal>
+
+                {/* Reassign Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <UserSwitchOutlined style={{ color: "#fa8c16" }} />
+                            <span>Reassign Technician</span>
+                        </div>
+                    }
+                    open={reassignModalVisible}
+                    onCancel={() => setReassignModalVisible(false)}
+                    footer={[
+                        <Button key="cancel" onClick={() => setReassignModalVisible(false)}>
+                            Cancel
+                        </Button>,
+                        <Button
+                            key="reassign"
+                            type="primary"
+                            loading={updating}
+                            onClick={handleReassign}
+                            style={{ backgroundColor: "#fa8c16", borderColor: "#fa8c16" }}
+                        >
+                            Reassign
+                        </Button>
+                    ]}
+                    className="assign-modal"
+                >
+                    <div className="modal-item-info">
+                        <Card size="small" style={{ marginBottom: 16, backgroundColor: "#fff7e6" }}>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Text type="secondary">Product</Text>
+                                    <div><Text strong>{selectedItem?.product}</Text></div>
+                                </Col>
+                                <Col span={12}>
+                                    <Text type="secondary">Current Assignee</Text>
+                                    <div><Text strong style={{ color: "#fa8c16" }}>{selectedItem?.assignedToName}</Text></div>
+                                </Col>
+                            </Row>
+                            <div style={{ marginTop: 12 }}>
+                                <Text type="secondary">Serial No.</Text>
+                                <div><Text code>{selectedItem?.serialNo}</Text></div>
+                            </div>
+                        </Card>
+                    </div>
+                    <Space direction="vertical" style={{ width: "100%" }} size="middle">
+                        <div>
+                            <Text strong>New Technician *</Text>
+                            <Select
+                                style={{ width: "100%", marginTop: 4 }}
+                                size="large"
+                                placeholder="Select new technician"
+                                value={newAssignee ? newAssignee.email : undefined}
+                                onChange={(value) => {
+                                    const emp = employees.find(e => e.email === value);
+                                    setNewAssignee(emp);
+                                }}
+                                showSearch
+                                filterOption={(input, option) =>
+                                    option.children.toLowerCase().includes(input.toLowerCase())
+                                }
+                            >
+                                {employees
+                                    .filter(emp => emp.email !== selectedItem?.assignedToEmail)
+                                    .map(emp => (
+                                        <Option key={emp.email} value={emp.email}>
+                                            {emp.name} ({emp.email})
+                                        </Option>
+                                    ))}
+                            </Select>
+                        </div>
+                        <div>
+                            <Text strong>Reason for Reassignment *</Text>
+                            <TextArea
+                                rows={3}
+                                placeholder="Enter the reason for reassigning this item (mandatory)"
+                                value={reassignReason}
+                                onChange={(e) => setReassignReason(e.target.value)}
                                 style={{ marginTop: 4 }}
                             />
                         </div>

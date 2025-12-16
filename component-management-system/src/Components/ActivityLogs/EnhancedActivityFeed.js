@@ -24,7 +24,7 @@ import {
     UserOutlined,
     ClockCircleOutlined,
     FilterOutlined,
-    AppstoreOutlined,
+    // AppstoreOutlined,
     EnvironmentOutlined,
     InboxOutlined,
     ReloadOutlined,
@@ -332,7 +332,7 @@ export default function EnhancedActivityFeed() {
     const topRegion =
         Object.entries(regionCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
 
-    const uniqueUsers = new Set(items.map((item) => item.updatedByEmail)).size;
+    // const uniqueUsers = new Set(items.map((item) => item.updatedByEmail)).size;
 
     return (
         <div className="enhanced-activity-container">

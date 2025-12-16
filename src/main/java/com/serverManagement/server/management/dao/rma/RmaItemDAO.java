@@ -66,8 +66,8 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     List<RmaItemEntity> findByRmaNo(String rmaNo);
 
     // Find unassigned items by RMA number (for bulk assignment)
-    // Note: Uses requestNumber (auto-generated) since rmaNo is assigned later
-    @Query("SELECT r FROM RmaItemEntity r WHERE r.rmaRequest.requestNumber = :rmaNo AND (r.assignedToEmail IS NULL OR r.assignedToEmail = '')")
+    // Checks both Parent Request Number AND Item-level RMA Number (legacy/manual)
+    @Query("SELECT r FROM RmaItemEntity r WHERE (r.rmaRequest.requestNumber = :rmaNo OR r.rmaNo = :rmaNo) AND (r.assignedToEmail IS NULL OR r.assignedToEmail = '')")
     List<RmaItemEntity> findUnassignedByRmaNo(@Param("rmaNo") String rmaNo);
 
     // -----------New Methods for Depot Dispatch------------------
@@ -80,4 +80,5 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     // Explicit
     List<RmaItemEntity> findAllById(Iterable<Long> ids);
 
+    List<RmaItemEntity> findByRmaRequest(com.serverManagement.server.management.entity.rma.RmaRequestEntity rmaRequest);
 }

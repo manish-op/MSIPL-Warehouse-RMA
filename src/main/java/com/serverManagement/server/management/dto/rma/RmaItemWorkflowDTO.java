@@ -25,8 +25,17 @@ public class RmaItemWorkflowDTO {
     private String companyName; // Customer company name from parent RMA request
     private ZonedDateTime receivedDate; // Date when RMA request was created/received
     private String repairType;
+    private String lastReassignmentReason; // Added for displaying reassignment reason
 
     // Getters and Setters
+    public String getLastReassignmentReason() {
+        return lastReassignmentReason;
+    }
+
+    public void setLastReassignmentReason(String lastReassignmentReason) {
+        this.lastReassignmentReason = lastReassignmentReason;
+    }
+
     public Long getId() {
         return id;
     }

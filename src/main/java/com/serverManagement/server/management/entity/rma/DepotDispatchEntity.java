@@ -17,6 +17,10 @@ public class DepotDispatchEntity {
     @Column(name = "eway_bill_no")
     private String ewayBillNo;
 
+    @ManyToOne
+    @JoinColumn(name = "transporter_id")
+    private TransporterEntity transporter;
+
     @Column(name = "courier_name")
     private String courierName;
 
@@ -104,5 +108,13 @@ public class DepotDispatchEntity {
 
     public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public TransporterEntity getTransporter() {
+        return transporter;
+    }
+
+    public void setTransporter(TransporterEntity transporter) {
+        this.transporter = transporter;
     }
 }
