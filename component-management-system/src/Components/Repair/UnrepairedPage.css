@@ -358,6 +358,185 @@
     font-weight: 600;
 }
 
-.gatepass-modal .ant-table-tbody>tr:hover>td {
-    background: #e6f7ff;
+/* ==========================================================================
+   DARK MODE SUPPORT
+   ========================================================================== */
+
+[data-theme='dark'] .unrepaired-page {
+    background: #000000;
+}
+
+/* HEADER STATS */
+[data-theme='dark'] .stat-box {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* CARDS & CONTAINERS */
+[data-theme='dark'] .rma-group-card,
+[data-theme='dark'] .item-card,
+[data-theme='dark'] .loading-container,
+[data-theme='dark'] .empty-state {
+    background: #141414 !important;
+    border-color: #303030;
+}
+
+[data-theme='dark'] .rma-group-card .ant-card-head {
+    background: #1f1f1f !important;
+    border-bottom: 1px solid #303030 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .rma-group-card .ant-card-body {
+    background: #141414 !important;
+}
+
+[data-theme='dark'] .item-card {
+    border-color: #303030 !important;
+    background: #1f1f1f !important;
+}
+
+[data-theme='dark'] .item-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    border-color: #177ddc !important;
+}
+
+/* ACTIONS FOOTER */
+[data-theme='dark'] .item-card .ant-card-actions {
+    background: #262626 !important;
+    border-top: 1px solid #303030 !important;
+}
+
+[data-theme='dark'] .item-card .ant-card-actions .ant-btn:not(.ant-btn-primary) {
+    background-color: transparent !important;
+    border-color: #434343 !important;
+    color: #ffffff !important;
+}
+
+[data-theme='dark'] .item-card .ant-card-actions .ant-btn:not(.ant-btn-primary):hover {
+    border-color: #1890ff !important;
+    color: #1890ff !important;
+}
+
+/* TEXT VISIBILITY */
+[data-theme='dark'] .fault-text,
+[data-theme='dark'] .ant-typography.fault-text {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+[data-theme='dark'] .item-row .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .ant-typography strong {
+    color: #fff !important;
+}
+
+/* TAGS VISIBILITY */
+[data-theme='dark'] .ant-tag {
+    opacity: 1 !important;
+    border-color: transparent !important;
+}
+
+[data-theme='dark'] .ant-tag-green {
+    background-color: #135200 !important;
+    color: #fff !important;
+    border: 1px solid #237804 !important;
+}
+
+[data-theme='dark'] .ant-tag-blue,
+[data-theme='dark'] .ant-tag-geekblue {
+    background-color: #061178 !important;
+    color: #fff !important;
+    border: 1px solid #10239e !important;
+}
+
+[data-theme='dark'] .ant-tag-purple {
+    background-color: #22075e !important;
+    color: #fff !important;
+    border: 1px solid #391085 !important;
+}
+
+[data-theme='dark'] .ant-tag-orange {
+    background-color: #612500 !important;
+    color: #fff !important;
+    border: 1px solid #873800 !important;
+}
+
+[data-theme='dark'] .ant-tag-red,
+[data-theme='dark'] .ant-tag-magenta {
+    background-color: #5c0011 !important;
+    color: #fff !important;
+    border: 1px solid #a8071a !important;
+}
+
+/* GLOBAL MODAL CONFIRM/WARNING FIXES */
+[data-theme='dark'] .ant-modal-confirm-title,
+[data-theme='dark'] .ant-modal-confirm-content {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-modal-confirm-body .anticon {
+    color: #faad14 !important; /* Keep warning icon yellow */
+}
+
+/* Fix Gatepass Header Icons in Dark Mode */
+[data-theme='dark'] .gatepass-modal .ant-modal-title span {
+    color: #fff !important;
+}
+
+/* Ensure Gatepass Preview Cards have high contrast */
+[data-theme='dark'] .gatepass-info-card .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .gatepass-info-card strong {
+    color: #fff !important;
+}
+
+/* MODALS */
+[data-theme='dark'] .assign-modal .ant-modal-header,
+[data-theme='dark'] .sticker-modal .ant-modal-header,
+[data-theme='dark'] .gatepass-modal .ant-modal-header {
+    background: #1f1f1f !important;
+    border-bottom-color: #303030 !important;
+}
+
+[data-theme='dark'] .assign-modal .ant-modal-body,
+[data-theme='dark'] .sticker-modal .ant-modal-body,
+[data-theme='dark'] .gatepass-modal .ant-modal-body {
+    background: #141414 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .sticker-preview {
+    background: #1f1f1f !important;
+    border-color: #303030 !important;
+}
+
+[data-theme='dark'] .sticker-preview-company,
+[data-theme='dark'] .sticker-preview-row .ant-typography {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .gatepass-info-card {
+    background: #1f1f1f !important;
+    border-color: #303030 !important;
+}
+
+[data-theme='dark'] .gatepass-modal .ant-table-thead > tr > th {
+    background: #1f1f1f !important;
+    color: #fff !important;
+    border-bottom-color: #303030 !important;
+}
+
+[data-theme='dark'] .gatepass-modal .ant-table-tbody > tr > td {
+    background: #141414 !important;
+    border-bottom-color: #303030 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .gatepass-modal .ant-table-tbody > tr:hover > td {
+    background: #262626 !important;
 }

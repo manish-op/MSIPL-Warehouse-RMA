@@ -493,97 +493,116 @@ export default function DepotDispatchPage() {
                                     <Empty description="No items in transit" image={Empty.PRESENTED_IMAGE_SIMPLE} />
                                 ) : (
                                     <div className="rma-groups">
-                                    {Object.entries(groupedInTransit).map(([rmaNo, rmaItems]) => (
-                                        <Card
-                                        key={rmaNo}
-                                        className="rma-group-card"
-                                        title={
-                                            <div className="rma-card-header">
-                                            <span className="rma-number">
-                                                <Tag color="#9254de">
-                                                RMA: {rmaNo}
-                                                </Tag>
-                                            </span>
-                                            <Badge
-                                                count={rmaItems.length}
-                                                style={{ backgroundColor: "#9254de" }}
-                                            />
-                                            </div>
-                                        }
-                                        extra={
-                                            <Space>
-                                                <Tag color="cyan" icon={<SendOutlined />}>Out for Delivery</Tag>
-                                            </Space>
-                                        }
-                                        >
-                                            <div className="in-transit-box">
-                                                <CarOutlined style={{fontSize: 24, color: '#9254de'}} />
-                                                <Space size="large" style={{flex:1}}>
-                                                    <div>
-                                                        <Text type="secondary" style={{display:'block', fontSize:12}}>DC Number</Text>
-                                                        <Text strong>{rmaItems[0]?.dcNo || 'N/A'}</Text>
-                                                    </div>
-                                                    <div>
-                                                        <Text type="secondary" style={{display:'block', fontSize:12}}>E-Way Bill</Text>
-                                                        <Text strong>{rmaItems[0]?.ewayBillNo || 'N/A'}</Text>
-                                                    </div>
-                                                    <Tag color="processing">In Transit to Depot</Tag>
-                                                </Space>
-                                            </div>
-                                        <Row gutter={[16, 16]}>
-                                            {rmaItems.map((item) => (
-                                            <Col xs={24} md={12} lg={8} key={item.id}>
-                                                <Card
-                                                    className="item-card"
-                                                    size="small"
-                                                    actions={[
-                                                        item.depotStage === 'IN_TRANSIT_TO_DEPOT' && (
-                                                        <Button
-                                                            key="receive-item"
-                                                            type="text"
-                                                            icon={<CheckCircleOutlined />}
-                                                            onClick={() => handleMarkReceived(item)}
-                                                            loading={receivingIds.has(item.id)}
-                                                            style={{ color: '#52c41a' }}
-                                                        >
-                                                            Receive Item
-                                                        </Button>
-                                                        )
-                                                    ].filter(Boolean)}
-                                                >
-                                                     <div className="item-content">
-                                                        <div style={{marginBottom: 8}}>
-                                                            {item.depotStage === 'IN_TRANSIT_TO_DEPOT' ? (
-                                                                <Tag color="processing">In Transit</Tag>
-                                                            ) : (
-                                                                <Tag color="success">Received at Depot</Tag>
-                                                            )}
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Product</Text>
-                                                            <Text strong>{item.product || "N/A"}</Text>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Serial No.</Text>
-                                                            <Text code>{item.serialNo || "N/A"}</Text>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Model</Text>
-                                                            <Text>{item.model || "N/A"}</Text>
-                                                        </div>
-                                                        {item.itemRmaNo && (
-                                                            <div className="item-row">
-                                                                <Text type="secondary">RMA Number</Text>
-                                                                <Tag color="purple">{item.itemRmaNo}</Tag>
-                                                            </div>
-                                                        )}
-                                                     </div>
-                                                </Card>
-                                            </Col>
-                                            ))}
-                                        </Row>
-                                        </Card>
-                                    ))}
+                                    {
+    Object.entries(groupedInTransit)
+    .sort(([rmaNoA, itemsA], [rmaNoB, itemsB]) => {
+        // Sort Groups: Put RMAs with 'IN_TRANSIT_TO_DEPOT' items first
+        const hasInTransitA = itemsA.some(i => i.depotStage === 'IN_TRANSIT_TO_DEPOT');
+        const hasInTransitB = itemsB.some(i => i.depotStage === 'IN_TRANSIT_TO_DEPOT');
+        if (hasInTransitA && !hasInTransitB) return -1;
+        if (!hasInTransitA && hasInTransitB) return 1;
+        return 0; // Keep original order if both same
+    })
+    .map(([rmaNo, rmaItems]) => {
+        // Sort Items inside group: 'IN_TRANSIT_TO_DEPOT' first
+        const sortedItems = [...rmaItems].sort((a, b) => {
+            if (a.depotStage === 'IN_TRANSIT_TO_DEPOT' && b.depotStage !== 'IN_TRANSIT_TO_DEPOT') return -1;
+            if (a.depotStage !== 'IN_TRANSIT_TO_DEPOT' && b.depotStage === 'IN_TRANSIT_TO_DEPOT') return 1;
+            return 0;
+        });
+
+        return (
+        <Card
+        key={rmaNo}
+        className="rma-group-card"
+        title={
+            <div className="rma-card-header">
+            <span className="rma-number">
+                <Tag color="#9254de">
+                RMA: {rmaNo}
+                </Tag>
+            </span>
+            <Badge
+                count={rmaItems.length}
+                style={{ backgroundColor: "#9254de" }}
+            />
+            </div>
+        }
+        extra={
+            <Space>
+                <Tag color="cyan" icon={<SendOutlined />}>Out for Delivery</Tag>
+            </Space>
+        }
+        >
+            <div className="in-transit-box">
+                <CarOutlined style={{fontSize: 24, color: '#9254de'}} />
+                <Space size="large" style={{flex:1}}>
+                    <div>
+                        <Text type="secondary" style={{display:'block', fontSize:12}}>DC Number</Text>
+                        <Text strong>{rmaItems[0]?.dcNo || 'N/A'}</Text>
+                    </div>
+                    <div>
+                        <Text type="secondary" style={{display:'block', fontSize:12}}>E-Way Bill</Text>
+                        <Text strong>{rmaItems[0]?.ewayBillNo || 'N/A'}</Text>
+                    </div>
+                    <Tag color="processing">In Transit to Depot</Tag>
+                </Space>
+            </div>
+        <Row gutter={[16, 16]}>
+            {sortedItems.map((item) => (
+            <Col xs={24} md={12} lg={8} key={item.id}>
+                <Card
+                    className="item-card"
+                    size="small"
+                    actions={[
+                        item.depotStage === 'IN_TRANSIT_TO_DEPOT' && (
+                        <Button
+                            key="receive-item"
+                            type="text"
+                            icon={<CheckCircleOutlined />}
+                            onClick={() => handleMarkReceived(item)}
+                            loading={receivingIds.has(item.id)}
+                            style={{ color: '#52c41a' }}
+                        >
+                            Receive Item
+                        </Button>
+                        )
+                    ].filter(Boolean)}
+                >
+                        <div className="item-content">
+                        <div style={{marginBottom: 8}}>
+                            {item.depotStage === 'IN_TRANSIT_TO_DEPOT' ? (
+                                <Tag color="processing">In Transit</Tag>
+                            ) : (
+                                <Tag color="success">Received at Depot</Tag>
+                            )}
+                        </div>
+                        <div className="item-row">
+                            <Text type="secondary">Product</Text>
+                            <Text strong>{item.product || "N/A"}</Text>
+                        </div>
+                        <div className="item-row">
+                            <Text type="secondary">Serial No.</Text>
+                            <Text code>{item.serialNo || "N/A"}</Text>
+                        </div>
+                        <div className="item-row">
+                            <Text type="secondary">Model</Text>
+                            <Text>{item.model || "N/A"}</Text>
+                        </div>
+                        {item.itemRmaNo && (
+                            <div className="item-row">
+                                <Text type="secondary">RMA Number</Text>
+                                <Tag color="purple">{item.itemRmaNo}</Tag>
+                            </div>
+                        )}
+                        </div>
+                </Card>
+            </Col>
+            ))}
+        </Row>
+        </Card>
+    )})
+}
                                     </div>
                                 )}
                             </>

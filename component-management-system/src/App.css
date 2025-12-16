@@ -679,3 +679,60 @@ Input:hover::after {
 [data-theme='dark'] .ant-form-item-label>label {
   color: #e8e6e3 !important;
 }
+/* 1. Force the Card Body itself to use the correct text color */
+[data-theme='dark'] .ant-card-body {
+    color: var(--text-color) !important;
+}
+
+/* 2. Aggressively target all headings and generic text containers inside the card */
+[data-theme='dark'] .ant-card-body h1, 
+[data-theme='dark'] .ant-card-body h2, 
+[data-theme='dark'] .ant-card-body h3, 
+[data-theme='dark'] .ant-card-body h4, 
+[data-theme='dark'] .ant-card-body h5, 
+[data-theme='dark'] .ant-card-body div, 
+[data-theme='dark'] .ant-card-body span {
+    color: var(--text-color) !important;
+}
+
+/* 3. EXCEPTION: Re-apply colors for your status text (Green/Yellow/Red) 
+   so they don't turn white. Add any other color classes you use here. */
+[data-theme='dark'] .ant-card-body .text-success,
+[data-theme='dark'] .ant-card-body .ant-typography-success,
+[data-theme='dark'] .ant-card-body span[style*="color: green"],
+[data-theme='dark'] .ant-card-body span[style*="color: #52c41a"] {
+    color: var(--color-success) !important;
+}
+
+[data-theme='dark'] .ant-card-body .text-warning,
+[data-theme='dark'] .ant-card-body .ant-typography-warning,
+[data-theme='dark'] .ant-card-body span[style*="color: orange"],
+[data-theme='dark'] .ant-card-body span[style*="color: #faad14"] {
+    color: var(--color-warning) !important;
+}
+/* FORCE FIX: Target Ant Design Statistic Components directly */
+
+/* 1. Fix the Title (e.g., "Total Requests") */
+[data-theme='dark'] .ant-statistic-title {
+    color: #b0b0b0 !important; /* Light Grey for title */
+}
+
+/* 2. Fix the Value (e.g., "32", "36") */
+[data-theme='dark'] .ant-statistic-content,
+[data-theme='dark'] .ant-statistic-content-value,
+[data-theme='dark'] .ant-statistic-content-value-int,
+[data-theme='dark'] .ant-statistic-content-value-decimal {
+    color: #ffffff !important; /* Pure White for numbers */
+}
+
+/* 3. Safety Net for any other text inside the card */
+[data-theme='dark'] .ant-card-body span {
+    color: #ffffff !important; 
+}
+/* FORCE FIX for "Total Requests" Title */
+html[data-theme='dark'] .ant-card .ant-statistic .ant-statistic-title,
+body[data-theme='dark'] .ant-card .ant-statistic .ant-statistic-title,
+[data-theme='dark'] .ant-statistic-title {
+    color: #cccccc !important; /* Light Grey */
+    opacity: 1 !important;     /* Force full visibility */
+}

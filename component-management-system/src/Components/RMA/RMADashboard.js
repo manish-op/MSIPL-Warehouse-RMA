@@ -18,7 +18,6 @@ import {
   Tooltip as RechartsTooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, Legend 
 } from 'recharts';
-
 import RmaLayout from "./RmaLayout";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import "./RmaDashboard.css"; 
@@ -230,7 +229,7 @@ function RmaDashboard() {
                     value={stats?.totalItems || 0}
                     valueStyle={{ fontWeight: 'bold', fontSize: '28px' }}
                    />
-                   <div className="kpi-trend text-neutral">Total Invenory</div>
+                   <div className="kpi-trend text-neutral">Total Inventory</div>
                 </Card>
               </Col>
 

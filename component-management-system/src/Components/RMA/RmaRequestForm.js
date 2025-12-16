@@ -983,7 +983,7 @@ function RmaRequestForm() {
             </Radio.Group>
 
             {previewData && (
-              <div style={{ background: "#f5f5f5", padding: 15, borderRadius: 8 }}>
+              <div className="request-preview-box">
                 <Title level={5}>Request Preview</Title>
                 <Row gutter={[16, 8]}>
                   <Col span={12}>

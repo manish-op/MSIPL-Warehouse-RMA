@@ -225,3 +225,221 @@
     background: #fff;
     border-radius: 16px;
 }
+
+/* ==========================================================================
+   DARK MODE OVERRIDES
+   ========================================================================== */
+[data-theme='dark'] .depot-page {
+    background: #000000;
+}
+
+[data-theme='dark'] .depot-header {
+    background: linear-gradient(135deg, #22075e 0%, #391085 100%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .stat-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme='dark'] .rma-group-card {
+    background: #141414;
+    border: 1px solid #303030;
+}
+
+[data-theme='dark'] .rma-group-card .ant-card-head {
+    background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+    border-bottom: 1px solid #303030;
+    color: #fff;
+}
+
+[data-theme='dark'] .rma-group-card .ant-card-head .ant-card-head-title {
+    color: #fff;
+}
+
+[data-theme='dark'] .item-card {
+    background: #1f1f1f;
+    border-color: #303030;
+}
+
+[data-theme='dark'] .item-card .ant-card-head {
+    border-bottom: 1px solid #303030;
+    color: #fff;
+}
+
+[data-theme='dark'] .item-card .ant-card-head-title {
+    color: #fff;
+}
+
+/* Text Visibility */
+[data-theme='dark'] .item-row .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='dark'] .item-row span,
+[data-theme='dark'] .item-row strong,
+[data-theme='dark'] .item-row div {
+    color: #fff;
+}
+
+/* Buttons */
+[data-theme='dark'] .btn-generate-dc {
+    background: transparent !important;
+    border-color: #434343 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .btn-generate-dc:hover {
+    border-color: #9254de !important;
+    color: #9254de !important;
+}
+
+/* In Transit Box */
+[data-theme='dark'] .in-transit-box {
+    background: #1f1f1f;
+    border-color: #303030;
+    color: #fff;
+}
+
+[data-theme='dark'] .in-transit-box .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='dark'] .depot-content .ant-tabs-tab {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='dark'] .depot-content .ant-tabs-tab-active {
+    color: #9254de !important;
+}
+
+/* Fix for 'In Transit' and 'Received' Tags */
+[data-theme='dark'] .ant-tag-processing {
+    background: #111d2c !important;
+    border: 1px solid #103362 !important;
+    color: #177ddc !important; /* Ant Design Dark Blue */
+}
+
+[data-theme='dark'] .ant-tag-success {
+    background: #162312 !important;
+    border: 1px solid #274916 !important;
+    color: #49aa19 !important; /* Ant Design Dark Green */
+}
+
+/* Fix for Modal Inputs and DatePicker in Dark Mode */
+[data-theme='dark'] .ant-modal-content,
+[data-theme='dark'] .ant-modal-header {
+    background-color: #1f1f1f !important;
+}
+
+[data-theme='dark'] .ant-modal-title {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-form-item-label > label {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme='dark'] .ant-input,
+[data-theme='dark'] .ant-picker {
+    background-color: #141414 !important;
+    border-color: #434343 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-picker-input > input {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-picker-suffix {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* DatePicker Dropdown Fix */
+[data-theme='dark'] .ant-picker-dropdown, 
+[data-theme='dark'] .ant-picker-dropdown .ant-picker-panel-container {
+    background-color: #1f1f1f !important;
+}
+
+[data-theme='dark'] .ant-picker-header,
+[data-theme='dark'] .ant-picker-footer {
+    color: #fff !important;
+    border-bottom: 1px solid #303030 !important;
+}
+
+[data-theme='dark'] .ant-picker-header-view button {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-picker-content th {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-picker-cell {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .ant-picker-cell-in-view {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-picker-cell-inner {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-picker-cell-selected .ant-picker-cell-inner {
+    background: #1890ff !important;
+    color: #fff !important;
+}
+
+/* Fix for DC Generation Modal Cards & Table */
+[data-theme='dark'] .ant-card-small {
+    background: #1f1f1f !important;
+    border-color: #303030 !important;
+}
+
+[data-theme='dark'] .ant-card-head {
+    border-bottom: 1px solid #303030 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-card-head .ant-card-head-title {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-card-body {
+    background: #1f1f1f !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-card-body strong,
+[data-theme='dark'] .ant-card-body p {
+    color: #fff !important;
+}
+
+/* Table in Modal Fix */
+[data-theme='dark'] .ant-table {
+    background: #141414 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-table-thead > tr > th {
+    background: #1f1f1f !important;
+    color: #fff !important;
+    border-bottom: 1px solid #303030 !important;
+}
+
+[data-theme='dark'] .ant-table-tbody > tr > td {
+    background: #141414 !important;
+    color: #fff !important;
+    border-bottom: 1px solid #303030 !important;
+}
+
+[data-theme='dark'] .ant-table-tbody > tr:hover > td {
+    background: #1f1f1f !important;
+}
+
+[data-theme='dark'] .ant-table-wrapper .ant-table-container {
+    border: 1px solid #303030 !important;
+}

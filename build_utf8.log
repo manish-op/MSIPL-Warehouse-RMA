@@ -1,0 +1,90 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.serverManagement:server-management >---------------
+[INFO] Building server-management 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.3.2:clean (default-clean) @ server-management ---
+[INFO] Deleting C:\Users\CMJ786\Desktop\rma\server-management\target
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ server-management ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 17 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ server-management ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 178 source files with javac [debug release 17] to target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[82,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[82,3] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[82,5] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[83,13] > or ',' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[114,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[114,3] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[114,5] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[114,7] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[115,13] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,4] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,7] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,10] ';' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,49] ';' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[146,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[146,3] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[146,5] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[160,13] > or ',' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[177,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[177,3] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[177,5] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[177,7] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[179,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[179,4] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[179,7] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[179,10] ';' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[180,21] ';' expected
+[INFO] 27 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.139 s
+[INFO] Finished at: 2025-12-16T11:35:42+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project server-management: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[82,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[82,3] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[82,5] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[83,13] > or ',' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[114,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[114,3] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[114,5] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[114,7] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[115,13] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,4] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,7] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,10] ';' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[122,49] ';' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[146,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[146,3] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[146,5] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[160,13] > or ',' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[177,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[177,3] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[177,5] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[177,7] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[179,1] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[179,4] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[179,7] illegal start of expression
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[179,10] ';' expected
+[ERROR] /C:/Users/CMJ786/Desktop/rma/server-management/src/main/java/com/serverManagement/server/management/service/rma/RmaInwardGatepassService.java:[180,21] ';' expected
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
