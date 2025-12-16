@@ -65,26 +65,6 @@ public class RmaController {
         }
     }
 
-    @GetMapping("/requests")
-    public ResponseEntity<?> getRmaRequests(@RequestParam(value = "filter", required = false) String filter) {
-        try {
-            return rmaService.getRmaRequests(filter);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/items/all")
-    public ResponseEntity<?> getAllItems() {
-        try {
-            return rmaService.getAllItems();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
-        }
-    }
-
     // ============ WORKFLOW ENDPOINTS ============
 
     @GetMapping("/items/unassigned")
