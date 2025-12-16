@@ -140,11 +140,25 @@ function RmaDashboard() {
 
   // --- Table Columns ---
   const requestColumns = [
-      { title: "RMA No", dataIndex: "itemRmaNo", key: "itemRmaNo", render:(val)=>val || "-" },
-      { title: "Request No", dataIndex: "requestNumber", key: "requestNumber" }, 
+      { title: "RMA No", key: "manualRmaNo", render: (_, record) => {
+          // Display Manual RMA Number from items if available
+          if (record.items && record.items.length > 0) {
+              // Find first item with a manual RMA number
+              const item = record.items.find(i => i.rmaNo);
+              return item ? item.rmaNo : "-";
+          }
+          return "-";
+      }},
+      { title: "Request No", key: "requestNumber", render: (_, record) => record.requestNumber || record.rmaNo }, 
       { title: "Company", dataIndex: "companyName", key: "companyName" },
       { title: "Date", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
-      { title: "Items", key: "itemsCount", render: (_, record) => record.items ? record.items.length : 0 },
+      { title: "Items", dataIndex: "itemsCount", key: "itemsCount", align: "center", render: (val, record)=>
+        typeof val === "number"
+        ? val
+        : Array.isArray(record.items)
+        ? record.items.length
+        :0,
+       },
       { title: "Status", key: "status", render: () => <Tag color="blue">Submitted</Tag> } 
   ];
 

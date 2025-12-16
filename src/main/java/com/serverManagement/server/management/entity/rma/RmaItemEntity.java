@@ -117,6 +117,7 @@ public class RmaItemEntity {
     // Relationship with RMA Request
     @ManyToOne
     @JoinColumn(name = "rma_request_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference
     private RmaRequestEntity rmaRequest;
 
     // Constructors

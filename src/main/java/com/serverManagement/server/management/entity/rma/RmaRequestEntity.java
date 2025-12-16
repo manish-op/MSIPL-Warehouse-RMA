@@ -77,7 +77,7 @@ public class RmaRequestEntity {
 
     // Relationship with RMA Items
     @OneToMany(mappedBy = "rmaRequest", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<RmaItemEntity> items;
 
     // Customer relationship (for return address customer)
