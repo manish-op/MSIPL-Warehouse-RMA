@@ -310,6 +310,9 @@ public class RmaService {
                                 item.getModel(),
                                 item.getFaultDescription(),
                                 item.getRepairStatus());
+
+                        itemDTO.setRequestNumber(request.getRequestNumber()); // auto generated
+                        itemDTO.setItemRmaNo(item.getRmaNo()); // manual RMA NO filled by the user
                         itemDTOs.add(itemDTO);
                     }
                 }

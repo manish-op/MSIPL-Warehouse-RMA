@@ -5,7 +5,6 @@ import logo from "../../images/images.png";
 import { ThemeContext } from "../../context/ThemeContext";
 import "./ThemeToggle.css";
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
-import NotificationBell from "../NotificationBell/NotificationBell"; 
 
 function Header() {
   const location = useLocation();
@@ -42,7 +41,6 @@ function Header() {
           </Link>
         )}
 
-        {!showButton && <NotificationBell />}
 
         {showButton ? (
           <Link to="/login" className="header-btn">

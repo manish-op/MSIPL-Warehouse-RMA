@@ -23,6 +23,9 @@ public class RmaItemsGroupedResponse {
         private String faultDescription;
         private String repairStatus;
 
+        private String RequestNumber; // auto rma in the RMA statistics
+        private String itemRmaNo; // manual RMA No filled by the user
+
         public RmaItemDTO() {
         }
 
@@ -83,6 +86,22 @@ public class RmaItemsGroupedResponse {
 
         public void setRepairStatus(String repairStatus) {
             this.repairStatus = repairStatus;
+        }
+
+        public String getRequestNumber() {
+            return RequestNumber;
+        }
+
+        public void setRequestNumber(String requestNumber) {
+            this.RequestNumber = requestNumber;
+        }
+
+        public String getItemRmaNo() {
+            return itemRmaNo;
+        }
+
+        public void setItemRmaNo(String itemRmaNo) {
+            this.itemRmaNo = itemRmaNo;
         }
     }
 
