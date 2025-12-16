@@ -392,8 +392,6 @@ public class RmaItemEntity {
         this.depotDispatch = depotDispatch;
     }
 
-    // Delegated Getters/Setters for backward compatibility (optional but helping
-    // Refactor)
     public String getDcNo() {
         return depotDispatch != null ? depotDispatch.getDcNo() : null;
     }
