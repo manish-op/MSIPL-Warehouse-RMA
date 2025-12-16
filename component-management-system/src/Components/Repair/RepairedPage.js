@@ -13,6 +13,11 @@ import {
     Button,
     Modal,
     Table,
+    Form,
+    Input,
+    Select,
+    DatePicker,
+    Space,
 } from "antd";
 import {
     CheckCircleOutlined,
@@ -20,6 +25,8 @@ import {
     ReloadOutlined,
     EyeOutlined,
     DownloadOutlined,
+    FilePdfOutlined,
+    SendOutlined,
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
@@ -27,12 +34,34 @@ import "./UnrepairedPage.css";
 
 const { Title, Text, Paragraph } = Typography;
 
+const PREDEFINED_TRANSPORTERS = {
+    "BlueDart": "BD001",
+    "DTDC": "DT001",
+    "Professional Couriers": "PC001",
+    "Trackon": "TR001",
+    "Delhivery": "DL001"
+};
+
 export default function RepairedPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [generatingGatepass, setGeneratingGatepass] = useState(null);
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewData, setPreviewData] = useState({ rmaNo: "", items: [] });
+    // DC Modal State
+    const [dcModalVisible, setDcModalVisible] = useState(false);
+    const [dcSubmitting, setDcSubmitting] = useState(false);
+    const [dcTableData, setDcTableData] = useState([]);
+    const [transporters, setTransporters] = useState([]);
+    const [isNewTransporter, setIsNewTransporter] = useState(false);
+    const [selectedRmaForDc, setSelectedRmaForDc] = useState(null);
+    const [dcForm] = Form.useForm();
+    // Dispatch Modal State
+    const [dispatchModalVisible, setDispatchModalVisible] = useState(false);
+    const [dispatchSubmitting, setDispatchSubmitting] = useState(false);
+    const [selectedRmaNo, setSelectedRmaNo] = useState(null);
+    const [selectedRmaItems, setSelectedRmaItems] = useState([]);
+    const [dispatchForm] = Form.useForm();
 
     const loadItems = async () => {
         setLoading(true);
@@ -47,14 +76,151 @@ export default function RepairedPage() {
         setLoading(false);
     };
 
+    const fetchTransporters = async () => {
+        const result = await RmaApi.getAllTransporters();
+        if (result.success) {
+            setTransporters(result.data);
+        }
+    };
+
     useEffect(() => {
         loadItems();
+        fetchTransporters();
     }, []);
+
+    // Open DC Modal
+    const openDcModal = (rmaNo, rmaItems) => {
+        // Validation: Ensure all items have an RMA Number assigned
+        const pendingRma = rmaItems.some(item => !item.itemRmaNo || item.itemRmaNo.trim() === '');
+        if (pendingRma) {
+            message.warning("RMA Number must be assigned to all items before generating Delivery Challan");
+            return;
+        }
+        setSelectedRmaForDc(rmaNo);
+        setDcTableData(rmaItems.map((item, index) => ({ ...item, slNo: index + 1, qty: 1 })));
+
+        dcForm.resetFields();
+        // Pre-fill Customer Details
+        const customerDetails = rmaItems[0]?.rmaRequest;
+        dcForm.setFieldsValue({
+            modeOfShipment: "ROAD",
+            boxes: "1",
+            consigneeName: customerDetails?.companyName || "",
+            consigneeAddress: customerDetails?.returnAddress || "",
+        });
+        setDcModalVisible(true);
+    };
+
+    // Handle Generate DC
+    const handleGenerateDC = async (values) => {
+        try {
+            setDcSubmitting(true);
+            const {
+                consigneeName, consigneeAddress, gstIn,
+                boxes, dimensions, weight, modeOfShipment,
+                transporterName, transporterId,
+                items: formItems // captured from table inputs
+            } = values;
+
+            const formattedItems = dcTableData.map((item, index) => ({
+                slNo: index + 1,
+                product: item.product,
+                model: item.model,
+                serialNo: item.serialNo,
+                rate: (formItems?.[index]?.rate || 0).toString(),
+                itemId: item.id
+            }));
+
+            const payload = {
+                rmaNo: selectedRmaForDc,
+                consigneeName,
+                consigneeAddress,
+                gstIn,
+                boxes: parseInt(boxes),
+                dimensions,
+                weight,
+                modeOfShipment,
+                transporterName: Array.isArray(transporterName) ? transporterName[transporterName.length - 1] : transporterName,
+                transporterId,
+                items: formattedItems
+            };
+
+            const result = await RmaApi.generateDeliveryChallan(payload);
+            if (result.success) {
+                message.success("Delivery Challan Generated Successfully");
+                setDcModalVisible(false);
+                fetchTransporters();
+            } else {
+                message.error("Failed to Generate DC");
+            }
+
+        } catch (error) {
+            console.error("DC Gen Error:", error);
+            message.error("An error occurred");
+        } finally {
+            setDcSubmitting(false);
+        }
+    };
 
     // Open Preview Modal
     const openPreview = (rmaItems, rmaNo) => {
         setPreviewData({ rmaNo, items: rmaItems });
         setPreviewVisible(true);
+    };
+
+    // Open Dispatch Modal
+    const openDispatchModal = (rmaNo, rmaItems) => {
+        const pendingRma = rmaItems.some(item => !item.itemRmaNo || item.itemRmaNo.trim() === '');
+        if (pendingRma) {
+            message.warning("RMA Number must be assigned to all items before dispatching");
+            return;
+        }
+        setSelectedRmaNo(rmaNo);
+        setSelectedRmaItems(rmaItems);
+        dispatchForm.resetFields();
+        const customerDetails = rmaItems[0]?.rmaRequest;
+        dispatchForm.setFieldsValue({
+            dispatchDate: null,
+            courierName: "",
+            trackingNo: "",
+            dcNo: "",
+            ewayBillNo: "",
+            remarks: `Dispatch to Customer: ${customerDetails?.companyName || 'N/A'}`,
+        });
+        setDispatchModalVisible(true);
+    };
+
+    // Handle Confirm Dispatch to Customer
+    const handleConfirmDispatch = async () => {
+        try {
+            const values = await dispatchForm.validateFields();
+            setDispatchSubmitting(true);
+
+            // Update each item status to DISPATCHED
+            let successCount = 0;
+            for (const item of selectedRmaItems) {
+                const result = await RmaApi.updateItemStatus(
+                    item.id,
+                    'DISPATCHED',
+                    values.remarks || 'Dispatched to Customer',
+                    true
+                );
+                if (result.success) successCount++;
+            }
+
+            if (successCount === selectedRmaItems.length) {
+                message.success(`${successCount} item(s) dispatched to customer successfully!`);
+                setDispatchModalVisible(false);
+                loadItems();
+            } else {
+                message.warning(`${successCount} of ${selectedRmaItems.length} items dispatched.`);
+            }
+        } catch (error) {
+            console.error("Dispatch error:", error);
+            message.error("Failed to dispatch items");
+        } finally {
+            setDispatchSubmitting(false);
+        }
     };
 
     // Confirm and Generate Outward Gatepass PDF
@@ -182,14 +348,28 @@ export default function RepairedPage() {
                                         </div>
                                     }
                                     extra={
-                                        <Button
-                                            type="primary"
-                                            // Pass items and the best available RMA Key (Request Number preferred for backend, fallback to Group Key)
-                                            onClick={() => openPreview(rmaItems, rmaItems[0].rmaRequest?.requestNumber || rmaNo)}
-                                            style={{ backgroundColor: "#135200", borderColor: "#135200" }}
-                                        >
-                                            Generate Outward Gatepass
-                                        </Button>
+                                        <Space>
+                                            <Button
+                                                className="btn-generate-dc"
+                                                icon={<FilePdfOutlined />}
+                                                onClick={() => openDcModal(rmaItems[0].rmaRequest?.requestNumber || rmaNo, rmaItems)}
+                                            >
+                                                Generate DC
+                                            </Button>
+                                            <Button
+                                                type="primary"
+                                                icon={<SendOutlined />}
+                                                onClick={() => openDispatchModal(rmaItems[0].rmaRequest?.requestNumber || rmaNo, rmaItems)}
+                                            >
+                                                Dispatch to Customer
+                                            </Button>
+                                            <Button
+                                                onClick={() => openPreview(rmaItems, rmaItems[0].rmaRequest?.requestNumber || rmaNo)}
+                                                style={{ backgroundColor: "#135200", borderColor: "#135200", color: "#fff" }}
+                                            >
+                                                Generate Out Gatepass
+                                            </Button>
+                                        </Space>
                                     }
                                 >
                                     <Row gutter={[16, 16]}>
@@ -250,6 +430,242 @@ export default function RepairedPage() {
                         </div>
                     )}
                 </div>
+
+                {/* Dispatch to Customer Modal */}
+                <Modal
+                    title={`Dispatch to Customer - ${selectedRmaNo || ""}`}
+                    open={dispatchModalVisible}
+                    onCancel={() => setDispatchModalVisible(false)}
+                    confirmLoading={dispatchSubmitting}
+                    onOk={handleConfirmDispatch}
+                    okText="Confirm Dispatch"
+                    width={700}
+                >
+                    <Form form={dispatchForm} layout="vertical">
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    name="dispatchDate"
+                                    label="Dispatch Date"
+                                    rules={[{ required: true, message: "Required" }]}
+                                >
+                                    <DatePicker style={{ width: "100%" }} />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name="courierName" label="Courier Company">
+                                    <Input placeholder="e.g., BlueDart, DTDC" />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item name="trackingNo" label="Tracking / AWB No.">
+                                    <Input placeholder="Tracking number" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name="dcNo" label="Delivery Challan No.">
+                                    <Input placeholder="DC number" />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item name="ewayBillNo" label="E-Way Bill No.">
+                                    <Input placeholder="E-way bill number" />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+
+                        <Form.Item name="remarks" label="Remarks">
+                            <Input.TextArea rows={3} placeholder="Any dispatch remarks" />
+                        </Form.Item>
+
+                        <Divider />
+                        <Space direction="vertical" style={{ width: "100%" }}>
+                            <Text type="secondary">
+                                You are dispatching <strong>{selectedRmaItems.length}</strong> item(s) to the customer.
+                            </Text>
+                        </Space>
+                    </Form>
+                </Modal>
+
+                {/* Delivery Challan Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <FilePdfOutlined style={{ color: "#faad14" }} />
+                            <span>Generate Delivery Challan</span>
+                        </div>
+                    }
+                    open={dcModalVisible}
+                    onCancel={() => setDcModalVisible(false)}
+                    width={1000}
+                    footer={[
+                        <Button key="cancel" onClick={() => setDcModalVisible(false)}>
+                            Cancel
+                        </Button>,
+                        <Button
+                            key="generate"
+                            type="primary"
+                            icon={<FilePdfOutlined />}
+                            onClick={() => dcForm.submit()}
+                            loading={dcSubmitting}
+                            style={{ background: "#faad14", borderColor: "#faad14" }}
+                        >
+                            Generate DC
+                        </Button>
+                    ]}
+                >
+                    <Form
+                        form={dcForm}
+                        layout="vertical"
+                        onFinish={handleGenerateDC}
+                        initialValues={{
+                            modeOfShipment: "ROAD",
+                            boxes: "1"
+                        }}
+                    >
+                        <Row gutter={16}>
+                            {/* Consignor (Fixed for now, or display only) */}
+                            <Col span={12}>
+                                <Card title="Consignor Details" size="small" style={{ background: '#f9f9f9' }}>
+                                    <p><strong>Motorola Solutions India</strong></p>
+                                    <p>A, Building 8, DLF</p>
+                                    <p>Gurgaon, Haryana, India</p>
+                                </Card>
+                            </Col>
+                            {/* Consignee */}
+                            <Col span={12}>
+                                <Card title="Consignee Details" size="small">
+                                    <Form.Item name="consigneeName" label="Name">
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item name="consigneeAddress" label="Address">
+                                        <Input.TextArea rows={2} />
+                                    </Form.Item>
+                                    <Form.Item name="gstIn" label="GST IN">
+                                        <Input placeholder="Enter GST IN" />
+                                    </Form.Item>
+                                </Card>
+                            </Col>
+                        </Row>
+
+                        <Divider orientation="left">Item Details</Divider>
+
+                        <Table
+                            dataSource={dcTableData}
+                            pagination={false}
+                            size="small"
+                            columns={[
+                                { title: 'Sr No', dataIndex: 'slNo', key: 'slNo', width: 60 },
+                                { title: 'Material Code', dataIndex: 'serialNo', key: 'serialNo' },
+                                {
+                                    title: 'Description',
+                                    key: 'product',
+                                    render: (_, record) => `${record.product || ''}${record.model ? ' - ' + record.model : ''}`
+                                },
+                                { title: 'Qty', dataIndex: 'qty', key: 'qty', render: () => 1 }, // Always 1 per item row
+                                {
+                                    title: 'Rate (Value)',
+                                    key: 'rate',
+                                    render: (_, record, index) => (
+                                        <Form.Item
+                                            name={['items', index, 'rate']}
+                                            rules={[{ required: true, message: 'Required' }]}
+                                            style={{ margin: 0 }}
+                                        >
+                                            <Input prefix="₹" type="number" placeholder="Value" />
+                                        </Form.Item>
+                                    )
+                                }
+                            ]}
+                        />
+
+                        <Divider orientation="left">Shipment Details</Divider>
+                        <Row gutter={16}>
+                            <Col span={6}>
+                                <Form.Item name="boxes" label="No of Boxes" rules={[{ required: true }]}>
+                                    <Input type="number" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="dimensions" label="Dimensions" rules={[{ required: true }]}>
+                                    <Input placeholder="e.g. 10x10x10" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="weight" label="Weight (kg)" rules={[{ required: true }]}>
+                                    <Input placeholder="e.g. 5kg" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="modeOfShipment" label="Mode of Shipment">
+                                    <Select>
+                                        <Select.Option value="ROAD">ROAD</Select.Option>
+                                        <Select.Option value="AIR">AIR</Select.Option>
+                                        <Select.Option value="HAND_CARRY">HAND CARRY</Select.Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item name="transporterName" label="Transporter Name">
+                                    <Select
+                                        showSearch
+                                        placeholder="Select or Type New Transporter"
+                                        optionFilterProp="children"
+                                        onSelect={(value) => {
+                                            const t = transporters.find(tr => tr.name === value);
+                                            if (t) {
+                                                dcForm.setFieldsValue({ transporterId: t.transporterId });
+                                                setIsNewTransporter(false);
+                                            }
+                                        }}
+                                        onSearch={(val) => {
+                                            const exists = transporters.some(t => t.name.toLowerCase() === val.toLowerCase());
+                                            if (!exists) {
+                                                dcForm.setFieldsValue({ transporterId: "" });
+                                                setIsNewTransporter(true);
+                                            }
+                                        }}
+                                        mode="tags"
+                                        maxTagCount={1}
+                                    >
+                                        {[
+                                            ...transporters,
+                                            ...Object.keys(PREDEFINED_TRANSPORTERS)
+                                                .filter(name => !transporters.some(t => t.name === name))
+                                                .map(name => ({ id: `pre-${name}`, name: name }))
+                                        ].map(t => (
+                                            <Select.Option key={t.id} value={t.name}>{t.name}</Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    name="transporterId"
+                                    label="Transporter ID"
+                                    rules={[{ required: true, message: 'Please enter Transporter ID' }]}
+                                    help={isNewTransporter ? "Enter ID for new transporter to save it" : ""}
+                                >
+                                    <Input placeholder="Auto-filled or Enter New ID" />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <Row gutter={16} justify="end" style={{ marginTop: 16 }}>
+                            <Col>
+                                <Button onClick={() => setDcModalVisible(false)} style={{ marginRight: 8 }}>Cancel</Button>
+                                <Button type="primary" htmlType="submit" loading={dcSubmitting}>Generate DC</Button>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Modal>
 
                 {/* Outward Gatepass Preview Modal */}
                 <Modal

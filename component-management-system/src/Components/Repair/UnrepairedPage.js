@@ -817,7 +817,7 @@ export default function UnrepairedPage() {
                                         <div className="rma-card-header">
                                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                                 <Tag color="#1890ff" style={{ fontSize: 14, padding: "4px 12px" }}>
-                                                    RMA: {rmaNo}
+                                                    RMA: {rmaItems[0]?.itemRmaNo || rmaNo}
                                                 </Tag>
                                                 <Badge
                                                     count={rmaItems.length}
@@ -836,14 +836,14 @@ export default function UnrepairedPage() {
                                                     <>
                                                         <Button
                                                             icon={<FileTextOutlined />}
-                                                            onClick={() => openGatepassPreview(rmaItems, rmaNo)}
+                                                            onClick={() => openGatepassPreview(rmaItems, rmaItems[0]?.itemRmaNo || rmaNo)}
                                                             size="small"
                                                         >
                                                             Preview Gatepass
                                                         </Button>
                                                         <Button
                                                             icon={<PrinterOutlined />}
-                                                            onClick={() => openStickerModal(rmaItems, rmaNo)}
+                                                            onClick={() => openStickerModal(rmaItems, rmaItems[0]?.itemRmaNo || rmaNo)}
                                                             size="small"
                                                             style={{ background: "#722ed1", borderColor: "#722ed1", color: "#fff" }}
                                                         >
@@ -854,7 +854,7 @@ export default function UnrepairedPage() {
                                                 <Button
                                                     type="primary"
                                                     icon={<UserAddOutlined />}
-                                                    onClick={() => openBulkAssignModal(rmaNo, rmaItems)}
+                                                    onClick={() => openBulkAssignModal(rmaItems[0]?.itemRmaNo || rmaNo, rmaItems)}
                                                     size="small"
                                                     style={{ background: "#52c41a", borderColor: "#52c41a" }}
                                                 >
