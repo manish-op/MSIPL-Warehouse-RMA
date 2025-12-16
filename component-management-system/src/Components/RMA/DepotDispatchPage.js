@@ -867,7 +867,15 @@ export default function DepotDispatchPage() {
                     </div>
                 </Modal>
             </div>
+<<<<<<< HEAD
         </RmaLayout >
     );
 }
 
+=======
+        </Modal>
+      </div>
+    </RmaLayout>
+  );
+}
+>>>>>>> origin/priyanshi

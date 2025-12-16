@@ -5,7 +5,10 @@ import logo from "../../images/images.png";
 import { ThemeContext } from "../../context/ThemeContext";
 import "./ThemeToggle.css";
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
+<<<<<<< HEAD
 import NotificationBell from "../NotificationBell/NotificationBell";
+=======
+>>>>>>> origin/priyanshi
 
 function Header() {
   const location = useLocation();
@@ -42,7 +45,10 @@ function Header() {
           </Link>
         )}
 
+<<<<<<< HEAD
         {!showButton && location.pathname.startsWith("/dashboard") && <NotificationBell />}
+=======
+>>>>>>> origin/priyanshi
 
         {showButton ? (
           <Link to="/login" className="header-btn">

@@ -1,5 +1,6 @@
 package com.serverManagement.server.management.dao.rma;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.serverManagement.server.management.dto.rma.DepotDispatchItemDto;
 import com.serverManagement.server.management.entity.rma.RmaItemEntity;
 
 @Repository
@@ -80,5 +82,10 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     // Explicit
     List<RmaItemEntity> findAllById(Iterable<Long> ids);
 
+<<<<<<< HEAD
     List<RmaItemEntity> findByRmaRequest(com.serverManagement.server.management.entity.rma.RmaRequestEntity rmaRequest);
+=======
+    Collection<DepotDispatchItemDto> findByRepairTypeAndDepotStage(String string, String string2);
+
+>>>>>>> origin/priyanshi
 }
