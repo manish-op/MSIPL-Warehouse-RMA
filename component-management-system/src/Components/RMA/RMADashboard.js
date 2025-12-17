@@ -24,16 +24,7 @@ import "./RmaDashboard.css";
 
 const { Option } = Select;
 
-// --- Mock Data for Trend Chart (Replace with real API data later) ---
-const CHART_DATA_TRENDS = [
-  { name: 'Mon', requests: 4 },
-  { name: 'Tue', requests: 7 },
-  { name: 'Wed', requests: 5 },
-  { name: 'Thu', requests: 12 },
-  { name: 'Fri', requests: 8 },
-  { name: 'Sat', requests: 3 },
-  { name: 'Sun', requests: 2 },
-];
+// --- Trend Chart Data is now fetched from API (stats.dailyTrends) ---
 
 const PIE_COLORS = ['#52c41a', '#fa8c16', '#f5222d']; // Green, Orange, Red
 
@@ -280,7 +271,7 @@ function RmaDashboard() {
                 <Col xs={24} lg={16}>
                     <Card title="Incoming Requests Trend (Last 7 Days)" bordered={false} className="chart-card">
                         <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={CHART_DATA_TRENDS} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                            <LineChart data={stats?.dailyTrends || []} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
                                 <YAxis axisLine={false} tickLine={false} />
