@@ -11,6 +11,7 @@ import EmployeeManagement from "./Components/Employee/EmployeeManagement";
 import RegionManagement from "./Components/Region/RegionManagement";
 import KeywordManagement from "./Components/Keyword/KeywordManagement.js";
 import AddItem from "./Components/Items/AddItem/AddItem.js";
+import GetItemByKeyword from "./Components/Items/GetItem/GetItemByKeyword.js";
 
 import UpdateItem from "./Components/Items/UpdateItem/UpdateItem.js";
 import HistoryTable from "./Components/Items/HistoryRelated/HistoryTable.js";
@@ -79,6 +80,7 @@ function App() {
               <Route path="addItem" element={<AddItem />} />
 
               <Route path="updateItem" element={<UpdateItem />} />
+              <Route path="itemSearch" element={<GetItemByKeyword />} />
 
               <Route path="historyTable" element={<HistoryTable />} />
               <Route

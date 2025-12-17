@@ -22,6 +22,7 @@ com\serverManagement\server\management\controller\chat\ChatController.class
 com\serverManagement\server\management\controller\keyword\KeywordController.class
 com\serverManagement\server\management\request\itemRepairingDetails\ItemRepairingRequest.class
 com\serverManagement\server\management\request\changePassword\PasswordRequest.class
+com\serverManagement\server\management\controller\rma\RmaController.class
 com\serverManagement\server\management\dao\option\ItemStatusOptionDAO.class
 com\serverManagement\server\management\dao\keyword\SubKeywordDAO.class
 com\serverManagement\server\management\service\gatepass\InwardGatePassService.class
@@ -39,6 +40,7 @@ com\serverManagement\server\management\dao\itemRepairOption\TechnicianStatusDAO.
 com\serverManagement\server\management\dao\rma\TransporterDAO.class
 com\serverManagement\server\management\dao\keyword\KeywordDAO.class
 com\serverManagement\server\management\entity\itemDetails\RegionUpdateDTO.class
+com\serverManagement\server\management\service\rma\RmaService.class
 com\serverManagement\server\management\request\option\UpdateAvailableStatusRequest.class
 com\serverManagement\server\management\request\rma\RmaCreateRequest$RmaItemDto.class
 com\serverManagement\server\management\dao\itemDetails\ItemDetailsDAO.class
@@ -59,6 +61,7 @@ com\serverManagement\server\management\request\itemRepairingDetails\EngineerUpda
 com\serverManagement\server\management\service\gatepasspdf\OutwardGatepassPDFService.class
 com\serverManagement\server\management\entity\chat\ChatMessage.class
 com\serverManagement\server\management\request\itemDetails\AddItemRequest.class
+com\serverManagement\server\management\controller\itemDetails\ReplacementController.class
 com\serverManagement\server\management\service\itemDetails\CSVConverterService.class
 com\serverManagement\server\management\dao\itemstock\InventoryThresholdRepository.class
 com\serverManagement\server\management\service\itemDetails\GetSerialIdOnly.class
@@ -92,6 +95,7 @@ com\serverManagement\server\management\dao\gatepass\OutwardGatepassDAO.class
 com\serverManagement\server\management\request\keyword\UpdateKeywordName.class
 com\serverManagement\server\management\request\itemRepairingDetails\GetAssignTicketDetailsRequest.class
 com\serverManagement\server\management\service\itemRepairOption\RepairingOptionService.class
+com\serverManagement\server\management\dto\rma\DailyTrendDto.class
 com\serverManagement\server\management\service\itemDetails\ItemDetailsService.class
 com\serverManagement\server\management\service\gatepass\FruMakingAfterGatePassService.class
 com\serverManagement\server\management\request\rma\RmaCreateRequest.class
@@ -143,6 +147,7 @@ com\serverManagement\server\management\entity\itemRepairDetails\RepairingComment
 com\serverManagement\server\management\dao\rma\RmaRequestDAO.class
 com\serverManagement\server\management\dao\role\RoleDAO.class
 com\serverManagement\server\management\controller\itemDetails\ItemDetailsController.class
+com\serverManagement\server\management\service\itemDetails\ReplacementService.class
 com\serverManagement\server\management\controller\itemstock\InventoryThresholdController.class
 com\serverManagement\server\management\request\user\AddUserRequest.class
 com\serverManagement\server\management\service\itemRepairingDetails\ItemRepairingService.class
@@ -163,6 +168,7 @@ com\serverManagement\server\management\request\role\UpdateRole.class
 com\serverManagement\server\management\entity\itemDetails\WarehouseAuditLogEntity.class
 com\serverManagement\server\management\entity\itemDetails\ItemDetailsDTOForCSV.class
 com\serverManagement\server\management\entity\itemDetails\ItemDetailsEntity.class
+com\serverManagement\server\management\dto\rma\RmaDashboardStatsDto.class
 com\serverManagement\server\management\entity\adminUser\AdminUserEntity.class
 com\serverManagement\server\management\request\itemRepairingDetails\ManagerGetTicketRequest.class
 com\serverManagement\server\management\dao\itemRepairDetails\FruDAO.class
@@ -179,4 +185,5 @@ com\serverManagement\server\management\response\keyword\KeywordResponse.class
 com\serverManagement\server\management\request\itemDetails\AssignItemDetailsRequest.class
 com\serverManagement\server\management\controller\itemDetails\UploadViaCsvFileController.class
 com\serverManagement\server\management\globalException\UnathorizedException.class
+com\serverManagement\server\management\request\itemDetails\ReplacementRequest.class
 com\serverManagement\server\management\request\itemDetails\StockTransferRequest.class

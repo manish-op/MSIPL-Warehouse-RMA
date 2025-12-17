@@ -18,4 +18,7 @@ public interface ItemAvailableStatusOptionDAO extends JpaRepository<ItemAvailabl
 
 	@Query("SELECT um FROM ItemAvailableStatusOptionEntity um WHERE LOWER(um.itemAvailableOption) =:optionValue")
 	public ItemAvailableStatusOptionEntity getStatusDetailsByOption(@Param("optionValue") String optionValue);
+
+	public ItemAvailableStatusOptionEntity findByItemAvailableOption(String string); // for replacement process
+
 }
