@@ -75,7 +75,6 @@ public class RmaRequestEntity {
 
     // Relationship with RMA Items
     @OneToMany(mappedBy = "rmaRequest", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<RmaItemEntity> items;
 
     // Customer relationship (for return address customer)

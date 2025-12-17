@@ -113,3 +113,93 @@
         transform: translateX(0);
     }
 }
+
+/* =========================================================================
+   DARK MODE OVERRIDES
+   ========================================================================= */
+
+/* Page Background */
+[data-theme='dark'] .audit-trail-container {
+    background: #000000 !important;
+    min-height: 100vh;
+}
+
+[data-theme='dark'] .audit-trail-header {
+    background: linear-gradient(135deg, #391085 0%, #22075e 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Stat Mini Cards */
+[data-theme='dark'] .stat-mini-card {
+    background: #1f1f1f;
+    border: 1px solid #303030;
+}
+
+[data-theme='dark'] .stat-mini-card .ant-statistic-title {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+[data-theme='dark'] .stat-mini-card .ant-statistic-content {
+    color: #fff;
+}
+
+/* Filter & Table Cards */
+[data-theme='dark'] .filter-card,
+[data-theme='dark'] .table-card {
+    background: #1f1f1f;
+    border: 1px solid #303030;
+}
+
+/* Input & Select in Dark Mode */
+[data-theme='dark'] .filter-card .ant-input,
+[data-theme='dark'] .filter-card .ant-select-selector {
+    background: #141414 !important;
+    border-color: #434343 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .filter-card .ant-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* Table Headers */
+[data-theme='dark'] .table-card .ant-table-thead > tr > th {
+    background: #262626 !important;
+    color: #fff !important;
+    border-bottom: 1px solid #303030;
+}
+
+/* Table Body */
+[data-theme='dark'] .table-card .ant-table-tbody > tr > td {
+    background: #1f1f1f;
+    color: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid #303030;
+}
+
+/* Table Hover Row */
+[data-theme='dark'] .table-card .ant-table-tbody > tr:hover > td {
+    background: #303030 !important;
+}
+
+/* Changes Cell (Old/New Value) */
+[data-theme='dark'] .changes-cell .old-value {
+    background: rgba(166, 29, 36, 0.15); /* Darker red bg */
+    border-left-color: #a61d24;
+    color: #ffa39e;
+}
+
+[data-theme='dark'] .changes-cell .new-value {
+    background: rgba(39, 73, 22, 0.15); /* Darker green bg */
+    border-left-color: #49aa19;
+    color: #b7eb8f;
+}
+
+/* Pagination */
+[data-theme='dark'] .ant-pagination-item a {
+    color: #fff;
+}
+
+[data-theme='dark'] .ant-pagination-item-active {
+    background: transparent;
+    border-color: #1890ff;
+}

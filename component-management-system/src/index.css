@@ -77,3 +77,102 @@ body {
   transition: background-color 0.2s linear, color 0.2s linear;
 }
 
+
+/* ==========================================================================
+   GLOBAL DARK MODE OVERRIDES
+   ========================================================================== */
+
+/* Toast / Message Fix */
+[data-theme='dark'] .ant-message-notice-content {
+    background: #333 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+}
+
+[data-theme='dark'] .ant-message-notice-content span {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-message .anticon {
+    color: #fff !important; /* Ensure icons are visible */
+}
+
+/* Modal Global Fix */
+[data-theme='dark'] .ant-modal-content,
+[data-theme='dark'] .ant-modal-header {
+    background-color: #1f1f1f;
+    border-bottom-color: #303030;
+}
+
+[data-theme='dark'] .ant-modal-title {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-modal-close {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='dark'] .ant-modal-close:hover {
+    color: #fff;
+}
+
+/* Global Table Fixes for Dark Mode */
+[data-theme='dark'] .ant-table {
+    background: transparent;
+    color: #e4e6eb;
+}
+
+[data-theme='dark'] .ant-table-thead > tr > th {
+    background: #1f1f1f;
+    color: #e4e6eb;
+    border-bottom: 1px solid #303030;
+}
+
+[data-theme='dark'] .ant-table-tbody > tr > td {
+    background: #141414;
+    color: #e4e6eb;
+    border-bottom: 1px solid #303030;
+}
+
+[data-theme='dark'] .ant-table-tbody > tr.ant-table-row:hover > td,
+[data-theme='dark'] .ant-table-tbody > tr > td.ant-table-cell-row-hover {
+    background: #2a2a2a !important;
+}
+
+[data-theme='dark'] .ant-pagination-item a {
+    color: #e4e6eb;
+}
+
+[data-theme='dark'] .ant-pagination-item-active {
+    background: transparent;
+    border-color: #1890ff;
+}
+
+/* Modal Cancel Content Fix */
+[data-theme='dark'] .ant-modal-footer .ant-btn-default {
+    background: transparent !important;
+    border-color: #434343 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-modal-footer .ant-btn-default:hover {
+    color: #40a9ff !important;
+    border-color: #40a9ff !important;
+}
+
+/* Fix for Modal.confirm (Logout, etc.) */
+[data-theme='dark'] .ant-modal-confirm-btns .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger) {
+    background-color: transparent !important;
+    border-color: #434343 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-modal-confirm-btns .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger):hover {
+    color: #40a9ff !important;
+    border-color: #40a9ff !important;
+}
+
+[data-theme='dark'] .ant-modal-confirm-body .ant-modal-confirm-title, 
+[data-theme='dark'] .ant-modal-confirm-body .ant-modal-confirm-content {
+    color: #fff !important;
+}

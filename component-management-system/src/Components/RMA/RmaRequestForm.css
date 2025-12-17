@@ -317,3 +317,212 @@
     justify-content: flex-end;
   }
 }
+
+/* ==========================================================================
+   DARK MODE OVERRIDES (RMA Request Page Premium Fix)
+   ========================================================================== */
+
+/* Page Background */
+[data-theme='dark'] .rma-wizard-container {
+    background: #000000;
+}
+
+/* Steps Card as the "Header" - Apply Premium Gradient */
+[data-theme='dark'] .steps-card {
+    background: linear-gradient(135deg, #1890ff 0%, #0050b3 100%) !important;
+    border: none;
+    box-shadow: 0 4px 20px rgba(24, 144, 255, 0.4);
+}
+
+/* Steps Text Colors in Dark Mode (on top of gradient) */
+[data-theme='dark'] .wizard-steps .ant-steps-item-title {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 600;
+}
+
+[data-theme='dark'] .wizard-steps .ant-steps-item-process .ant-steps-item-title {
+    color: #fff !important;
+    font-weight: 700;
+}
+
+[data-theme='dark'] .wizard-steps .ant-steps-item-wait .ant-steps-item-title {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Step Icons */
+[data-theme='dark'] .wizard-steps .ant-steps-item-icon {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='dark'] .wizard-steps .ant-steps-item-icon .ant-steps-icon {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Fix Item List Card in Dark Mode */
+[data-theme='dark'] .item-card {
+    background: #1f1f1f;
+    border-color: #303030;
+}
+
+[data-theme='dark'] .item-card .ant-card-head {
+    background: linear-gradient(135deg, #003a8c 0%, #002766 100%);
+    border-bottom: 1px solid #303030;
+}
+
+[data-theme='dark'] .item-card .ant-card-head-title {
+    color: #fff;
+}
+
+/* Fix "Confirm RMA Submission" Modal Review Section */
+.review-preview-box {
+    background: #f5f5f5; /* Default light mode bg */
+}
+
+[data-theme='dark'] .review-preview-box {
+    background: #1f1f1f !important;
+    border: 1px solid #303030;
+    color: #fff;
+}
+
+[data-theme='dark'] .review-preview-box .ant-typography {
+    color: #fff;
+}
+
+[data-theme='dark'] .review-preview-box .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+/* Fix Radio Buttons in Modal */
+[data-theme='dark'] .ant-radio-wrapper {
+    color: #fff;
+}
+
+/* Fix Success Screen (Result Component) */
+[data-theme='dark'] .success-card {
+    background: #141414;
+    border: 1px solid #303030;
+}
+
+[data-theme='dark'] .success-card .ant-result-title {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .success-card .ant-result-subtitle {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .success-card .ant-typography {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .success-card .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Fix RMA Number Display Box */
+[data-theme='dark'] .rma-number-card {
+    background: #1f1f1f;
+    border: 1px solid #303030;
+    border-left: 4px solid #52c41a; /* Keep the green accent */
+}
+
+[data-theme='dark'] .rma-number-card .ant-typography {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .rma-number-card .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+/* Fix Review Section Cards */
+[data-theme='dark'] .review-card {
+    background: #1f1f1f;
+    border: 1px solid #303030;
+}
+
+[data-theme='dark'] .review-card .ant-card-head {
+    background: linear-gradient(135deg, #003a8c 0%, #002766 100%);
+    border-bottom: 1px solid #303030;
+}
+
+[data-theme='dark'] .review-card .ant-card-head-title {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .review-card .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .review-card .ant-typography strong {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .review-item {
+    border-bottom: 1px solid #303030;
+}
+
+[data-theme='dark'] .wizard-steps .ant-steps-item-active .ant-steps-item-icon {
+    background: #fff;
+    border-color: #fff;
+}
+
+[data-theme='dark'] .wizard-steps .ant-steps-item-active .ant-steps-item-icon .ant-steps-icon {
+    color: #1890ff;
+}
+
+[data-theme='dark'] .wizard-steps .ant-steps-item-finish .ant-steps-item-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='dark'] .wizard-steps .ant-steps-item-finish .ant-steps-item-icon .ant-steps-icon {
+    color: #fff;
+}
+
+/* Steps Connecting Lines */
+[data-theme='dark'] .ant-steps-item-tail::after {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Form Card */
+[data-theme='dark'] .form-card {
+    background: #141414;
+    border: 1px solid #303030;
+}
+
+[data-theme='dark'] .step-title {
+    color: #fff; /* Ensure "Contact & Return Address" title is white */
+}
+
+[data-theme='dark'] .step-description {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* Input Fields */
+[data-theme='dark'] .ant-input,
+[data-theme='dark'] .ant-select-selector,
+[data-theme='dark'] textarea.ant-input {
+    background-color: #1f1f1f !important;
+    border-color: #434343 !important;
+    color: #fff !important;
+}
+
+[data-theme='dark'] .ant-select-arrow {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* Invoice Section */
+[data-theme='dark'] .invoice-section {
+    background: #1f1f1f;
+    border-color: #303030;
+}
+
+[data-theme='dark'] .ant-divider {
+    color: rgba(255, 255, 255, 0.45);
+    border-top-color: #303030;
+}
+
+[data-theme='dark'] .ant-form-item-label > label {
+    color: rgba(255, 255, 255, 0.85);
+}

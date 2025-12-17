@@ -64,8 +64,8 @@ export default function AssignedPage() {
         setLoading(true);
         const result = await RmaApi.getAssignedItems();
         if (result.success) {
-            // Filter to show ONLY Local Repair items
-            const localItems = (result.data || []).filter(item => item.repairType === 'LOCAL');
+            // Filter out Depot items, show everything else (Local, legacy nulls, etc.)
+            const localItems = (result.data || []).filter(item => item.repairType !== 'DEPOT');
             setItems(localItems);
         } else {
             message.error("Failed to load assigned items");

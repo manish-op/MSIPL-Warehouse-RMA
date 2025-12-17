@@ -34,11 +34,31 @@ public class RmaController {
     @Autowired
     private RmaExcelExportService excelExportService;
 
+    @GetMapping("/requests")
+    public ResponseEntity<?> getAllRmaRequests(@RequestParam(name = "timeFilter", required = false) String timeFilter) {
+        try {
+            return rmaService.getAllRmaRequests(timeFilter);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createRmaRequest(HttpServletRequest request,
             @RequestBody CreateRmaRequest createRmaRequest) {
         try {
             return rmaService.createRmaRequest(request, createRmaRequest);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/items")
+    public ResponseEntity<?> getAllRmaItems() {
+        try {
+            return rmaService.getAllRmaItems();
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());

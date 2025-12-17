@@ -9,7 +9,6 @@ import {
     ClockCircleOutlined,
 } from '@ant-design/icons';
 import { AlertApi } from '../API/AlertApi/AlertApi';
-import './ActiveAlerts.css';
 
 const { Title, Text } = Typography;
 

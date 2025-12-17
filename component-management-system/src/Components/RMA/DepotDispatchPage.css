@@ -219,9 +219,98 @@
     background: #fff;
     border-radius: 16px;
 }
+/* CSS Cleanup - Removed user duplicate block */
 
-.empty-state {
-    padding: 80px 0;
-    background: #fff;
-    border-radius: 16px;
+/* =========================================================================
+   DARK MODE OVERRIDES (Specific to Depot Dispatch Page)
+   ========================================================================= */
+
+[data-theme='dark'] .depot-page {
+    background: #000000;
+}
+
+[data-theme='dark'] .in-transit-box {
+    background: #141414;
+    border-color: #303030;
+    color: #fff;
+}
+
+[data-theme='dark'] .loading-container,
+[data-theme='dark'] .empty-state {
+    background: #1f1f1f;
+    border: 1px solid #303030;
+}
+
+[data-theme='dark'] .rma-group-card .ant-card-head {
+    background: linear-gradient(135deg, #003a8c 0%, #002766 100%) !important;
+}
+
+/* Fix Tabs Visibility */
+[data-theme='dark'] .depot-content .ant-tabs-tab {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='dark'] .depot-content .ant-tabs-tab:hover {
+    color: #fff;
+}
+
+[data-theme='dark'] .depot-content .ant-tabs-tab-active {
+    color: #d3adf7 !important; /* Keep purple theme but lighter for contrast */
+}
+
+[data-theme='dark'] .depot-content .ant-tabs-tab-btn {
+    text-shadow: none;
+}
+
+/* Modal Styling Fixes for Depot Page */
+[data-theme='dark'] .dispatch-modal .ant-modal-title *,
+[data-theme='dark'] .dc-modal .ant-modal-title * {
+    color: #fff !important;
+}
+
+[data-theme='dark'] .dispatch-modal .ant-typography,
+[data-theme='dark'] .dispatch-modal .ant-typography-secondary,
+[data-theme='dark'] .dispatch-modal span,
+[data-theme='dark'] .dispatch-modal strong,
+[data-theme='dark'] .dispatch-modal div, /* Aggressive catch-all */
+[data-theme='dark'] .dc-modal .ant-typography,
+[data-theme='dark'] .dc-modal .ant-typography-secondary,
+[data-theme='dark'] .dc-modal span,
+[data-theme='dark'] .dc-modal strong,
+[data-theme='dark'] .dc-modal div {
+     color: #e8e6e3 !important;
+}
+
+/* Reset input text color to be visible (AntD handles this but just in case) */
+[data-theme='dark'] .dispatch-modal input,
+[data-theme='dark'] .dispatch-modal textarea,
+[data-theme='dark'] .dc-modal input,
+[data-theme='dark'] .dc-modal textarea {
+     color: #fff !important;
+     background-color: #141414 !important;
+     border-color: #434343 !important;
+}
+
+/* Fix for Material Code Table in DC Modal */
+[data-theme='dark'] .dc-modal .ant-table-thead > tr > th {
+    background: #262626 !important;
+    color: #fff !important;
+    border-bottom: 1px solid #434343;
+}
+
+[data-theme='dark'] .dc-modal .ant-table-tbody > tr > td {
+    background: #1f1f1f !important;
+    color: #fff !important;
+    border-bottom: 1px solid #434343;
+}
+
+/* Fix Input inside Table (Rate/Qty) */
+[data-theme='dark'] .dc-modal .ant-table-tbody .ant-form-item input {
+    background: #141414 !important;
+    color: #fff !important;
+    border: 1px solid #434343;
+}
+
+[data-theme='dark'] .dc-modal .ant-table-cell-row-hover {
+    background: #2a2a2a !important;
 }

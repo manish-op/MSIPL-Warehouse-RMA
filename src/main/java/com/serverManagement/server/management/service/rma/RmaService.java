@@ -3,6 +3,7 @@ package com.serverManagement.server.management.service.rma;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,6 @@ import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
 import com.serverManagement.server.management.dao.keyword.KeywordDAO;
 import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
 import com.serverManagement.server.management.dao.rma.RmaItemDAO;
-import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
 import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
 import com.serverManagement.server.management.dao.rma.TransporterDAO;
 import com.serverManagement.server.management.dao.rma.DepotDispatchDAO;
@@ -327,6 +327,56 @@ public class RmaService {
         return str == null || str.trim().isEmpty();
     }
 
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getAllRmaItems() {
+        try {
+            List<RmaItemEntity> items = rmaItemDAO.findAll();
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching all items: " + e.getMessage());
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getAllRmaRequests(String timeFilter) {
+        try {
+            List<RmaRequestEntity> allRequests = rmaRequestDAO.findAll();
+
+            if (timeFilter == null || timeFilter.equalsIgnoreCase("all")) {
+                return ResponseEntity.ok(allRequests);
+            }
+
+            ZonedDateTime now = ZonedDateTime.now();
+            ZonedDateTime threshold = now;
+
+            if (timeFilter.equalsIgnoreCase("week")) {
+                threshold = now.minusWeeks(1);
+            } else if (timeFilter.equalsIgnoreCase("month")) {
+                threshold = now.minusMonths(1);
+            } else if (timeFilter.equalsIgnoreCase("year")) {
+                threshold = now.minusYears(1);
+            }
+
+            final ZonedDateTime finalThreshold = threshold;
+            List<RmaRequestEntity> filtered = allRequests.stream()
+                    .filter(req -> {
+                        if (req.getCreatedDate() == null)
+                            return false;
+                        return req.getCreatedDate().isAfter(finalThreshold);
+                    })
+                    .toList();
+
+            return ResponseEntity.ok(filtered);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching requests: " + e.getMessage());
+        }
+    }
+
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getAllRmaItemsGrouped() {
         try {
             // Fetch all RMA requests from database with items eagerly loaded
@@ -381,11 +431,49 @@ public class RmaService {
             long repairedCount = rmaItemDAO.countRepaired();
             long unrepairedCount = rmaItemDAO.countUnrepaired();
 
+            // Calculate Trend Data (Last 7 Days)
+            ZonedDateTime now = ZonedDateTime.now();
+            ZonedDateTime sevenDaysAgo = now.minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+            // Use findAll() and filter in memory to avoid restarting server for DAO
+            // interface change
+            List<RmaRequestEntity> allRequests = rmaRequestDAO.findAll();
+            List<RmaRequestEntity> recentRequests = new ArrayList<>();
+            for (RmaRequestEntity req : allRequests) {
+                if (req.getCreatedDate() != null && req.getCreatedDate().isAfter(sevenDaysAgo)) {
+                    recentRequests.add(req);
+                }
+            }
+
+            // Map to store counts per day
+            java.util.Map<java.time.LocalDate, Long> countsByDate = new java.util.HashMap<>();
+            for (RmaRequestEntity req : recentRequests) {
+                if (req.getCreatedDate() != null) {
+                    java.time.LocalDate date = req.getCreatedDate().toLocalDate();
+                    countsByDate.put(date, countsByDate.getOrDefault(date, 0L) + 1);
+                }
+            }
+
+            // Generate list for last 7 days (ensure all days are present including 0s)
+            List<com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto.DailyTrendDto> trendData = new ArrayList<>();
+            java.time.format.DateTimeFormatter dayFormatter = java.time.format.DateTimeFormatter.ofPattern("EEE"); // Mon,
+                                                                                                                   // Tue...
+
+            for (int i = 6; i >= 0; i--) {
+                ZonedDateTime d = now.minusDays(i);
+                java.time.LocalDate dateKey = d.toLocalDate();
+                String dayName = d.format(dayFormatter);
+                long count = countsByDate.getOrDefault(dateKey, 0L);
+                trendData.add(new com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto.DailyTrendDto(
+                        dayName, count));
+            }
+
             com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto stats = new com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto(
                     totalRequests,
                     totalItems,
                     repairedCount,
-                    unrepairedCount);
+                    unrepairedCount,
+                    trendData);
 
             return ResponseEntity.ok(stats);
         } catch (Exception e) {

@@ -679,3 +679,126 @@ Input:hover::after {
 [data-theme='dark'] .ant-form-item-label>label {
   color: #e8e6e3 !important;
 }
+
+/* =========================================
+   Global Dark Theme Modal Fixes
+   ========================================= */
+
+/* Modal Content Container */
+[data-theme='dark'] .ant-modal-content {
+  background-color: #1f1f1f !important;
+  color: #e8e6e3 !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Modal Header */
+[data-theme='dark'] .ant-modal-header {
+  background-color: #1f1f1f !important;
+  border-bottom: 1px solid #303030 !important;
+  color: #e8e6e3 !important;
+}
+
+/* Modal Title */
+[data-theme='dark'] .ant-modal-title {
+  color: #e8e6e3 !important;
+}
+
+/* Modal Footer */
+[data-theme='dark'] .ant-modal-footer {
+  border-top: 1px solid #303030 !important;
+}
+
+/* Modal Close Button */
+[data-theme='dark'] .ant-modal-close {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+[data-theme='dark'] .ant-modal-close:hover {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Modal Confirm Props (Delete/Confirm Dialogs) */
+[data-theme='dark'] .ant-modal-confirm-title,
+[data-theme='dark'] .ant-modal-confirm-content {
+  color: #e8e6e3 !important;
+}
+
+/* Button Fixes specific to Modals if needed */
+[data-theme='dark'] .ant-modal-footer .ant-btn-default {
+  background-color: transparent !important;
+  border-color: #434343 !important;
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .ant-modal-footer .ant-btn-default:hover {
+  border-color: #1677ff !important;
+  color: #1677ff !important;
+}
+
+/* Specific Modal Title Fixes for Custom Headers (Icon + Text) and Strings */
+[data-theme='dark'] .assign-modal .ant-modal-title,
+[data-theme='dark'] .assign-modal .ant-modal-title *,
+[data-theme='dark'] .gatepass-modal .ant-modal-title,
+[data-theme='dark'] .gatepass-modal .ant-modal-title *,
+[data-theme='dark'] .sticker-modal .ant-modal-title,
+[data-theme='dark'] .sticker-modal .ant-modal-title *,
+[data-theme='dark'] .dc-modal .ant-modal-title,
+[data-theme='dark'] .dc-modal .ant-modal-title *,
+[data-theme='dark'] .dispatch-modal .ant-modal-title,
+[data-theme='dark'] .dispatch-modal .ant-modal-title * {
+    color: #ffffff !important;
+}
+
+[data-theme='dark'] .dc-modal .ant-modal-header,
+[data-theme='dark'] .dispatch-modal .ant-modal-header {
+    background: #1f1f1f !important;
+    border-bottom: 1px solid #303030;
+}
+
+/* =========================================
+   Global Dark Theme Modal Content Visibility Fixes
+   ========================================= */
+
+/* Fix Table Headers inside Modals (Generate DC, Gatepass) */
+[data-theme='dark'] .ant-modal .ant-table-thead > tr > th {
+    background-color: #303030 !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #434343 !important;
+}
+
+/* Fix Card Text Content inside Modals (Consignor Details, etc.) */
+[data-theme='dark'] .ant-modal .ant-card,
+[data-theme='dark'] .ant-modal .ant-card p,
+[data-theme='dark'] .ant-modal .ant-card div,
+[data-theme='dark'] .ant-modal .ant-card span,
+[data-theme='dark'] .ant-modal .ant-card strong,
+[data-theme='dark'] .ant-modal .ant-card b {
+    color: #e8e6e3 !important;
+    background-color: transparent !important; /* Allow card bg to show */
+}
+
+/* Ensure Card Background itself is correct inside Modal */
+[data-theme='dark'] .ant-modal .ant-card {
+    background-color: #1f1f1f !important;
+    border: 1px solid #303030 !important;
+}
+
+/* Fix Form Item Labels inside Modals (Double check) */
+[data-theme='dark'] .ant-modal .ant-form-item-label > label {
+    color: #e8e6e3 !important;
+}
+
+/* Fix Typography (Text, Title, Paragraph) inside Modals globally */
+[data-theme='dark'] .ant-modal .ant-typography {
+    color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .ant-modal .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .ant-modal strong,
+[data-theme='dark'] .ant-modal span {
+    color: #e8e6e3; /* Fallback for miscellaneous spans */
+}

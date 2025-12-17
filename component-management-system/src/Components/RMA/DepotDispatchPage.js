@@ -597,6 +597,7 @@ export default function DepotDispatchPage() {
                     title={`Dispatch to Bangalore - ${selectedRmaNo || ""}`}
                     open={dispatchModalVisible}
                     onCancel={() => setDispatchModalVisible(false)}
+                    className="dispatch-modal"
                     confirmLoading={dispatchSubmitting}
                     onOk={handleConfirmDispatch}
                     okText="Confirm Dispatch"
@@ -665,6 +666,7 @@ export default function DepotDispatchPage() {
                     open={dcModalVisible}
                     onCancel={() => setDcModalVisible(false)}
                     width={1000}
+                    className="dc-modal"
                     footer={[
                         <Button key="cancel" onClick={() => setDcModalVisible(false)}>
                             Cancel

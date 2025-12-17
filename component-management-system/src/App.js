@@ -27,7 +27,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ChatComponent from "./Components/Chat/ChatComponent.js";
 import EmployeeList from "./Components/EmployeeList/EmployeeList.js";
 import ThresholdManager from "./Components/Threshold/ThresholdManager.js";
-import ActiveAlerts from "./Components/Alerts/ActiveAlerts.js";
+import ActiveAlerts from "./Components/Alerts/ActiveAlert.js";
 import EnhancedActivityFeed from "./Components/ActivityLogs/EnhancedActivityFeed.js";
 import RmaDashboard from "./Components/RMA/RMADashboard.js";
 import RmaRequestForm from "./Components/RMA/RmaRequestForm.js";

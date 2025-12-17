@@ -67,8 +67,8 @@ export default function RepairedPage() {
         setLoading(true);
         const result = await RmaApi.getRepairedItems();
         if (result.success) {
-            // Filter for Local Repair items only (as per requirement)
-            const localItems = (result.data || []).filter(item => item.repairType === 'LOCAL');
+            // Filter out Depot items, show everything else (Local, legacy nulls, etc.)
+            const localItems = (result.data || []).filter(item => item.repairType !== 'DEPOT');
             setItems(localItems);
         } else {
             message.error("Failed to load repaired items");
@@ -504,6 +504,7 @@ export default function RepairedPage() {
                     open={dcModalVisible}
                     onCancel={() => setDcModalVisible(false)}
                     width={1000}
+                    className="dc-modal"
                     footer={[
                         <Button key="cancel" onClick={() => setDcModalVisible(false)}>
                             Cancel
@@ -658,12 +659,7 @@ export default function RepairedPage() {
                                 </Form.Item>
                             </Col>
                         </Row>
-                        <Row gutter={16} justify="end" style={{ marginTop: 16 }}>
-                            <Col>
-                                <Button onClick={() => setDcModalVisible(false)} style={{ marginRight: 8 }}>Cancel</Button>
-                                <Button type="primary" htmlType="submit" loading={dcSubmitting}>Generate DC</Button>
-                            </Col>
-                        </Row>
+
                     </Form>
                 </Modal>
 

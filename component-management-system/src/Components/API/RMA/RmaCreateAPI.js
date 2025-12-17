@@ -104,6 +104,12 @@ export const RmaApi = {
 
   // Dashboard Statistics
   getRmaDashboardStats: async () => apiGet("/rma/stats"),
+  
+  // Get RMA Requests with optional time filter
+  getRmaRequests: async (timeFilter) => apiGet(`/rma/requests?timeFilter=${timeFilter || 'all'}`),
+
+  // Get all items (flat list)
+  getAllItems: async () => apiGet("/rma/items"),
 
   // Workflow APIs
   getUnassignedItems: async () => apiGet("/rma/items/unassigned"),
