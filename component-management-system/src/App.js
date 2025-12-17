@@ -28,6 +28,7 @@ import ChatComponent from "./Components/Chat/ChatComponent.js";
 import EmployeeList from "./Components/EmployeeList/EmployeeList.js";
 import ThresholdManager from "./Components/Threshold/ThresholdManager.js";
 import ActiveAlerts from "./Components/Alerts/ActiveAlert.js";
+import ItemSearch from "./Components/Items/ItemSearch/ItemSearch.js";
 import EnhancedActivityFeed from "./Components/ActivityLogs/EnhancedActivityFeed.js";
 import RmaDashboard from "./Components/RMA/RMADashboard.js";
 import RmaRequestForm from "./Components/RMA/RmaRequestForm.js";
@@ -109,6 +110,8 @@ function App() {
               <Route path="activity-logs" element={<ChatComponent />} />
               <Route path="all-users" element={<EmployeeList />} />
               <Route path="thresholds" element={<ThresholdManager />} />
+              <Route path="alerts/active" element={<ActiveAlerts />} />
+              <Route path="itemSearch" element={<ItemSearch />} />
 
               <Route path="items/activity" element={<EnhancedActivityFeed />} />
             </Route>

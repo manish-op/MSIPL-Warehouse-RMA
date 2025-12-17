@@ -8,9 +8,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.serverManagement.server.management.entity.rma.RmaItemEntity;
+import com.serverManagement.server.management.entity.rma.RmaRequestEntity;
 
 @Repository
 public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
+
+    // Find all items belonging to a specific RMA request
+    List<RmaItemEntity> findByRmaRequest(RmaRequestEntity rmaRequest);
 
     // Count items by repair status (case-insensitive)
     @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = LOWER(:status)")
@@ -79,5 +83,23 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
 
     // Explicit
     List<RmaItemEntity> findAllById(Iterable<Long> ids);
+
+    // -----------New Methods for Dispatch Tracking------------------
+    // Find items by dispatch status
+    List<RmaItemEntity> findByIsDispatched(Boolean isDispatched);
+
+    // Find items by RMA status
+    List<RmaItemEntity> findByRmaStatus(String rmaStatus);
+
+    // Find items by dispatch destination
+    List<RmaItemEntity> findByDispatchTo(String dispatchTo);
+
+    // Find items pending dispatch (repaired but not yet dispatched)
+    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'repaired' AND (r.isDispatched IS NULL OR r.isDispatched = false)")
+    List<RmaItemEntity> findRepairedPendingDispatch();
+
+    // Find dispatched items pending delivery confirmation
+    @Query("SELECT r FROM RmaItemEntity r WHERE r.isDispatched = true AND r.deliveryConfirmedDate IS NULL")
+    List<RmaItemEntity> findDispatchedPendingDelivery();
 
 }

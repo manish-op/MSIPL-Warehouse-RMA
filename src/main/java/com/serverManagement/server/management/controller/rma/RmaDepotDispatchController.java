@@ -60,6 +60,18 @@ public class RmaDepotDispatchController {
                     .body("No items found for dispatch");
         }
 
+        // Check if any items are already dispatched
+        List<String> alreadyDispatchedSerials = items.stream()
+                .filter(item -> Boolean.TRUE.equals(item.getIsDispatched()))
+                .map(RmaItemEntity::getSerialNo)
+                .toList();
+
+        if (!alreadyDispatchedSerials.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Items already dispatched (Serial No): " + alreadyDispatchedSerials
+                            + ". Cannot dispatch again.");
+        }
+
         // Create new Dispatch Entity
         DepotDispatchEntity dispatch = new DepotDispatchEntity();
         dispatch.setDcNo(req.getDcNo());
@@ -82,6 +94,14 @@ public class RmaDepotDispatchController {
             String oldStage = item.getDepotStage();
             item.setDepotStage("IN_TRANSIT_TO_DEPOT");
             item.setDepotDispatch(dispatch);
+
+            // Set dispatch tracking fields
+            item.setIsDispatched(true);
+            item.setDispatchedDate(java.time.ZonedDateTime.now());
+            item.setDispatchedByEmail(loggedInUserEmail);
+            item.setDispatchedByName(loggedInUserName);
+            item.setRmaStatus("DISPATCHED");
+            item.setDispatchTo("BANGALORE"); // Explicitly set dispatch_to
 
             // Create Audit Log for DC Generation / Dispatch
             RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
@@ -184,5 +204,73 @@ public class RmaDepotDispatchController {
             return xRealIp;
         }
         return request.getRemoteAddr();
+    }
+
+    // 5) POST: dispatch LOCAL repaired items to Customer
+    @PostMapping("/dispatch-to-customer")
+    public ResponseEntity<?> dispatchToCustomer(HttpServletRequest request, @RequestBody DepotDispatchRequest req) {
+        // Get logged in user for audit
+        String loggedInUserEmail = null;
+        String loggedInUserName = null;
+        try {
+            loggedInUserEmail = request.getUserPrincipal().getName();
+            AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+            loggedInUserName = loggedInUser != null ? loggedInUser.getName() : loggedInUserEmail;
+        } catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        List<RmaItemEntity> items = rmaItemDAO.findAllById(req.getItemIds());
+        if (items.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No items found for dispatch");
+        }
+
+        // Check if any items are already dispatched
+        List<String> alreadyDispatchedSerials = items.stream()
+                .filter(item -> Boolean.TRUE.equals(item.getIsDispatched()))
+                .map(RmaItemEntity::getSerialNo)
+                .toList();
+
+        if (!alreadyDispatchedSerials.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Items already dispatched (Serial No): " + alreadyDispatchedSerials
+                            + ". Cannot dispatch again.");
+        }
+
+        for (RmaItemEntity item : items) {
+            String oldStatus = item.getRepairStatus();
+            String oldStage = item.getLocalStage();
+
+            // Set dispatch tracking fields
+            item.setIsDispatched(true);
+            item.setDispatchedDate(java.time.ZonedDateTime.now());
+            item.setDispatchedByEmail(loggedInUserEmail);
+            item.setDispatchedByName(loggedInUserName);
+            item.setRmaStatus("DISPATCHED");
+            item.setLocalStage("DISPATCHED");
+            item.setDispatchTo("CUSTOMER"); // Explicitly set dispatch_to
+
+            // Create Audit Log for Dispatch to Customer
+            RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
+            auditLog.setRmaItemId(item.getId());
+            String rmaNo = item.getRmaNo() != null ? item.getRmaNo()
+                    : (item.getRmaRequest() != null ? item.getRmaRequest().getRequestNumber() : null);
+            auditLog.setRmaNo(rmaNo);
+            auditLog.setAction("DISPATCHED_TO_CUSTOMER");
+            auditLog.setOldValue("Status: " + (oldStatus != null ? oldStatus : "REPAIRED") +
+                    ", Stage: " + (oldStage != null ? oldStage : "N/A"));
+            auditLog.setNewValue("Status: DISPATCHED, Stage: DISPATCHED, Remarks: " +
+                    (req.getRemarks() != null ? req.getRemarks() : "Dispatched to Customer"));
+            auditLog.setPerformedByEmail(loggedInUserEmail);
+            auditLog.setPerformedByName(loggedInUserName);
+            auditLog.setIpAddress(getClientIpAddress(request));
+            auditLog.setRemarks("Item dispatched to customer");
+
+            rmaAuditLogDAO.save(auditLog);
+        }
+
+        rmaItemDAO.saveAll(items);
+        return ResponseEntity.ok("Items dispatched to customer successfully");
     }
 }

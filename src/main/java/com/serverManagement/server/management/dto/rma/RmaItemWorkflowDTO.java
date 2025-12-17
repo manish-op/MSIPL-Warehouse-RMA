@@ -26,6 +26,22 @@ public class RmaItemWorkflowDTO {
     private ZonedDateTime receivedDate; // Date when RMA request was created/received
     private String repairType;
     private String lastReassignmentReason; // Added for displaying reassignment reason
+    private Boolean isDispatched; // Dispatch status flag
+
+    // Dispatch tracking fields
+    private String dispatchTo; // CUSTOMER or BANGALORE
+    private ZonedDateTime dispatchedDate;
+    private String dispatchedByEmail;
+    private String dispatchedByName;
+    private String dcNo; // Delivery Challan Number
+    private String ewayBillNo; // E-Way Bill Number
+
+    // Delivery confirmation fields
+    private String deliveredTo; // Name of person who received
+    private String deliveredBy; // Courier/person who delivered
+    private ZonedDateTime deliveryDate;
+    private String deliveryNotes;
+    private Boolean isDelivered; // Simple flag to check if delivery confirmed
 
     // Getters and Setters
     public String getLastReassignmentReason() {
@@ -186,5 +202,101 @@ public class RmaItemWorkflowDTO {
 
     public void setReceivedDate(ZonedDateTime receivedDate) {
         this.receivedDate = receivedDate;
+    }
+
+    public Boolean getIsDispatched() {
+        return isDispatched;
+    }
+
+    public void setIsDispatched(Boolean isDispatched) {
+        this.isDispatched = isDispatched;
+    }
+
+    public String getDispatchTo() {
+        return dispatchTo;
+    }
+
+    public void setDispatchTo(String dispatchTo) {
+        this.dispatchTo = dispatchTo;
+    }
+
+    public ZonedDateTime getDispatchedDate() {
+        return dispatchedDate;
+    }
+
+    public void setDispatchedDate(ZonedDateTime dispatchedDate) {
+        this.dispatchedDate = dispatchedDate;
+    }
+
+    public String getDispatchedByEmail() {
+        return dispatchedByEmail;
+    }
+
+    public void setDispatchedByEmail(String dispatchedByEmail) {
+        this.dispatchedByEmail = dispatchedByEmail;
+    }
+
+    public String getDispatchedByName() {
+        return dispatchedByName;
+    }
+
+    public void setDispatchedByName(String dispatchedByName) {
+        this.dispatchedByName = dispatchedByName;
+    }
+
+    public String getDcNo() {
+        return dcNo;
+    }
+
+    public void setDcNo(String dcNo) {
+        this.dcNo = dcNo;
+    }
+
+    public String getEwayBillNo() {
+        return ewayBillNo;
+    }
+
+    public void setEwayBillNo(String ewayBillNo) {
+        this.ewayBillNo = ewayBillNo;
+    }
+
+    public String getDeliveredTo() {
+        return deliveredTo;
+    }
+
+    public void setDeliveredTo(String deliveredTo) {
+        this.deliveredTo = deliveredTo;
+    }
+
+    public String getDeliveredBy() {
+        return deliveredBy;
+    }
+
+    public void setDeliveredBy(String deliveredBy) {
+        this.deliveredBy = deliveredBy;
+    }
+
+    public ZonedDateTime getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(ZonedDateTime deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public String getDeliveryNotes() {
+        return deliveryNotes;
+    }
+
+    public void setDeliveryNotes(String deliveryNotes) {
+        this.deliveryNotes = deliveryNotes;
+    }
+
+    public Boolean getIsDelivered() {
+        return isDelivered;
+    }
+
+    public void setIsDelivered(Boolean isDelivered) {
+        this.isDelivered = isDelivered;
     }
 }

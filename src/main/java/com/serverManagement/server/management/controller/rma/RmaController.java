@@ -75,16 +75,6 @@ public class RmaController {
         }
     }
 
-    @GetMapping("/requests")
-    public ResponseEntity<?> getRmaRequests() {
-        try {
-            return rmaService.getAllRmaItemsGrouped();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
-        }
-    }
-
     @GetMapping("/items/all")
     public ResponseEntity<?> getAllItems() {
         try {
@@ -141,6 +131,32 @@ public class RmaController {
     public ResponseEntity<?> getCantBeRepairedItems() {
         try {
             return rmaService.getCantBeRepairedItems();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/items/dispatched")
+    public ResponseEntity<?> getDispatchedItems() {
+        try {
+            return rmaService.getDispatchedItems();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/confirm-delivery")
+    public ResponseEntity<?> confirmDelivery(HttpServletRequest request, @RequestBody Map<String, Object> payload) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Integer> itemIdInts = (List<Integer>) payload.get("itemIds");
+            List<Long> itemIds = itemIdInts.stream().map(Integer::longValue).toList();
+            String deliveredTo = (String) payload.get("deliveredTo");
+            String deliveredBy = (String) payload.get("deliveredBy");
+            String deliveryNotes = (String) payload.get("deliveryNotes");
+            return rmaService.confirmDelivery(request, itemIds, deliveredTo, deliveredBy, deliveryNotes);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());

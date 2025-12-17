@@ -104,7 +104,7 @@ export const RmaApi = {
 
   // Dashboard Statistics
   getRmaDashboardStats: async () => apiGet("/rma/stats"),
-  
+
   // Dashboard Interactive Modals
   getRmaRequests: async (filter) => apiGet(`/rma/requests?filter=${filter || 'all'}`),
   getAllItems: async () => apiGet("/rma/items/all"),
@@ -114,6 +114,34 @@ export const RmaApi = {
   getAssignedItems: async () => apiGet("/rma/items/assigned"),
   getRepairedItems: async () => apiGet("/rma/items/repaired"),
   getCantBeRepairedItems: async () => apiGet("/rma/items/cant-be-repaired"),
+  getDispatchedItems: async () => apiGet("/rma/items/dispatched"),
+
+  // Delivery Confirmation
+  confirmDelivery: async (itemIds, deliveredTo, deliveredBy, deliveryNotes) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/confirm-delivery`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ itemIds, deliveredTo, deliveredBy, deliveryNotes }),
+      });
+
+      if (response.ok) {
+        const text = await response.text();
+        return { success: true, message: text };
+      } else {
+        const error = await response.text();
+        return { success: false, error };
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
   //Depot Dispatch APIs
   getDepotReadyToDispatch: async () => apiGet("/rma/depot/ready-to-dispatch"),
   dispatchToBangalore: async (payload) => {
@@ -156,6 +184,31 @@ export const RmaApi = {
       if (!response.ok) {
         const errorText = await response.text();
         return { success: false, error: errorText || "Failed to mark as received" };
+      }
+      const text = await response.text();
+      return { success: true, message: text };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Dispatch LOCAL repaired items to Customer
+  dispatchToCustomer: async (payload) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/dispatch-to-customer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { success: false, error: errorText || "Failed to dispatch to customer" };
       }
       const text = await response.text();
       return { success: true, message: text };

@@ -99,6 +99,50 @@ public class RmaItemEntity {
     @JoinColumn(name = "depot_dispatch_id")
     private DepotDispatchEntity depotDispatch;
 
+    @Column(name = "last_reassignment_reason", length = 2000)
+    private String lastReassignmentReason;
+
+    // ============ DISPATCH TRACKING ============
+    @Column(name = "dispatch_to")
+    private String dispatchTo; // CUSTOMER or BANGALORE (auto-set based on repair_type)
+
+    @Column(name = "is_dispatched")
+    private Boolean isDispatched = false; // Simple boolean to track dispatch status
+
+    @Column(name = "dispatched_date")
+    private ZonedDateTime dispatchedDate; // When item was dispatched
+
+    @Column(name = "dispatched_by_email")
+    private String dispatchedByEmail;
+
+    @Column(name = "dispatched_by_name")
+    private String dispatchedByName;
+
+    @Column(name = "rma_status")
+    private String rmaStatus = "OPEN"; // OPEN, IN_PROGRESS, DISPATCHED, CLOSED
+
+    // ============ DELIVERY CONFIRMATION ============
+    @Column(name = "delivered_to")
+    private String deliveredTo; // Name of person who received the item
+
+    @Column(name = "delivered_by")
+    private String deliveredBy; // Name of person/courier who delivered
+
+    @Column(name = "delivery_date")
+    private ZonedDateTime deliveryDate; // When it was delivered
+
+    @Column(name = "delivery_confirmed_by_email")
+    private String deliveryConfirmedByEmail; // Who recorded the delivery in system
+
+    @Column(name = "delivery_confirmed_by_name")
+    private String deliveryConfirmedByName;
+
+    @Column(name = "delivery_confirmed_date")
+    private ZonedDateTime deliveryConfirmedDate; // When delivery was recorded
+
+    @Column(name = "delivery_notes", length = 1000)
+    private String deliveryNotes; // POD number, signature notes, etc.
+
     // @Column(name = "dc_no")
     // private String dcNo;
 
@@ -367,6 +411,12 @@ public class RmaItemEntity {
 
     public void setRepairType(String repairType) {
         this.repairType = repairType;
+        // Auto-set dispatch destination based on repair type
+        if ("LOCAL".equalsIgnoreCase(repairType)) {
+            this.dispatchTo = "CUSTOMER";
+        } else if ("DEPOT".equalsIgnoreCase(repairType)) {
+            this.dispatchTo = "BANGALORE";
+        }
     }
 
     public String getDepotStage() {
@@ -442,6 +492,147 @@ public class RmaItemEntity {
         if (this.depotDispatch == null)
             this.depotDispatch = new DepotDispatchEntity();
         this.depotDispatch.setTrackingNo(trackingNo);
+    }
+
+    public String getLastReassignmentReason() {
+        return lastReassignmentReason;
+    }
+
+    public void setLastReassignmentReason(String lastReassignmentReason) {
+        this.lastReassignmentReason = lastReassignmentReason;
+    }
+
+    // ============ DISPATCH TRACKING GETTERS/SETTERS ============
+    public String getDispatchTo() {
+        return dispatchTo;
+    }
+
+    public void setDispatchTo(String dispatchTo) {
+        this.dispatchTo = dispatchTo;
+    }
+
+    public Boolean getIsDispatched() {
+        return isDispatched;
+    }
+
+    public void setIsDispatched(Boolean isDispatched) {
+        this.isDispatched = isDispatched;
+    }
+
+    public ZonedDateTime getDispatchedDate() {
+        return dispatchedDate;
+    }
+
+    public void setDispatchedDate(ZonedDateTime dispatchedDate) {
+        this.dispatchedDate = dispatchedDate;
+    }
+
+    public String getDispatchedByEmail() {
+        return dispatchedByEmail;
+    }
+
+    public void setDispatchedByEmail(String dispatchedByEmail) {
+        this.dispatchedByEmail = dispatchedByEmail;
+    }
+
+    public String getDispatchedByName() {
+        return dispatchedByName;
+    }
+
+    public void setDispatchedByName(String dispatchedByName) {
+        this.dispatchedByName = dispatchedByName;
+    }
+
+    public String getRmaStatus() {
+        return rmaStatus;
+    }
+
+    public void setRmaStatus(String rmaStatus) {
+        this.rmaStatus = rmaStatus;
+    }
+
+    // ============ DELIVERY CONFIRMATION GETTERS/SETTERS ============
+    public String getDeliveredTo() {
+        return deliveredTo;
+    }
+
+    public void setDeliveredTo(String deliveredTo) {
+        this.deliveredTo = deliveredTo;
+    }
+
+    public String getDeliveredBy() {
+        return deliveredBy;
+    }
+
+    public void setDeliveredBy(String deliveredBy) {
+        this.deliveredBy = deliveredBy;
+    }
+
+    public ZonedDateTime getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(ZonedDateTime deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public String getDeliveryConfirmedByEmail() {
+        return deliveryConfirmedByEmail;
+    }
+
+    public void setDeliveryConfirmedByEmail(String deliveryConfirmedByEmail) {
+        this.deliveryConfirmedByEmail = deliveryConfirmedByEmail;
+    }
+
+    public String getDeliveryConfirmedByName() {
+        return deliveryConfirmedByName;
+    }
+
+    public void setDeliveryConfirmedByName(String deliveryConfirmedByName) {
+        this.deliveryConfirmedByName = deliveryConfirmedByName;
+    }
+
+    public ZonedDateTime getDeliveryConfirmedDate() {
+        return deliveryConfirmedDate;
+    }
+
+    public void setDeliveryConfirmedDate(ZonedDateTime deliveryConfirmedDate) {
+        this.deliveryConfirmedDate = deliveryConfirmedDate;
+    }
+
+    public String getDeliveryNotes() {
+        return deliveryNotes;
+    }
+
+    public void setDeliveryNotes(String deliveryNotes) {
+        this.deliveryNotes = deliveryNotes;
+    }
+
+    // Helper method to mark item as dispatched
+    public void markAsDispatched(String byEmail, String byName) {
+        this.isDispatched = true;
+        this.dispatchedDate = ZonedDateTime.now();
+        this.dispatchedByEmail = byEmail;
+        this.dispatchedByName = byName;
+        this.rmaStatus = "DISPATCHED";
+    }
+
+    // Helper method to confirm delivery and close RMA (for LOCAL items)
+    public void confirmDelivery(String deliveredTo, String deliveredBy, String notes,
+            String confirmedByEmail, String confirmedByName) {
+        this.deliveredTo = deliveredTo;
+        this.deliveredBy = deliveredBy;
+        this.deliveryDate = ZonedDateTime.now();
+        this.deliveryConfirmedByEmail = confirmedByEmail;
+        this.deliveryConfirmedByName = confirmedByName;
+        this.deliveryConfirmedDate = ZonedDateTime.now();
+        this.deliveryNotes = notes;
+
+        // Auto-close RMA for LOCAL repairs after delivery
+        if ("LOCAL".equalsIgnoreCase(this.repairType)) {
+            this.rmaStatus = "CLOSED";
+            this.localStage = "DELIVERED";
+        }
     }
 
     @Override

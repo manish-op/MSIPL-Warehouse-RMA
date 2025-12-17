@@ -18,6 +18,7 @@ import {
     Select,
     DatePicker,
     Space,
+    Tabs,
 } from "antd";
 import {
     CheckCircleOutlined,
@@ -44,6 +45,8 @@ const PREDEFINED_TRANSPORTERS = {
 
 export default function RepairedPage() {
     const [items, setItems] = useState([]);
+    const [dispatchedItems, setDispatchedItems] = useState([]); // Dispatched items for second tab
+    const [activeTab, setActiveTab] = useState("1");
     const [loading, setLoading] = useState(false);
     const [generatingGatepass, setGeneratingGatepass] = useState(null);
     const [previewVisible, setPreviewVisible] = useState(false);
@@ -61,19 +64,45 @@ export default function RepairedPage() {
     const [dispatchSubmitting, setDispatchSubmitting] = useState(false);
     const [selectedRmaNo, setSelectedRmaNo] = useState(null);
     const [selectedRmaItems, setSelectedRmaItems] = useState([]);
+    const [selectedDispatchItemIds, setSelectedDispatchItemIds] = useState([]); // Items selected for dispatch
     const [dispatchForm] = Form.useForm();
+
+    // Delivery Confirmation Modal State
+    const [deliveryModalVisible, setDeliveryModalVisible] = useState(false);
+    const [deliverySubmitting, setDeliverySubmitting] = useState(false);
+    const [selectedDeliveryItems, setSelectedDeliveryItems] = useState([]);
+    const [deliveryForm] = Form.useForm();
 
     const loadItems = async () => {
         setLoading(true);
-        const result = await RmaApi.getRepairedItems();
-        if (result.success) {
-            // Filter out Depot items, show everything else (Local, legacy nulls, etc.)
-            const localItems = (result.data || []).filter(item => item.repairType !== 'DEPOT');
-            setItems(localItems);
-        } else {
-            message.error("Failed to load repaired items");
+        try {
+            // Fetch both repaired and dispatched items in parallel
+            const [repairedResult, dispatchedResult] = await Promise.all([
+                RmaApi.getRepairedItems(),
+                RmaApi.getDispatchedItems()
+            ]);
+
+            if (repairedResult.success) {
+                // Filter out Depot items AND already dispatched items
+                const localItems = (repairedResult.data || []).filter(item =>
+                    item.repairType !== 'DEPOT' && item.isDispatched !== true
+                );
+                setItems(localItems);
+            } else {
+                message.error("Failed to load repaired items");
+            }
+
+            if (dispatchedResult.success) {
+                // Filter to only show LOCAL dispatched items (not DEPOT)
+                const localDispatched = (dispatchedResult.data || []).filter(item => item.repairType !== 'DEPOT');
+                setDispatchedItems(localDispatched);
+            }
+        } catch (error) {
+            console.error("Load items error:", error);
+            message.error("Failed to load items");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const fetchTransporters = async () => {
@@ -177,6 +206,7 @@ export default function RepairedPage() {
         }
         setSelectedRmaNo(rmaNo);
         setSelectedRmaItems(rmaItems);
+        setSelectedDispatchItemIds(rmaItems.map(item => item.id)); // Select all by default
         dispatchForm.resetFields();
         const customerDetails = rmaItems[0]?.rmaRequest;
         dispatchForm.setFieldsValue({
@@ -193,27 +223,35 @@ export default function RepairedPage() {
     // Handle Confirm Dispatch to Customer
     const handleConfirmDispatch = async () => {
         try {
+            // Validate at least one item selected
+            if (selectedDispatchItemIds.length === 0) {
+                message.warning("Please select at least one item to dispatch");
+                return;
+            }
+
             const values = await dispatchForm.validateFields();
             setDispatchSubmitting(true);
 
-            // Update each item status to DISPATCHED
-            let successCount = 0;
-            for (const item of selectedRmaItems) {
-                const result = await RmaApi.updateItemStatus(
-                    item.id,
-                    'DISPATCHED',
-                    values.remarks || 'Dispatched to Customer',
-                    true
-                );
-                if (result.success) successCount++;
-            }
+            // Build payload with selected item IDs only
+            const payload = {
+                itemIds: selectedDispatchItemIds,
+                remarks: values.remarks || 'Dispatched to Customer',
+                dcNo: values.dcNo,
+                ewayBillNo: values.ewayBillNo,
+                courierName: values.courierName,
+                trackingNo: values.trackingNo,
+                dispatchDate: values.dispatchDate?.format("YYYY-MM-DD"),
+            };
 
-            if (successCount === selectedRmaItems.length) {
-                message.success(`${successCount} item(s) dispatched to customer successfully!`);
+            // Use new dispatch-to-customer API
+            const result = await RmaApi.dispatchToCustomer(payload);
+
+            if (result.success) {
+                message.success(`${selectedDispatchItemIds.length} item(s) dispatched to customer successfully!`);
                 setDispatchModalVisible(false);
                 loadItems();
             } else {
-                message.warning(`${successCount} of ${selectedRmaItems.length} items dispatched.`);
+                message.error(result.error || "Failed to dispatch items");
             }
         } catch (error) {
             console.error("Dispatch error:", error);
@@ -250,6 +288,47 @@ export default function RepairedPage() {
         setGeneratingGatepass(null);
     };
 
+    // ========== DELIVERY CONFIRMATION ==========
+    const openDeliveryModal = (rmaItems) => {
+        // Filter only items that are dispatched but not yet delivered
+        const undeliveredItems = rmaItems.filter(item => !item.isDelivered);
+        if (undeliveredItems.length === 0) {
+            message.info("All items in this RMA have already been confirmed for delivery.");
+            return;
+        }
+        setSelectedDeliveryItems(undeliveredItems);
+        deliveryForm.resetFields();
+        setDeliveryModalVisible(true);
+    };
+
+    const handleConfirmDelivery = async () => {
+        try {
+            const values = await deliveryForm.validateFields();
+            setDeliverySubmitting(true);
+
+            const itemIds = selectedDeliveryItems.map(item => item.id);
+            const result = await RmaApi.confirmDelivery(
+                itemIds,
+                values.deliveredTo,
+                values.deliveredBy,
+                values.deliveryNotes
+            );
+
+            if (result.success) {
+                message.success(result.message || "Delivery confirmed successfully!");
+                setDeliveryModalVisible(false);
+                loadItems(); // Refresh
+            } else {
+                message.error(result.error || "Failed to confirm delivery");
+            }
+        } catch (error) {
+            console.error("Delivery confirmation error:", error);
+            message.error("Failed to confirm delivery");
+        } finally {
+            setDeliverySubmitting(false);
+        }
+    };
+
     // Group items by RMA number
     const groupedItems = items.reduce((acc, item) => {
         const rmaNo = item.rmaNo || "Unknown";
@@ -260,8 +339,20 @@ export default function RepairedPage() {
         return acc;
     }, {});
 
+    // Group dispatched items by RMA number
+    const groupedDispatchedItems = dispatchedItems.reduce((acc, item) => {
+        const rmaNo = item.rmaNo || "Unknown";
+        if (!acc[rmaNo]) {
+            acc[rmaNo] = [];
+        }
+        acc[rmaNo].push(item);
+        return acc;
+    }, {});
+
     const totalRmaRequests = Object.keys(groupedItems).length;
     const totalItems = items.length;
+    const totalDispatchedRma = Object.keys(groupedDispatchedItems).length;
+    const totalDispatchedItems = dispatchedItems.length;
 
     return (
         <RmaLayout>
@@ -313,122 +404,264 @@ export default function RepairedPage() {
                     </Row>
                 </div>
 
-                {/* Content Section */}
+                {/* Content Section with Tabs */}
                 <div className="unrepaired-content">
-                    {loading ? (
-                        <div className="loading-container">
-                            <Spin size="large" />
-                            <Text style={{ marginTop: 16 }}>Loading items...</Text>
-                        </div>
-                    ) : totalRmaRequests === 0 ? (
-                        <Empty
-                            image={Empty.PRESENTED_IMAGE_SIMPLE}
-                            description="No local repaired items found"
-                            className="empty-state"
-                        />
-                    ) : (
-                        <div className="rma-groups">
-                            {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
-                                <Card
-                                    key={rmaNo}
-                                    className="rma-group-card"
-                                    style={{ borderLeft: "4px solid #52c41a" }}
-                                    title={
-                                        <div className="rma-card-header">
-                                            <span className="rma-number">
-                                                <Tag color="#52c41a" style={{ fontSize: 14, padding: "4px 12px" }}>
-                                                    RMA: {rmaNo}
-                                                </Tag>
-                                            </span>
-                                            <Badge
-                                                count={rmaItems.length}
-                                                style={{ backgroundColor: "#52c41a" }}
-                                                overflowCount={99}
-                                            />
-                                        </div>
-                                    }
-                                    extra={
-                                        <Space>
-                                            <Button
-                                                className="btn-generate-dc"
-                                                icon={<FilePdfOutlined />}
-                                                onClick={() => openDcModal(rmaItems[0].rmaRequest?.requestNumber || rmaNo, rmaItems)}
-                                            >
-                                                Generate DC
-                                            </Button>
-                                            <Button
-                                                type="primary"
-                                                icon={<SendOutlined />}
-                                                onClick={() => openDispatchModal(rmaItems[0].rmaRequest?.requestNumber || rmaNo, rmaItems)}
-                                            >
-                                                Dispatch to Customer
-                                            </Button>
-                                            <Button
-                                                onClick={() => openPreview(rmaItems, rmaItems[0].rmaRequest?.requestNumber || rmaNo)}
-                                                style={{ backgroundColor: "#135200", borderColor: "#135200", color: "#fff" }}
-                                            >
-                                                Generate Out Gatepass
-                                            </Button>
-                                        </Space>
-                                    }
-                                >
-                                    <Row gutter={[16, 16]}>
-                                        {rmaItems.map((item) => (
-                                            <Col xs={24} md={12} lg={8} key={item.id}>
-                                                <Card
-                                                    className="item-card"
-                                                    size="small"
-                                                    hoverable
-                                                    style={{ borderTop: "3px solid #52c41a" }}
-                                                >
-                                                    <div className="item-content">
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Product</Text>
-                                                            <Text strong>{item.product || "N/A"}</Text>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Serial No.</Text>
-                                                            <Text code>{item.serialNo || "N/A"}</Text>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Repaired By</Text>
-                                                            <Text>{item.repairedByName || "N/A"}</Text>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Repair Date</Text>
-                                                            <Text>{item.repairedDate ? new Date(item.repairedDate).toLocaleDateString() : "N/A"}</Text>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Status</Text>
-                                                            <Tag color="green" icon={<CheckCircleOutlined />}>
-                                                                REPAIRED
+                    <Tabs
+                        activeKey={activeTab}
+                        onChange={setActiveTab}
+                        items={[
+                            {
+                                key: "1",
+                                label: `Ready to Dispatch (${totalItems})`,
+                                children: loading ? (
+                                    <div className="loading-container">
+                                        <Spin size="large" />
+                                        <Text style={{ marginTop: 16 }}>Loading items...</Text>
+                                    </div>
+                                ) : totalRmaRequests === 0 ? (
+                                    <Empty
+                                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                        description="No local repaired items found"
+                                        className="empty-state"
+                                    />
+                                ) : (
+                                    <div className="rma-groups">
+                                        {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
+                                            <Card
+                                                key={rmaNo}
+                                                className="rma-group-card"
+                                                style={{ borderLeft: "4px solid #52c41a" }}
+                                                title={
+                                                    <div className="rma-card-header">
+                                                        <span className="rma-number">
+                                                            <Tag color="#52c41a" style={{ fontSize: 14, padding: "4px 12px" }}>
+                                                                RMA: {rmaNo}
                                                             </Tag>
-                                                        </div>
-                                                        {item.itemRmaNo && (
-                                                            <div className="item-row">
-                                                                <Text type="secondary">RMA Number</Text>
-                                                                <Tag color="green">{item.itemRmaNo}</Tag>
-                                                            </div>
-                                                        )}
-                                                        <Divider style={{ margin: "8px 0" }} />
-                                                        <div className="fault-section">
-                                                            <Text type="secondary">Repair Remarks</Text>
-                                                            <Paragraph
-                                                                ellipsis={{ rows: 2, expandable: true }}
-                                                                className="fault-text"
-                                                            >
-                                                                {item.repairRemarks || "No remarks"}
-                                                            </Paragraph>
-                                                        </div>
+                                                        </span>
+                                                        <Badge
+                                                            count={rmaItems.length}
+                                                            style={{ backgroundColor: "#52c41a" }}
+                                                            overflowCount={99}
+                                                        />
                                                     </div>
-                                                </Card>
-                                            </Col>
+                                                }
+                                                extra={
+                                                    <Space>
+                                                        <Button
+                                                            type="primary"
+                                                            ghost
+                                                            icon={<EyeOutlined />}
+                                                            onClick={() => openPreview(rmaItems, rmaNo)}
+                                                        >
+                                                            Outpass Preview
+                                                        </Button>
+                                                        <Button
+                                                            icon={<FilePdfOutlined />}
+                                                            onClick={() => openDcModal(rmaNo, rmaItems)}
+                                                            style={{ borderColor: "#faad14", color: "#faad14" }}
+                                                        >
+                                                            Generate DC
+                                                        </Button>
+                                                        <Button
+                                                            type="primary"
+                                                            icon={<SendOutlined />}
+                                                            onClick={() => openDispatchModal(rmaNo, rmaItems)}
+                                                            style={{ background: "#52c41a", borderColor: "#52c41a" }}
+                                                        >
+                                                            Dispatch to Customer
+                                                        </Button>
+                                                    </Space>
+                                                }
+                                            >
+                                                <Row gutter={[16, 16]}>
+                                                    {rmaItems.map((item) => (
+                                                        <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
+                                                            <Card
+                                                                size="small"
+                                                                className="item-card"
+                                                                style={{
+                                                                    borderColor: "#d9f7be",
+                                                                    backgroundColor: "#f6ffed",
+                                                                }}
+                                                            >
+                                                                <div className="item-content">
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Serial No</Text>
+                                                                        <Text strong copyable>{item.serialNo}</Text>
+                                                                    </div>
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Product</Text>
+                                                                        <Text>{item.product}</Text>
+                                                                    </div>
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Model</Text>
+                                                                        <Text>{item.model}</Text>
+                                                                    </div>
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Repaired By</Text>
+                                                                        <Text>{item.repairedByName || "N/A"}</Text>
+                                                                    </div>
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Repair Date</Text>
+                                                                        <Text>{item.repairedDate ? new Date(item.repairedDate).toLocaleDateString() : "N/A"}</Text>
+                                                                    </div>
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Status</Text>
+                                                                        <Tag color="green" icon={<CheckCircleOutlined />}>
+                                                                            REPAIRED
+                                                                        </Tag>
+                                                                    </div>
+                                                                    {item.itemRmaNo && (
+                                                                        <div className="item-row">
+                                                                            <Text type="secondary">RMA Number</Text>
+                                                                            <Tag color="green">{item.itemRmaNo}</Tag>
+                                                                        </div>
+                                                                    )}
+                                                                    <Divider style={{ margin: "8px 0" }} />
+                                                                    <div className="fault-section">
+                                                                        <Text type="secondary">Repair Remarks</Text>
+                                                                        <Paragraph
+                                                                            ellipsis={{ rows: 2, expandable: true }}
+                                                                            className="fault-text"
+                                                                        >
+                                                                            {item.repairRemarks || "No remarks"}
+                                                                        </Paragraph>
+                                                                    </div>
+                                                                </div>
+                                                            </Card>
+                                                        </Col>
+                                                    ))}
+                                                </Row>
+                                            </Card>
                                         ))}
-                                    </Row>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
+                                    </div>
+                                ),
+                            },
+                            {
+                                key: "2",
+                                label: `Dispatched (${totalDispatchedItems})`,
+                                children: loading ? (
+                                    <div className="loading-container">
+                                        <Spin size="large" />
+                                        <Text style={{ marginTop: 16 }}>Loading items...</Text>
+                                    </div>
+                                ) : totalDispatchedRma === 0 ? (
+                                    <Empty
+                                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                        description="No dispatched items found"
+                                        className="empty-state"
+                                    />
+                                ) : (
+                                    <div className="rma-groups">
+                                        {Object.entries(groupedDispatchedItems).map(([rmaNo, rmaItems]) => (
+                                            <Card
+                                                key={rmaNo}
+                                                className="rma-group-card"
+                                                style={{ borderLeft: "4px solid #1890ff" }}
+                                                title={
+                                                    <div className="rma-card-header">
+                                                        <span className="rma-number">
+                                                            <Tag color="#1890ff" style={{ fontSize: 14, padding: "4px 12px" }}>
+                                                                RMA: {rmaNo}
+                                                            </Tag>
+                                                        </span>
+                                                        <Badge
+                                                            count={rmaItems.length}
+                                                            style={{ backgroundColor: "#1890ff" }}
+                                                            overflowCount={99}
+                                                        />
+                                                    </div>
+                                                }
+                                                extra={
+                                                    <Space>
+                                                        <Tag color="blue" icon={<SendOutlined />}>Dispatched</Tag>
+                                                        {rmaItems.some(item => !item.isDelivered) && (
+                                                            <Button
+                                                                type="primary"
+                                                                icon={<CheckCircleOutlined />}
+                                                                onClick={() => openDeliveryModal(rmaItems)}
+                                                                style={{ background: "#52c41a", borderColor: "#52c41a" }}
+                                                            >
+                                                                Confirm Delivery
+                                                            </Button>
+                                                        )}
+                                                    </Space>
+                                                }
+                                            >
+                                                <Row gutter={[16, 16]}>
+                                                    {rmaItems.map((item) => (
+                                                        <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
+                                                            <Card
+                                                                size="small"
+                                                                className="item-card"
+                                                                style={{
+                                                                    borderColor: item.isDelivered ? "#b7eb8f" : "#91d5ff",
+                                                                    backgroundColor: item.isDelivered ? "#f6ffed" : "#e6f7ff",
+                                                                }}
+                                                            >
+                                                                <div className="item-content">
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Serial No</Text>
+                                                                        <Text strong copyable>{item.serialNo}</Text>
+                                                                    </div>
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Product</Text>
+                                                                        <Text>{item.product}</Text>
+                                                                    </div>
+                                                                    <div className="item-row">
+                                                                        <Text type="secondary">Model</Text>
+                                                                        <Text>{item.model}</Text>
+                                                                    </div>
+                                                                    {item.itemRmaNo && (
+                                                                        <div className="item-row">
+                                                                            <Text type="secondary">RMA Number</Text>
+                                                                            <Tag color="blue">{item.itemRmaNo}</Tag>
+                                                                        </div>
+                                                                    )}
+                                                                    <Divider style={{ margin: "8px 0" }} />
+                                                                    {item.isDelivered ? (
+                                                                        <>
+                                                                            <div className="item-row">
+                                                                                <Text type="secondary">Status</Text>
+                                                                                <Tag color="green" icon={<CheckCircleOutlined />}>
+                                                                                    DELIVERED
+                                                                                </Tag>
+                                                                            </div>
+                                                                            <div className="item-row">
+                                                                                <Text type="secondary">Delivered To</Text>
+                                                                                <Text strong>{item.deliveredTo}</Text>
+                                                                            </div>
+                                                                            {item.deliveredBy && (
+                                                                                <div className="item-row">
+                                                                                    <Text type="secondary">Delivered By</Text>
+                                                                                    <Text>{item.deliveredBy}</Text>
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="item-row">
+                                                                                <Text type="secondary">Delivery Date</Text>
+                                                                                <Text>{item.deliveryDate ? new Date(item.deliveryDate).toLocaleDateString() : "N/A"}</Text>
+                                                                            </div>
+                                                                        </>
+                                                                    ) : (
+                                                                        <div className="item-row">
+                                                                            <Text type="secondary">Status</Text>
+                                                                            <Tag color="blue" icon={<SendOutlined />}>
+                                                                                DISPATCHED
+                                                                            </Tag>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </Card>
+                                                        </Col>
+                                                    ))}
+                                                </Row>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                ),
+                            },
+                        ]}
+                    />
                 </div>
 
                 {/* Dispatch to Customer Modal */}
@@ -484,10 +717,27 @@ export default function RepairedPage() {
                             <Input.TextArea rows={3} placeholder="Any dispatch remarks" />
                         </Form.Item>
 
-                        <Divider />
+                        <Divider>Select Items to Dispatch</Divider>
+                        <Table
+                            size="small"
+                            rowKey="id"
+                            dataSource={selectedRmaItems}
+                            pagination={false}
+                            rowSelection={{
+                                selectedRowKeys: selectedDispatchItemIds,
+                                onChange: (keys) => setSelectedDispatchItemIds(keys),
+                            }}
+                            columns={[
+                                { title: 'Serial No', dataIndex: 'serialNo', key: 'serialNo' },
+                                { title: 'Product', dataIndex: 'product', key: 'product' },
+                                { title: 'Model', dataIndex: 'model', key: 'model' },
+                                { title: 'RMA No', dataIndex: 'itemRmaNo', key: 'itemRmaNo' },
+                            ]}
+                            style={{ marginBottom: 16 }}
+                        />
                         <Space direction="vertical" style={{ width: "100%" }}>
                             <Text type="secondary">
-                                You are dispatching <strong>{selectedRmaItems.length}</strong> item(s) to the customer.
+                                Selected <strong>{selectedDispatchItemIds.length}</strong> of <strong>{selectedRmaItems.length}</strong> item(s) to dispatch.
                             </Text>
                         </Space>
                     </Form>
@@ -764,6 +1014,56 @@ export default function RepairedPage() {
                             bordered
                         />
                     </div>
+                </Modal>
+
+                {/* Delivery Confirmation Modal */}
+                <Modal
+                    title={
+                        <Space>
+                            <CheckCircleOutlined style={{ color: "#52c41a" }} />
+                            <span>Confirm Delivery</span>
+                        </Space>
+                    }
+                    open={deliveryModalVisible}
+                    onCancel={() => setDeliveryModalVisible(false)}
+                    onOk={handleConfirmDelivery}
+                    okText="Confirm Delivery"
+                    okButtonProps={{ 
+                        loading: deliverySubmitting,
+                        style: { background: "#52c41a", borderColor: "#52c41a" }
+                    }}
+                    cancelButtonProps={{ disabled: deliverySubmitting }}
+                    width={500}
+                >
+                    <div style={{ marginBottom: 16 }}>
+                        <Text type="secondary">
+                            Confirming delivery for {selectedDeliveryItems.length} item(s)
+                        </Text>
+                    </div>
+                    <Form form={deliveryForm} layout="vertical">
+                        <Form.Item
+                            name="deliveredTo"
+                            label="Delivered To (Receiver Name)"
+                            rules={[{ required: true, message: "Please enter receiver name" }]}
+                        >
+                            <Input placeholder="Name of person who received the items" />
+                        </Form.Item>
+                        <Form.Item
+                            name="deliveredBy"
+                            label="Delivered By (Courier/Person)"
+                        >
+                            <Input placeholder="Courier name or person who delivered" />
+                        </Form.Item>
+                        <Form.Item
+                            name="deliveryNotes"
+                            label="Delivery Notes"
+                        >
+                            <Input.TextArea 
+                                placeholder="e.g., POD number, signature notes, condition remarks..."
+                                rows={3}
+                            />
+                        </Form.Item>
+                    </Form>
                 </Modal>
             </div>
         </RmaLayout>

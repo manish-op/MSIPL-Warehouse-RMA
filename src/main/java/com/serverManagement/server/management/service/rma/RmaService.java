@@ -556,6 +556,20 @@ public class RmaService {
     }
 
     /**
+     * Get all dispatched items (is_dispatched = true)
+     */
+    public ResponseEntity<?> getDispatchedItems() {
+        try {
+            List<RmaItemEntity> items = rmaItemDAO.findByIsDispatched(true);
+            return ResponseEntity.ok(convertToItemDTOList(items));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch dispatched items: " + e.getMessage());
+        }
+    }
+
+    /**
      * Assign a technician to an RMA item
      * Security: Requires authentication, validates inputs, logs action
      */
@@ -828,6 +842,9 @@ public class RmaService {
                 item.setRepairedDate(ZonedDateTime.now());
             }
 
+            // Note: DISPATCHED status is handled by separate dispatch endpoints
+            // (dispatch-to-customer, dispatch-to-bangalore)
+
             rmaItemDAO.save(item);
 
             // Create Audit Log Entry
@@ -912,6 +929,77 @@ public class RmaService {
     }
 
     /**
+     * Confirm delivery of dispatched items
+     */
+    public ResponseEntity<?> confirmDelivery(HttpServletRequest request, List<Long> itemIds,
+            String deliveredTo, String deliveredBy, String deliveryNotes) {
+        try {
+            // Authentication
+            String loggedInUserEmail = null;
+            String loggedInUserName = null;
+            try {
+                loggedInUserEmail = request.getUserPrincipal().getName();
+                AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+                loggedInUserName = loggedInUser != null ? loggedInUser.getName() : loggedInUserEmail;
+            } catch (NullPointerException e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            }
+
+            if (itemIds == null || itemIds.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("No items selected for delivery confirmation");
+            }
+
+            if (deliveredTo == null || deliveredTo.trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("'Delivered To' is required");
+            }
+
+            List<RmaItemEntity> items = rmaItemDAO.findAllById(itemIds);
+            if (items.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No items found");
+            }
+
+            ZonedDateTime now = ZonedDateTime.now();
+            int confirmedCount = 0;
+
+            for (RmaItemEntity item : items) {
+                // Only confirm items that are dispatched
+                if (Boolean.TRUE.equals(item.getIsDispatched())) {
+                    item.setDeliveredTo(deliveredTo.trim());
+                    item.setDeliveredBy(deliveredBy != null ? deliveredBy.trim() : null);
+                    item.setDeliveryDate(now);
+                    item.setDeliveryNotes(deliveryNotes != null ? deliveryNotes.trim() : null);
+                    item.setDeliveryConfirmedByEmail(loggedInUserEmail);
+                    item.setDeliveryConfirmedByName(loggedInUserName);
+                    item.setDeliveryConfirmedDate(now);
+                    item.setRmaStatus("DELIVERED");
+
+                    rmaItemDAO.save(item);
+                    confirmedCount++;
+
+                    // Create audit log
+                    RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
+                    auditLog.setRmaItemId(item.getId());
+                    auditLog.setRmaNo(item.getRmaNo());
+                    auditLog.setAction("DELIVERY_CONFIRMED");
+                    auditLog.setNewValue("Delivered to: " + deliveredTo);
+                    auditLog.setPerformedByEmail(loggedInUserEmail);
+                    auditLog.setPerformedByName(loggedInUserName);
+                    auditLog.setIpAddress(getClientIpAddress(request));
+                    auditLog.setRemarks(deliveryNotes);
+                    rmaAuditLogDAO.save(auditLog);
+                }
+            }
+
+            return ResponseEntity.ok("Delivery confirmed for " + confirmedCount + " item(s)");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to confirm delivery: " + e.getMessage());
+        }
+    }
+
+    /**
      * Helper method to convert entity list to DTO list
      */
     private List<RmaItemWorkflowDTO> convertToItemDTOList(List<RmaItemEntity> items) {
@@ -953,6 +1041,23 @@ public class RmaService {
             dto.setItemRmaNo(item.getRmaNo());
             dto.setIssueFixed(item.getIssueFixed());
             dto.setLastReassignmentReason(item.getLastReassignmentReason()); // Populate DTO field
+            dto.setIsDispatched(item.getIsDispatched()); // Dispatch status for filtering
+
+            // Dispatch tracking fields
+            dto.setDispatchTo(item.getDispatchTo());
+            dto.setDispatchedDate(item.getDispatchedDate());
+            dto.setDispatchedByEmail(item.getDispatchedByEmail());
+            dto.setDispatchedByName(item.getDispatchedByName());
+            dto.setDcNo(item.getDcNo());
+            dto.setEwayBillNo(item.getEwayBillNo());
+
+            // Delivery confirmation fields
+            dto.setDeliveredTo(item.getDeliveredTo());
+            dto.setDeliveredBy(item.getDeliveredBy());
+            dto.setDeliveryDate(item.getDeliveryDate());
+            dto.setDeliveryNotes(item.getDeliveryNotes());
+            dto.setIsDelivered(item.getDeliveredTo() != null); // Mark as delivered if deliveredTo is set
+
             dtoList.add(dto);
         }
         return dtoList;
