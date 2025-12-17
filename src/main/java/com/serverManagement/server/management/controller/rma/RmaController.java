@@ -55,6 +55,26 @@ public class RmaController {
         }
     }
 
+    @GetMapping("/requests")
+    public ResponseEntity<?> getRmaRequests() {
+        try {
+            return rmaService.getAllRmaItemsGrouped();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/items/all")
+    public ResponseEntity<?> getAllItems() {
+        try {
+            return rmaService.getAllItems();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/stats")
     public ResponseEntity<?> getRmaDashboardStats() {
         try {
