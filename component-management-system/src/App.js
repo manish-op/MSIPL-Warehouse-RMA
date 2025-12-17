@@ -11,7 +11,7 @@ import EmployeeManagement from "./Components/Employee/EmployeeManagement";
 import RegionManagement from "./Components/Region/RegionManagement";
 import KeywordManagement from "./Components/Keyword/KeywordManagement.js";
 import AddItem from "./Components/Items/AddItem/AddItem.js";
-import ItemSearch from "./Components/Items/ItemSearch/ItemSearch.js";
+
 import UpdateItem from "./Components/Items/UpdateItem/UpdateItem.js";
 import HistoryTable from "./Components/Items/HistoryRelated/HistoryTable.js";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute.js";
@@ -77,11 +77,9 @@ function App() {
 
               {/* Items */}
               <Route path="addItem" element={<AddItem />} />
-              <Route path="itemSearch" element={<ItemSearch />} />
-              <Route path="getItemBySerial" element={<ItemSearch />} />
-              <Route path="getItemByKeyword" element={<ItemSearch />} />
+
               <Route path="updateItem" element={<UpdateItem />} />
-              <Route path="itemHistory" element={<ItemSearch />} />
+
               <Route path="historyTable" element={<HistoryTable />} />
               <Route
                 path="statusManagement"
@@ -111,7 +109,7 @@ function App() {
               <Route path="activity-logs" element={<ChatComponent />} />
               <Route path="all-users" element={<EmployeeList />} />
               <Route path="thresholds" element={<ThresholdManager />} />
-              <Route path="alerts/active" element={<ActiveAlerts />} />
+
               <Route path="items/activity" element={<EnhancedActivityFeed />} />
             </Route>
 

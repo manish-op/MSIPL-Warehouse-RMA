@@ -295,6 +295,9 @@
     color: #2f54eb !important;
 }
 
+/* ==========================================================================
+   3. NEW DASHBOARD STYLING (For the new JS code)
+   ========================================================================== */
 .rma-dashboard-container {
   padding: 24px;
   max-width: 1600px;

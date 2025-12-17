@@ -24,6 +24,16 @@ import "./RmaDashboard.css";
 
 const { Option } = Select;
 
+// --- Mock Data for Trend Chart (Replace with real API data later) ---
+const CHART_DATA_TRENDS = [
+  { name: 'Mon', requests: 4 },
+  { name: 'Tue', requests: 7 },
+  { name: 'Wed', requests: 5 },
+  { name: 'Thu', requests: 12 },
+  { name: 'Fri', requests: 8 },
+  { name: 'Sat', requests: 3 },
+  { name: 'Sun', requests: 2 },
+];
 const PIE_COLORS = ['#52c41a', '#fa8c16', '#f5222d']; // Green, Orange, Red
 
 function RmaDashboard() {
@@ -128,28 +138,9 @@ function RmaDashboard() {
   };
 
   // --- Table Columns ---
-  // Columns for Requests Table
   const requestColumns = [
-      { 
-        title: "RMA No", 
-        dataIndex: "rmaNo", 
-        key: "rmaNo", 
-        render:(val, record) => {
-            // If requestNumber is missing, the value in rmaNo is likely the legacy Request ID.
-            // So hide it from this "Manual RMA" column.
-            if (!record.requestNumber && val) return "-";
-            return val || "-"; 
-        } 
-      },
-      { 
-        title: "Request No", 
-        dataIndex: "requestNumber", 
-        key: "requestNumber",
-        render: (val, record) => {
-             // If requestNumber is missing, use the legacy value found in rmaNo
-             return val || record.rmaNo || "-";
-        }
-      },
+      { title: "RMA No", dataIndex: "itemRmaNo", key: "itemRmaNo", render:(val)=>val || "-" },
+      { title: "Request No", dataIndex: "requestNumber", key: "requestNumber" },
       { title: "Company", dataIndex: "companyName", key: "companyName" },
       { title: "Date", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
       { title: "Items", key: "itemsCount", render: (_, record) => record.items ? record.items.length : 0 },
@@ -274,7 +265,7 @@ function RmaDashboard() {
                 <Col xs={24} lg={16}>
                     <Card title="Incoming Requests Trend (Last 7 Days)" bordered={false} className="chart-card">
                         <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={stats?.trendData || []} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                            <LineChart data={CHART_DATA_TRENDS} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
                                 <YAxis axisLine={false} tickLine={false} />

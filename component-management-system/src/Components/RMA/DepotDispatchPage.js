@@ -872,4 +872,3 @@ export default function DepotDispatchPage() {
         </RmaLayout >
     );
 }
-

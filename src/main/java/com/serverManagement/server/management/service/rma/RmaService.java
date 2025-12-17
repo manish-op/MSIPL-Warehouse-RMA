@@ -500,6 +500,20 @@ public class RmaService {
     }
 
     /**
+     * Get all RMA items
+     */
+    public ResponseEntity<?> getAllItems() {
+        try {
+            List<RmaItemEntity> items = rmaItemDAO.findAll();
+            return ResponseEntity.ok(convertToItemDTOList(items));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch all items: " + e.getMessage());
+        }
+    }
+
+    /**
      * Get all assigned RMA items (items with assignee, not yet completed)
      */
     public ResponseEntity<?> getAssignedItems() {

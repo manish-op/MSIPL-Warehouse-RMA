@@ -13,7 +13,7 @@ import { UploadOutlined, DownloadOutlined, SwapOutlined } from "@ant-design/icon
 import GetRegionAPI from "../API/Region/GetRegion/GetRegionAPI";
 import ExportCsvApi from "../API/ImportExport/ExportCsvApi";
 import ImportCsvApi from "../API/ImportExport/ImportCsvApi";
-import "./ImportExport.css";
+
 
 const { Title, Text } = Typography;
 
