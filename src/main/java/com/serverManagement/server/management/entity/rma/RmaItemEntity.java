@@ -70,10 +70,6 @@ public class RmaItemEntity {
     @Column(name = "assigned_date")
     private ZonedDateTime assignedDate;
 
-    // Track reason for last reassignment
-    @Column(name = "last_reassignment_reason", length = 500)
-    private String lastReassignmentReason;
-
     // Repair completion tracking
     @Column(name = "repaired_by_email")
     private String repairedByEmail;
@@ -121,7 +117,7 @@ public class RmaItemEntity {
     // Relationship with RMA Request
     @ManyToOne
     @JoinColumn(name = "rma_request_id", nullable = false)
-    @com.fasterxml.jackson.annotation.JsonIgnore
+    @com.fasterxml.jackson.annotation.JsonBackReference
     private RmaRequestEntity rmaRequest;
 
     // Constructors
@@ -323,14 +319,6 @@ public class RmaItemEntity {
         this.assignedDate = assignedDate;
     }
 
-    public String getLastReassignmentReason() {
-        return lastReassignmentReason;
-    }
-
-    public void setLastReassignmentReason(String lastReassignmentReason) {
-        this.lastReassignmentReason = lastReassignmentReason;
-    }
-
     // Repair completion getters and setters
     public String getRepairedByEmail() {
         return repairedByEmail;
@@ -405,8 +393,6 @@ public class RmaItemEntity {
         this.depotDispatch = depotDispatch;
     }
 
-    // Delegated Getters/Setters for backward compatibility (optional but helping
-    // Refactor)
     public String getDcNo() {
         return depotDispatch != null ? depotDispatch.getDcNo() : null;
     }

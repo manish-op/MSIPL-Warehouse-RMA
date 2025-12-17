@@ -2,7 +2,9 @@ package com.serverManagement.server.management.entity.rma;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -75,6 +77,7 @@ public class RmaRequestEntity {
 
     // Relationship with RMA Items
     @OneToMany(mappedBy = "rmaRequest", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<RmaItemEntity> items;
 
     // Customer relationship (for return address customer)

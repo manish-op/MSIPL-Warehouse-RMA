@@ -171,7 +171,9 @@ export default function UnrepairedPage() {
         setLoading(true);
         const result = await RmaApi.getUnassignedItems();
         if (result.success) {
-            setItems(result.data || []);
+            // Filter out Depot Repair items as they are moved to Depot Dispatch page
+            const filteredItems = (result.data || []).filter(item => item.repairType !== 'Depot Repair');
+            setItems(filteredItems);
         } else {
             message.error("Failed to load unassigned items");
         }

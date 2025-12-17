@@ -126,10 +126,9 @@ public class RmaInwardGatepassService {
             RmaInwardGatepassEntity gatepass = new RmaInwardGatepassEntity();
             gatepass.setGatepassNumber(gatepassNumber);
 
-            // Handle legacy items that don't have a persisted request
             if (rmaRequest.getId() == null) {
                 // Persist the dummy request so we can link it
-                rmaRequest.setRequestNumber(requestNumber);
+                rmaRequest.setRequestNumber(requestNumber); // Reuse the item's RMA number
                 rmaRequest.setCompanyName("N/A (Legacy Item)");
                 rmaRequest.setReturnAddress("N/A");
                 rmaRequest.setEmail("legacy@placeholder.com");
@@ -140,6 +139,7 @@ public class RmaInwardGatepassService {
                 rmaRequest = rmaRequestDAO.save(rmaRequest);
             }
             gatepass.setRmaRequest(rmaRequest);
+
             gatepass.setSupplierName(rmaRequest.getCompanyName());
             gatepass.setSupplierAddress(rmaRequest.getReturnAddress());
             gatepass.setGeneratedDate(ZonedDateTime.now());
