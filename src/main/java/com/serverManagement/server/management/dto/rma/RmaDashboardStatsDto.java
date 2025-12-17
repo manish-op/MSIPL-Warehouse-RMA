@@ -6,15 +6,18 @@ public class RmaDashboardStatsDto {
     private long totalItems;
     private long repairedCount;
     private long unrepairedCount;
+    private java.util.List<DailyTrendDto> dailyTrends;
 
     public RmaDashboardStatsDto() {
     }
 
-    public RmaDashboardStatsDto(long totalRequests, long totalItems, long repairedCount, long unrepairedCount) {
+    public RmaDashboardStatsDto(long totalRequests, long totalItems, long repairedCount, long unrepairedCount,
+            java.util.List<DailyTrendDto> dailyTrends) {
         this.totalRequests = totalRequests;
         this.totalItems = totalItems;
         this.repairedCount = repairedCount;
         this.unrepairedCount = unrepairedCount;
+        this.dailyTrends = dailyTrends;
     }
 
     public long getTotalRequests() {
@@ -47,5 +50,13 @@ public class RmaDashboardStatsDto {
 
     public void setUnrepairedCount(long unrepairedCount) {
         this.unrepairedCount = unrepairedCount;
+    }
+
+    public java.util.List<DailyTrendDto> getDailyTrends() {
+        return dailyTrends;
+    }
+
+    public void setDailyTrends(java.util.List<DailyTrendDto> dailyTrends) {
+        this.dailyTrends = dailyTrends;
     }
 }

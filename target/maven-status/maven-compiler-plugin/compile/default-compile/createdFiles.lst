@@ -22,7 +22,6 @@ com\serverManagement\server\management\controller\chat\ChatController.class
 com\serverManagement\server\management\controller\keyword\KeywordController.class
 com\serverManagement\server\management\request\itemRepairingDetails\ItemRepairingRequest.class
 com\serverManagement\server\management\request\changePassword\PasswordRequest.class
-com\serverManagement\server\management\controller\rma\RmaController.class
 com\serverManagement\server\management\dao\option\ItemStatusOptionDAO.class
 com\serverManagement\server\management\dao\keyword\SubKeywordDAO.class
 com\serverManagement\server\management\service\gatepass\InwardGatePassService.class
@@ -40,7 +39,6 @@ com\serverManagement\server\management\dao\itemRepairOption\TechnicianStatusDAO.
 com\serverManagement\server\management\dao\rma\TransporterDAO.class
 com\serverManagement\server\management\dao\keyword\KeywordDAO.class
 com\serverManagement\server\management\entity\itemDetails\RegionUpdateDTO.class
-com\serverManagement\server\management\service\rma\RmaService.class
 com\serverManagement\server\management\request\option\UpdateAvailableStatusRequest.class
 com\serverManagement\server\management\request\rma\RmaCreateRequest$RmaItemDto.class
 com\serverManagement\server\management\dao\itemDetails\ItemDetailsDAO.class
@@ -165,7 +163,6 @@ com\serverManagement\server\management\request\role\UpdateRole.class
 com\serverManagement\server\management\entity\itemDetails\WarehouseAuditLogEntity.class
 com\serverManagement\server\management\entity\itemDetails\ItemDetailsDTOForCSV.class
 com\serverManagement\server\management\entity\itemDetails\ItemDetailsEntity.class
-com\serverManagement\server\management\dto\rma\RmaDashboardStatsDto.class
 com\serverManagement\server\management\entity\adminUser\AdminUserEntity.class
 com\serverManagement\server\management\request\itemRepairingDetails\ManagerGetTicketRequest.class
 com\serverManagement\server\management\dao\itemRepairDetails\FruDAO.class

@@ -338,6 +338,7 @@ public class RmaService {
     /**
      * Get RMA dashboard statistics
      * Returns counts of total requests, total items, repaired, and unrepaired items
+     * Also returns daily trend for the last 7 days
      */
     public ResponseEntity<?> getRmaDashboardStats() {
         try {
@@ -346,11 +347,40 @@ public class RmaService {
             long repairedCount = rmaItemDAO.countRepaired();
             long unrepairedCount = rmaItemDAO.countUnrepaired();
 
+            // Calculate Daily Trends for the last 7 days
+            List<com.serverManagement.server.management.dto.rma.DailyTrendDto> dailyTrends = new ArrayList<>();
+            ZonedDateTime now = ZonedDateTime.now();
+            ZonedDateTime sevenDaysAgo = now.minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+            // Get requests for the last 7 days to minimize memory usage
+            List<RmaRequestEntity> recentRequests = rmaRequestDAO.findByCreatedDateBetween(sevenDaysAgo, now);
+
+            // Create a map for quick lookups
+            // Group by Date (YYYY-MM-DD)
+            java.util.Map<java.time.LocalDate, Long> requestsByDate = recentRequests.stream()
+                    .collect(java.util.stream.Collectors.groupingBy(
+                            req -> req.getCreatedDate().toLocalDate(),
+                            java.util.stream.Collectors.counting()));
+
+            // Iterate last 7 days to ensure all days are present even if 0 requests
+            java.time.format.DateTimeFormatter dayFormatter = java.time.format.DateTimeFormatter.ofPattern("EEE");
+
+            for (int i = 6; i >= 0; i--) {
+                ZonedDateTime date = now.minusDays(i);
+                java.time.LocalDate localDate = date.toLocalDate();
+
+                String dayName = date.format(dayFormatter); // Mon, Tue, etc.
+                long count = requestsByDate.getOrDefault(localDate, 0L);
+
+                dailyTrends.add(new com.serverManagement.server.management.dto.rma.DailyTrendDto(dayName, count));
+            }
+
             com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto stats = new com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto(
                     totalRequests,
                     totalItems,
                     repairedCount,
-                    unrepairedCount);
+                    unrepairedCount,
+                    dailyTrends);
 
             return ResponseEntity.ok(stats);
         } catch (Exception e) {

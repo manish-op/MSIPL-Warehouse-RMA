@@ -21,6 +21,7 @@ C:\Users\CMJ786\Desktop\rma\server-management\src\main\java\com\serverManagement
 C:\Users\CMJ786\Desktop\rma\server-management\src\main\java\com\serverManagement\server\management\service\gatepasspdf\OutwardGatepassPDFService.java
 C:\Users\CMJ786\Desktop\rma\server-management\src\main\java\com\serverManagement\server\management\entity\itemstock\InventoryThreshold.java
 C:\Users\CMJ786\Desktop\rma\server-management\src\main\java\com\serverManagement\server\management\request\user\AddUserRequest.java
+C:\Users\CMJ786\Desktop\rma\server-management\src\main\java\com\serverManagement\server\management\dto\rma\DailyTrendDto.java
 C:\Users\CMJ786\Desktop\rma\server-management\src\main\java\com\serverManagement\server\management\entity\adminUser\AdminUserEntity.java
 C:\Users\CMJ786\Desktop\rma\server-management\src\main\java\com\serverManagement\server\management\request\itemDetails\GetItemByKeywordRequest.java
 C:\Users\CMJ786\Desktop\rma\server-management\src\main\java\com\serverManagement\server\management\service\admin\user\role\UserRoleService.java
