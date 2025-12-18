@@ -326,9 +326,10 @@ const BERCertificateForm = React.forwardRef(({ productData, onClose }, ref) => {
             />
 
             {/* Photo Evidence */}
+            {/* Photo Evidence */}
             <div className="photo-section">
               <label><strong>Attached Photo/Evidence:</strong></label>
-              <div className="photo-upload">
+              <div className="photo-upload" data-html2canvas-ignore="true">
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -343,7 +344,7 @@ const BERCertificateForm = React.forwardRef(({ productData, onClose }, ref) => {
               {photoPreview && (
                 <div className="photo-preview">
                   <img src={photoPreview} alt="Evidence" />
-                  <button onClick={handleRemovePhoto} className="remove-photo-btn">Remove</button>
+                  <button onClick={handleRemovePhoto} className="remove-photo-btn" data-html2canvas-ignore="true">Remove</button>
                 </div>
               )}
             </div>
