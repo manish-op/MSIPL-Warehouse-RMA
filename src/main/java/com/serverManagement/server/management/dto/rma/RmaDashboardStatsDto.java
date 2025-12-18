@@ -6,26 +6,18 @@ public class RmaDashboardStatsDto {
     private long totalItems;
     private long repairedCount;
     private long unrepairedCount;
-    private java.util.List<DailyTrendDto> trendData;
+    private java.util.List<DailyTrendDto> dailyTrends;
 
     public RmaDashboardStatsDto() {
     }
 
     public RmaDashboardStatsDto(long totalRequests, long totalItems, long repairedCount, long unrepairedCount,
-            java.util.List<DailyTrendDto> trendData) {
+            java.util.List<DailyTrendDto> dailyTrends) {
         this.totalRequests = totalRequests;
         this.totalItems = totalItems;
         this.repairedCount = repairedCount;
         this.unrepairedCount = unrepairedCount;
-        this.trendData = trendData;
-    }
-
-    // Keep old constructor for backward compatibility
-    public RmaDashboardStatsDto(long totalRequests, long totalItems, long repairedCount, long unrepairedCount) {
-        this.totalRequests = totalRequests;
-        this.totalItems = totalItems;
-        this.repairedCount = repairedCount;
-        this.unrepairedCount = unrepairedCount;
+        this.dailyTrends = dailyTrends;
     }
 
     public long getTotalRequests() {
@@ -60,40 +52,11 @@ public class RmaDashboardStatsDto {
         this.unrepairedCount = unrepairedCount;
     }
 
-    public java.util.List<DailyTrendDto> getTrendData() {
-        return trendData;
+    public java.util.List<DailyTrendDto> getDailyTrends() {
+        return dailyTrends;
     }
 
-    public void setTrendData(java.util.List<DailyTrendDto> trendData) {
-        this.trendData = trendData;
-    }
-
-    public static class DailyTrendDto {
-        private String name;
-        private long requests;
-
-        public DailyTrendDto() {
-        }
-
-        public DailyTrendDto(String name, long requests) {
-            this.name = name;
-            this.requests = requests;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public long getRequests() {
-            return requests;
-        }
-
-        public void setRequests(long requests) {
-            this.requests = requests;
-        }
+    public void setDailyTrends(java.util.List<DailyTrendDto> dailyTrends) {
+        this.dailyTrends = dailyTrends;
     }
 }

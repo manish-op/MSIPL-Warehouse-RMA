@@ -11,15 +11,19 @@ import {
     Empty,
     Divider,
     Button,
+    Modal, // Added Modal
+    Input  // Added Input
 } from "antd";
 import {
     WarningOutlined,
     ExclamationCircleOutlined,
     SwapOutlined,
     ReloadOutlined,
+    SafetyCertificateOutlined // Icon for success
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
+import Cookies from "js-cookie";
 import "./UnrepairedPage.css";
 
 const { Title, Text, Paragraph } = Typography;
@@ -27,6 +31,17 @@ const { Title, Text, Paragraph } = Typography;
 export default function CantBeRepairedPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    // --- NEW STATE FOR POPUPS ---
+    const [isReplaceModalVisible, setIsReplaceModalVisible] = useState(false);
+    const [isStockModalVisible, setIsStockModalVisible] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    
+    // Tracks the specific item being worked on
+    const [selectedItem, setSelectedItem] = useState({
+        rmaNo: "",
+        modelNo: ""
+    });
 
     const loadItems = async () => {
         setLoading(true);
@@ -42,6 +57,73 @@ export default function CantBeRepairedPage() {
     useEffect(() => {
         loadItems();
     }, []);
+
+    // --- NEW HANDLER: Open the Input Modal ---
+    const handleProcessClick = (item) => {
+        setSelectedItem({
+            rmaNo: item.rmaNo || item.itemRmaNo, // Handle variations in data naming
+            modelNo: item.model
+        });
+        setIsReplaceModalVisible(true);
+    };
+
+    // --- NEW HANDLER: Submit to Spring Boot ---
+    const handleConfirmReplacement = async () => {
+        setConfirmLoading(true);
+        try {
+            const token = atob(Cookies.get("authToken") || "");
+            const response = await fetch('/api/replacement/process', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    rmaNumber: selectedItem.rmaNo,
+                    modelNo: selectedItem.modelNo
+                })
+            });
+
+            const responseText = await response.text();
+            console.log("Raw Response:", responseText); // Debugging
+            
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                // If parsing fails, it's likely HTML error page
+                console.error("JSON Parse Error:", e);
+                throw new Error("Server returned non-JSON response: " + response.status);
+            }
+
+            if (response.ok) {
+                // SUCCESS
+                message.success({
+                    content: `Success! Assigned new Serial: ${data.newSerial}`,
+                    icon: <SafetyCertificateOutlined style={{ color: '#52c41a' }} />,
+                    duration: 5,
+                });
+                setIsReplaceModalVisible(false);
+                loadItems(); // Refresh list to remove the processed item
+            } else {
+                // FAILURE
+                setIsReplaceModalVisible(false); // Close input modal
+
+                if (data.error === "OUT_OF_STOCK") {
+                    // Open Red Warning Modal
+                    setIsStockModalVisible(true);
+                } else {
+                    message.error("Error: " + (data.error || "Unknown error"));
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            message.error("System connection error");
+        } finally {
+            setConfirmLoading(false);
+        }
+    };
 
     // Group items by RMA number
     const groupedItems = items.reduce((acc, item) => {
@@ -59,7 +141,7 @@ export default function CantBeRepairedPage() {
     return (
         <RmaLayout>
             <div className="unrepaired-page">
-                {/* Header Section - Red Theme for Can't Be Repaired */}
+                {/* Header Section */}
                 <div className="unrepaired-header" style={{ background: "linear-gradient(135deg, #f5222d 0%, #cf1322 100%)", boxShadow: "0 4px 20px rgba(245, 34, 45, 0.3)" }}>
                     <div className="header-content">
                         <div className="header-title">
@@ -155,6 +237,8 @@ export default function CantBeRepairedPage() {
                                                             icon={<SwapOutlined />}
                                                             style={{ backgroundColor: "#722ed1", borderColor: "#722ed1" }}
                                                             className="assign-btn"
+                                                            // --- CONNECTED BUTTON ---
+                                                            onClick={() => handleProcessClick(item)}
                                                         >
                                                             Process Replacement
                                                         </Button>
@@ -175,29 +259,16 @@ export default function CantBeRepairedPage() {
                                                         </div>
                                                         <div className="item-row">
                                                             <Text type="secondary">Status</Text>
-                                                            {item.repairStatus === "BER" ? (
-                                                                <Tag color="red" icon={<WarningOutlined />}>
-                                                                    BER (Beyond Economic Repair)
-                                                                </Tag>
-                                                            ) : (
-                                                                <Tag color="red" icon={<WarningOutlined />}>
-                                                                    CAN'T BE REPAIRED
-                                                                </Tag>
-                                                            )}
+                                                            <Tag color="red" icon={<WarningOutlined />}>
+                                                                {item.repairStatus === "CANT_BE_REPAIRED" ? "Can't Be Repaired" : 
+                                                                 item.repairStatus === "BER" ? "BER (Beyond Economic Repair)" : 
+                                                                 item.repairStatus || "Unknown Status"}
+                                                            </Tag>
                                                         </div>
-                                                        {item.itemRmaNo && (
-                                                            <div className="item-row">
-                                                                <Text type="secondary">RMA Number</Text>
-                                                                <Tag color="green">{item.itemRmaNo}</Tag>
-                                                            </div>
-                                                        )}
                                                         <Divider style={{ margin: "8px 0" }} />
                                                         <div className="fault-section">
                                                             <Text type="secondary">Remarks</Text>
-                                                            <Paragraph
-                                                                ellipsis={{ rows: 2, expandable: true }}
-                                                                className="fault-text"
-                                                            >
+                                                            <Paragraph ellipsis={{ rows: 2, expandable: true }} className="fault-text">
                                                                 {item.repairRemarks || "No remarks provided"}
                                                             </Paragraph>
                                                         </div>
@@ -211,7 +282,67 @@ export default function CantBeRepairedPage() {
                         </div>
                     )}
                 </div>
+
+                {/* --- MODAL 1: CONFIRM REPLACEMENT --- */}
+                <Modal
+                    title="Process Replacement"
+                    open={isReplaceModalVisible}
+                    onCancel={() => setIsReplaceModalVisible(false)}
+                    onOk={handleConfirmReplacement}
+                    confirmLoading={confirmLoading}
+                    okText="Check Inventory & Assign"
+                    okButtonProps={{ style: { backgroundColor: '#722ed1' } }}
+                >
+                    <div style={{ padding: '10px 0' }}>
+                        <div style={{ marginBottom: 16 }}>
+                            <Text strong>RMA Number:</Text>
+                            <Input value={selectedItem.rmaNo} disabled style={{ marginTop: 8 }} />
+                        </div>
+                        <div>
+                            <Text strong>Required Model:</Text>
+                            <Input 
+                                value={selectedItem.modelNo} 
+                                onChange={(e) => setSelectedItem({...selectedItem, modelNo: e.target.value})}
+                                style={{ marginTop: 8 }} 
+                            />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                Confirm the model number matches the inventory.
+                            </Text>
+                        </div>
+                    </div>
+                </Modal>
+
+                {/* --- MODAL 2: OUT OF STOCK WARNING --- */}
+                <Modal
+                    title={<span style={{ color: '#f5222d' }}><WarningOutlined /> Out of Stock</span>}
+                    open={isStockModalVisible}
+                    onCancel={() => setIsStockModalVisible(false)}
+                    footer={[
+                        <Button key="close" onClick={() => setIsStockModalVisible(false)}>
+                            Close
+                        </Button>,
+                        <Button 
+                            key="order" 
+                            type="primary" 
+                            danger 
+                            onClick={() => window.location.href = '/purchase-order/create'}
+                        >
+                            Create Purchase Order
+                        </Button>
+                    ]}
+                >
+                    <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                        <ExclamationCircleOutlined style={{ fontSize: 48, color: '#f5222d', marginBottom: 16 }} />
+                        <Paragraph style={{ fontSize: 16 }}>
+                            The part <strong>{selectedItem.modelNo}</strong> is not available in the inventory.
+                        </Paragraph>
+                        <Paragraph type="secondary">
+                            You need to order a new unit before this replacement can be processed.
+                        </Paragraph>
+                    </div>
+                </Modal>
+
             </div>
         </RmaLayout>
     );
-}
+}   

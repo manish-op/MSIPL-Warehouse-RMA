@@ -1,14 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, Avatar, Spin, message, Button, Typography, Row, Col, Divider, Tag, Tooltip as AntTooltip } from "antd";
+import { Card, Avatar, Spin, message, Button, Typography, Row, Col, Divider, Tag } from "antd";
 import {
   UserOutlined, KeyOutlined, MailOutlined, PhoneOutlined,
   GlobalOutlined, SafetyCertificateOutlined, ReloadOutlined,
-  AppstoreOutlined, EnvironmentOutlined, PieChartOutlined, BarChartOutlined
+  AppstoreOutlined, EnvironmentOutlined,
 } from "@ant-design/icons";
-import { 
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid 
-} from 'recharts';
 import Cookies from "js-cookie";
 import { URL } from "../API/URL";
 import { useNavigate } from "react-router-dom";
@@ -17,70 +13,139 @@ import "./Profile.css";
 
 const { Title, Text } = Typography;
 
-// --- Animation Hooks (Kept from your code) ---
 function useCountUp(target, duration = 1000) {
   const [value, setValue] = useState(0);
+  const [progress, setProgress] = useState(0);
+
   useEffect(() => {
-    let start = 0;
-    const end = parseInt(target, 10) || 0;
-    if (start === end) return;
-    let totalMilSec = duration;
-    let incrementTime = (totalMilSec / end) * 1000;
-    let timer = setInterval(() => {
-      start += 1;
-      setValue(start);
-      if (start === end) clearInterval(timer);
-    }, 10); // Simplified for stability in charts
-    setValue(end); // Direct set for now to prevent chart flickering
-    return () => clearInterval(timer);
+    const to = Number(target) || 0;
+    const startTime = performance.now();
+    let raf = 0;
+
+    function step(ts) {
+      const elapsed = ts - startTime;
+      const t = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setProgress(eased);
+      const cur = Math.round(to * eased);
+      setValue(cur);
+      if (t < 1) {
+        raf = requestAnimationFrame(step);
+      } else {
+        setProgress(1);
+        setValue(to);
+      }
+    }
+
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
   }, [target, duration]);
-  return { value };
+
+  return { value, progress };
 }
 
-const REGION_COLORS = ["#1677ff", "#52c41a", "#faad14", "#722ed1", "#eb2f96", "#13c2c2"];
+function useCountUpArray(targetArray = [], duration = 1000) {
+  // Use JSON.stringify for stable dependency to avoid useMemo size warning
+  const targetArrayString = JSON.stringify(targetArray);
+  const targetValues = useMemo(() => targetArray.map((v) => Number(v) || 0), [targetArrayString]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [values, setValues] = useState(() => targetValues.map(() => 0));
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const from = targetValues.map(() => 0);
+    const to = targetValues;
+    const startTime = performance.now();
+    let raf = 0;
+
+    function step(ts) {
+      const elapsed = ts - startTime;
+      const t = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setProgress(eased);
+
+      const next = from.map((f, i) => Math.round(f + (to[i] - f) * eased));
+      setValues(next);
+
+      if (t < 1) {
+        raf = requestAnimationFrame(step);
+      } else {
+        setProgress(1);
+        setValues(to);
+      }
+    }
+
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [duration, targetArrayString, targetValues]);
+
+  return { values, progress };
+}
+
+const REGION_COLORS = [
+  "#1677ff",
+  "#52c41a",
+  "#faad14",
+  "#722ed1",
+  "#eb2f96",
+];
 
 export default function Profile() {
   const navigate = useNavigate();
 
-  // Local Storage Data
+  // Profile data from local storage
   const name = localStorage.getItem("name") || "User";
   const email = localStorage.getItem("email") || "N/A";
   const mobile = localStorage.getItem("mobile") || "N/A";
   const role = (localStorage.getItem("_User_role_for_MSIPL") || "N/A").toUpperCase();
   const region = localStorage.getItem("region") || null;
 
-  // State
+  // Local state
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
 
-  // Fetch Logic
   function getAuthToken() {
-    return localStorage.getItem("authToken") || Cookies.get("authToken");
+    try {
+      const cookie = Cookies.get("authToken");
+      if (cookie) return atob(cookie);
+    } catch (_) { }
+    return localStorage.getItem("authToken");
   }
 
   async function fetchDashboardSummary() {
     setLoading(true);
     setError(null);
-    try {
-        // MOCK DATA FOR TESTING (Replace with your actual fetch call)
-        // const res = await fetch(URL + "/admin/user/dashboard-summary"...
-        
-        // Simulating API response for visual demo:
-        setTimeout(() => {
-            setSummary({
-                totalItems: 1250,
-                regionCounts: [
-                    { region: 'North', count: 450 },
-                    { region: 'South', count: 300 },
-                    { region: 'East', count: 200 },
-                    { region: 'West', count: 300 },
-                ]
-            });
-            setLoading(false);
-        }, 800);
+    const token = getAuthToken();
+    const headers = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
 
+    try {
+      const res = await fetch(URL + "/admin/user/dashboard-summary", {
+        method: "GET",
+        credentials: "include",
+        headers,
+      });
+
+      if (res.status === 401) {
+        Cookies.remove("authToken", { path: "/" });
+        localStorage.clear();
+        message.warning("Session expired. Please login again.");
+        navigate("/login");
+        return;
+      }
+
+      if (!res.ok) {
+        const txt = await res.text();
+        setError(txt || "Server error");
+        setLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+      setSummary(data);
+      setLoading(false);
     } catch (err) {
       setError(err.message || "Network error");
       setLoading(false);
@@ -89,19 +154,33 @@ export default function Profile() {
 
   useEffect(() => {
     fetchDashboardSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Prepare Chart Data
-  const regionData = useMemo(() => {
-    if (!summary?.regionCounts) return [];
-    return summary.regionCounts.map((item, index) => ({
-        name: item.region || "Unknown",
-        value: item.count,
-        color: REGION_COLORS[index % REGION_COLORS.length]
-    }));
-  }, [summary]);
+  // Prepare animated values
+  const totalTarget = summary?.totalItems || 0;
+  const { value: animatedTotal, progress: totalProgress } = useCountUp(totalTarget, 1200);
 
-  const totalItems = summary?.totalItems || 0;
+  const regionCounts = useMemo(() => {
+    if (!summary || !summary.regionCounts) return [];
+    const isAdmin = role === "ADMIN";
+    if (!isAdmin && region) {
+      return summary.regionCounts.filter((rc) => (rc.region || "").toLowerCase() === (region || "").toLowerCase());
+    }
+    return summary.regionCounts;
+  }, [summary, role, region]);
+
+  const regionTargetCounts = regionCounts.map((r) => r.count || 0);
+  const { values: animatedRegionCounts, progress: regionsProgress } = useCountUpArray(regionTargetCounts, 1000);
+
+  const combinedProgress = regionCounts.length > 0 ? (totalProgress + regionsProgress) / 2 : totalProgress;
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
 
   const getRoleColor = (r) => {
     switch (r) {
@@ -109,19 +188,6 @@ export default function Profile() {
       case "MANAGER": return "#722ed1";
       default: return "#1677ff";
     }
-  };
-
-  // Custom Tooltip for Recharts
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="custom-chart-tooltip">
-          <p className="tooltip-label">{payload[0].name}</p>
-          <p className="tooltip-value">{payload[0].value} Items</p>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -133,8 +199,10 @@ export default function Profile() {
             <UserOutlined />
           </div>
           <div className="header-text">
-            <Title level={3} className="header-title">Welcome back, {name}</Title>
-            <Text className="header-subtitle">Manage your profile and view inventory analytics</Text>
+            <Title level={3} className="header-title">{getGreeting()}, {name}!</Title>
+            <Text className="header-subtitle">
+              Welcome to your personal dashboard
+            </Text>
           </div>
         </div>
         <Button
@@ -146,12 +214,14 @@ export default function Profile() {
         </Button>
       </div>
 
+      {/* Main Content */}
       <Row gutter={[24, 24]}>
-        {/* LEFT COLUMN: Profile Info */}
-        <Col xs={24} lg={8} xl={7}>
+        {/* Left Column - Profile Card */}
+        <Col xs={24} lg={8}>
           <Card className="profile-card" bordered={false}>
+            {/* Profile Header */}
             <div className="profile-avatar-section">
-              <Avatar size={110} icon={<UserOutlined />} className="profile-avatar" />
+              <Avatar size={100} icon={<UserOutlined />} className="profile-avatar" />
               <div className="profile-name-section">
                 <Title level={4} className="profile-name">{name}</Title>
                 <Tag color={getRoleColor(role)} className="role-tag">{role}</Tag>
@@ -160,133 +230,159 @@ export default function Profile() {
 
             <Divider className="profile-divider" />
 
+            {/* Profile Details */}
             <div className="profile-details">
               <div className="detail-item">
-                <div className="detail-icon"><MailOutlined /></div>
+                <div className="detail-icon">
+                  <MailOutlined />
+                </div>
                 <div className="detail-content">
-                  <Text className="detail-label">Email</Text>
+                  <Text className="detail-label">Email Address</Text>
                   <Text className="detail-value">{email}</Text>
                 </div>
               </div>
+
               <div className="detail-item">
-                <div className="detail-icon"><PhoneOutlined /></div>
+                <div className="detail-icon">
+                  <PhoneOutlined />
+                </div>
                 <div className="detail-content">
-                  <Text className="detail-label">Phone</Text>
+                  <Text className="detail-label">Mobile Number</Text>
                   <Text className="detail-value">{mobile}</Text>
                 </div>
               </div>
+
               {region && (
                 <div className="detail-item">
-                  <div className="detail-icon"><GlobalOutlined /></div>
+                  <div className="detail-icon">
+                    <GlobalOutlined />
+                  </div>
                   <div className="detail-content">
-                    <Text className="detail-label">Region</Text>
+                    <Text className="detail-label">Assigned Region</Text>
                     <Text className="detail-value">{region}</Text>
                   </div>
                 </div>
               )}
+
+              <div className="detail-item">
+                <div className="detail-icon">
+                  <SafetyCertificateOutlined />
+                </div>
+                <div className="detail-content">
+                  <Text className="detail-label">Access Level</Text>
+                  <Text className="detail-value">{role}</Text>
+                </div>
+              </div>
             </div>
 
+            {/* Change Password Button */}
             <div className="profile-actions">
-              <Button type="primary" icon={<KeyOutlined />} onClick={() => setChangePasswordVisible(true)} block className="change-password-btn">
+              <Button
+                type="primary"
+                icon={<KeyOutlined />}
+                onClick={() => setChangePasswordVisible(true)}
+                block
+                className="change-password-btn"
+              >
                 Change Password
               </Button>
             </div>
           </Card>
         </Col>
 
-        {/* RIGHT COLUMN: Dashboard & Analytics */}
-        <Col xs={24} lg={16} xl={17}>
-          {loading ? (
-             <Card className="stats-card loading-card"><Spin size="large" tip="Loading Analytics..." /></Card>
-          ) : error ? (
-             <Card className="stats-card"><Text type="danger">{error}</Text></Card>
-          ) : (
-            <>
-              {/* Top Row: KPI Cards */}
-              <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-                <Col xs={24} sm={12}>
-                  <Card className="kpi-card kpi-primary" bordered={false}>
-                     <div className="kpi-content">
-                        <div>
-                            <Text className="kpi-label">Total Inventory</Text>
-                            <Title level={2} className="kpi-value">{totalItems.toLocaleString()}</Title>
-                        </div>
-                        <div className="kpi-icon"><AppstoreOutlined /></div>
-                     </div>
-                     <div className="kpi-footer">Across {regionData.length} Regions</div>
-                  </Card>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Card className="kpi-card kpi-secondary" bordered={false}>
-                     <div className="kpi-content">
-                        <div>
-                            <Text className="kpi-label">Top Region</Text>
-                            <Title level={2} className="kpi-value">
-                                {regionData.sort((a,b) => b.value - a.value)[0]?.name || "N/A"}
-                            </Title>
-                        </div>
-                        <div className="kpi-icon"><EnvironmentOutlined /></div>
-                     </div>
-                     <div className="kpi-footer">Highest Activity</div>
-                  </Card>
-                </Col>
-              </Row>
+        {/* Right Column - Stats */}
+        <Col xs={24} lg={16}>
+          <Card className="stats-card" bordered={false}>
+            {loading ? (
+              <div className="centered-spin">
+                <Spin size="large" />
+                <Text className="loading-text">Loading dashboard data...</Text>
+              </div>
+            ) : error ? (
+              <div className="error-container">
+                <Text className="error-text">{error}</Text>
+                <Button type="primary" onClick={fetchDashboardSummary} style={{ marginTop: 16 }}>
+                  Retry
+                </Button>
+              </div>
+            ) : (
+              <>
+                {/* Stats Header */}
+                <div className="stats-header">
+                  <AppstoreOutlined className="stats-header-icon" />
+                  <Text strong className="stats-header-title">Inventory Overview</Text>
+                </div>
+                <Divider className="stats-divider" />
 
-              {/* Bottom Row: Charts */}
-              <Row gutter={[16, 16]}>
-                {/* Donut Chart */}
-                <Col xs={24} xl={12}>
-                    <Card className="chart-card" title={<><PieChartOutlined /> Regional Distribution</>} bordered={false}>
-                        <div style={{ width: '100%', height: 300 }}>
-                            <ResponsiveContainer>
-                                <PieChart>
-                                    <Pie
-                                        data={regionData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {regionData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Legend verticalAlign="bottom" height={36} iconType="circle"/>
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </Card>
-                </Col>
+                {/* Stats Boxes */}
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} sm={12}>
+                    <div className="stat-box primary">
+                      <div className="stat-icon">
+                        <AppstoreOutlined />
+                      </div>
+                      <div className="stat-content">
+                        <Text className="stat-label">Total Items</Text>
+                        <Text className="stat-number">{animatedTotal.toLocaleString()}</Text>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <div className="stat-box secondary">
+                      <div className="stat-icon">
+                        <EnvironmentOutlined />
+                      </div>
+                      <div className="stat-content">
+                        <Text className="stat-label">Active Regions</Text>
+                        <Text className="stat-number">{regionCounts.length}</Text>
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
 
-                {/* Bar Chart */}
-                <Col xs={24} xl={12}>
-                    <Card className="chart-card" title={<><BarChartOutlined /> Volume by Region</>} bordered={false}>
-                        <div style={{ width: '100%', height: 300 }}>
-                            <ResponsiveContainer>
-                                <BarChart data={regionData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis type="number" hide />
-                                    <YAxis type="category" dataKey="name" width={80} tick={{fill: '#8c8c8c', fontSize: 12}} />
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
-                                        {regionData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </Card>
-                </Col>
-              </Row>
-            </>
-          )}
+                {/* Progress Bar */}
+                <div className="progress-section">
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${Math.round(combinedProgress * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Region Cards */}
+                {regionCounts.length > 0 && (
+                  <>
+                    <div className="section-header">
+                      <EnvironmentOutlined className="section-icon" />
+                      <Text strong className="section-title">Region Breakdown</Text>
+                    </div>
+                    <div className="region-cards-grid">
+                      {regionCounts.map((rc, idx) => {
+                        const color = REGION_COLORS[idx % REGION_COLORS.length];
+                        const animated = animatedRegionCounts[idx] ?? 0;
+                        return (
+                          <div className="region-card" key={rc.region || idx}>
+                            <div className="region-pill" style={{ background: color }}>
+                              {String(rc.region || "R").charAt(0).toUpperCase()}
+                            </div>
+                            <div className="region-info">
+                              <Text className="region-name">{String(rc.region || "UNKNOWN").toUpperCase()}</Text>
+                              <Text className="region-count">{animated.toLocaleString()} items</Text>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </Card>
         </Col>
       </Row>
 
+      {/* Change Password Modal */}
       <ChangePasswordModal
         visible={changePasswordVisible}
         onClose={() => setChangePasswordVisible(false)}

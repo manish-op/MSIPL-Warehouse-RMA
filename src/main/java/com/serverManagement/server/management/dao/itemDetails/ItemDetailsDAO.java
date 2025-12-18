@@ -55,6 +55,10 @@ public interface ItemDetailsDAO
         @Query("select count(i) from ItemDetailsEntity i where lower(i.keywordEntity.keywordName) = :kw")
         long countByKeywordNameLower(@Param("kw") String kw);
 
+        // For Replacement Process
+        @Query("SELECT i FROM ItemDetailsEntity i WHERE i.modelNo = :modelNo AND i.availableStatusId.itemAvailableOption = 'AVAILABLE'")
+        List<ItemDetailsEntity> findAvailableByModel(@Param("modelNo") String modelNo);
+
         // Get distinct products for RMA form dropdown
         @Query("SELECT DISTINCT i.system, i.modelNo, i.partNo FROM ItemDetailsEntity i WHERE i.system IS NOT NULL ORDER BY i.system")
         List<Object[]> findDistinctProducts();

@@ -22,4 +22,7 @@ public interface RmaRequestDAO extends JpaRepository<RmaRequestEntity, Long> {
 
     // Find RMA request by manual RMA number
     RmaRequestEntity findByRmaNo(String rmaNo);
+
+    // Find requests by created date range
+    List<RmaRequestEntity> findByCreatedDateBetween(ZonedDateTime startDate, ZonedDateTime endDate);
 }

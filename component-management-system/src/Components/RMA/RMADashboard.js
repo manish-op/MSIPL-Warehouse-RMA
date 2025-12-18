@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { 
+import {
   Row, Col, Card, Statistic, Spin, message, Modal,
-  Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip 
+  Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip
 } from "antd";
 import {
   FileTextOutlined,
@@ -12,27 +12,18 @@ import {
   RiseOutlined,
   FilterOutlined
 } from "@ant-design/icons";
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, 
-  Tooltip as RechartsTooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, Legend 
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip as RechartsTooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
 } from 'recharts';
 import RmaLayout from "./RmaLayout";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
-import "./RmaDashboard.css"; 
+import "./RmaDashboard.css";
 
 const { Option } = Select;
 
-// --- Mock Data for Trend Chart (Replace with real API data later) ---
-const CHART_DATA_TRENDS = [
-  { name: 'Mon', requests: 4 },
-  { name: 'Tue', requests: 7 },
-  { name: 'Wed', requests: 5 },
-  { name: 'Thu', requests: 12 },
-  { name: 'Fri', requests: 8 },
-  { name: 'Sat', requests: 3 },
-  { name: 'Sun', requests: 2 },
-];
+// --- Trend Chart Data is now fetched from API (stats.dailyTrends) ---
 const PIE_COLORS = ['#52c41a', '#fa8c16', '#f5222d']; // Green, Orange, Red
 
 function RmaDashboard() {
@@ -73,7 +64,7 @@ function RmaDashboard() {
 
   useEffect(() => {
     if (modalVisible) {
-        fetchModalData();
+      fetchModalData();
     }
   }, [modalVisible, modalType, timeFilter]);
 
@@ -94,110 +85,114 @@ function RmaDashboard() {
     let result;
 
     try {
-        if (modalType === "requests") {
-            result = await RmaApi.getRmaRequests(timeFilter);
-        } else if (modalType === "items") {
-             result = await RmaApi.getAllItems();
-        } else if (modalType === "repaired") {
-             result = await RmaApi.getRepairedItems();
-        } else if (modalType === "unrepaired") {
-             const allItems = await RmaApi.getAllItems();
-             if(allItems.success) {
-                 result = {
-                     success: true,
-                     data: allItems.data.filter(item => item.repairStatus !== 'REPAIRED')
-                 };
-             } else {
-                 result = allItems;
-             }
-        }
-
-        if (result && result.success) {
-            setModalData(result.data);
+      if (modalType === "requests") {
+        result = await RmaApi.getRmaRequests(timeFilter);
+      } else if (modalType === "items") {
+        result = await RmaApi.getAllItems();
+      } else if (modalType === "repaired") {
+        result = await RmaApi.getRepairedItems();
+      } else if (modalType === "unrepaired") {
+        const allItems = await RmaApi.getAllItems();
+        if (allItems.success) {
+          result = {
+            success: true,
+            data: allItems.data.filter(item => item.repairStatus !== 'REPAIRED')
+          };
         } else {
-            message.error("Failed to load details");
+          result = allItems;
         }
+      }
+
+      if (result && result.success) {
+        setModalData(result.data);
+      } else {
+        message.error("Failed to load details");
+      }
     } catch (error) {
-        message.error("Error loading data");
+      message.error("Error loading data");
     } finally {
-        setModalLoading(false);
+      setModalLoading(false);
     }
   };
 
   // --- Handlers ---
   const handleCardClick = (type) => {
-      setModalType(type);
-      setModalVisible(true);
-      if(type === 'requests') setTimeFilter('all');
+    setModalType(type);
+    setModalVisible(true);
+    if (type === 'requests') setTimeFilter('all');
   };
 
   const handleModalClose = () => {
-      setModalVisible(false);
-      setModalData([]);
+    setModalVisible(false);
+    setModalData([]);
   };
 
   // --- Table Columns ---
   const requestColumns = [
-      { title: "RMA No", dataIndex: "itemRmaNo", key: "itemRmaNo", render:(val)=>val || "-" },
-      { title: "Request No", dataIndex: "requestNumber", key: "requestNumber" },
-      { title: "Company", dataIndex: "companyName", key: "companyName" },
-      { title: "Date", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
-      { title: "Items", dataIndex: "itemsCount", key: "itemsCount", align: "center", render: (val, record)=>
+    { title: "RMA No", dataIndex: "itemRmaNo", key: "itemRmaNo", render: (val) => val || "-" },
+    { title: "Request No", dataIndex: "requestNumber", key: "requestNumber" },
+    { title: "Company", dataIndex: "companyName", key: "companyName" },
+    { title: "Date", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
+    {
+      title: "Items", dataIndex: "itemsCount", key: "itemsCount", align: "center", render: (val, record) =>
         typeof val === "number"
-        ? val
-        : Array.isArray(record.items)
-        ? record.items.length
-        :0,
-       },
-      { title: "Status", key: "status", render: () => <Tag color="blue">Submitted</Tag> } 
+          ? val
+          : Array.isArray(record.items)
+            ? record.items.length
+            : 0,
+    },
+    { title: "Status", key: "status", render: () => <Tag color="blue">Submitted</Tag> }
   ];
 
   const itemColumns = [
-      { title: "Product", dataIndex: "product", key: "product" },
-      { title: "Serial No", dataIndex: "serialNo", key: "serialNo" },
-      { title: "RMA No", dataIndex: "rmaNo", key: "rmaNo", render:(val)=>{
+    { title: "Product", dataIndex: "product", key: "product" },
+    { title: "Serial No", dataIndex: "serialNo", key: "serialNo" },
+    {
+      title: "RMA No", dataIndex: "rmaNo", key: "rmaNo", render: (val) => {
         if (!val) return "-";
         return /^RMA-\d{8}-\d{6}$/.test(val) ? "-" : val;
-      }},
-      { title: "Status", dataIndex: "repairStatus", key: "repairStatus", 
-        render: (status) => {
-            let color = 'default';
-            if(status === 'REPAIRED') color = 'green';
-            if(status === 'UNASSIGNED') color = 'orange';
-            if(status === 'ASSIGNED') color = 'blue';
-            if(status === 'REPAIRING') color = 'geekblue';
-            if(status === 'BER') color = 'red';
-            return <Tag color={color}>{status}</Tag>
-        }
-      },
-      { title: "Technician", dataIndex: "assignedToName", key: "assignedToName" }
+      }
+    },
+    {
+      title: "Status", dataIndex: "repairStatus", key: "repairStatus",
+      render: (status) => {
+        let color = 'default';
+        if (status === 'REPAIRED') color = 'green';
+        if (status === 'UNASSIGNED') color = 'orange';
+        if (status === 'ASSIGNED') color = 'blue';
+        if (status === 'REPAIRING') color = 'geekblue';
+        if (status === 'BER') color = 'red';
+        return <Tag color={color}>{status}</Tag>
+      }
+    },
+    { title: "Technician", dataIndex: "assignedToName", key: "assignedToName" }
   ];
 
   const getModalTitle = () => {
-      switch(modalType) {
-          case 'requests': return 'RMA Requests Details';
-          case 'items': return 'All Inventory Items';
-          case 'repaired': return 'Repaired History';
-          case 'unrepaired': return 'Pending / Unrepaired Items';
-          default: return 'Details';
-      }
+    switch (modalType) {
+      case 'requests': return 'RMA Requests Details';
+      case 'items': return 'All Inventory Items';
+      case 'repaired': return 'Repaired History';
+      case 'unrepaired': return 'Pending / Unrepaired Items';
+      default: return 'Details';
+    }
   };
 
   // --- Render ---
   return (
     <RmaLayout>
       <div className="rma-dashboard-container">
-        
+
         {/* 1. Header Section */}
         <div className="dashboard-header">
-            <div>
-                <h1 className="welcome-text">{getGreeting()}, {name}</h1>
-                <p className="sub-text">Overview of your Return Merchandise Authorization status.</p>
-            </div>
-            <div className="header-actions">
-               {/* Optional: Add a Refresh or Filter Button here */}
-               <Button icon={<FilterOutlined />}>Last 30 Days</Button>
-            </div>
+          <div>
+            <h1 className="welcome-text">{getGreeting()}, {name}</h1>
+            <p className="sub-text">Overview of your Return Merchandise Authorization status.</p>
+          </div>
+          <div className="header-actions">
+            {/* Optional: Add a Refresh or Filter Button here */}
+            <Button icon={<FilterOutlined />}>Last 30 Days</Button>
+          </div>
         </div>
 
         {loading ? (
@@ -212,28 +207,28 @@ function RmaDashboard() {
               <Col xs={24} sm={12} md={6}>
                 <Card className="kpi-card kpi-blue" hoverable onClick={() => handleCardClick('requests')}>
                   <div className="kpi-icon-wrapper"><FileTextOutlined /></div>
-                  <Statistic 
-                    title="Total Requests" 
-                    value={stats?.totalRequests || 0} 
+                  <Statistic
+                    title="Total Requests"
+                    value={stats?.totalRequests || 0}
                     valueStyle={{ fontWeight: 'bold', fontSize: '28px' }}
                   />
                   <div className="kpi-trend">
-                    <RiseOutlined style={{ color: '#52c41a' }} /> 
+                    <RiseOutlined style={{ color: '#52c41a' }} />
                     <span>Active Requests</span>
                   </div>
                 </Card>
               </Col>
-              
+
               {/* Card 2: Items */}
               <Col xs={24} sm={12} md={6}>
                 <Card className="kpi-card kpi-purple" hoverable onClick={() => handleCardClick('items')}>
                   <div className="kpi-icon-wrapper"><InboxOutlined /></div>
-                  <Statistic 
-                    title="Total Items" 
+                  <Statistic
+                    title="Total Items"
                     value={stats?.totalItems || 0}
                     valueStyle={{ fontWeight: 'bold', fontSize: '28px' }}
-                   />
-                   <div className="kpi-trend text-neutral">Total Inventory</div>
+                  />
+                  <div className="kpi-trend text-neutral">Total Inventory</div>
                 </Card>
               </Col>
 
@@ -241,12 +236,12 @@ function RmaDashboard() {
               <Col xs={24} sm={12} md={6}>
                 <Card className="kpi-card kpi-green" hoverable onClick={() => handleCardClick('repaired')}>
                   <div className="kpi-icon-wrapper"><CheckCircleOutlined /></div>
-                  <Statistic 
-                    title="Repaired" 
+                  <Statistic
+                    title="Repaired"
                     value={stats?.repairedCount || 0}
                     valueStyle={{ fontWeight: 'bold', fontSize: '28px' }}
-                   />
-                   <div className="kpi-trend text-success">Completed</div>
+                  />
+                  <div className="kpi-trend text-success">Completed</div>
                 </Card>
               </Col>
 
@@ -254,100 +249,100 @@ function RmaDashboard() {
               <Col xs={24} sm={12} md={6}>
                 <Card className="kpi-card kpi-orange" hoverable onClick={() => handleCardClick('unrepaired')}>
                   <div className="kpi-icon-wrapper"><ClockCircleOutlined /></div>
-                  <Statistic 
-                    title="Unrepaired / Pending" 
+                  <Statistic
+                    title="Unrepaired / Pending"
                     value={stats?.unrepairedCount || 0}
                     valueStyle={{ fontWeight: 'bold', fontSize: '28px' }}
-                   />
-                   <div className="kpi-trend text-warning">Action Required</div>
+                  />
+                  <div className="kpi-trend text-warning">Action Required</div>
                 </Card>
               </Col>
             </Row>
 
             {/* 3. Charts Row */}
             <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
-                {/* Left: Trend Line Chart */}
-                <Col xs={24} lg={16}>
-                    <Card title="Incoming Requests Trend (Last 7 Days)" bordered={false} className="chart-card">
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={CHART_DATA_TRENDS} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                                <YAxis axisLine={false} tickLine={false} />
-                                <RechartsTooltip 
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                />
-                                <Line 
-                                    type="monotone" 
-                                    dataKey="requests" 
-                                    stroke="#1890ff" 
-                                    strokeWidth={3} 
-                                    dot={{r: 4, fill: '#1890ff', strokeWidth: 2, stroke: '#fff'}} 
-                                    activeDot={{r: 6}} 
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </Card>
-                </Col>
-                
-                {/* Right: Ratio Pie Chart */}
-                <Col xs={24} lg={8}>
-                    <Card title="Repair Outcome Ratio" bordered={false} className="chart-card">
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={pieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <RechartsTooltip />
-                                <Legend verticalAlign="bottom" height={36}/>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </Card>
-                </Col>
+              {/* Left: Trend Line Chart */}
+              <Col xs={24} lg={16}>
+                <Card title="Incoming Requests Trend (Last 7 Days)" bordered={false} className="chart-card">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={stats?.dailyTrends || []} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                      <YAxis axisLine={false} tickLine={false} />
+                      <RechartsTooltip
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="requests"
+                        stroke="#1890ff"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: '#1890ff', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Card>
+              </Col>
+
+              {/* Right: Ratio Pie Chart */}
+              <Col xs={24} lg={8}>
+                <Card title="Repair Outcome Ratio" bordered={false} className="chart-card">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip />
+                      <Legend verticalAlign="bottom" height={36} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Card>
+              </Col>
             </Row>
           </>
         )}
 
         {/* 4. Detail Modal (Kept from original code) */}
         <Modal
-            title={getModalTitle()}
-            open={modalVisible}
-            onCancel={handleModalClose}
-            footer={null}
-            width={1000}
-            className="rma-detail-modal"
+          title={getModalTitle()}
+          open={modalVisible}
+          onCancel={handleModalClose}
+          footer={null}
+          width={1000}
+          className="rma-detail-modal"
         >
-            {modalType === 'requests' && (
-                <div style={{ marginBottom: 16, textAlign: 'right' }}>
-                    <span style={{ marginRight: 8 }}>Filter by Date:</span>
-                    <Select defaultValue="all" value={timeFilter} onChange={setTimeFilter} style={{ width: 120 }}>
-                        <Option value="all">All Time</Option>
-                        <Option value="year">Last Year</Option>
-                        <Option value="month">Last Month</Option>
-                        <Option value="week">Last Week</Option>
-                    </Select>
-                </div>
-            )}
-            
-            <Table
-                columns={modalType === 'requests' ? requestColumns : itemColumns}
-                dataSource={modalData}
-                loading={modalLoading}
-                rowKey={(record) => record.id || Math.random()} 
-                pagination={{ pageSize: 8 }}
-                scroll={{ x: 'max-content' }}
-                size="small"
-            />
+          {modalType === 'requests' && (
+            <div style={{ marginBottom: 16, textAlign: 'right' }}>
+              <span style={{ marginRight: 8 }}>Filter by Date:</span>
+              <Select defaultValue="all" value={timeFilter} onChange={setTimeFilter} style={{ width: 120 }}>
+                <Option value="all">All Time</Option>
+                <Option value="year">Last Year</Option>
+                <Option value="month">Last Month</Option>
+                <Option value="week">Last Week</Option>
+              </Select>
+            </div>
+          )}
+
+          <Table
+            columns={modalType === 'requests' ? requestColumns : itemColumns}
+            dataSource={modalData}
+            loading={modalLoading}
+            rowKey={(record) => record.id || Math.random()}
+            pagination={{ pageSize: 8 }}
+            scroll={{ x: 'max-content' }}
+            size="small"
+          />
         </Modal>
       </div>
     </RmaLayout>

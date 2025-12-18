@@ -423,6 +423,7 @@ public class RmaService {
     /**
      * Get RMA dashboard statistics
      * Returns counts of total requests, total items, repaired, and unrepaired items
+     * Also returns daily trend for the last 7 days
      */
     public ResponseEntity<?> getRmaDashboardStats() {
         try {
@@ -431,41 +432,32 @@ public class RmaService {
             long repairedCount = rmaItemDAO.countRepaired();
             long unrepairedCount = rmaItemDAO.countUnrepaired();
 
-            // Calculate Trend Data (Last 7 Days)
+            // Calculate Daily Trends for the last 7 days
+            List<com.serverManagement.server.management.dto.rma.DailyTrendDto> dailyTrends = new ArrayList<>();
             ZonedDateTime now = ZonedDateTime.now();
             ZonedDateTime sevenDaysAgo = now.minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
 
-            // Use findAll() and filter in memory to avoid restarting server for DAO
-            // interface change
-            List<RmaRequestEntity> allRequests = rmaRequestDAO.findAll();
-            List<RmaRequestEntity> recentRequests = new ArrayList<>();
-            for (RmaRequestEntity req : allRequests) {
-                if (req.getCreatedDate() != null && req.getCreatedDate().isAfter(sevenDaysAgo)) {
-                    recentRequests.add(req);
-                }
-            }
+            // Get requests for the last 7 days to minimize memory usage
+            List<RmaRequestEntity> recentRequests = rmaRequestDAO.findByCreatedDateBetween(sevenDaysAgo, now);
 
-            // Map to store counts per day
-            java.util.Map<java.time.LocalDate, Long> countsByDate = new java.util.HashMap<>();
-            for (RmaRequestEntity req : recentRequests) {
-                if (req.getCreatedDate() != null) {
-                    java.time.LocalDate date = req.getCreatedDate().toLocalDate();
-                    countsByDate.put(date, countsByDate.getOrDefault(date, 0L) + 1);
-                }
-            }
+            // Create a map for quick lookups
+            // Group by Date (YYYY-MM-DD)
+            java.util.Map<java.time.LocalDate, Long> requestsByDate = recentRequests.stream()
+                    .collect(java.util.stream.Collectors.groupingBy(
+                            req -> req.getCreatedDate().toLocalDate(),
+                            java.util.stream.Collectors.counting()));
 
-            // Generate list for last 7 days (ensure all days are present including 0s)
-            List<com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto.DailyTrendDto> trendData = new ArrayList<>();
-            java.time.format.DateTimeFormatter dayFormatter = java.time.format.DateTimeFormatter.ofPattern("EEE"); // Mon,
-                                                                                                                   // Tue...
+            // Iterate last 7 days to ensure all days are present even if 0 requests
+            java.time.format.DateTimeFormatter dayFormatter = java.time.format.DateTimeFormatter.ofPattern("EEE");
 
             for (int i = 6; i >= 0; i--) {
-                ZonedDateTime d = now.minusDays(i);
-                java.time.LocalDate dateKey = d.toLocalDate();
-                String dayName = d.format(dayFormatter);
-                long count = countsByDate.getOrDefault(dateKey, 0L);
-                trendData.add(new com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto.DailyTrendDto(
-                        dayName, count));
+                ZonedDateTime date = now.minusDays(i);
+                java.time.LocalDate localDate = date.toLocalDate();
+
+                String dayName = date.format(dayFormatter); // Mon, Tue, etc.
+                long count = requestsByDate.getOrDefault(localDate, 0L);
+
+                dailyTrends.add(new com.serverManagement.server.management.dto.rma.DailyTrendDto(dayName, count));
             }
 
             com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto stats = new com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto(
@@ -473,7 +465,7 @@ public class RmaService {
                     totalItems,
                     repairedCount,
                     unrepairedCount,
-                    trendData);
+                    dailyTrends);
 
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
