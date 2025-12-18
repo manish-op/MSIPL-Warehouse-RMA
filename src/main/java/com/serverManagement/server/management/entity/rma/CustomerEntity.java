@@ -31,6 +31,10 @@ public class CustomerEntity {
     @Column(name = "address", length = 1000)
     private String address;
 
+    // Turn Around Time in days (for both local and depot repairs)
+    @Column(name = "tat")
+    private Integer tat;
+
     // Audit fields
     @Column(name = "created_date")
     private ZonedDateTime createdDate;
@@ -98,6 +102,14 @@ public class CustomerEntity {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Integer getTat() {
+        return tat;
+    }
+
+    public void setTat(Integer tat) {
+        this.tat = tat;
     }
 
     public ZonedDateTime getCreatedDate() {

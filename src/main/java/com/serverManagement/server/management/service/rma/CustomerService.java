@@ -25,14 +25,20 @@ public class CustomerService {
      */
     @Transactional
     public CustomerEntity findOrCreateCustomer(String companyName, String contactName, String email,
-            String telephone, String mobile, String address) {
+            String telephone, String mobile, String address, Integer tat) {
 
         // Try to find existing customer by company name + email combination
         Optional<CustomerEntity> existingCustomer = customerDAO.findExistingCustomer(companyName, email);
 
         if (existingCustomer.isPresent()) {
-            // Return existing customer
-            return existingCustomer.get();
+            // Update TAT if provided and customer exists
+            CustomerEntity existing = existingCustomer.get();
+            if (tat != null) {
+                existing.setTat(tat);
+                existing.setUpdatedDate(ZonedDateTime.now());
+                customerDAO.save(existing);
+            }
+            return existing;
         }
 
         // Create new customer
@@ -43,6 +49,7 @@ public class CustomerService {
         newCustomer.setTelephone(telephone);
         newCustomer.setMobile(mobile);
         newCustomer.setAddress(address);
+        newCustomer.setTat(tat);
         newCustomer.setCreatedDate(ZonedDateTime.now());
         newCustomer.setUpdatedDate(ZonedDateTime.now());
 

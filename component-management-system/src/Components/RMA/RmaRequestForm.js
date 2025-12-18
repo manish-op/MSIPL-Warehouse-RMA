@@ -182,6 +182,7 @@ function RmaRequestForm() {
         telephone: customer.telephone,
         mobile: customer.mobile,
         returnAddress: customer.address,
+        tat: customer.tat, // Auto-fill TAT from saved customer
       });
       message.success(`Customer details loaded: ${customer.companyName}`);
     }
@@ -252,7 +253,7 @@ function RmaRequestForm() {
 
     try {
       const values = await form.validateFields();
-      
+
       const payload = {
         dplLicense: values.dplLicense || "",
         date: new Date().toISOString().split('T')[0],
@@ -273,7 +274,8 @@ function RmaRequestForm() {
         invoiceAddress: values.invoiceAddress || "",
         signature: values.signature || values.contactName,
         repairType: repairType,
-        
+        tat: values.tat ? parseInt(values.tat, 10) : null,
+
         items: (values.items || []).map(item => ({
           product: item.product,
           model: item.partNo || "",
@@ -536,6 +538,25 @@ function RmaRequestForm() {
               >
                 <TextArea rows={3} placeholder="Enter full return address" size="large" />
               </Form.Item>
+
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={8}>
+                  <Form.Item
+                    label="TAT (Turn Around Time)"
+                    name="tat"
+                    tooltip="Expected number of days to complete repair and return items"
+                  >
+                    <Input
+                      type="number"
+                      placeholder="Enter days (e.g., 15)"
+                      size="large"
+                      min={1}
+                      max={365}
+                      suffix="days"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
               <Divider />
 
@@ -803,12 +824,12 @@ function RmaRequestForm() {
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
-                          <Form.Item {...restField} label="Lower Firmaware Version" name={[name, "lowerFirmwareVersion"]}>
-                            <Select placeholder="Select">
-                             <Option value="Follow Depot Mainboard Inventory Version">Follow Depot Mainboard Inventory Version</Option>
-                             <Option value="Return Unrepaired">Return Unrepaired</Option>
-                            </Select>
-                          </Form.Item>
+                            <Form.Item {...restField} label="Lower Firmaware Version" name={[name, "lowerFirmwareVersion"]}>
+                              <Select placeholder="Select">
+                                <Option value="Follow Depot Mainboard Inventory Version">Follow Depot Mainboard Inventory Version</Option>
+                                <Option value="Return Unrepaired">Return Unrepaired</Option>
+                              </Select>
+                            </Form.Item>
                           </Col>
                           <Col xs={12} md={8}>
                             <Form.Item {...restField} label="Partial Shipment" name={[name, "partialshipment"]}>
@@ -960,9 +981,9 @@ function RmaRequestForm() {
             <Button key="back" onClick={() => setConfrimVisible(false)}>
               Cancel
             </Button>,
-            <Button 
-              key="submit" 
-              type="primary" 
+            <Button
+              key="submit"
+              type="primary"
               loading={finalSubmitting}
               onClick={finalSubmit}
             >
@@ -973,8 +994,8 @@ function RmaRequestForm() {
         >
           <div style={{ padding: "10px 0" }}>
             <Title level={5}>Select Repair Type</Title>
-            <Radio.Group 
-              onChange={(e) => setRepairType(e.target.value)} 
+            <Radio.Group
+              onChange={(e) => setRepairType(e.target.value)}
               value={repairType}
               style={{ marginBottom: 20 }}
             >
@@ -999,17 +1020,17 @@ function RmaRequestForm() {
                     <Text type="secondary">Total Items:</Text> <Text strong>{previewData.items?.length || 0}</Text>
                   </Col>
                 </Row>
-                
+
                 <Divider style={{ margin: "12px 0" }} />
-                
+
                 <div style={{ maxHeight: 200, overflowY: "auto" }}>
                   <Text strong>Items:</Text>
                   <ul style={{ paddingLeft: 20, margin: "5px 0" }}>
                     {previewData.items?.map((item, idx) => (
                       <li key={idx}>
                         <Text>{item.product} ({item.serialNo})</Text>
-                        <br/>
-                        <Text type="secondary" style={{fontSize: 12}}>{item.faultDescription}</Text>
+                        <br />
+                        <Text type="secondary" style={{ fontSize: 12 }}>{item.faultDescription}</Text>
                       </li>
                     ))}
                   </ul>
