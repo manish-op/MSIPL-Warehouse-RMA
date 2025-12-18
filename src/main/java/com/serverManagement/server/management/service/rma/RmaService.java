@@ -423,7 +423,7 @@ public class RmaService {
     /**
      * Get RMA dashboard statistics
      * Returns counts of total requests, total items, repaired, and unrepaired items
-     * Also returns daily trend for the last 7 days
+     * Also returns daily trend for the last 7 days and recent RMA numbers
      */
     public ResponseEntity<?> getRmaDashboardStats() {
         try {
@@ -460,12 +460,30 @@ public class RmaService {
                 dailyTrends.add(new com.serverManagement.server.management.dto.rma.DailyTrendDto(dayName, count));
             }
 
+            // Fetch recent RMA numbers from rma_item table (non-null, limited to 10)
+            List<String> recentRmaNumbers = new ArrayList<>();
+            try {
+                List<RmaItemEntity> allItems = rmaItemDAO.findAll();
+                recentRmaNumbers = allItems.stream()
+                        .filter(item -> item.getRmaNo() != null && !item.getRmaNo().trim().isEmpty()
+                                && !item.getRmaNo().startsWith("RMA-") // Exclude auto-generated format
+                                && !"Unknown".equalsIgnoreCase(item.getRmaNo().trim()))
+                        .map(RmaItemEntity::getRmaNo)
+                        .distinct()
+                        .limit(10)
+                        .collect(java.util.stream.Collectors.toList());
+            } catch (Exception e) {
+                // If failed to fetch, just return empty list
+                e.printStackTrace();
+            }
+
             com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto stats = new com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto(
                     totalRequests,
                     totalItems,
                     repairedCount,
                     unrepairedCount,
-                    dailyTrends);
+                    dailyTrends,
+                    recentRmaNumbers);
 
             return ResponseEntity.ok(stats);
         } catch (Exception e) {

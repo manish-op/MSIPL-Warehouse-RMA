@@ -1,23 +1,36 @@
 package com.serverManagement.server.management.dto.rma;
 
+import java.util.List;
+
 public class RmaDashboardStatsDto {
 
     private long totalRequests;
     private long totalItems;
     private long repairedCount;
     private long unrepairedCount;
-    private java.util.List<DailyTrendDto> dailyTrends;
+    private List<DailyTrendDto> dailyTrends;
+    private List<String> recentRmaNumbers; // Recent RMA numbers for display
 
     public RmaDashboardStatsDto() {
     }
 
     public RmaDashboardStatsDto(long totalRequests, long totalItems, long repairedCount, long unrepairedCount,
-            java.util.List<DailyTrendDto> dailyTrends) {
+            List<DailyTrendDto> dailyTrends) {
         this.totalRequests = totalRequests;
         this.totalItems = totalItems;
         this.repairedCount = repairedCount;
         this.unrepairedCount = unrepairedCount;
         this.dailyTrends = dailyTrends;
+    }
+
+    public RmaDashboardStatsDto(long totalRequests, long totalItems, long repairedCount, long unrepairedCount,
+            List<DailyTrendDto> dailyTrends, List<String> recentRmaNumbers) {
+        this.totalRequests = totalRequests;
+        this.totalItems = totalItems;
+        this.repairedCount = repairedCount;
+        this.unrepairedCount = unrepairedCount;
+        this.dailyTrends = dailyTrends;
+        this.recentRmaNumbers = recentRmaNumbers;
     }
 
     public long getTotalRequests() {
@@ -52,11 +65,19 @@ public class RmaDashboardStatsDto {
         this.unrepairedCount = unrepairedCount;
     }
 
-    public java.util.List<DailyTrendDto> getDailyTrends() {
+    public List<DailyTrendDto> getDailyTrends() {
         return dailyTrends;
     }
 
-    public void setDailyTrends(java.util.List<DailyTrendDto> dailyTrends) {
+    public void setDailyTrends(List<DailyTrendDto> dailyTrends) {
         this.dailyTrends = dailyTrends;
+    }
+
+    public List<String> getRecentRmaNumbers() {
+        return recentRmaNumbers;
+    }
+
+    public void setRecentRmaNumbers(List<String> recentRmaNumbers) {
+        this.recentRmaNumbers = recentRmaNumbers;
     }
 }
