@@ -570,6 +570,7 @@ public class RmaService {
     /**
      * Get all repaired RMA items
      */
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getRepairedItems() {
         try {
             List<RmaItemEntity> items = rmaItemDAO.findRepairedItems();

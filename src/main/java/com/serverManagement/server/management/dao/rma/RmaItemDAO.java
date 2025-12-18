@@ -27,12 +27,12 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     long countByRepairStatusContaining(@Param("keyword") String keyword);
 
-    // Count items that are NOT repaired (null, empty, or not containing 'repaired')
-    @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE r.repairStatus IS NULL OR r.repairStatus = '' OR LOWER(r.repairStatus) NOT LIKE '%repaired%'")
+    // Count items that are NOT repaired AND NOT replaced
+    @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE (r.repairStatus IS NULL OR r.repairStatus = '') OR (LOWER(r.repairStatus) NOT LIKE '%repaired%' AND LOWER(r.repairStatus) NOT LIKE '%replaced%')")
     long countUnrepaired();
 
-    // Count items that ARE repaired
-    @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'repaired'")
+    // Count items that ARE repaired OR replaced
+    @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'repaired' OR LOWER(r.repairStatus) = 'replaced'")
     long countRepaired();
 
     // ============ WORKFLOW QUERIES ============

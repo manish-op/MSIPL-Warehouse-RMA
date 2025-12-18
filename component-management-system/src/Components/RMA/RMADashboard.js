@@ -101,7 +101,7 @@ function RmaDashboard() {
         if (allItems.success) {
           result = {
             success: true,
-            data: allItems.data.filter(item => item.repairStatus !== 'REPAIRED')
+            data: allItems.data.filter(item => item.repairStatus !== 'REPAIRED' && item.repairStatus !== 'REPLACED')
           };
         } else {
           result = allItems;
@@ -179,7 +179,7 @@ function RmaDashboard() {
       title: "Status", dataIndex: "repairStatus", key: "repairStatus",
       render: (status) => {
         let color = 'default';
-        if (status === 'REPAIRED') color = 'green';
+        if (status === 'REPAIRED' || status === 'REPLACED') color = 'green';
         if (status === 'UNASSIGNED') color = 'orange';
         if (status === 'ASSIGNED') color = 'blue';
         if (status === 'REPAIRING') color = 'geekblue';
