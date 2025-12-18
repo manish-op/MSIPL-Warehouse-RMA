@@ -4,8 +4,9 @@ public enum RepairStatus {
     ASSIGNED("Assigned"),
     REPAIRING("Repairing"),
     REPAIRED("Repaired"),
-    CANT_BE_REPAIRED("Can't Be Repaired"),
-    BER("BER");
+    BER("BER"),
+    REPLACED("Replaced"),
+    CANT_BE_REPAIRED("Can't Be Repaired");
 
     private final String displayName;
 

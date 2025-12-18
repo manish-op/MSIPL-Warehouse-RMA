@@ -38,8 +38,6 @@ const { Title, Text, Paragraph } = Typography;
 const PREDEFINED_TRANSPORTERS = {
     "BlueDart": "BD001",
     "DTDC": "DT001",
-    "Professional Couriers": "PC001",
-    "Trackon": "TR001",
     "Delhivery": "DL001"
 };
 
@@ -507,8 +505,11 @@ export default function RepairedPage() {
                                                                     </div>
                                                                     <div className="item-row">
                                                                         <Text type="secondary">Status</Text>
-                                                                        <Tag color="green" icon={<CheckCircleOutlined />}>
-                                                                            REPAIRED
+                                                                        <Tag
+                                                                            color={item.repairStatus?.toUpperCase() === 'REPLACED' ? 'purple' : 'green'}
+                                                                            icon={<CheckCircleOutlined />}
+                                                                        >
+                                                                            {item.repairStatus?.toUpperCase() || 'REPAIRED'}
                                                                         </Tag>
                                                                     </div>
                                                                     {item.itemRmaNo && (
@@ -1028,7 +1029,7 @@ export default function RepairedPage() {
                     onCancel={() => setDeliveryModalVisible(false)}
                     onOk={handleConfirmDelivery}
                     okText="Confirm Delivery"
-                    okButtonProps={{ 
+                    okButtonProps={{
                         loading: deliverySubmitting,
                         style: { background: "#52c41a", borderColor: "#52c41a" }
                     }}
@@ -1058,7 +1059,7 @@ export default function RepairedPage() {
                             name="deliveryNotes"
                             label="Delivery Notes"
                         >
-                            <Input.TextArea 
+                            <Input.TextArea
                                 placeholder="e.g., POD number, signature notes, condition remarks..."
                                 rows={3}
                             />

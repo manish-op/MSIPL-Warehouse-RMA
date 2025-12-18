@@ -51,14 +51,14 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
             """)
     List<RmaItemEntity> findUnassignedItems();
 
-    // Find assigned items (has assignee, not yet repaired or cant be repaired or
-    // BER)
+    // Find assigned items (has assignee, not yet repaired/replaced or cant be
+    // repaired or BER)
     @Query("SELECT r FROM RmaItemEntity r WHERE r.assignedToEmail IS NOT NULL AND r.assignedToEmail != '' " +
-            "AND (r.repairStatus IS NULL OR (LOWER(r.repairStatus) != 'repaired' AND LOWER(r.repairStatus) != 'cant_be_repaired' AND LOWER(r.repairStatus) != 'ber'))")
+            "AND (r.repairStatus IS NULL OR (LOWER(r.repairStatus) != 'repaired' AND LOWER(r.repairStatus) != 'replaced' AND LOWER(r.repairStatus) != 'cant_be_repaired' AND LOWER(r.repairStatus) != 'ber'))")
     List<RmaItemEntity> findAssignedItems();
 
-    // Find repaired items
-    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'repaired'")
+    // Find repaired OR replaced items (both ready for dispatch)
+    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'repaired' OR LOWER(r.repairStatus) = 'replaced'")
     List<RmaItemEntity> findRepairedItems();
 
     // Find items that can't be repaired (includes CANT_BE_REPAIRED and BER)
@@ -97,8 +97,8 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     // Find items by dispatch destination
     List<RmaItemEntity> findByDispatchTo(String dispatchTo);
 
-    // Find items pending dispatch (repaired but not yet dispatched)
-    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = 'repaired' AND (r.isDispatched IS NULL OR r.isDispatched = false)")
+    // Find items pending dispatch (repaired OR replaced but not yet dispatched)
+    @Query("SELECT r FROM RmaItemEntity r WHERE (LOWER(r.repairStatus) = 'repaired' OR LOWER(r.repairStatus) = 'replaced') AND (r.isDispatched IS NULL OR r.isDispatched = false)")
     List<RmaItemEntity> findRepairedPendingDispatch();
 
     // Find dispatched items pending delivery confirmation

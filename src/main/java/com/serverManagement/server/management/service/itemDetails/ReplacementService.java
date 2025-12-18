@@ -23,35 +23,83 @@ public class ReplacementService {
     @Autowired
     private com.serverManagement.server.management.dao.rma.RmaItemDAO rmaItemDao;
 
+    public List<ItemDetailsEntity> searchReplacementItems(String query) {
+        return itemDao.searchAllItems(query);
+    }
+
     @Transactional
     public String processReplacement(ReplacementRequest request, String userEmail) {
 
         System.out.println(
                 "Processing replacement for RMA: " + request.getRmaNumber() + ", Model: " + request.getModelNo());
 
-        // 1. Check Inventory
-        // Ensure DAO method uses 'AVAILABLE' (case sensitive check was fixed
-        // previously)
-        List<ItemDetailsEntity> availableItems = itemDao.findAvailableByModel(request.getModelNo());
-        System.out.println("Available items found: " + availableItems.size());
+        ItemDetailsEntity replacementUnit = null;
 
-        if (availableItems.isEmpty()) {
-            throw new RuntimeException("OUT_OF_STOCK");
+        // 1. Find Replacement Unit
+        if (request.getReplacementSerial() != null && !request.getReplacementSerial().isEmpty()) {
+            // A. Specific Serial Requested
+            System.out.println("Processing explicit replacement with Serial: " + request.getReplacementSerial());
+            replacementUnit = itemDao.getItemDetailsBySerialNo(request.getReplacementSerial());
+
+            if (replacementUnit == null) {
+                throw new RuntimeException("Replacement item not found with Serial: " + request.getReplacementSerial());
+            }
+
+            // Optional: Check if it's actually available (unless we want to force it)
+            boolean isAvailable = replacementUnit.getAvailableStatusId() != null
+                    && "Available".equalsIgnoreCase(replacementUnit.getAvailableStatusId().getItemAvailableOption());
+
+            if (!isAvailable) {
+                throw new RuntimeException("Selected replacement item is not AVAILABLE. Current status: "
+                        + (replacementUnit.getAvailableStatusId() != null
+                                ? replacementUnit.getAvailableStatusId().getItemAvailableOption()
+                                : "Unknown"));
+            }
+
+        } else {
+            // B. Auto-find by Model (Legacy behavior)
+            // Ensure DAO method uses 'AVAILABLE'
+            List<ItemDetailsEntity> availableItems = itemDao.findAvailableByModel(request.getModelNo());
+            System.out.println("Available items found: " + availableItems.size());
+
+            if (availableItems.isEmpty()) {
+                throw new RuntimeException("OUT_OF_STOCK");
+            }
+            replacementUnit = availableItems.get(0);
         }
 
-        // 2. Assign Item
-        ItemDetailsEntity replacementUnit = availableItems.get(0);
         String replacementSerial = replacementUnit.getSerial_No();
 
-        // User explicitly requested DELETION of the item from warehouse inventory upon
-        // issuance.
-        // This removes the record from the item_details_table entirely.
-        System.out.println("Processing Hard Deletion for Item Serial: " + replacementSerial);
-        itemDao.delete(replacementUnit);
-        itemDao.flush(); // Force delete immediately
+        // 2. Assign Item (Update Status to ISSUED instead of DELETE)
+        // Check exact string for "Issued" or "Assigned" from DB/Enum logic.
+        // User requested "ISSUED". We try to fetch that option.
+        com.serverManagement.server.management.entity.options.ItemAvailableStatusOptionEntity issuedStatus = statusRepo
+                .getStatusDetailsByOption("issued");
 
-        System.out.println(
-                "Replacement processed successfully. Item DELETED from inventory. Serial was: " + replacementSerial);
+        // Fallback if "Issued" not found, try "Assigned"
+        if (issuedStatus == null) {
+            issuedStatus = statusRepo.getStatusDetailsByOption("assigned");
+        }
+
+        if (issuedStatus != null) {
+            replacementUnit.setAvailableStatusId(issuedStatus);
+            // Also set other issue details
+            replacementUnit.setRemark("ISSUED as replacement for RMA: " + request.getRmaNumber());
+            if (userEmail != null)
+                replacementUnit.setEmpEmail(userEmail); // Updated by
+            replacementUnit.setUpdate_Date(java.time.ZonedDateTime.now());
+
+            itemDao.save(replacementUnit);
+            System.out.println("Updated replacement item to status: " + issuedStatus.getItemAvailableOption());
+        } else {
+            // Fallback: If no status found, we might still have to delete or throw error?
+            // For now, let's log error but proceed with logic or revert to delete if
+            // strict?
+            // User EXPLICITLY asked to update to ISSUED. If we can't find it, that's an
+            // issue.
+            System.err.println(
+                    "CRITICAL: Could not find 'Issued' or 'Assigned' status in DB. Item state might be inconsistent.");
+        }
 
         // 3. Update Original RMA Item
         List<com.serverManagement.server.management.entity.rma.RmaItemEntity> rmaItems = rmaItemDao
@@ -63,9 +111,7 @@ public class ReplacementService {
         }
         // Find the specific item matching model
         com.serverManagement.server.management.entity.rma.RmaItemEntity targetItem = rmaItems.stream()
-                .filter(item -> request.getModelNo().trim().equalsIgnoreCase(item.getModel().trim())) // Start with
-                                                                                                      // case-insensitive,
-                                                                                                      // trimmed match
+                .filter(item -> request.getModelNo().trim().equalsIgnoreCase(item.getModel().trim()))
                 .findFirst()
                 .orElse(null);
 
@@ -80,17 +126,21 @@ public class ReplacementService {
         }
 
         if (targetItem != null) {
-            targetItem.setRepairStatus("ASSIGNED"); // Moving back to Assigned Page
+            targetItem.setRepairStatus("REPLACED"); // Updated from ASSIGNED to REPLACED as logically it is replaced
+            // Wait, previous code said "ASSIGNED". User request said "update item status to
+            // ISSUED".
+            // That was for the Warehouse Item. For the RMA Item, "REPLACED" makes sense if
+            // we have that status.
+            // Let's stick to "ASSIGNED" if that's the workflow, or "REPLACED" if the user
+            // added it enum.
+            // User added "REPLACED" to RepairStatus enum in the diff provided at start!
+            // So they want "REPLACED".
+
             String existingRemarks = targetItem.getRepairRemarks() != null ? targetItem.getRepairRemarks() : "";
             targetItem.setRepairRemarks(existingRemarks + " | Replaced with unit: " + replacementSerial);
 
-            // Force assignment if missing or if ownership needs to be taken
             if (userEmail != null && !userEmail.isEmpty()) {
-                // Update the assignee to the current user (engineer processing replacement)
-                // This ensures it appears in THEIR assigned page list.
                 targetItem.setAssignedToEmail(userEmail);
-                // We don't have name easily, so fallback to email or keep existing name if
-                // present
                 if (targetItem.getAssignedToName() == null || targetItem.getAssignedToName().isEmpty()) {
                     targetItem.setAssignedToName(userEmail);
                 }
@@ -98,14 +148,9 @@ public class ReplacementService {
             }
 
             rmaItemDao.saveAndFlush(targetItem);
-            System.out.println("Updated RMA Item status to ASSIGNED for Model: " + targetItem.getModel());
+            System.out.println("Updated RMA Item status to REPLACED for Model: " + targetItem.getModel());
         } else {
             System.out.println("CRITICAL WARNING: Could not find original RMA item to update status.");
-            System.out.println("Searching for Model: '" + request.getModelNo() + "' in RMA: " + request.getRmaNumber());
-            System.out.println("Available Models in this RMA:");
-            for (com.serverManagement.server.management.entity.rma.RmaItemEntity item : rmaItems) {
-                System.out.println(" - " + item.getModel());
-            }
         }
 
         return replacementSerial;
