@@ -24,7 +24,8 @@
 
 .msipl-sider .ant-menu {
   transition: all 0.25s ease;
-  background: transparent !important; /* Fix: Show sidebar gradient through menu */
+  background: transparent !important;
+  /* Fix: Show sidebar gradient through menu */
 }
 
 .msipl-sider .ant-menu-item {
@@ -106,20 +107,44 @@
    2. SIDEBAR THEMES (Preserved)
    ========================================================================== */
 /* Blue Theme */
-.msipl-sider.theme-blue { background: linear-gradient(180deg, #001529 0%, #002140 100%) !important; }
-.msipl-sider.theme-blue .ant-menu-item-selected { background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%) !important; color: #fff !important; }
+.msipl-sider.theme-blue {
+  background: linear-gradient(180deg, #001529 0%, #002140 100%) !important;
+}
+
+.msipl-sider.theme-blue .ant-menu-item-selected {
+  background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #fff !important;
+}
 
 /* Green Theme - Brighter for Visibility */
-.msipl-sider.theme-green { background: linear-gradient(180deg, #135200 0%, #237804 100%) !important; }
-.msipl-sider.theme-green .ant-menu-item-selected { background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%) !important; color: #fff !important; }
+.msipl-sider.theme-green {
+  background: linear-gradient(180deg, #135200 0%, #237804 100%) !important;
+}
+
+.msipl-sider.theme-green .ant-menu-item-selected {
+  background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%) !important;
+  color: #fff !important;
+}
 
 /* Red Theme - Brighter for Visibility */
-.msipl-sider.theme-red { background: linear-gradient(180deg, #5c0011 0%, #a8071a 100%) !important; }
-.msipl-sider.theme-red .ant-menu-item-selected { background: linear-gradient(90deg, #f5222d 0%, #ff4d4f 100%) !important; color: #fff !important; }
+.msipl-sider.theme-red {
+  background: linear-gradient(180deg, #5c0011 0%, #a8071a 100%) !important;
+}
+
+.msipl-sider.theme-red .ant-menu-item-selected {
+  background: linear-gradient(90deg, #f5222d 0%, #ff4d4f 100%) !important;
+  color: #fff !important;
+}
 
 /* Purple Theme - Brighter for Visibility */
-.msipl-sider.theme-purple { background: linear-gradient(180deg, #22075e 0%, #391085 100%) !important; }
-.msipl-sider.theme-purple .ant-menu-item-selected { background: linear-gradient(90deg, #722ed1 0%, #9254de 100%) !important; color: #fff !important; }
+.msipl-sider.theme-purple {
+  background: linear-gradient(180deg, #22075e 0%, #391085 100%) !important;
+}
+
+.msipl-sider.theme-purple .ant-menu-item-selected {
+  background: linear-gradient(90deg, #722ed1 0%, #9254de 100%) !important;
+  color: #fff !important;
+}
 
 
 /* ==========================================================================
@@ -139,7 +164,7 @@
   align-items: center;
   margin-bottom: 32px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .welcome-text {
@@ -156,13 +181,17 @@
   margin-top: 4px;
 }
 
-[data-theme='dark'] .welcome-text { color: #fff; }
+[data-theme='dark'] .welcome-text {
+  color: #fff;
+}
 
 /* KPI Cards (Replaces old stat-card) */
 .kpi-card {
   border-radius: 16px;
-  border: 1px solid #f0f0f0; /* Subtle border */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); /* Very soft shadow */
+  border: 1px solid #f0f0f0;
+  /* Subtle border */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  /* Very soft shadow */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -176,10 +205,21 @@
 }
 
 /* Top Borders for KPI Cards */
-.kpi-blue { border-top: 4px solid #1890ff; }
-.kpi-purple { border-top: 4px solid #722ed1; }
-.kpi-green { border-top: 4px solid #52c41a; }
-.kpi-orange { border-top: 4px solid #fa8c16; }
+.kpi-blue {
+  border-top: 4px solid #1890ff;
+}
+
+.kpi-purple {
+  border-top: 4px solid #722ed1;
+}
+
+.kpi-green {
+  border-top: 4px solid #52c41a;
+}
+
+.kpi-orange {
+  border-top: 4px solid #fa8c16;
+}
 
 /* KPI Icon Background Circles */
 .kpi-icon-wrapper {
@@ -197,10 +237,37 @@
 }
 
 /* Icon Colors & Backgrounds */
-.kpi-blue .kpi-icon-wrapper { background: #1890ff; color: #1890ff; opacity: 1; color: #fff; box-shadow: 0 4px 10px rgba(24, 144, 255, 0.3); }
-.kpi-purple .kpi-icon-wrapper { background: #722ed1; color: #722ed1; opacity: 1; color: #fff; box-shadow: 0 4px 10px rgba(114, 46, 209, 0.3); }
-.kpi-green .kpi-icon-wrapper { background: #52c41a; color: #52c41a; opacity: 1; color: #fff; box-shadow: 0 4px 10px rgba(82, 196, 26, 0.3); }
-.kpi-orange .kpi-icon-wrapper { background: #fa8c16; color: #fa8c16; opacity: 1; color: #fff; box-shadow: 0 4px 10px rgba(250, 140, 22, 0.3); }
+.kpi-blue .kpi-icon-wrapper {
+  background: #1890ff;
+  color: #1890ff;
+  opacity: 1;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(24, 144, 255, 0.3);
+}
+
+.kpi-purple .kpi-icon-wrapper {
+  background: #722ed1;
+  color: #722ed1;
+  opacity: 1;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(114, 46, 209, 0.3);
+}
+
+.kpi-green .kpi-icon-wrapper {
+  background: #52c41a;
+  color: #52c41a;
+  opacity: 1;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(82, 196, 26, 0.3);
+}
+
+.kpi-orange .kpi-icon-wrapper {
+  background: #fa8c16;
+  color: #fa8c16;
+  opacity: 1;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(250, 140, 22, 0.3);
+}
 
 /* Trend Text */
 .kpi-trend {
@@ -214,14 +281,57 @@
 }
 
 
-.text-success { color: #52c41a; }
-.text-warning { color: #fa8c16; }
-.text-neutral { color: #bfbfbf; }
+.text-success {
+  color: #52c41a;
+}
 
-[data-theme='dark'] .ant-card-body .text-neutral,
-[data-theme='dark'] .text-neutral { 
-    color: #d9d9d9 !important; 
-    opacity: 1 !important;
+.text-warning {
+  color: #fa8c16;
+}
+
+.text-neutral {
+  color: #bfbfbf;
+}
+
+/* RMA Numbers Display on Cards */
+.kpi-rma-numbers {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.kpi-rma-numbers .rma-label {
+  font-size: 11px;
+  color: #8c8c8c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.kpi-rma-numbers .rma-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.kpi-rma-numbers .more-rmas {
+  font-size: 11px;
+  color: #722ed1;
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+[data-theme='dark'] .kpi-rma-numbers {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .kpi-rma-numbers .rma-label {
+  color: #a6a6a6;
+}
+
+[data-theme='dark'] .kpi-rma-numbers .more-rmas {
+  color: #b37feb;
 }
 
 /* Chart Cards */
@@ -251,95 +361,97 @@
 /* FIX FOR TOTAL INVENTORY (Highest Specificity) */
 html[data-theme='dark'] .ant-card-body .text-neutral,
 [data-theme='dark'] .ant-card-body .text-neutral,
-[data-theme='dark'] .text-neutral { 
-    color: #d9d9d9 !important; 
-    opacity: 1 !important;
+[data-theme='dark'] .text-neutral {
+  color: #d9d9d9 !important;
+  opacity: 1 !important;
 }
 
 /* FIX FOR RECHARTS TOOLTIPS IN DARK MODE */
 [data-theme='dark'] .recharts-default-tooltip {
-    background-color: #1f1f1f !important;
-    border: 1px solid #303030 !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+  background-color: #1f1f1f !important;
+  border: 1px solid #303030 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
 }
 
 [data-theme='dark'] .recharts-tooltip-item-name,
 [data-theme='dark'] .recharts-tooltip-item-value,
 [data-theme='dark'] .recharts-tooltip-label {
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 /* FIX FOR CHART AXIS TEXT & LEGEND IN DARK MODE */
 [data-theme='dark'] .recharts-text {
-    fill: #a6a6a6 !important;
+  fill: #a6a6a6 !important;
 }
+
 [data-theme='dark'] .recharts-cartesian-axis-tick-value {
-    fill: #a6a6a6 !important;
+  fill: #a6a6a6 !important;
 }
+
 [data-theme='dark'] .recharts-legend-item-text {
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 /* Modal Tweaks */
 .rma-detail-modal .ant-modal-content {
-    border-radius: 12px;
-    padding: 24px;
+  border-radius: 12px;
+  padding: 24px;
 }
 
 /* FIX FOR MODAL IN DARK MODE */
 [data-theme='dark'] .rma-detail-modal .ant-modal-content {
-    background-color: #1f1f1f !important;
-    color: #ffffff !important;
+  background-color: #1f1f1f !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .rma-detail-modal .ant-modal-header {
-    background-color: #1f1f1f !important;
-    border-bottom: 1px solid #303030;
+  background-color: #1f1f1f !important;
+  border-bottom: 1px solid #303030;
 }
 
 [data-theme='dark'] .rma-detail-modal .ant-modal-title {
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .rma-detail-modal .ant-modal-close-x {
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 /* MODAL TABLE DARK MODE */
-[data-theme='dark'] .rma-detail-modal .ant-table-thead > tr > th {
-    background-color: #141414 !important;
-    color: #e0e0e0 !important;
-    border-bottom: 1px solid #303030 !important;
+[data-theme='dark'] .rma-detail-modal .ant-table-thead>tr>th {
+  background-color: #141414 !important;
+  color: #e0e0e0 !important;
+  border-bottom: 1px solid #303030 !important;
 }
 
-[data-theme='dark'] .rma-detail-modal .ant-table-tbody > tr > td {
-    background-color: #1f1f1f !important;
-    color: #ffffff !important;
-    border-bottom: 1px solid #303030 !important;
+[data-theme='dark'] .rma-detail-modal .ant-table-tbody>tr>td {
+  background-color: #1f1f1f !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #303030 !important;
 }
 
-[data-theme='dark'] .rma-detail-modal .ant-table-tbody > tr:hover > td {
-    background-color: #2a2a2a !important;
+[data-theme='dark'] .rma-detail-modal .ant-table-tbody>tr:hover>td {
+  background-color: #2a2a2a !important;
 }
 
 /* MODAL PAGINATION DARK MODE */
 [data-theme='dark'] .rma-detail-modal .ant-pagination-item a {
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .rma-detail-modal .ant-pagination-item-active {
-    background: transparent !important;
-    border-color: #1890ff !important;
+  background: transparent !important;
+  border-color: #1890ff !important;
 }
 
 [data-theme='dark'] .rma-detail-modal .ant-pagination-item-active a {
-    color: #1890ff !important;
+  color: #1890ff !important;
 }
 
 [data-theme='dark'] .rma-detail-modal .ant-pagination-prev .ant-pagination-item-link,
 [data-theme='dark'] .rma-detail-modal .ant-pagination-next .ant-pagination-item-link {
-    background-color: transparent !important;
-    color: #ffffff !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
 }
 
 /* ==========================================================================
@@ -347,20 +459,21 @@ html[data-theme='dark'] .ant-card-body .text-neutral,
    ========================================================================== */
 
 /* 1. Card Container Backgrounds & Default Text */
-[data-theme='dark'] .kpi-card, 
+[data-theme='dark'] .kpi-card,
 [data-theme='dark'] .chart-card {
   background: #141414 !important;
   border-color: #303030 !important;
-  color: #ffffff !important; /* Force default text to be white */
+  color: #ffffff !important;
+  /* Force default text to be white */
 }
 
 /* 2. Header and Sub-text */
 [data-theme='dark'] .dashboard-header {
-   border-bottom-color: rgba(255,255,255,0.1);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme='dark'] .sub-text {
-   color: rgba(255,255,255,0.45);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 /* 3. FORCE VISIBILITY FOR "Total Requests" / TITLES 
@@ -368,30 +481,33 @@ html[data-theme='dark'] .ant-card-body .text-neutral,
 */
 [data-theme='dark'] .kpi-card .ant-statistic-title,
 [data-theme='dark'] .ant-statistic-title {
-    color: #a6a6a6 !important; /* Light Grey */
-    font-weight: 500 !important;
+  color: #a6a6a6 !important;
+  /* Light Grey */
+  font-weight: 500 !important;
 }
 
 /* 4. FORCE VISIBILITY FOR NUMBERS (32, 36, etc) */
 [data-theme='dark'] .kpi-card .ant-statistic-content-value,
 [data-theme='dark'] .ant-statistic-content {
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 /* 5. CATCH-ALL: Any other text inside the card */
 [data-theme='dark'] .kpi-card span,
 [data-theme='dark'] .kpi-card div {
-    color: inherit; /* Tells inner elements to listen to the parent color */
+  color: inherit;
+  /* Tells inner elements to listen to the parent color */
 }
 
 /* 6. FIX FOR CHART TITLES (Trend & Ratio) IN DARK MODE */
 [data-theme='dark'] .chart-card .ant-card-head-title {
-    color: #ffffff !important;
-    font-weight: 600;
+  color: #ffffff !important;
+  font-weight: 600;
 }
+
 [data-theme='dark'] .chart-card .ant-card-head {
-    border-bottom-color: #303030 !important;
-    color: #ffffff !important;
+  border-bottom-color: #303030 !important;
+  color: #ffffff !important;
 }
 
 /* ==========================================================================
@@ -403,8 +519,8 @@ html[data-theme='dark'] .msipl-sider.theme-purple,
 [data-theme='dark'] .msipl-sider.theme-green,
 [data-theme='dark'] .msipl-sider.theme-red,
 [data-theme='dark'] .msipl-sider.theme-purple {
-    background: #001529 !important;
-    background-image: linear-gradient(180deg, #001529 0%, #002140 100%) !important;
+  background: #001529 !important;
+  background-image: linear-gradient(180deg, #001529 0%, #002140 100%) !important;
 }
 
 html[data-theme='dark'] .msipl-sider.theme-green .ant-menu-item-selected,
@@ -413,7 +529,7 @@ html[data-theme='dark'] .msipl-sider.theme-purple .ant-menu-item-selected,
 [data-theme='dark'] .msipl-sider.theme-green .ant-menu-item-selected,
 [data-theme='dark'] .msipl-sider.theme-red .ant-menu-item-selected,
 [data-theme='dark'] .msipl-sider.theme-purple .ant-menu-item-selected {
-    background: #1890ff !important;
-    background-image: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%) !important;
-    color: #fff !important;
+  background: #1890ff !important;
+  background-image: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #fff !important;
 }

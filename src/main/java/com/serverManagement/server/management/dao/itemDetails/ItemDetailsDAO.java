@@ -59,8 +59,25 @@ public interface ItemDetailsDAO
         @Query("SELECT i FROM ItemDetailsEntity i WHERE i.modelNo = :modelNo AND i.availableStatusId.itemAvailableOption = 'AVAILABLE'")
         List<ItemDetailsEntity> findAvailableByModel(@Param("modelNo") String modelNo);
 
+        @Query("SELECT i FROM ItemDetailsEntity i LEFT JOIN i.keywordEntity k WHERE " +
+                        "(LOWER(i.modelNo) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+                        "LOWER(i.partNo) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+                        "LOWER(i.serial_No) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+                        "(k IS NOT NULL AND LOWER(k.keywordName) LIKE LOWER(CONCAT('%', :query, '%'))))")
+        List<ItemDetailsEntity> searchAllItems(@Param("query") String query);
+
         // Get distinct products for RMA form dropdown
         @Query("SELECT DISTINCT i.system, i.modelNo, i.partNo FROM ItemDetailsEntity i WHERE i.system IS NOT NULL ORDER BY i.system")
         List<Object[]> findDistinctProducts();
+
+        // Dashboard Statistics Queries
+        @Query("SELECT COUNT(i) FROM ItemDetailsEntity i WHERE LOWER(i.availableStatusId.itemAvailableOption) = 'available'")
+        long countAvailableItems();
+
+        @Query("SELECT COUNT(i) FROM ItemDetailsEntity i WHERE LOWER(i.availableStatusId.itemAvailableOption) LIKE '%issued%' OR LOWER(i.availableStatusId.itemAvailableOption) = 'issue'")
+        long countIssuedItems();
+
+        @Query("SELECT COUNT(i) FROM ItemDetailsEntity i WHERE LOWER(i.availableStatusId.itemAvailableOption) LIKE '%repair%'")
+        long countRepairingItems();
 
 }

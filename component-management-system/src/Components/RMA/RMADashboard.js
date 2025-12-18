@@ -148,9 +148,13 @@ function RmaDashboard() {
     { title: "Product", dataIndex: "product", key: "product" },
     { title: "Serial No", dataIndex: "serialNo", key: "serialNo" },
     {
-      title: "RMA No", dataIndex: "rmaNo", key: "rmaNo", render: (val) => {
-        if (!val) return "-";
-        return /^RMA-\d{8}-\d{6}$/.test(val) ? "-" : val;
+      title: "RMA No", dataIndex: "itemRmaNo", key: "itemRmaNo", render: (val, record) => {
+        // itemRmaNo contains the user-updated RMA number from rma_item table
+        const rmaNumber = val || record.rmaNo;
+        if (!rmaNumber || rmaNumber.trim() === '') return <Tag color="default">-</Tag>;
+        // Hide auto-generated format (RMA-DDMMYYYY-HHMMSS)
+        if (/^RMA-\d{8}-\d{6}$/.test(rmaNumber)) return <Tag color="default">-</Tag>;
+        return <Tag color="purple">{rmaNumber}</Tag>;
       }
     },
     {
