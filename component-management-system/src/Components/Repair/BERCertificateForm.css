@@ -1,0 +1,415 @@
+.ber-certificate-container {
+  background: white;
+  padding: 0;
+  border-radius: 0px;
+  max-width: 1000px;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important; /* Fill the modal body */
+  overflow: hidden !important; /* Prevent double scrollbars */
+}
+
+.ber-certificate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0;
+  border-bottom: 2px solid #333;
+  padding: 20px; /* moved padding here */
+  flex-shrink: 0; /* Don't shrink */
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+}
+
+.ber-form-content-wrapper {
+  flex: 1; /* Take remaining space */
+  overflow-y: auto; /* Scrollable */
+  padding: 20px;
+}
+
+.ber-form-printable {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 20px;
+  height: auto; /* Full height for content */
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+}
+
+.info-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  vertical-align: top;
+}
+
+.info-table input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.intro-text {
+  margin: 20px 0;
+  padding: 10px;
+  background: #f5f5f5;
+  border-left: 4px solid #333;
+}
+
+.section {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.section h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+}
+
+.damage-checklist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.damage-checklist label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.damage-checklist input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group textarea,
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.form-group textarea:focus,
+.form-group input:focus,
+.damage-checklist input:focus,
+.assessment-options input:focus,
+.instruction-options input:focus {
+  outline: none;
+  border-color: #32a8c6;
+  box-shadow: 0 0 0 2px rgba(50, 168, 198, 0.2);
+}
+
+/* Remove the specific focus ring that might look like a box/line */
+/* --- Completely Custom Checkbox/Radio Implementation --- */
+
+/* 1. Hide the browser's default checkbox/radio */
+input[type="checkbox"],
+input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+  /* Ensure no interactions or popups from the hidden input */
+  pointer-events: none;
+}
+
+/* 2. Container Labels */
+.custom-checkbox-label,
+.custom-radio-label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  border: none !important;
+  outline: none !important;
+}
+
+/* 3. The Custom Checkmark (Box) */
+.checkmark {
+  position: relative;
+  height: 1.2em;
+  width: 1.2em;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-radius: 0.15em;
+  display: flex; /* Centering helper */
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* 4. Radio specific rounded style */
+.checkmark.radio {
+  border-radius: 50%;
+}
+
+/* 5. Hover effect */
+.custom-checkbox-label:hover input ~ .checkmark,
+.custom-radio-label:hover input ~ .checkmark {
+  background-color: #f5f5f5;
+  border-color: #666;
+}
+
+/* 6. Checked State (Background) */
+.custom-checkbox-label input:checked ~ .checkmark,
+.checkmark.active {
+  background-color: #32a8c6;
+  border-color: #32a8c6;
+}
+.custom-radio-label input:checked ~ .checkmark,
+.checkmark.radio.active {
+  background-color: #fff; /* Radios usually keep white bg with dot */
+  border-color: #32a8c6;
+}
+
+/* 7. The Check Symbol (Hidden by default) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* 8. Show check when checked or active */
+.custom-checkbox-label input:checked ~ .checkmark:after,
+.custom-radio-label input:checked ~ .checkmark:after,
+.checkmark.active:after {
+  display: block;
+}
+
+/* 9. Checkbox Icon (Rotated L-shape border for PDF compatibility) */
+.custom-checkbox-label .checkmark:after {
+  left: 0.35em;
+  top: 0.1em;
+  width: 0.4em;
+  height: 0.7em;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* 10. Radio Icon (Dot) */
+.custom-radio-label .checkmark:after {
+  top: 50%;
+  left: 50%;
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: #32a8c6;
+  transform: translate(-50%, -50%);
+}
+
+/* Focus Handling: Apply focus style to checkmark when input is focused via keyboard */
+.custom-checkbox-label input:focus ~ .checkmark,
+.custom-radio-label input:focus ~ .checkmark {
+  box-shadow: 0 0 0 2px rgba(50, 168, 198, 0.2);
+}
+
+/* Aggressive cleanup for the labels themselves */
+.damage-checklist label,
+.assessment-options label,
+.instruction-options label {
+  outline: none !important;
+}
+
+.large-textarea {
+  min-height: 100px;
+}
+
+.photo-section {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.photo-upload {
+  margin: 10px 0;
+}
+
+.photo-upload input[type="file"] {
+  display: none;
+}
+
+.upload-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #32a8c6;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.upload-btn:hover {
+  background: #268a9f;
+}
+
+.photo-preview {
+  margin-top: 15px;
+  position: relative;
+  display: inline-block;
+}
+
+.photo-preview img {
+  max-width: 300px;
+  max-height: 300px;
+  border: 2px solid #32a8c6;
+  border-radius: 4px;
+  display: block;
+}
+
+.remove-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  padding: 5px 10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.assessment-options,
+.instruction-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.assessment-options label,
+.instruction-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.assessment-options input[type="radio"],
+.instruction-options input[type="radio"] {
+  cursor: pointer;
+}
+
+.assessment-options input[type="text"],
+.instruction-options input[type="text"] {
+  margin-left: 10px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.verification-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.verification-row > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 20px;
+  border-top: 2px solid #ddd;
+  background: white;
+  flex-shrink: 0; /* Fixed height */
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  margin-top: 0;
+  z-index: 1000; /* Ensure on top */
+}
+
+.btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: #32a8c6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #268a9f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+@media print {
+  .action-buttons,
+  .close-btn,
+  .photo-upload,
+  .remove-photo-btn {
+    display: none;
+  }
+  
+  .ber-form-printable {
+    box-shadow: none;
+  }
+}

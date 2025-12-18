@@ -381,6 +381,4 @@ export const RmaApi = {
 
   // Get valid repair statuses
   getRepairStatuses: async () => apiGet("/repair-statuses"),
-
-  getAllTransporters: async () => apiGet("/transporters"),
 };

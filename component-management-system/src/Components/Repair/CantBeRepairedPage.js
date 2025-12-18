@@ -47,7 +47,9 @@ export default function CantBeRepairedPage() {
         setLoading(true);
         const result = await RmaApi.getCantBeRepairedItems();
         if (result.success) {
-            setItems(result.data || []);
+            // Filter out BER items (they are now moved to Local Repaired / Local Dispatch)
+            const filteredItems = (result.data || []).filter(item => item.repairStatus !== "BER");
+            setItems(filteredItems);
         } else {
             message.error("Failed to load items");
         }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Typography,
     Tag,
@@ -25,6 +25,7 @@ import {
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
 import "./UnrepairedPage.css";
+import BERCertificateForm from "./BERCertificateForm";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -48,6 +49,12 @@ export default function AssignedPage() {
     const [employees, setEmployees] = useState([]);
     const [newAssignee, setNewAssignee] = useState(null);
     const [reassignReason, setReassignReason] = useState("");
+    const berFormRef = useRef(null);
+
+    //BER Certification
+    const [showBERForm, setShowBERForm] = useState(false);
+    const [berProductData, setBerProductData] = useState(null);
+
 
     const getStatusColor = (status) => {
         switch (status?.toUpperCase()) {
@@ -148,6 +155,23 @@ export default function AssignedPage() {
             message.success("Status updated successfully!");
             setStatusModalVisible(false);
             loadItems();
+
+            //if status is BER
+            if(newStatus === "BER"){
+                setBerProductData({
+                    customer: selectedItem.customerName || selectedItem.customer || "",
+                    consignee: selectedItem.consignee || "",
+                    dateIn: selectedItem.dateIn || "",
+                    warrantyStatus: selectedItem.warrantyStatus || "",
+                    isStatus: selectedItem.isStatus || "",
+                    incomingGIN: selectedItem.ginNo || "",
+                    jobID: selectedItem.jobId || "",
+                    serialNo: selectedItem.serialNo || "",
+                    tanapa: selectedItem.product || "",
+                    faultFromCustomer: selectedItem.faultDescription || "",
+                });
+                setShowBERForm(true);
+            }
         } else {
             message.error(result.error || "Failed to update status");
         }
@@ -518,6 +542,30 @@ export default function AssignedPage() {
                         </div>
                     </Space>
                 </Modal>
+                {showBERForm && (
+                     <Modal
+                     open={showBERForm}
+                     onCancel={()=>setShowBERForm(false)}
+                     width={1000}
+                     closable={true}
+                     maskClosable={false}
+                     styles={{ body: { height: '80vh', overflowY: 'auto', padding: 0 } }}
+                     footer={[
+                         <Button key="close" onClick={() => setShowBERForm(false)}>
+                             Close
+                         </Button>,
+                         <Button key="download" type="primary" onClick={() => berFormRef.current?.handleDownloadPDF()}>
+                             Download PDF
+                         </Button>,
+                     ]}
+                     >
+                         <BERCertificateForm
+                         ref={berFormRef}
+                         productData={berProductData}
+                         onClose={()=>setShowBERForm(false)}
+                         />
+                     </Modal>
+                )}
             </div>
         </RmaLayout>
     );

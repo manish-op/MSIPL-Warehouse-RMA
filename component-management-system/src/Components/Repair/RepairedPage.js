@@ -28,6 +28,7 @@ import {
     DownloadOutlined,
     FilePdfOutlined,
     SendOutlined,
+    WarningOutlined,
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
@@ -76,21 +77,34 @@ export default function RepairedPage() {
     const loadItems = async () => {
         setLoading(true);
         try {
-            // Fetch both repaired and dispatched items in parallel
-            const [repairedResult, dispatchedResult] = await Promise.all([
+            // Fetch repaired, dispatched, and cant-be-repaired (for BER) items in parallel
+            const [repairedResult, dispatchedResult, cantRepairedResult] = await Promise.all([
                 RmaApi.getRepairedItems(),
-                RmaApi.getDispatchedItems()
+                RmaApi.getDispatchedItems(),
+                RmaApi.getCantBeRepairedItems()
             ]);
+
+            let allLocalItems = [];
 
             if (repairedResult.success) {
                 // Filter out Depot items AND already dispatched items
-                const localItems = (repairedResult.data || []).filter(item =>
+                const localRepaired = (repairedResult.data || []).filter(item =>
                     item.repairType !== 'DEPOT' && item.isDispatched !== true
                 );
-                setItems(localItems);
+                allLocalItems = [...allLocalItems, ...localRepaired];
             } else {
                 message.error("Failed to load repaired items");
             }
+
+            // Extract BER items from CantBeRepaired list
+            if (cantRepairedResult.success) {
+                const berItems = (cantRepairedResult.data || []).filter(item => 
+                    item.repairStatus === "BER" && item.isDispatched !== true
+                );
+                allLocalItems = [...allLocalItems, ...berItems];
+            }
+
+            setItems(allLocalItems);
 
             if (dispatchedResult.success) {
                 // Filter to only show LOCAL dispatched items (not DEPOT)
@@ -507,9 +521,15 @@ export default function RepairedPage() {
                                                                     </div>
                                                                     <div className="item-row">
                                                                         <Text type="secondary">Status</Text>
-                                                                        <Tag color="green" icon={<CheckCircleOutlined />}>
-                                                                            REPAIRED
-                                                                        </Tag>
+                                                                        {item.repairStatus === "BER" ? (
+                                                                            <Tag color="red" icon={<WarningOutlined />}>
+                                                                                BER
+                                                                            </Tag>
+                                                                        ) : (
+                                                                            <Tag color="green" icon={<CheckCircleOutlined />}>
+                                                                                REPAIRED
+                                                                            </Tag>
+                                                                        )}
                                                                     </div>
                                                                     {item.itemRmaNo && (
                                                                         <div className="item-row">
