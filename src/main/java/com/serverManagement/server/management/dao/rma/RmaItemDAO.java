@@ -16,6 +16,9 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     // Find all items belonging to a specific RMA request
     List<RmaItemEntity> findByRmaRequest(RmaRequestEntity rmaRequest);
 
+    // Find items by parent Request Number
+    List<RmaItemEntity> findByRmaRequest_RequestNumber(String requestNumber);
+
     // Count items by repair status (case-insensitive)
     @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) = LOWER(:status)")
     long countByRepairStatusIgnoreCase(@Param("status") String status);

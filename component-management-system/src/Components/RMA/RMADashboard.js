@@ -189,10 +189,6 @@ function RmaDashboard() {
             <h1 className="welcome-text">{getGreeting()}, {name}</h1>
             <p className="sub-text">Overview of your Return Merchandise Authorization status.</p>
           </div>
-          <div className="header-actions">
-            {/* Optional: Add a Refresh or Filter Button here */}
-            <Button icon={<FilterOutlined />}>Last 30 Days</Button>
-          </div>
         </div>
 
         {loading ? (

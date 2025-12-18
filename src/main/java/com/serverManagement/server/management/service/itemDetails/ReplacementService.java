@@ -55,7 +55,12 @@ public class ReplacementService {
 
         // 3. Update Original RMA Item
         List<com.serverManagement.server.management.entity.rma.RmaItemEntity> rmaItems = rmaItemDao
-                .findByRmaNo(request.getRmaNumber());
+                .findByRmaRequest_RequestNumber(request.getRmaNumber());
+
+        // Fallback for legacy items or explicit RMA numbers
+        if (rmaItems == null || rmaItems.isEmpty()) {
+            rmaItems = rmaItemDao.findByRmaNo(request.getRmaNumber());
+        }
         // Find the specific item matching model
         com.serverManagement.server.management.entity.rma.RmaItemEntity targetItem = rmaItems.stream()
                 .filter(item -> request.getModelNo().trim().equalsIgnoreCase(item.getModel().trim())) // Start with

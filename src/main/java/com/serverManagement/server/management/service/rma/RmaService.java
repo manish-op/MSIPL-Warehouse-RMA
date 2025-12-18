@@ -444,7 +444,7 @@ public class RmaService {
             // Group by Date (YYYY-MM-DD)
             java.util.Map<java.time.LocalDate, Long> requestsByDate = recentRequests.stream()
                     .collect(java.util.stream.Collectors.groupingBy(
-                            req -> req.getCreatedDate().toLocalDate(),
+                            req -> req.getCreatedDate().withZoneSameInstant(now.getZone()).toLocalDate(),
                             java.util.stream.Collectors.counting()));
 
             // Iterate last 7 days to ensure all days are present even if 0 requests
