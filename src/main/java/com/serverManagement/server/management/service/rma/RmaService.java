@@ -512,6 +512,7 @@ public class RmaService {
     /**
      * Get all RMA items
      */
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getAllItems() {
         try {
             List<RmaItemEntity> items = rmaItemDAO.findAll();
@@ -520,6 +521,35 @@ public class RmaService {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to fetch all items: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Search items by query (product or serial no)
+     */
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> searchItems(String query) {
+        try {
+            if (query == null || query.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Search query cannot be empty");
+            }
+
+            // Fetch all items and filter in memory to avoid DB query issues
+            List<RmaItemEntity> allItems = rmaItemDAO.findAll();
+
+            String lowerQuery = query.toLowerCase().trim();
+
+            List<RmaItemEntity> filteredItems = allItems.stream()
+                    .filter(item -> (item.getProduct() != null && item.getProduct().toLowerCase().contains(lowerQuery))
+                            ||
+                            (item.getSerialNo() != null && item.getSerialNo().equalsIgnoreCase(lowerQuery)))
+                    .collect(java.util.stream.Collectors.toList());
+
+            return ResponseEntity.ok(convertToItemDTOList(filteredItems));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to search items: " + e.getMessage());
         }
     }
 
@@ -1340,4 +1370,5 @@ public class RmaService {
         }
         rmaItemDAO.saveAll(rmaItems);
     }
+
 }

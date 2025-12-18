@@ -7,6 +7,7 @@ const BERCertificateForm = React.forwardRef(({ productData, onClose }, ref) => {
   const formRef = useRef(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
+
   const [formData, setFormData] = useState({
     customer: productData?.customer || '',
     consignee: productData?.consignee || '',
@@ -94,6 +95,8 @@ const BERCertificateForm = React.forwardRef(({ productData, onClose }, ref) => {
   const handleRemovePhoto = () => {
     setPhotoPreview(null);
   };
+
+
 
   return (
     <div className="ber-certificate-container">
@@ -344,6 +347,8 @@ const BERCertificateForm = React.forwardRef(({ productData, onClose }, ref) => {
                 </div>
               )}
             </div>
+
+
           </div>
 
           {/* Assessment */}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Row, Col, Card, Statistic, Spin, message, Modal,
-  Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip
+  Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip, Input
 } from "antd";
 import {
   FileTextOutlined,
@@ -10,7 +10,8 @@ import {
   InboxOutlined,
   UserOutlined,
   RiseOutlined,
-  FilterOutlined
+  FilterOutlined,
+  SearchOutlined
 } from "@ant-design/icons";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -22,6 +23,7 @@ import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import "./RmaDashboard.css";
 
 const { Option } = Select;
+const { Search } = Input;
 
 // --- Trend Chart Data is now fetched from API (stats.dailyTrends) ---
 const PIE_COLORS = ['#52c41a', '#fa8c16', '#f5222d']; // Green, Orange, Red
@@ -37,6 +39,9 @@ function RmaDashboard() {
   const [modalData, setModalData] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
   const [timeFilter, setTimeFilter] = useState("all");
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState("");
 
   // User info
   const name = localStorage.getItem("name") || "Admin User";
@@ -101,12 +106,14 @@ function RmaDashboard() {
         } else {
           result = allItems;
         }
+      } else if (modalType === "search") {
+         result = await RmaApi.searchItems(searchQuery);
       }
 
       if (result && result.success) {
         setModalData(result.data);
       } else {
-        message.error("Failed to load details");
+        message.error(result.error || "Failed to load details");
       }
     } catch (error) {
       message.error("Error loading data");
@@ -125,6 +132,17 @@ function RmaDashboard() {
   const handleModalClose = () => {
     setModalVisible(false);
     setModalData([]);
+    // Do not clear searchQuery here so user can see what they searched, or clear if preferred
+  };
+
+  const onSearch = (value) => {
+    if (!value || value.trim() === "") {
+        message.warning("Please enter a search term");
+        return;
+    }
+    setSearchQuery(value);
+    setModalType("search");
+    setModalVisible(true);
   };
 
   // --- Table Columns ---
@@ -178,6 +196,7 @@ function RmaDashboard() {
       case 'items': return 'All Inventory Items';
       case 'repaired': return 'Repaired History';
       case 'unrepaired': return 'Pending / Unrepaired Items';
+      case 'search': return `Search Results for "${searchQuery}"`;
       default: return 'Details';
     }
   };
@@ -192,6 +211,16 @@ function RmaDashboard() {
           <div>
             <h1 className="welcome-text">{getGreeting()}, {name}</h1>
             <p className="sub-text">Overview of your Return Merchandise Authorization status.</p>
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <Search
+              placeholder="Search by Product or Serial No"
+              allowClear
+              enterButton={<Button type="primary" icon={<SearchOutlined />}>Search</Button>}
+              size="large"
+              onSearch={onSearch}
+              style={{ width: 400 }}
+            />
           </div>
         </div>
 
@@ -237,7 +266,7 @@ function RmaDashboard() {
                 <Card className="kpi-card kpi-green" hoverable onClick={() => handleCardClick('repaired')}>
                   <div className="kpi-icon-wrapper"><CheckCircleOutlined /></div>
                   <Statistic
-                    title="Repaired"
+                    title="Repaired/Replaced"
                     value={stats?.repairedCount || 0}
                     valueStyle={{ fontWeight: 'bold', fontSize: '28px' }}
                   />

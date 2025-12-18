@@ -85,6 +85,16 @@ public class RmaController {
         }
     }
 
+    @GetMapping("/search/items")
+    public ResponseEntity<?> searchItems(@RequestParam("q") String query) {
+        try {
+            return rmaService.searchItems(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/stats")
     public ResponseEntity<?> getRmaDashboardStats() {
         try {
