@@ -316,7 +316,7 @@ export default function Profile() {
 
                 {/* Stats Boxes */}
                 <Row gutter={[16, 16]}>
-                  <Col xs={24} sm={12}>
+                  <Col xs={12} sm={6}>
                     <div className="stat-box primary">
                       <div className="stat-icon">
                         <AppstoreOutlined />
@@ -327,14 +327,42 @@ export default function Profile() {
                       </div>
                     </div>
                   </Col>
-                  <Col xs={24} sm={12}>
-                    <div className="stat-box secondary">
-                      <div className="stat-icon">
-                        <EnvironmentOutlined />
+                  <Col xs={12} sm={6}>
+                    <div className="stat-box success">
+                      <div className="stat-icon" style={{ background: 'rgba(82, 196, 26, 0.1)', color: '#52c41a' }}>
+                        <AppstoreOutlined />
                       </div>
                       <div className="stat-content">
-                        <Text className="stat-label">Active Regions</Text>
-                        <Text className="stat-number">{regionCounts.length}</Text>
+                        <Text className="stat-label">Available</Text>
+                        <Text className="stat-number" style={{ color: '#52c41a' }}>
+                          {(summary?.availableCount || 0).toLocaleString()}
+                        </Text>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col xs={12} sm={6}>
+                    <div className="stat-box purple">
+                      <div className="stat-icon" style={{ background: 'rgba(114, 46, 209, 0.1)', color: '#722ed1' }}>
+                        <AppstoreOutlined />
+                      </div>
+                      <div className="stat-content">
+                        <Text className="stat-label">Issued</Text>
+                        <Text className="stat-number" style={{ color: '#722ed1' }}>
+                          {(summary?.issuedCount || 0).toLocaleString()}
+                        </Text>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col xs={12} sm={6}>
+                    <div className="stat-box warning">
+                      <div className="stat-icon" style={{ background: 'rgba(250, 140, 22, 0.1)', color: '#fa8c16' }}>
+                        <AppstoreOutlined />
+                      </div>
+                      <div className="stat-content">
+                        <Text className="stat-label">Repairing</Text>
+                        <Text className="stat-number" style={{ color: '#fa8c16' }}>
+                          {(summary?.repairingCount || 0).toLocaleString()}
+                        </Text>
                       </div>
                     </div>
                   </Col>
@@ -356,24 +384,42 @@ export default function Profile() {
                     <div className="section-header">
                       <EnvironmentOutlined className="section-icon" />
                       <Text strong className="section-title">Region Breakdown</Text>
+                      <Tag color="blue" style={{ marginLeft: 'auto' }}>{regionCounts.length} Regions</Tag>
                     </div>
-                    <div className="region-cards-grid">
+                    <Row gutter={[16, 16]} className="region-cards-enhanced">
                       {regionCounts.map((rc, idx) => {
                         const color = REGION_COLORS[idx % REGION_COLORS.length];
                         const animated = animatedRegionCounts[idx] ?? 0;
+                        const percentage = totalTarget > 0 ? Math.round((animated / totalTarget) * 100) : 0;
                         return (
-                          <div className="region-card" key={rc.region || idx}>
-                            <div className="region-pill" style={{ background: color }}>
-                              {String(rc.region || "R").charAt(0).toUpperCase()}
+                          <Col xs={24} sm={12} md={8} key={rc.region || idx}>
+                            <div className="region-card-enhanced" style={{ borderLeft: `4px solid ${color}` }}>
+                              <div className="region-card-header">
+                                <div className="region-avatar" style={{ background: color }}>
+                                  {String(rc.region || "R").charAt(0).toUpperCase()}
+                                </div>
+                                <div className="region-details">
+                                  <Text className="region-name-enhanced">{String(rc.region || "UNKNOWN").toUpperCase()}</Text>
+                                  <Text className="region-count-enhanced">{animated.toLocaleString()} items</Text>
+                                </div>
+                                <div className="region-percentage" style={{ color: color }}>
+                                  {percentage}%
+                                </div>
+                              </div>
+                              <div className="region-progress-bar">
+                                <div
+                                  className="region-progress-fill"
+                                  style={{
+                                    width: `${percentage}%`,
+                                    background: `linear-gradient(90deg, ${color}44, ${color})`
+                                  }}
+                                />
+                              </div>
                             </div>
-                            <div className="region-info">
-                              <Text className="region-name">{String(rc.region || "UNKNOWN").toUpperCase()}</Text>
-                              <Text className="region-count">{animated.toLocaleString()} items</Text>
-                            </div>
-                          </div>
+                          </Col>
                         );
                       })}
-                    </div>
+                    </Row>
                   </>
                 )}
               </>

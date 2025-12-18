@@ -70,4 +70,14 @@ public interface ItemDetailsDAO
         @Query("SELECT DISTINCT i.system, i.modelNo, i.partNo FROM ItemDetailsEntity i WHERE i.system IS NOT NULL ORDER BY i.system")
         List<Object[]> findDistinctProducts();
 
+        // Dashboard Statistics Queries
+        @Query("SELECT COUNT(i) FROM ItemDetailsEntity i WHERE LOWER(i.availableStatusId.itemAvailableOption) = 'available'")
+        long countAvailableItems();
+
+        @Query("SELECT COUNT(i) FROM ItemDetailsEntity i WHERE LOWER(i.availableStatusId.itemAvailableOption) LIKE '%issued%' OR LOWER(i.availableStatusId.itemAvailableOption) = 'issue'")
+        long countIssuedItems();
+
+        @Query("SELECT COUNT(i) FROM ItemDetailsEntity i WHERE LOWER(i.availableStatusId.itemAvailableOption) LIKE '%repair%'")
+        long countRepairingItems();
+
 }
