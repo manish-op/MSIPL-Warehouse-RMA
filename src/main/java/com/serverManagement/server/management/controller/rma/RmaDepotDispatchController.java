@@ -111,6 +111,7 @@ public class RmaDepotDispatchController {
             item.setDispatchedByEmail(loggedInUserEmail);
             item.setDispatchedByName(loggedInUserName);
             item.setRmaStatus("DISPATCHED");
+            item.setRepairStatus("DISPATCHED_TO_DEPOT");
             item.setDispatchTo("BANGALORE");
 
             RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
@@ -181,6 +182,7 @@ public class RmaDepotDispatchController {
 
             String oldStage = item.getDepotStage();
             item.setDepotStage("AT_DEPOT_RECEIVED");
+            item.setRepairStatus("RECEIVED_AT_DEPOT");
 
             RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
             auditLog.setRmaItemId(item.getId());
@@ -230,6 +232,7 @@ public class RmaDepotDispatchController {
 
                 String oldStage = item.getDepotStage();
                 item.setDepotStage("AT_DEPOT_REPAIRED");
+                item.setRepairStatus("REPAIRED_AT_DEPOT");
 
                 RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
                 auditLog.setRmaItemId(item.getId());
@@ -361,6 +364,7 @@ public class RmaDepotDispatchController {
 
             String oldStage = item.getDepotStage();
             item.setDepotStage("GGN_RECEIVED_FROM_DEPOT");
+            item.setRepairStatus("RECEIVED_AT_GURGAON");
 
             RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
             auditLog.setRmaItemId(item.getId());
@@ -433,6 +437,7 @@ public class RmaDepotDispatchController {
                 item.setDepotReturnHandlerContact(req.getHandlerContact());
                 item.setDepotStage("GGN_DISPATCHED_TO_CUSTOMER_HAND");
             }
+            item.setRepairStatus("DISPATCHED_TO_CUSTOMER");
 
             RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
             auditLog.setRmaItemId(item.getId());
@@ -485,6 +490,7 @@ public class RmaDepotDispatchController {
         item.setDepotStage("GGN_DELIVERED_TO_CUSTOMER");
         item.setDepotCycleClosed(Boolean.TRUE);
         item.setRmaStatus("DELIVERED");
+        item.setRepairStatus("DELIVERED_TO_CUSTOMER");
 
         String rmaNo = item.getRmaNo() != null ? item.getRmaNo()
                 : (item.getRmaRequest() != null ? item.getRmaRequest().getRequestNumber() : null);
