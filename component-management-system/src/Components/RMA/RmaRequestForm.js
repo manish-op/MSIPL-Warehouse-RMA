@@ -189,13 +189,22 @@ function RmaRequestForm() {
   };
 
   // Product selection handler - auto-fill model
-  const handleProductSelect = (value, index) => {
+  const handleProductSelect = (val, index) => {
+    // Select with mode="tags" returns an array
+    const value = Array.isArray(val) ? val[0] : val;
+    if (!value) return;
+
     const product = productCatalog.find(p => p.name === value);
+    const items = form.getFieldValue("items") || [];
+
+    // Always update product name (store as string if possible, or keep as array if antd forces it)
+    // We'll handle both in finalSubmit but let's try to keep it as string in form state if we can
+    items[index] = { ...items[index], product: value };
+
     if (product && (product.model || product.partNo)) {
-      const items = form.getFieldValue("items") || [];
-      items[index] = { ...items[index], product: value, partNo: product.model || product.partNo || "" };
-      form.setFieldsValue({ items });
+      items[index].partNo = product.model || product.partNo || "";
     }
+    form.setFieldsValue({ items });
   };
 
   // Step validation
@@ -277,7 +286,7 @@ function RmaRequestForm() {
         tat: values.tat ? parseInt(values.tat, 10) : null,
 
         items: (values.items || []).map(item => ({
-          product: item.product,
+          product: Array.isArray(item.product) ? item.product[0] : (item.product || ""),
           model: item.partNo || "",
           serialNo: item.serialNo,
           faultDescription: item.faultDescription,
@@ -718,14 +727,16 @@ function RmaRequestForm() {
                               rules={[{ required: true, message: "Product is required" }]}
                             >
                               <Select
-                                placeholder={loadingProducts ? "Loading products..." : "Select product"}
+                                placeholder={loadingProducts ? "Loading products..." : "Select or type product name"}
                                 size="large"
+                                mode="tags"
+                                maxCount={1}
                                 showSearch
                                 loading={loadingProducts}
                                 onChange={(val) => handleProductSelect(val, index)}
                                 filterOption={(input, option) => {
-                                  const label = option.value || "";
-                                  return label.toLowerCase().includes(input.toLowerCase());
+                                  const label = option.children?.[0] || option.value || "";
+                                  return label.toString().toLowerCase().includes(input.toLowerCase());
                                 }}
                               >
                                 {productCatalog.map(p => (
@@ -1040,7 +1051,7 @@ function RmaRequestForm() {
           </div>
         </Modal>
       </div>
-    </RmaLayout>
+    </RmaLayout >
   );
 }
 export default RmaRequestForm;
