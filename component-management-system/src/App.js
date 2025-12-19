@@ -39,6 +39,7 @@ import AssignedPage from "./Components/Repair/AssignedPage.js";
 import CantBeRepairedPage from "./Components/Repair/CantBeRepairedPage.js";
 import AuditTrail from "./Components/RMA/AuditTrail.js";
 import DepotDispatchPage from "./Components/RMA/DepotDispatchPage.js";
+import FeedbackButton from "./Components/Feedback/FeedbackButton.js";
 
 // checking the branch changes
 
@@ -128,6 +129,7 @@ function App() {
             <Route path="/audit-trail" element={<AuditTrail />} />
           </Route>
         </Routes>
+        <FeedbackButton />
       </div>
     </ThemeProvider>
   );

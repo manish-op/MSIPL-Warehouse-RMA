@@ -43,6 +43,7 @@ export default function CantBeRepairedPage() {
     const [selectedItem, setSelectedItem] = useState({
         rmaNo: "",
         modelNo: "",
+        productName: "", // Product name from RMA item for filtering
         replacementSerial: null // Add tracking for selected replacement
     });
 
@@ -69,9 +70,11 @@ export default function CantBeRepairedPage() {
 
     // --- NEW HANDLER: Open the Input Modal ---
     const handleProcessClick = (item) => {
+        const productName = item.product || ""; // Store product name for filtering
         setSelectedItem({
             rmaNo: item.rmaNo || item.itemRmaNo,
             modelNo: item.model,
+            productName: productName, // Store for filtering replacement items
             replacementSerial: null // Reset
         });
         setSearchOptions([]); // Clear previous searches
@@ -79,12 +82,13 @@ export default function CantBeRepairedPage() {
 
         // Auto-search for the model number initially
         if (item.model) {
-            handleSearch(item.model);
+            handleSearch(item.model, productName);
         }
     };
 
     // --- SEARCH API CALL ---
-    const handleSearch = async (value) => {
+    // productNameFilter: optional, if provided, only show items matching this product/keyword
+    const handleSearch = async (value, productNameFilter = null) => {
         if (!value || value.length < 2) return;
         setSearchLoading(true);
         try {
@@ -100,14 +104,24 @@ export default function CantBeRepairedPage() {
             });
 
             if (response.ok) {
-                const data = await response.json();
+                let data = await response.json();
+
+                // Filter by product name (keywordEntity.keywordName) if provided
+                // This ensures only matching product types are shown for replacement
+                const filterProduct = productNameFilter || selectedItem.productName;
+                if (filterProduct && filterProduct.trim() !== "") {
+                    data = data.filter(item => {
+                        const keywordName = item.keywordEntity?.keywordName || "";
+                        // Case-insensitive comparison
+                        return keywordName.toLowerCase() === filterProduct.toLowerCase();
+                    });
+                }
+
                 setSearchOptions(data);
             } else {
-                console.error("Search failed", response.status);
                 message.error("Search failed");
             }
         } catch (error) {
-            console.error("Search error:", error);
             message.error("Search error");
         } finally {
             setSearchLoading(false);
@@ -294,12 +308,18 @@ export default function CantBeRepairedPage() {
                         <div style={{ marginBottom: 24, padding: '16px', background: '#fff1f0', border: '1px solid #ffa39e', borderRadius: '4px' }}>
                             <Text strong style={{ color: '#cf1322' }}>Action: Replacement</Text><br />
                             <Text type="secondary">Original Item from RMA <strong>{selectedItem.rmaNo}</strong> (Model: {selectedItem.modelNo}) will be marked as REPLACED.</Text>
+                            {selectedItem.productName && (
+                                <>
+                                    <br />
+                                    <Text type="secondary">Filtering replacements by product type: <Tag color="purple">{selectedItem.productName}</Tag></Text>
+                                </>
+                            )}
                         </div>
 
                         <div>
                             <Text strong>Search Replacement Item:</Text>
                             <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
-                                Search by Model No, Part No, or Item Name. Select an 'AVAILABLE' item.
+                                Search by Model No, Part No, or Item Name. Only items matching the product type "{selectedItem.productName || 'Any'}" will be shown.
                             </Text>
 
                             <Select
@@ -310,9 +330,9 @@ export default function CantBeRepairedPage() {
                                 defaultActiveFirstOption={false}
                                 showArrow={false}
                                 filterOption={false}
-                                onSearch={handleSearch}
+                                onSearch={(val) => handleSearch(val, selectedItem.productName)}
                                 onChange={(val) => setSelectedItem({ ...selectedItem, replacementSerial: val })}
-                                notFoundContent={searchLoading ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No items found" />}
+                                notFoundContent={searchLoading ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={`No ${selectedItem.productName || ''} items found`} />}
                                 loading={searchLoading}
                                 size="large"
                                 listHeight={250}
