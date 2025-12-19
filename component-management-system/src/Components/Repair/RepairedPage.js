@@ -96,7 +96,7 @@ export default function RepairedPage() {
 
             // Extract BER items from CantBeRepaired list
             if (cantRepairedResult.success) {
-                const berItems = (cantRepairedResult.data || []).filter(item => 
+                const berItems = (cantRepairedResult.data || []).filter(item =>
                     item.repairStatus === "BER" && item.isDispatched !== true
                 );
                 allLocalItems = [...allLocalItems, ...berItems];
@@ -130,7 +130,7 @@ export default function RepairedPage() {
     }, []);
 
     // Open DC Modal
-    const openDcModal = (rmaNo, rmaItems) => {
+    const openDcModal = async (rmaNo, rmaItems) => {
         // Validation: Ensure all items have an RMA Number assigned
         const pendingRma = rmaItems.some(item => !item.itemRmaNo || item.itemRmaNo.trim() === '');
         if (pendingRma) {
@@ -138,7 +138,8 @@ export default function RepairedPage() {
             return;
         }
         setSelectedRmaForDc(rmaNo);
-        setDcTableData(rmaItems.map((item, index) => ({ ...item, slNo: index + 1, qty: 1 })));
+        const tableData = rmaItems.map((item, index) => ({ ...item, slNo: index + 1, qty: 1 }));
+        setDcTableData(tableData);
 
         dcForm.resetFields();
         // Pre-fill Customer Details
@@ -149,6 +150,24 @@ export default function RepairedPage() {
             consigneeName: customerDetails?.companyName || "",
             consigneeAddress: customerDetails?.returnAddress || "",
         });
+
+        // Fetch Saved Rates
+        try {
+            const itemsToFetch = rmaItems.map(i => ({ product: i.product, model: i.model }));
+            const rateRes = await RmaApi.getProductRates(itemsToFetch);
+
+            if (rateRes.success) {
+                const ratesMap = rateRes.data; // key: "product::model"
+                const itemFormValues = tableData.map(item => {
+                    const key = `${item.product?.trim() || ""}::${(item.model || "").trim()}`;
+                    return { rate: ratesMap[key] || "" };
+                });
+                dcForm.setFieldsValue({ items: itemFormValues });
+            }
+        } catch (e) {
+            console.error("Failed to fetch rates", e);
+        }
+
         setDcModalVisible(true);
     };
 
@@ -865,12 +884,12 @@ export default function RepairedPage() {
                                 </Form.Item>
                             </Col>
                             <Col span={6}>
-                                <Form.Item name="dimensions" label="Dimensions" rules={[{ required: true }]}>
+                                <Form.Item name="dimensions" label="Dimensions" rules={[{ required: false }]}>
                                     <Input placeholder="e.g. 10x10x10" />
                                 </Form.Item>
                             </Col>
                             <Col span={6}>
-                                <Form.Item name="weight" label="Weight (kg)" rules={[{ required: true }]}>
+                                <Form.Item name="weight" label="Weight (kg)" rules={[{ required: false }]}>
                                     <Input placeholder="e.g. 5kg" />
                                 </Form.Item>
                             </Col>

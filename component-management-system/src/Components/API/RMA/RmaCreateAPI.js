@@ -459,8 +459,34 @@ export const RmaApi = {
     }
   },
 
+  getProductRates: async (items) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/product-rates`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(items),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { success: true, data };
+      } else {
+        const errorText = await response.text();
+        return { success: false, error: errorText };
+      }
+    } catch (error) {
+      console.error("Error fetching product rates:", error);
+      return { success: false, error: error.message };
+    }
+  },
+
   // Generate Delivery Challan PDF
-  generateDeliveryChallan: async (data) => {
+  generateDeliveryChallan: async (payload) => {
     const token = getAuthToken();
     if (!token) {
       throw new Error("No authentication token");
@@ -472,7 +498,7 @@ export const RmaApi = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -482,7 +508,7 @@ export const RmaApi = {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `DeliveryChallan_${data.rmaNo}.pdf`;
+      a.download = `DeliveryChallan_${payload.rmaNo}.pdf`;
       document.body.appendChild(a);
       a.click();
 

@@ -87,14 +87,13 @@ export default function CantBeRepairedPage() {
     };
 
     // --- SEARCH API CALL ---
-    // productNameFilter: optional, if provided, only show items matching this product/keyword
-    const handleSearch = async (value, productNameFilter = null) => {
+    const handleSearch = async (value) => {
         if (!value || value.length < 2) return;
         setSearchLoading(true);
         try {
             const token = atob(Cookies.get("authToken") || "");
 
-            // Use the new simplified search endpoint
+            // Use the simplified search endpoint
             const response = await fetch(`${URL}/replacement/search?query=${encodeURIComponent(value)}`, {
                 method: "GET",
                 headers: {
@@ -104,19 +103,7 @@ export default function CantBeRepairedPage() {
             });
 
             if (response.ok) {
-                let data = await response.json();
-
-                // Filter by product name (keywordEntity.keywordName) if provided
-                // This ensures only matching product types are shown for replacement
-                const filterProduct = productNameFilter || selectedItem.productName;
-                if (filterProduct && filterProduct.trim() !== "") {
-                    data = data.filter(item => {
-                        const keywordName = item.keywordEntity?.keywordName || "";
-                        // Case-insensitive comparison
-                        return keywordName.toLowerCase() === filterProduct.toLowerCase();
-                    });
-                }
-
+                const data = await response.json();
                 setSearchOptions(data);
             } else {
                 message.error("Search failed");
@@ -276,6 +263,7 @@ export default function CantBeRepairedPage() {
                                                         <div className="item-row"><Text type="secondary">Serial No.</Text><Text code>{item.serialNo || "N/A"}</Text></div>
                                                         <div className="item-row"><Text type="secondary">Model</Text><Text>{item.model || "N/A"}</Text></div>
                                                         <div className="item-row"><Text type="secondary">Status</Text>
+
                                                             <Tag color="red" icon={<WarningOutlined />}>
                                                                 {item.repairStatus === "CANT_BE_REPAIRED" ? "Can't Be Repaired" : item.repairStatus === "BER" ? "BER (Beyond Economic Repair)" : item.repairStatus || "Unknown Status"}
                                                             </Tag>
@@ -308,47 +296,49 @@ export default function CantBeRepairedPage() {
                         <div style={{ marginBottom: 24, padding: '16px', background: '#fff1f0', border: '1px solid #ffa39e', borderRadius: '4px' }}>
                             <Text strong style={{ color: '#cf1322' }}>Action: Replacement</Text><br />
                             <Text type="secondary">Original Item from RMA <strong>{selectedItem.rmaNo}</strong> (Model: {selectedItem.modelNo}) will be marked as REPLACED.</Text>
-                            {selectedItem.productName && (
-                                <>
-                                    <br />
-                                    <Text type="secondary">Filtering replacements by product type: <Tag color="purple">{selectedItem.productName}</Tag></Text>
-                                </>
-                            )}
                         </div>
 
                         <div>
                             <Text strong>Search Replacement Item:</Text>
                             <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
-                                Search by Model No, Part No, or Item Name. Only items matching the product type "{selectedItem.productName || 'Any'}" will be shown.
+                                Search by Model No, Part No, or Serial No. Select an item with 'AVAILABLE' status.
                             </Text>
 
                             <Select
                                 showSearch
                                 value={selectedItem.replacementSerial}
-                                placeholder="Type to search (e.g. Model, Serial, Name)"
+                                placeholder="Type to search (e.g. Model, Serial, Part No)"
                                 style={{ width: '100%' }}
                                 defaultActiveFirstOption={false}
                                 showArrow={false}
                                 filterOption={false}
-                                onSearch={(val) => handleSearch(val, selectedItem.productName)}
+                                onSearch={handleSearch}
                                 onChange={(val) => setSelectedItem({ ...selectedItem, replacementSerial: val })}
-                                notFoundContent={searchLoading ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={`No ${selectedItem.productName || ''} items found`} />}
+                                notFoundContent={searchLoading ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No items found" />}
                                 loading={searchLoading}
                                 size="large"
-                                listHeight={250}
+                                listHeight={300}
                             >
                                 {searchOptions.map((d) => (
                                     <Option key={d.serial_No} value={d.serial_No} disabled={d.availableStatusId?.itemAvailableOption?.toLowerCase() !== 'available'}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <Text strong>{d.modelNo || d.partNo}</Text>
+                                        <div style={{ padding: '8px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                            {/* Row 1: Product & Status */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                                <Text strong style={{ fontSize: 14 }}>
+                                                    {d.keywordEntity?.keywordName || 'Unknown Product'}
+                                                </Text>
                                                 <Tag color={d.availableStatusId?.itemAvailableOption?.toLowerCase() === 'available' ? 'green' : 'orange'}>
-                                                    {d.availableStatusId?.itemAvailableOption || "Unknown"}
+                                                    {d.availableStatusId?.itemAvailableOption || 'Unknown'}
                                                 </Tag>
                                             </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#888' }}>
-                                                <span>SN: {d.serial_No}</span>
-                                                <span>{d.itemDescription || "No desc"}</span>
+                                            {/* Row 2: Serial No & Model */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#666', marginBottom: 2 }}>
+                                                <span><strong>SN:</strong> {d.serial_No || 'N/A'}</span>
+                                                <span><strong>Model:</strong> {d.modelNo || 'N/A'}</span>
+                                            </div>
+                                            {/* Row 3: Region */}
+                                            <div style={{ fontSize: 11, color: '#888' }}>
+                                                <strong>Region:</strong> {d.region?.city || 'N/A'}
                                             </div>
                                         </div>
                                     </Option>

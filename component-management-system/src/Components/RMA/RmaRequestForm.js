@@ -751,9 +751,9 @@ function RmaRequestForm() {
                               {...restField}
                               label="Serial Number"
                               name={[name, "serialNo"]}
-                              rules={[{ required: true, message: "Serial number is required" }]}
+                              tooltip="Optional - leave blank for accessories without serial numbers"
                             >
-                              <Input placeholder="Enter serial number" size="large" />
+                              <Input placeholder="Enter serial number " size="large" />
                             </Form.Item>
                           </Col>
                         </Row>

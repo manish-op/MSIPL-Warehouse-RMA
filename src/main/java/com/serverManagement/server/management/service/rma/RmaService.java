@@ -11,20 +11,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
 import com.serverManagement.server.management.dao.keyword.KeywordDAO;
+import com.serverManagement.server.management.dao.rma.DepotDispatchDAO;
+import com.serverManagement.server.management.dao.rma.ProductValueDAO;
 import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
 import com.serverManagement.server.management.dao.rma.RmaItemDAO;
 import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
 import com.serverManagement.server.management.dao.rma.TransporterDAO;
-import com.serverManagement.server.management.dao.rma.DepotDispatchDAO;
 import com.serverManagement.server.management.dto.rma.DeliveryChallanRequest;
-import com.serverManagement.server.management.entity.rma.DepotDispatchEntity;
-import com.serverManagement.server.management.entity.rma.TransporterEntity;
 import com.serverManagement.server.management.dto.rma.ProductCatalogDTO;
+import com.serverManagement.server.management.dto.rma.ProductModelDTO;
 import com.serverManagement.server.management.dto.rma.RmaItemWorkflowDTO;
 import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
+import com.serverManagement.server.management.entity.rma.DepotDispatchEntity;
+import com.serverManagement.server.management.entity.rma.ProductValueEntity;
 import com.serverManagement.server.management.entity.rma.RmaAuditLogEntity;
 import com.serverManagement.server.management.entity.rma.RmaItemEntity;
 import com.serverManagement.server.management.entity.rma.RmaRequestEntity;
+import com.serverManagement.server.management.entity.rma.TransporterEntity;
 import com.serverManagement.server.management.request.rma.CreateRmaRequest;
 import com.serverManagement.server.management.request.rma.RmaItemRequest;
 import com.serverManagement.server.management.response.rma.RmaResponse;
@@ -51,13 +54,16 @@ public class RmaService {
     private RmaAuditLogDAO rmaAuditLogDAO;
 
     @Autowired
-    private CustomerService customerService;
+    private ProductValueDAO productValueDAO;
 
     @Autowired
     private TransporterDAO transporterDAO;
 
     @Autowired
     private DepotDispatchDAO depotDispatchDAO;
+
+    @Autowired
+    private CustomerService customerService;
 
     // Email validation regex pattern
     private static final String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
@@ -112,14 +118,15 @@ public class RmaService {
                     .body("At least one RMA item is required");
         }
 
-        // Validate each item
+        // Validate each item (Serial No is now optional for accessories without serial
+        // numbers)
         for (int i = 0; i < createRmaRequest.getItems().size(); i++) {
             RmaItemRequest item = createRmaRequest.getItems().get(i);
-            if (isBlank(item.getProduct()) || isBlank(item.getSerialNo())
+            if (isBlank(item.getProduct())
                     || isBlank(item.getFaultDescription()) || isBlank(item.getFmUlatex())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Item " + (i + 1)
-                                + ": Product, Serial No, Fault Description, and FM/UL/ATEX are mandatory fields");
+                                + ": Product, Fault Description, and FM/UL/ATEX are mandatory fields");
             }
         }
 
@@ -224,7 +231,20 @@ public class RmaService {
             // Map item fields
             itemEntity.setProduct(itemRequest.getProduct());
             itemEntity.setModel(itemRequest.getModel());
-            itemEntity.setSerialNo(itemRequest.getSerialNo());
+            // Auto-fill "N/A" for accessories without serial numbers with a unique internal
+            // ID
+            String serialNo = itemRequest.getSerialNo();
+            if (serialNo == null || serialNo.trim().isEmpty() || "NA".equalsIgnoreCase(serialNo.trim())
+                    || "N/A".equalsIgnoreCase(serialNo.trim())) {
+                // Generate Unique ID: NA-Timestamp-Random
+                // This prevents unique constraint violations or overwrites while keeping "N/A"
+                // semantic
+                String uniqueId = "NA-" + System.currentTimeMillis() + "-"
+                        + java.util.UUID.randomUUID().toString().substring(0, 8);
+                itemEntity.setSerialNo(uniqueId);
+            } else {
+                itemEntity.setSerialNo(serialNo.trim());
+            }
             itemEntity.setFaultDescription(itemRequest.getFaultDescription());
             itemEntity.setCodeplug(itemRequest.getCodeplug());
             itemEntity.setFlashCode(itemRequest.getFlashCode());
@@ -393,10 +413,15 @@ public class RmaService {
 
                 if (request.getItems() != null) {
                     for (RmaItemEntity item : request.getItems()) {
+                        String displaySerial = item.getSerialNo();
+                        if (displaySerial != null && displaySerial.startsWith("NA-")) {
+                            displaySerial = "N/A";
+                        }
+
                         RmaItemsGroupedResponse.RmaItemDTO itemDTO = new RmaItemsGroupedResponse.RmaItemDTO(
                                 item.getId(),
                                 item.getProduct(),
-                                item.getSerialNo(),
+                                displaySerial,
                                 item.getModel(),
                                 item.getFaultDescription(),
                                 item.getRepairStatus());
@@ -1051,7 +1076,14 @@ public class RmaService {
             RmaItemWorkflowDTO dto = new RmaItemWorkflowDTO();
             dto.setId(item.getId());
             dto.setProduct(item.getProduct());
-            dto.setSerialNo(item.getSerialNo());
+
+            // Mask internal unique IDs for display
+            String displaySerial = item.getSerialNo();
+            if (displaySerial != null && displaySerial.startsWith("NA-")) {
+                displaySerial = "N/A";
+            }
+            dto.setSerialNo(displaySerial);
+
             dto.setModel(item.getModel());
             dto.setFaultDescription(item.getFaultDescription());
             dto.setRepairStatus(item.getRepairStatus());
@@ -1372,6 +1404,75 @@ public class RmaService {
             item.setDepotDispatch(dispatch);
         }
         rmaItemDAO.saveAll(rmaItems);
+
+        // Save Product Rates / Values for future auto-fill
+        if (request.getItems() != null) {
+            for (DeliveryChallanRequest.DcItemDto itemDto : request.getItems()) {
+                try {
+                    String rate = itemDto.getRate();
+                    String product = itemDto.getProduct();
+                    String model = itemDto.getModel();
+
+                    if (rate != null && !rate.trim().isEmpty() && product != null && !product.trim().isEmpty()) {
+                        // Normalize
+                        product = product.trim();
+                        model = (model != null) ? model.trim() : "";
+                        rate = rate.trim();
+
+                        // Check if exists
+                        java.util.Optional<com.serverManagement.server.management.entity.rma.ProductValueEntity> startVal = productValueDAO
+                                .findByProductAndModel(product, model);
+
+                        com.serverManagement.server.management.entity.rma.ProductValueEntity valEntity;
+                        if (startVal.isPresent()) {
+                            valEntity = startVal.get();
+                            valEntity.setValue(rate); // update with new rate
+                            valEntity.setLastUpdated(ZonedDateTime.now());
+                        } else {
+                            valEntity = new com.serverManagement.server.management.entity.rma.ProductValueEntity();
+                            valEntity.setProduct(product);
+                            valEntity.setModel(model);
+                            valEntity.setValue(rate);
+                            valEntity.setLastUpdated(ZonedDateTime.now());
+                        }
+                        productValueDAO.save(valEntity);
+                    }
+                } catch (Exception e) {
+                    // Log but don't fail the transaction just for rate saving
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
+    /**
+     * Get saved rates for a list of products/models
+     */
+    public ResponseEntity<?> getProductRates(List<ProductModelDTO> items) {
+        try {
+            java.util.Map<String, String> rates = new java.util.HashMap<>();
+            // Optimize: find all by (product, model) - but JPA might not support "IN"
+            // tuples easily without custom query.
+            // For now, iterate. If list is small (DC items usually < 20), it's fine.
+            // Or we could fetch ALL values for these products?
+
+            for (ProductModelDTO item : items) {
+                if (item.getProduct() == null)
+                    continue;
+                String model = item.getModel() == null ? "" : item.getModel().trim();
+                String product = item.getProduct().trim();
+
+                String key = product + "::" + model;
+                ProductValueEntity entity = productValueDAO.findByProductAndModel(product, model).orElse(null);
+                if (entity != null) {
+                    rates.put(key, entity.getValue());
+                }
+            }
+            return ResponseEntity.ok(rates);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch product rates");
+        }
+    }
 }
