@@ -1835,4 +1835,5 @@ export default function DepotDispatchPage() {
       </div>
     </RmaLayout>
   );
-};
+}
+}
