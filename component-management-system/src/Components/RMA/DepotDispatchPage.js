@@ -22,6 +22,8 @@ import {
   Tabs,
   Radio,
   Upload,
+  Dropdown,
+  Alert,
 } from "antd";
 import {
   CarOutlined,
@@ -30,6 +32,7 @@ import {
   FilePdfOutlined,
   CheckCircleOutlined,
   EditOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
 import RmaLayout from "./RmaLayout";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
@@ -40,13 +43,14 @@ const { Title, Text, Paragraph } = Typography;
 
 const PREDEFINED_TRANSPORTERS = {
   "Blue Dart Express": "27AAACB0446L1ZS",
+  "Blue Dart": "27AAACB0446L1ZS", // Match dropdown value
   "Safe Express": "27AAECS4363H2Z7",
 };
 
 export default function DepotDispatchPage() {
+  const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
   const [inTransitItems, setInTransitItems] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("1");
 
   // Edit RMA State
@@ -81,6 +85,14 @@ export default function DepotDispatchPage() {
   const [ggnTrackingNo, setGgnTrackingNo] = useState("");
   const [ggnHandlerName, setGgnHandlerName] = useState("");
   const [ggnHandlerContact, setGgnHandlerContact] = useState("");
+  // New DC Fields
+  const [ggnAddress, setGgnAddress] = useState("");
+  const [ggnState, setGgnState] = useState("");
+  const [ggnCity, setGgnCity] = useState("");
+  const [ggnKw, setGgnKw] = useState(""); // For "Rate/Value" or similiar
+  const [ggnTransporterId, setGgnTransporterId] = useState("");
+  const [ggnGst, setGgnGst] = useState("");
+  const [ggnValue, setGgnValue] = useState("");
   const [ggnProofFileId, setGgnProofFileId] = useState(null);
   const [ggnProofRemarks, setGgnProofRemarks] = useState("");
   const [ggnSubmitting, setGgnSubmitting] = useState(false);
@@ -174,17 +186,41 @@ export default function DepotDispatchPage() {
   const totalInTransitRma = Object.keys(groupedInTransit).length;
   const totalInTransitItems = inTransitItems.length;
 
-  const openDispatchModal = (rmaNo, rmaItems) => {
+  const openDispatchModal = async (rmaNo, rmaItems) => {
+    // Partial Dispatch: Filter items that have an RMA Number
+    const validItems = rmaItems.filter(item => item.itemRmaNo && item.itemRmaNo.trim() !== "");
+    
+    if (validItems.length === 0) {
+        message.error("No items have an RMA Number. Cannot dispatch.");
+        return;
+    }
+
+    if (validItems.length < rmaItems.length) {
+        const excludedCount = rmaItems.length - validItems.length;
+        message.warning(`${excludedCount} item(s) excluded due to missing RMA Number.`);
+    }
+
     setSelectedRmaNo(rmaNo);
-    setSelectedRmaItems(rmaItems);
-    setSelectedDispatchItemIds(rmaItems.map((item) => item.id));
+    setSelectedRmaItems(validItems);
+    setSelectedDispatchItemIds(validItems.map((item) => item.id));
     dispatchForm.resetFields();
+    
+    let nextDcNo = "";
+    try {
+        const res = await RmaApi.getNextDcNo();
+        if (res.success && res.data && res.data.dcNo) {
+             nextDcNo = res.data.dcNo;
+        }
+    } catch (error) {
+        console.error("Failed to fetch next DC No", error);
+    }
+
     dispatchForm.setFieldsValue({
       dispatchDate: null,
       courierName: "",
       trackingNo: "",
-      dcNo: rmaItems[0]?.dcNo || "",
-      ewayBillNo: rmaItems[0]?.ewayBillNo || "",
+      dcNo: nextDcNo || "",
+      ewayBillNo: validItems[0]?.ewayBillNo || "",
       remarks: "Dispatch to Bangalore depot for repair.",
     });
     setDispatchModalVisible(true);
@@ -228,10 +264,58 @@ export default function DepotDispatchPage() {
     }
   };
 
-  const openDcModal = (rmaNo, rmaItems, isCustomerDispatch = false) => {
+  const [isReturnDispatch, setIsReturnDispatch] = useState(false);
+  const [isCustomerDispatch, setIsCustomerDispatch] = useState(false);
+
+  const { Option } = Select;
+
+  const handleTransporterChange = (val) => {
+    const selectedValue = Array.isArray(val) ? val[val.length - 1] : val;
+
+    const exists = transporters.find((t) => t.transporterName === selectedValue);
+    
+    if (!exists) {
+        setIsNewTransporter(true);
+        if (PREDEFINED_TRANSPORTERS[selectedValue]) {
+            dcForm.setFieldsValue({
+                transporterId: PREDEFINED_TRANSPORTERS[selectedValue],
+            });
+        } else {
+            dcForm.setFieldsValue({ transporterId: "" });
+        }
+    } else {
+        setIsNewTransporter(false);
+        dcForm.setFieldsValue({
+            transporterId: exists.transporterId,
+        });
+    }
+  };
+
+  const openDcModal = async (rmaNo, rmaItems, isCustomerDispatch = false, isReturn = false) => {
+    // Partial Dispatch: Filter items that have an RMA Number
+    let validItems = rmaItems.filter(item => item.itemRmaNo && item.itemRmaNo.trim() !== "");
+
+    if (isReturn) {
+        // Only include Repaired items for Depot Return logic
+        validItems = validItems.filter(item => item.depotStage === "AT_DEPOT_REPAIRED");
+    }
+
+    if (validItems.length === 0) {
+        message.error("No eligible items (Repaired & with RMA No) found for dispatch.");
+        return;
+    }
+
+    if (validItems.length < rmaItems.length) {
+        const excludedCount = rmaItems.length - validItems.length;
+        message.warning(`${excludedCount} item(s) excluded (missing RMA No or not Repaired).`);
+    }
+
     setSelectedRmaNo(rmaNo);
+    setIsReturnDispatch(isReturn);
+    setIsCustomerDispatch(isCustomerDispatch);
+    
     setDcTableData(
-      rmaItems.map((item, index) => ({
+      validItems.map((item, index) => ({
         ...item,
         slNo: index + 1,
         qty: 1,
@@ -239,26 +323,43 @@ export default function DepotDispatchPage() {
     );
 
     dcForm.resetFields();
+    
+    // Auto-generate DC Number
+    let nextDcNo = "";
+    try {
+        const res = await RmaApi.getNextDcNo();
+        if (res.success && res.data && res.data.dcNo) {
+             nextDcNo = res.data.dcNo;
+        }
+    } catch (error) {
+        console.error("Failed to fetch next DC No", error);
+    }
+    
     if (isCustomerDispatch) {
-      // Pre-fill for Customer Dispatch
-      // Try to find customer details from the first item
-      const customerName = rmaItems[0]?.customerName || "";
-
+      const customerName = validItems[0]?.customerName || "";
       dcForm.setFieldsValue({
         modeOfShipment: "ROAD",
         boxes: "1",
         consigneeName: customerName,
         consigneeAddress: "", // User to fill
-        gstIn: "", // User to fill
+        gstIn: "", 
+        dcNo: nextDcNo,
       });
     } else {
-      // Default: Dispatch to Bangalore Depot
+      // Dispatch to Gurgaon (or Depot originally)
+      // If it's Return (Depot -> Gurgaon), set Gurgaon address
+      // If it's Forward (Start -> Depot), set Bangalore address
+      
+      const consigneeName = isReturn ? "Motorola Solutions India Pvt Ltd (Gurgaon)" : "Motorola Solutions India Pvt Ltd";
+      const consigneeAddress = isReturn ? "Gurgaon" : "Bangalore";
+
       dcForm.setFieldsValue({
         modeOfShipment: "ROAD",
         boxes: "1",
-        consigneeName: "Motorola Solutions India Pvt Ltd",
-        consigneeAddress: "Bangalore",
+        consigneeName: consigneeName,
+        consigneeAddress: consigneeAddress,
         gstIn: "29AAACM4363F1Z6",
+        dcNo: nextDcNo,
       });
     }
     setDcModalVisible(true);
@@ -303,6 +404,7 @@ export default function DepotDispatchPage() {
         modeOfShipment,
         transporterName,
         transporterId,
+        dcNo,
         items: formItems,
       } = values;
 
@@ -318,8 +420,16 @@ export default function DepotDispatchPage() {
         product: item.product,
         model: item.model,
         serialNo: item.serialNo,
-        rate: (formItems?.[index]?.rate || 0).toString(),
+        qty: 1,
+        rate:
+          formItems && formItems[index] && formItems[index].rate
+            ? formItems[index].rate
+            : 0,
+            itemRmaNo: item.itemRmaNo, // Include Item RMA No (backend needs it?) - useful for UI
       }));
+
+       // Need item IDs for backend dispatch
+       const itemIds = dcTableData.map(item => item.id);
 
       const payload = {
         rmaNo: selectedRmaNo,
@@ -334,22 +444,58 @@ export default function DepotDispatchPage() {
           ? transporterName[transporterName.length - 1]
           : transporterName,
         transporterId,
+        dcNo,
         items: formattedItems,
       };
 
+      // == NEW: Return Dispatch Logic ==
+      if (isReturnDispatch) {
+          // Prepare payload for dispatch-return
+          const returnPayload = {
+              itemIds: itemIds,
+              dcNo: dcNo, // This is now "Docket NO" in form
+              ewayBillNo: "", // optional/future
+              dispatchMode: modeOfShipment === "HAND_CARRY" ? "HAND" : "COURIER",
+              courierName: payload.transporterName,
+              trackingNo: "", // Tracking No removed from form
+              dispatchTo: isCustomerDispatch ? "CUSTOMER" : "GURGAON",
+              dispatchDate: values.dispatchDate ? values.dispatchDate.format("YYYY-MM-DD") : null,
+              remarks: `Docket: ${dcNo}`, // Updated remarks
+          };
+          
+          const dispatchRes = await RmaApi.dispatchReturn(returnPayload);
+          if (!dispatchRes.success) {
+              message.error(dispatchRes.error || "Failed to update Dispatch Status");
+              setDcSubmitting(false);
+              return;
+          }
+          message.success("Items dispatched successfully!");
+          
+          // == SKIP PDF GENERATION for Return Dispatch as per request ==
+          setDcModalVisible(false);
+          loadItems();
+          setDcSubmitting(false);
+          return;
+      }
+
+      // Generate PDF (Only for Outward Dispatch)
       const result = await RmaApi.generateDeliveryChallan(payload);
       if (result.success) {
         message.success("Delivery Challan Generated Successfully");
         setDcModalVisible(false);
         fetchTransporters();
+        // Return dispatch handled above, so no need to refresh here for that case
       } else {
-        message.error("Failed to Generate DC");
+        message.error("Failed to Generate DC PDF");
       }
     } catch (error) {
       console.error("DC Gen Error:", error);
       message.error("An error occurred");
     } finally {
-      setDcSubmitting(false);
+      if (!isReturnDispatch) {
+          // Only reset submitting here if we didn't return early
+          setDcSubmitting(false);
+      }
     }
   };
 
@@ -393,6 +539,40 @@ export default function DepotDispatchPage() {
       });
     }
   };
+
+  // == GGN Workflow Handlers ==
+  const handleMarkReceivedGgn = async (item) => {
+    try {
+        const res = await RmaApi.markDepotReceivedAtGurgaon({ itemIds: [item.id] });
+        if (res.success) {
+            message.success("Marked as Received at Gurgaon");
+            loadItems();
+        } else {
+            message.error(res.error || "Failed to mark received");
+        }
+    } catch (e) {
+        message.error("Error: " + e.message);
+    }
+  };
+
+  const openGgnDispatchModal = (item) => {
+      setSelectedItem(item);
+      // Reset manual state
+      setGgnDispatchMode("HAND");
+      setGgnCourierName("");
+      setGgnTrackingNo("");
+      setGgnHandlerName("");
+      setGgnHandlerContact("");
+      // Reset DC fields
+      setGgnAddress(item.customerAddress || ""); // Pre-fill if available
+      setGgnState(item.state || "");
+      setGgnCity(item.city || "");
+      setGgnValue("0");
+      setGgnGst(item.gstin || "");
+      setGgnTransporterId("");
+      setGgnPlanModalVisible(true);
+  };
+
 
   return (
     <RmaLayout>
@@ -518,17 +698,21 @@ export default function DepotDispatchPage() {
                                     <Card
                                       className="item-card"
                                       size="small"
-                                      actions={[
-                                        <Button
-                                          key="add-rma"
-                                          icon={<EditOutlined />}
-                                          onClick={() =>
-                                            openEditRmaModal(item)
-                                          }
-                                        >
-                                          Add RMA
-                                        </Button>,
-                                      ]}
+                                      actions={
+                                        !item.itemRmaNo
+                                          ? [
+                                              <Button
+                                                key="add-rma"
+                                                icon={<EditOutlined />}
+                                                onClick={() =>
+                                                  openEditRmaModal(item)
+                                                }
+                                              >
+                                                Add RMA No.
+                                              </Button>,
+                                            ]
+                                          : []
+                                      }
                                       title={
                                         <div
                                           style={{
@@ -589,6 +773,28 @@ export default function DepotDispatchPage() {
                                             {item.faultDescription}
                                           </Paragraph>
                                         </div>
+                                        
+                                        {/* NEW: Dispatch Buttons for Repaired Items */}
+                                        {item.depotStage === "AT_DEPOT_REPAIRED" && (
+                                           <div style={{ marginTop: 8, display: 'flex', gap: '5px' }}>
+                                                <Button 
+                                                    type="primary" 
+                                                    size="small"
+                                                    style={{ flex: 1, backgroundColor: "#1890ff" }}
+                                                    onClick={() => openDcModal(rmaNo, rmaItems, false, true)} 
+                                                >
+                                                    To Gurgaon
+                                                </Button>
+                                                <Button 
+                                                    type="primary" 
+                                                    size="small" 
+                                                    style={{ flex: 1, backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+                                                    onClick={() => openDcModal(rmaNo, rmaItems, true, true)}
+                                                >
+                                                    To Customer
+                                                </Button>
+                                           </div>
+                                        )}
                                       </div>
                                     </Card>
                                   </Col>
@@ -703,15 +909,6 @@ export default function DepotDispatchPage() {
                                         >
                                           Generate DC (Customer)
                                         </Button>
-                                        <Button
-                                          size="small"
-                                          icon={<FilePdfOutlined />}
-                                          onClick={() =>
-                                            handleGenerateOutwardGatepass(rmaNo)
-                                          }
-                                        >
-                                          Outward Gatepass
-                                        </Button>
                                       </>
                                     )}
                                   </Space>
@@ -736,7 +933,11 @@ export default function DepotDispatchPage() {
                                         DC Number
                                       </Text>
                                       <Text strong>
-                                        {rmaItems[0]?.dcNo || "N/A"}
+                                        {/* Show Return DC if returning, else Outward DC */}
+                                        {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" || 
+                                         rmaItems[0]?.depotStage?.includes("GGN_") 
+                                            ? rmaItems[0]?.depotReturnDcNo || "N/A"
+                                            : rmaItems[0]?.dcNo || "N/A"}
                                       </Text>
                                     </div>
                                     <div>
@@ -750,12 +951,17 @@ export default function DepotDispatchPage() {
                                         E-Way Bill
                                       </Text>
                                       <Text strong>
-                                        {rmaItems[0]?.ewayBillNo || "N/A"}
+                                        {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" || 
+                                         rmaItems[0]?.depotStage?.includes("GGN_")
+                                            ? rmaItems[0]?.depotReturnEwayBillNo || "N/A"
+                                            : rmaItems[0]?.ewayBillNo || "N/A"}
                                       </Text>
                                     </div>
-                                    <Tag color="processing">
-                                      In Transit to Depot
-                                    </Tag>
+                                    {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" ? (
+                                        <Tag color="orange">In Transit from Depot</Tag>
+                                    ) : (
+                                        <Tag color="processing">In Transit to Depot</Tag>
+                                    )}
                                   </Space>
                                 </div>
                                 <Row gutter={[16, 16]}>
@@ -805,8 +1011,17 @@ export default function DepotDispatchPage() {
                                             )}
                                             {item.depotStage ===
                                               "AT_DEPOT_REPAIRED" && (
-                                              <Tag color="orange">
-                                                Repaired
+                                              <>
+                                                {item.repairStatus?.includes("UNREPAIRED") && <Tag color="default">Unrepaired</Tag>}
+                                                {(!item.repairStatus || (item.repairStatus.includes("REPAIRED") && !item.repairStatus.includes("UNREPAIRED"))) && <Tag color="orange">Repaired</Tag>}
+                                                {item.repairStatus?.includes("REPLACED") && <Tag color="green">Replaced</Tag>}
+                                                {item.repairStatus?.includes("BER") && <Tag color="red">BER</Tag>}
+                                              </>
+                                            )}
+                                            {item.depotStage ===
+                                              "IN_TRANSIT_FROM_DEPOT" && (
+                                              <Tag color="geekblue">
+                                                {item.dispatchTo === "CUSTOMER" ? "Dispatched Bangalore to customer" : "Dispatched to Gurgaon"}
                                               </Tag>
                                             )}
                                             {item.depotStage ===
@@ -820,7 +1035,7 @@ export default function DepotDispatchPage() {
                                               "GGN_DISPATCHED_TO_CUSTOMER_COURIER",
                                             ].includes(item.depotStage) && (
                                               <Tag color="cyan">
-                                                Dispatched to Customer
+                                                Dispatched from GGN to customer
                                               </Tag>
                                             )}
                                             {(item.depotStage ===
@@ -863,148 +1078,108 @@ export default function DepotDispatchPage() {
                                               </Tag>
                                             </div>
                                           )}
-
-                                          {/* NEW: Gurgaon actions */}
-                                          <Divider
-                                            style={{ margin: "8px 0" }}
-                                          />
-                                          <Space wrap>
-                                            {item.depotStage ===
-                                              "AT_DEPOT_RECEIVED" && (
-                                              <>
-                                              <Button
-                                                size="small"
-                                                type="primary"
-                                                style={{
-                                                  backgroundColor: "#faad14",
-                                                  borderColor: "#faad14",
-                                                }}
-                                                onClick={async () => {
-                                                  const payload = {
-                                                    itemIds: [item.id],
-                                                  };
-                                                  const res =
-                                                    await RmaApi.markDepotRepaired(
-                                                      payload
-                                                    );
-                                                  if (res.success) {
-                                                    message.success(
-                                                      res.message ||
-                                                        "Marked as Repaired"
-                                                    );
-                                                    loadItems();
-                                                  } else {
-                                                    message.error(
-                                                      res.error ||
-                                                        "Failed to mark repaired"
-                                                    );
-                                                  }
-                                                }}
-                                              >
-                                                Mark Repaired
-                                              </Button>
-                                              <Button
-                                                    danger
-                                                    size="small"
-                                                    style={{ marginLeft: 5 }}
-                                                    onClick={() => {
-                                                      Modal.confirm({
-                                                        title: "Confirm Faulty Return",
-                                                        content:
-                                                          "This will mark the item as 'Returned Faulty' and AUTOMATICALLY CREATE A NEW RMA REQUEST for the same device. Proceed?",
-                                                        onOk: async () => {
-                                                          const res =
-                                                            await RmaApi.markDepotFaultyAndCreateNewRma(
-                                                              item.id
-                                                            );
-                                                          if (res.success) {
-                                                            message.success(
-                                                              res.message ||
-                                                                "New RMA Created Successfully"
-                                                            );
-                                                            loadItems();
-                                                          } else {
-                                                            message.error(
-                                                              res.error ||
-                                                                "Failed to create new RMA"
-                                                            );
-                                                          }
-                                                        },
-                                                      });
+                                          <div>
+                                          <Space>
+                                           {/* NEW: Gurgaon actions - Replaced with Return Dispatch Options */}
+                                           <Divider style={{ margin: "8px 0" }} />
+                                            {item.depotStage === "AT_DEPOT_RECEIVED" && (
+                                                <Dropdown
+                                                    menu={{
+                                                        items: [
+                                                            { label: "Repaired", key: "REPAIRED" },
+                                                            { label: "Replaced", key: "REPLACED" },
+                                                            { label: "BER", key: "BER" },
+                                                            { label: "Unrepaired", key: "UNREPAIRED" },
+                                                        ],
+                                                        onClick: async ({ key }) => {
+                                                            const statusLabels = {
+                                                                "REPAIRED": "Repaired",
+                                                                "REPLACED": "Replaced",
+                                                                "BER": "BER",
+                                                                "UNREPAIRED": "Unrepaired"
+                                                            };
+                                                            const payload = {
+                                                                itemIds: [item.id],
+                                                                repairStatus: key
+                                                            };
+                                                            
+                                                            const res = await RmaApi.markDepotRepaired(payload);
+                                                            
+                                                            if (res.success) {
+                                                                message.success(res.message || `Marked as ${statusLabels[key]}`);
+                                                                loadItems();
+                                                            } else {
+                                                                message.error(res.error || "Failed to update status");
+                                                            }
+                                                        }
                                                     }}
-                                                  >
-                                                    Mark Faulty & Create New RMA
-                                                  </Button>
-                                              </>
-                                            )}
-
-                                            {item.depotStage ===
-                                              "AT_DEPOT_REPAIRED" && (
-                                              <Button
-                                                type="primary"
-                                                size="small"
-                                                onClick={async () => {
-                                                  const payload = {
-                                                    itemIds: [item.id],
-                                                  };
-                                                  const res =
-                                                    await RmaApi.markDepotReceivedAtGurgaon(
-                                                      payload
-                                                    );
-                                                  if (res.success) {
-                                                    message.success(
-                                                      res.message ||
-                                                        "Marked received at Gurgaon"
-                                                    );
-                                                    loadItems();
-                                                  } else {
-                                                    message.error(
-                                                      res.error ||
-                                                        "Failed to mark received at Gurgaon"
-                                                    );
-                                                  }
-                                                }}
-                                              >
-                                                Mark Received at Gurgaon
-                                              </Button>
-                                            )}
-
-                                            {item.depotStage ===
-                                              "GGN_RECEIVED_FROM_DEPOT" && (
-                                                <Button
-                                                  type="primary"
-                                                  size="small"
-                                                  onClick={() => {
-                                                    setSelectedItem(item);
-                                                    setGgnDispatchMode("HAND");
-                                                    setGgnCourierName("");
-                                                    setGgnTrackingNo("");
-                                                    setGgnHandlerName("");
-                                                    setGgnHandlerContact("");
-                                                    setGgnPlanModalVisible(true);
-                                                  }}
                                                 >
-                                                  Plan Dispatch (GGN → Customer)
-                                                </Button>
+                                                    <Button
+                                                        size="small"
+                                                        type="primary"
+                                                        style={{
+                                                            backgroundColor: "#faad14",
+                                                            borderColor: "#faad14",
+                                                            width: "100%",
+                                                            marginBottom: 5
+                                                        }}
+                                                    >
+                                                        Mark Status <DownOutlined />
+                                                    </Button>
+                                                </Dropdown>
                                             )}
 
-                                            {[
-                                              "GGN_DISPATCHED_TO_CUSTOMER_HAND",
-                                              "GGN_DISPATCHED_TO_CUSTOMER_COURIER",
-                                            ].includes(item.depotStage) && (
-                                              <Button
-                                                type="primary"
-                                                size="small"
-                                                onClick={() => {
-                                                  setSelectedItem(item);
-                                                  setGgnProofFileId(null);
-                                                  setGgnProofRemarks("");
-                                                  setGgnProofModalVisible(true);
-                                                }}
-                                              >
-                                                Upload Signed DC
-                                              </Button>
-                                            )}
+                                           {/* Buttons for Repaired items (Restore to Tab 2) */}
+                                           {item.depotStage === "AT_DEPOT_REPAIRED" && (
+                                               <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: 5 }}>
+                                                    <Button 
+                                                        type="primary" 
+                                                        size="small"
+                                                        style={{ flex: 1, backgroundColor: "#1890ff" }}
+                                                        onClick={() => openDcModal(rmaNo, rmaItems, false, true)} 
+                                                    >
+                                                        To Gurgaon
+                                                    </Button>
+                                                    <Button 
+                                                        type="primary" 
+                                                        size="small" 
+                                                        style={{ flex: 1, backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+                                                        onClick={() => openDcModal(rmaNo, rmaItems, true, true)}
+                                                    >
+                                                        To Customer
+                                                    </Button>
+                                               </div>
+                                           )}
+                                           
+                                          {/* == Consolidated Action Buttons == */}
+                                            <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap', width: "100%" }}>
+                                                {item.depotStage === "IN_TRANSIT_FROM_DEPOT" && item.dispatchTo === "GURGAON" && (
+                                                    <Button size="small" type="primary" onClick={() => handleMarkReceivedGgn(item)}>
+                                                        Mark Received (GGN)
+                                                    </Button>
+                                                )}
+                                                
+                                                {item.depotStage === "GGN_RECEIVED_FROM_DEPOT" && (
+                                                    <Button size="small" type="primary" onClick={() => openGgnDispatchModal(item)}>
+                                                        Dispatch to Customer
+                                                    </Button>
+                                                )}
+
+                                                {/* Allow GGN Dispatch OR Direct Customer Dispatch (IN_TRANSIT_FROM_DEPOT) flow to upload signed DC */}
+                                                { (["GGN_DISPATCHED_TO_CUSTOMER_HAND", "GGN_DISPATCHED_TO_CUSTOMER_COURIER"].includes(item.depotStage) || 
+                                                  (item.depotStage === "IN_TRANSIT_FROM_DEPOT" && item.dispatchTo === "CUSTOMER")) && (
+                                                    <Button size="small" type="primary" style={{ background: "#faad14", borderColor: "#faad14" }}
+                                                        onClick={() => {
+                                                            setSelectedItem(item);
+                                                            setGgnProofFileId(null);
+                                                            setGgnProofRemarks("");
+                                                            setGgnProofModalVisible(true);
+                                                        }}
+                                                    >
+                                                        Upload Signed DC
+                                                    </Button>
+                                                )}
+                                            </div>
 
                                             {item.depotStage ===
                                               "GGN_RETURNED_FAULTY" && (
@@ -1037,7 +1212,8 @@ export default function DepotDispatchPage() {
                                             )}
                                           </Space>
                                         </div>
-                                      </Card>
+                                      </div>
+                                    </Card>
                                     </Col>
                                   ))}
                                 </Row>
@@ -1134,17 +1310,17 @@ export default function DepotDispatchPage() {
           </Form>
         </Modal>
 
-        {/* Delivery Challan Modal */}
+        {/* Delivery Challan / Return Dispatch Modal */}
         <Modal
           title={
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <FilePdfOutlined style={{ color: "#faad14" }} />
-              <span>Generate Delivery Challan</span>
+              {isReturnDispatch ? <SendOutlined style={{ color: "#1890ff" }} /> : <FilePdfOutlined style={{ color: "#faad14" }} />}
+              <span>{isReturnDispatch ? "Dispatch Details" : "Generate Delivery Challan"}</span>
             </div>
           }
           open={dcModalVisible}
           onCancel={() => setDcModalVisible(false)}
-          width={1000}
+          width={isReturnDispatch ? 600 : 1000}
           footer={[
             <Button
               key="cancel"
@@ -1155,12 +1331,12 @@ export default function DepotDispatchPage() {
             <Button
               key="generate"
               type="primary"
-              icon={<FilePdfOutlined />}
+              icon={isReturnDispatch ? <SendOutlined /> : <FilePdfOutlined />}
               onClick={() => dcForm.submit()}
               loading={dcSubmitting}
-              style={{ background: "#faad14", borderColor: "#faad14" }}
+              style={isReturnDispatch ? {} : { background: "#faad14", borderColor: "#faad14" }}
             >
-              Generate DC
+              {isReturnDispatch ? "Dispatch" : "Generate DC"}
             </Button>,
           ]}
         >
@@ -1173,7 +1349,8 @@ export default function DepotDispatchPage() {
               boxes: "1",
             }}
           >
-            <Row gutter={16}>
+           {!isReturnDispatch && (
+             <Row gutter={16}>
               <Col span={12}>
                 <Card
                   title="Consignor Details"
@@ -1198,52 +1375,96 @@ export default function DepotDispatchPage() {
                   <Form.Item name="gstIn" label="GST IN">
                     <Input placeholder="Enter GST IN" />
                   </Form.Item>
+                  <Form.Item name="dcNo" label="Delivery Challan No.">
+                    <Input placeholder="Auto-generated" />
+                  </Form.Item>
                 </Card>
               </Col>
             </Row>
+           )}
 
-            <Divider orientation="left">Item Details</Divider>
+            {/* Courier Details - Visible for BOTH */}
+             <Divider orientation="left">Shipment Details</Divider>
+             {isReturnDispatch && (
+                <div style={{ marginBottom: 16 }}>
+                    <Alert message="Enter details for return dispatch. No DC PDF will be generated." type="info" showIcon />
+                </div>
+             )}
 
-            <Table
-              dataSource={dcTableData}
-              pagination={false}
-              size="small"
-              columns={[
-                { title: "Sr No", dataIndex: "slNo", key: "slNo", width: 60 },
-                { title: "Material Code", dataIndex: "serialNo", key: "serialNo" },
-                {
-                  title: "Description",
-                  key: "product",
-                  render: (_, record) =>
-                    `${record.product || ""}${
-                      record.model ? " - " + record.model : ""
-                    }`,
-                },
-                {
-                  title: "Qty",
-                  dataIndex: "qty",
-                  key: "qty",
-                  render: () => 1,
-                },
-                {
-                  title: "Rate (Value)",
-                  key: "rate",
-                  render: (_, record, index) => (
-                    <Form.Item
-                      name={["items", index, "rate"]}
-                      rules={[{ required: true, message: "Required" }]}
-                      style={{ margin: 0 }}
-                    >
-                      <Input prefix="₹" type="number" placeholder="Value" />
-                    </Form.Item>
-                  ),
-                },
-              ]}
-            />
+             <Row gutter={16}>
+               <Col span={12}>
+                 <Form.Item
+                   name="transporterName"
+                   label={isReturnDispatch ? "Name" : "Courier Name"}
+                   rules={[{ required: true, message: "Required" }]}
+                 >
+                   <Select
+                     mode="tags"
+                     style={{ width: "100%" }}
+                     placeholder="Select or Type"
+                     onChange={handleTransporterChange}
+                     options={[
+                       ...transporters.map((t) => ({
+                         label: t.transporterName,
+                         value: t.transporterName,
+                       })),
+                       { label: "Blue Dart", value: "Blue Dart" },
+                       { label: "Safe Express", value: "Safe Express" },
+                     ]}
+                   />
+                 </Form.Item>
+               </Col>
+               <Col span={12}>
+                 <Form.Item name="transporterId" label="Transporter ID">
+                    <Input placeholder="Auto-filled ID" />
+                 </Form.Item>
+               </Col>
+               
+               {isReturnDispatch && (
+                 <>
+                   <Col span={12}>
+                        <Form.Item 
+                            name="dcNo" 
+                            label="Docket NO" 
+                            rules={[{ required: true, message: "Required" }]}
+                        >
+                            <Input placeholder="Enter Docket Number" />
+                        </Form.Item>
+                   </Col>
+                   <Col span={12}>
+                        <Form.Item 
+                            name="dispatchDate" 
+                            label="Date of Dispatch"
+                            rules={[{ required: true, message: "Required" }]}
+                        >
+                             <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
+                        </Form.Item>
+                   </Col>
+                 </>
+               )}
 
-            <Divider orientation="left">Shipment Details</Divider>
-            <Row gutter={16}>
-              <Col span={6}>
+               {!isReturnDispatch && (
+                <Col span={12}>
+                 <Form.Item
+                   name="modeOfShipment"
+                   label="Mode of Shipment"
+                   rules={[{ required: true }]}
+                 >
+                   <Select>
+                     <Select.Option value="ROAD">Road</Select.Option>
+                     <Select.Option value="AIR">Air</Select.Option>
+                     <Select.Option value="TRAIN">Train</Select.Option>
+                     <Select.Option value="HAND_CARRY">Hand Carry</Select.Option>
+                   </Select>
+                 </Form.Item>
+                </Col>
+               )}
+             </Row>
+
+             {/* Box Details - Only for !isReturnDispatch */}
+             {!isReturnDispatch && (
+             <Row gutter={16}>
+              <Col span={8}>
                 <Form.Item
                   name="boxes"
                   label="No of Boxes"
@@ -1252,124 +1473,69 @@ export default function DepotDispatchPage() {
                   <Input type="number" />
                 </Form.Item>
               </Col>
-              <Col span={6}>
+              <Col span={8}>
                 <Form.Item
                   name="dimensions"
                   label="Dimensions"
-                  rules={[{ required: true }]}
                 >
                   <Input placeholder="e.g. 10x10x10" />
                 </Form.Item>
               </Col>
-              <Col span={6}>
+              <Col span={8}>
                 <Form.Item
                   name="weight"
                   label="Weight (kg)"
-                  rules={[{ required: true }]}
                 >
                   <Input placeholder="e.g. 5kg" />
                 </Form.Item>
               </Col>
-              <Col span={6}>
-                <Form.Item name="modeOfShipment" label="Mode of Shipment">
-                  <Select>
-                    <Select.Option value="ROAD">ROAD</Select.Option>
-                    <Select.Option value="AIR">AIR</Select.Option>
-                    <Select.Option value="HAND_CARRY">
-                      HAND CARRY
-                    </Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
             </Row>
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item name="transporterName" label="Transporter Name">
-                  <Select
-                    showSearch
-                    placeholder="Select or Type New Transporter"
-                    optionFilterProp="children"
-                    onSelect={(value) => {
-                      const t = transporters.find((t) => t.name === value);
-                      if (t) {
-                        dcForm.setFieldsValue({
-                          transporterId: t.transporterId,
-                        });
-                        setIsNewTransporter(false);
-                      }
-                    }}
-                    onSearch={(val) => {
-                      const exists = transporters.some(
-                        (t) => t.name.toLowerCase() === val.toLowerCase()
-                      );
-                      setIsNewTransporter(!exists && val.length > 0);
-                    }}
-                    onChange={(val) => {
-                      const selectedValue = Array.isArray(val)
-                        ? val[val.length - 1]
-                        : val;
+            )}
 
-                      const exists = transporters.find(
-                        (t) => t.name === selectedValue
-                      );
-                      if (!exists) {
-                        setIsNewTransporter(true);
-                        if (PREDEFINED_TRANSPORTERS[selectedValue]) {
-                          dcForm.setFieldsValue({
-                            transporterId:
-                              PREDEFINED_TRANSPORTERS[selectedValue],
-                          });
-                        } else {
-                          dcForm.setFieldsValue({ transporterId: "" });
-                        }
-                      } else {
-                        setIsNewTransporter(false);
-                        dcForm.setFieldsValue({
-                          transporterId: exists.transporterId,
-                        });
-                      }
-                    }}
-                    mode="tags"
-                    notFoundContent="Type to add new transporter"
-                  >
-                    {[
-                      ...transporters,
-                      ...Object.keys(PREDEFINED_TRANSPORTERS)
-                        .filter(
-                          (name) =>
-                            !transporters.some((t) => t.name === name)
-                        )
-                        .map((name) => ({ id: `pre-${name}`, name })),
-                    ].map((t) => (
-                      <Select.Option key={t.id} value={t.name}>
-                        {t.name}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="transporterId"
-                  label="Transporter ID"
-                  rules={[
+            {!isReturnDispatch && (
+             <>
+                <Divider orientation="left">Item Details</Divider>
+                <Table
+                  dataSource={dcTableData}
+                  pagination={false}
+                  size="small"
+                  columns={[
+                    { title: "Sr No", dataIndex: "slNo", key: "slNo", width: 60 },
+                    { title: "Material Code", dataIndex: "serialNo", key: "serialNo" },
                     {
-                      required: true,
-                      message: "Please enter Transporter ID",
+                      title: "Description",
+                      key: "product",
+                      render: (_, record) =>
+                        `${record.product || ""}${
+                          record.model ? " - " + record.model : ""
+                        }`,
+                    },
+                    {
+                      title: "Qty",
+                      dataIndex: "qty",
+                      key: "qty",
+                      render: () => 1,
+                    },
+                    {
+                      title: "Rate (Value)",
+                      key: "rate",
+                      render: (_, record, index) => (
+                        <Form.Item
+                          name={["items", index, "rate"]}
+                          rules={[{ required: true, message: "Required" }]}
+                          style={{ margin: 0 }}
+                        >
+                          <Input prefix="₹" type="number" placeholder="Value" />
+                        </Form.Item>
+                      ),
                     },
                   ]}
-                  help={
-                    isNewTransporter
-                      ? "Enter ID for new transporter to save it"
-                      : ""
-                  }
-                >
-                  <Input placeholder="Auto-filled or Enter New ID" />
-                </Form.Item>
-              </Col>
-            </Row>
+                />
+             </>
+            )}
           </Form>
         </Modal>
+
 
         {/* Add RMA Modal */}
         <Modal
@@ -1436,6 +1602,41 @@ export default function DepotDispatchPage() {
               message.success(res.message || "Dispatch planned");
               setGgnPlanModalVisible(false);
               loadItems();
+              
+              // Generate DC PDF for GGN -> Customer dispatch
+              try {
+                  message.loading("Generating Delivery Challan...", 1.5);
+                  await RmaApi.generateDeliveryChallan({
+                      rmaNo: selectedItem.rmaNo, 
+                      transporterName: ggnDispatchMode === "COURIER" ? ggnCourierName : ggnHandlerName,
+                      modeOfShipment: ggnDispatchMode === "COURIER" ? "ROAD" : "HAND_CARRY", 
+                      dcNo: "TEMP-GGN", 
+                      consigneeName: selectedItem.customerName || "Customer", 
+                      address: ggnAddress || selectedItem.address || "Customer Address",
+                      gstin: ggnGst,
+                      state: ggnState,
+                      stateCode: "", // Add logic if needed
+                      contactPerson: "",
+                      contactNumber: "",
+                      transporterId: ggnTransporterId,
+                      dispatchDate: null, 
+                      boxes: 1,
+                      dimensions: "",
+                      weight: "",
+                      items: [{
+                           slNo: 1,
+                           serialNo: selectedItem.serialNo,
+                           product: selectedItem.product,
+                           model: selectedItem.model,
+                           qty: 1,
+                           rate: ggnValue || 0 
+                      }]
+                  });
+              } catch (e) {
+                  console.error("Failed to generate DC PDF", e);
+                  message.warning("Dispatch saved, but failed to generate DC PDF");
+              }
+
             } else {
               message.error(
                 res.error || "Failed to plan dispatch from Gurgaon"
@@ -1444,6 +1645,8 @@ export default function DepotDispatchPage() {
           }}
         >
           <Space direction="vertical" style={{ width: "100%" }} size="middle">
+             <Alert message="Please fill all details for Delivery Challan generation." type="info" showIcon />
+             
             <div>
               <Text strong>Delivery Method</Text>
               <Radio.Group
@@ -1455,17 +1658,68 @@ export default function DepotDispatchPage() {
                 <Radio value="COURIER">By Courier</Radio>
               </Radio.Group>
             </div>
+            
+            <Divider orientation="left">DC Details</Divider>
+            
+            <Row gutter={16}>
+                <Col span={24}>
+                     <Text strong>Address</Text>
+                     <Input.TextArea rows={2} value={ggnAddress} onChange={(e) => setGgnAddress(e.target.value)} placeholder="Full Customer Address" />
+                </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 8 }}>
+                <Col span={12}>
+                     <Text strong>State</Text>
+                     <Input value={ggnState} onChange={(e) => setGgnState(e.target.value)} placeholder="State" />
+                </Col>
+                 <Col span={12}>
+                     <Text strong>GSTIN</Text>
+                     <Input value={ggnGst} onChange={(e) => setGgnGst(e.target.value)} placeholder="GST Number" />
+                </Col>
+            </Row>
+             <Row gutter={16} style={{ marginTop: 8 }}>
+                <Col span={12}>
+                     <Text strong>Value (Rate)</Text>
+                     <Input value={ggnValue} onChange={(e) => setGgnValue(e.target.value)} placeholder="Declared Value" />
+                </Col>
+            </Row>
+
+            <Divider orientation="left">Transporter / Handler</Divider>
 
             {ggnDispatchMode === "COURIER" && (
               <>
-                <div>
-                  <Text strong>Courier Name</Text>
-                  <Input
-                    value={ggnCourierName}
-                    onChange={(e) => setGgnCourierName(e.target.value)}
-                  />
-                </div>
-                <div>
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Text strong>Courier Name</Text>
+                          <Select
+                             style={{ width: "100%" }}
+                             placeholder="Select or Type"
+                             value={ggnCourierName}
+                             onChange={(val) => {
+                                 setGgnCourierName(val);
+                                 const selectedT = transporters.find(t => t.transporterName === val);
+                                 if (selectedT) {
+                                     setGgnTransporterId(selectedT.transporterId);
+                                 } else {
+                                     setGgnTransporterId("");
+                                 }
+                             }}
+                             options={[
+                               ...transporters.map((t) => ({
+                                 label: t.transporterName,
+                                 value: t.transporterName,
+                               })),
+                               { label: "Blue Dart", value: "Blue Dart" },
+                               { label: "Safe Express", value: "Safe Express" },
+                             ]}
+                           />
+                    </Col>
+                    <Col span={12}>
+                        <Text strong>Transporter ID</Text>
+                        <Input value={ggnTransporterId} onChange={(e) => setGgnTransporterId(e.target.value)} placeholder="Transporter ID" />
+                    </Col>
+                </Row>
+                <div style={{ marginTop: 8 }}>
                   <Text strong>AWB / Tracking No.</Text>
                   <Input
                     value={ggnTrackingNo}
@@ -1567,4 +1821,4 @@ export default function DepotDispatchPage() {
       </div>
     </RmaLayout>
   );
-}
+};

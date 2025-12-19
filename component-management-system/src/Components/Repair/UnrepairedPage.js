@@ -888,7 +888,7 @@ export default function UnrepairedPage() {
                                                                 icon={<EditOutlined />}
                                                                 onClick={() => openEditRmaModal(item)}
                                                             >
-                                                                Add RMA
+                                                                Add RMA No.
                                                             </Button>
                                                         )
                                                     ]}

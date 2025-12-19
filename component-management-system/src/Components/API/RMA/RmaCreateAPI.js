@@ -145,6 +145,8 @@ export const RmaApi = {
 
   // ---------- Depot Dispatch APIs (to Depot / Bangalore) ----------
   getDepotReadyToDispatch: async () => apiGet("/rma/depot/ready-to-dispatch"),
+  
+  getNextDcNo: async () => apiGet("/rma/depot/next-dc-no"),
 
   dispatchToBangalore: async (payload) => {
     const token = getAuthToken();
@@ -289,6 +291,32 @@ export const RmaApi = {
       if (!response.ok) {
         const errorText = await response.text();
         return { success: false, error: errorText || "Failed to plan dispatch from Gurgaon" };
+      }
+      const text = await response.text();
+      return { success: true, message: text };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Dispatch return from Depot to GGN or Customer
+  dispatchReturn: async (payload) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/depot/dispatch-return`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { success: false, error: errorText || "Failed to dispatch return" };
       }
       const text = await response.text();
       return { success: true, message: text };

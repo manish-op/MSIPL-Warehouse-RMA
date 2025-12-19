@@ -27,6 +27,7 @@ const { confirm } = Modal;
 
 const RmaLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
 
   // Module state
@@ -99,6 +100,11 @@ const RmaLayout = ({ children }) => {
     if (key === "depot-dispatch") navigate("/depot-dispatch");
     if (key === "audit-trail") navigate("/audit-trail");
     if (key === "logout") showLogoutConfirm();
+    
+    // Auto-close sidebar on mobile after navigation
+    if (isMobile) {
+      setCollapsed(true);
+    }
   };
 
   // Determine sidebar theme based on selected key
@@ -111,8 +117,11 @@ const RmaLayout = ({ children }) => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      {/* Global Header */}
-      <Header onLogout={showLogoutConfirm} />
+      {/* Global Header with Sidebar Toggle */}
+      <Header 
+        onLogout={showLogoutConfirm} 
+        onToggleSidebar={() => setCollapsed(!collapsed)}
+      />
 
       <Layout>
         {/* Sidebar */}
@@ -120,16 +129,33 @@ const RmaLayout = ({ children }) => {
           width={220}
           collapsible
           collapsed={collapsed}
+          onCollapse={(value) => setCollapsed(value)}
+          breakpoint="lg"
+          collapsedWidth={isMobile ? 0 : 80}
+          onBreakpoint={(broken) => {
+            setIsMobile(broken);
+            if (broken) setCollapsed(true);
+          }}
           trigger={null}
           className={`msipl-sider ${getSidebarTheme()}`}
           theme="dark"
+          style={{
+            height: isMobile ? "calc(100vh - 64px)" : "auto", // Adjust for header
+            position: isMobile && !collapsed ? "absolute" : "relative",
+            zIndex: 1000,
+            left: 0,
+            top: 0
+          }}
         >
-          <div
-            className="msipl-sider-toggle"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          </div>
+          {/* Internal Toggle only if NOT mobile */}
+          {!isMobile && (
+            <div
+              className="msipl-sider-toggle"
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            </div>
+          )}
 
           {/* Module Switcher */}
           {!collapsed && (

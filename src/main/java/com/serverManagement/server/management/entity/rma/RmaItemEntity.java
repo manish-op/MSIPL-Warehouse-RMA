@@ -121,6 +121,12 @@ public class RmaItemEntity {
     @Column(name = "depot_return_tracking_no")
     private String depotReturnTrackingNo;
 
+    @Column(name = "depot_return_dc_no")
+    private String depotReturnDcNo;
+
+    @Column(name = "depot_return_eway_bill_no")
+    private String depotReturnEwayBillNo;
+
     @Column(name = "depot_return_handler_name")
     private String depotReturnHandlerName;
 
@@ -599,6 +605,22 @@ public class RmaItemEntity {
 
     public void setDepotReturnHandlerContact(String depotReturnHandlerContact) {
         this.depotReturnHandlerContact = depotReturnHandlerContact;
+    }
+
+    public String getDepotReturnDcNo() {
+        return depotReturnDcNo;
+    }
+
+    public void setDepotReturnDcNo(String depotReturnDcNo) {
+        this.depotReturnDcNo = depotReturnDcNo;
+    }
+
+    public String getDepotReturnEwayBillNo() {
+        return depotReturnEwayBillNo;
+    }
+
+    public void setDepotReturnEwayBillNo(String depotReturnEwayBillNo) {
+        this.depotReturnEwayBillNo = depotReturnEwayBillNo;
     }
 
     public String getDepotProofOfDeliveryFileId() {

@@ -112,3 +112,30 @@
     margin: 0;
   }
 }
+
+.menu-toggle-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.menu-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='light'] .menu-toggle-btn {
+  color: #001529; /* Match light theme header text */
+}
+
+/* Ensure Logo and Company Name align well with toggle */
+.header-left {
+  gap: 4px;
+}

@@ -4,10 +4,10 @@ import "./Header.css";
 import logo from "../../images/images.png";
 import { ThemeContext } from "../../context/ThemeContext";
 import "./ThemeToggle.css";
-import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
+import { FaSignInAlt, FaSignOutAlt, FaBars } from "react-icons/fa";
 import NotificationBell from "../NotificationBell/NotificationBell";
 
-function Header() {
+function Header({ onToggleSidebar }) {
   const location = useLocation();
   const [showButton, setShowButton] = useState(true);
   const { theme, toggleTheme } = useContext(ThemeContext);
@@ -20,6 +20,15 @@ function Header() {
   return (
     <header className="header">
       <div className="header-left">
+        {onToggleSidebar && (
+          <button 
+            className="menu-toggle-btn" 
+            onClick={onToggleSidebar}
+            aria-label="Toggle Sidebar"
+          >
+            <FaBars />
+          </button>
+        )}
         <img src={logo} alt="Company Logo" className="logo" />
         <span className="companyName">Motorola Solutions India Pvt Ltd</span>
       </div>

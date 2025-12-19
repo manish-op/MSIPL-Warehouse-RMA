@@ -103,4 +103,24 @@ public class DepotDispatchRequest {
     public void setHandlerContact(String handlerContact) {
         this.handlerContact = handlerContact;
     }
+
+    private String repairStatus;
+
+    public String getRepairStatus() {
+        return repairStatus;
+    }
+
+    public void setRepairStatus(String repairStatus) {
+        this.repairStatus = repairStatus;
+    }
+
+    private String dispatchTo; // GURGAON or CUSTOMER
+
+    public String getDispatchTo() {
+        return dispatchTo;
+    }
+
+    public void setDispatchTo(String dispatchTo) {
+        this.dispatchTo = dispatchTo;
+    }
 }

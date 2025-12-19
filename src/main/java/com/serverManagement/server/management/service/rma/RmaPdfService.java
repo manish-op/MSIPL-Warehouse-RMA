@@ -19,8 +19,15 @@ import com.serverManagement.server.management.dto.rma.DeliveryChallanRequest;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import java.io.InputStream;
 
+import com.serverManagement.server.management.entity.rma.DepotDispatchEntity;
+import com.serverManagement.server.management.dao.rma.DepotDispatchDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+
 @Service
 public class RmaPdfService {
+
+    @Autowired
+    private DepotDispatchDAO depotDispatchDAO;
 
     public byte[] generateDeliveryChallan(DeliveryChallanRequest request) throws IOException {
         try (PDDocument document = new PDDocument()) {
@@ -200,9 +207,33 @@ public class RmaPdfService {
                 // Horizontal lines on right side
                 float rightRowH = rowHeight / 4;
 
-                // MSIPL/2025 | 110
+                // MSIPL/2025 | DC No
                 drawText(contentStream, "MSIPL/2025", rightX, rightY, true);
-                drawText(contentStream, "110", rightX + 100, rightY, false);
+
+                // Use requested DC No or fallback
+                final String finalDcNumber;
+                String incomingDc = request.getDcNo();
+                if (incomingDc == null || incomingDc.isEmpty()) {
+                    finalDcNumber = "1";
+                } else {
+                    finalDcNumber = incomingDc;
+                    try {
+                        boolean exists = depotDispatchDAO.findAll().stream()
+                                .anyMatch(d -> d.getDcNo() != null && d.getDcNo().equals(finalDcNumber));
+
+                        if (!exists) {
+                            DepotDispatchEntity newDispatch = new DepotDispatchEntity();
+                            newDispatch.setDcNo(finalDcNumber);
+                            newDispatch.setDispatchDate(java.time.ZonedDateTime.now());
+                            newDispatch.setCourierName("Local/Customer"); // Placeholder
+                            depotDispatchDAO.save(newDispatch);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Failed to save DC usage in PDF service: " + e.getMessage());
+                    }
+                }
+
+                drawText(contentStream, finalDcNumber, rightX + 100, rightY, false);
                 contentStream.moveTo(splitX, yPosition - rightRowH);
                 contentStream.lineTo(margin + tableWidth, yPosition - rightRowH);
                 contentStream.stroke();

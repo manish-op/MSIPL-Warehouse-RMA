@@ -540,3 +540,104 @@
 [data-theme="dark"] .ant-table-wrapper .ant-table-container {
   border: 1px solid #303030 !important;
 }
+
+/* =========================================================================
+   MOBILE RESPONSIVENESS OVERRIDES
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  /* Header Adjustments */
+  .depot-header {
+    padding: 16px;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .header-content .refresh-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* Stats Row - Stack or Grid */
+  .stats-row .ant-col {
+    width: 100% !important; /* Force full width on mobile */
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin-bottom: 8px;
+  }
+  
+  .stat-box {
+    padding: 12px;
+  }
+
+  /* Content Padding */
+  .depot-content {
+    padding: 16px;
+  }
+
+  /* In Transit Box - Stack Vertically */
+  .in-transit-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .in-transit-box .ant-space {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  
+  .in-transit-box .anticon {
+    font-size: 20px !important; /* Smaller icon */
+    align-self: flex-start;
+  }
+
+  /* RMA Group Card Header */
+  .rma-card-header {
+    flex-wrap: wrap; 
+  }
+
+  /* Item Cards */
+  .item-card {
+    border-radius: 8px; /* Slightly reduced radius */
+  }
+
+  .item-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-bottom: 8px;
+  }
+  
+  .item-row .ant-typography-secondary {
+    font-size: 11px;
+    margin-bottom: 0;
+  }
+  
+  .item-row strong, .item-row span:not(.ant-typography-secondary) {
+    font-size: 13px;
+    /* Ensure long text breaks */
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  /* Buttons */
+  .btn-dispatch, .btn-generate-dc {
+    width: 100%; /* Full width buttons on mobile */
+    margin-top: 4px;
+  }
+  
+  /* Tabs Scrollable */
+  .depot-content .ant-tabs-nav-list {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px; /* Scrollbar space if needed */
+  }
+}

@@ -30,6 +30,9 @@ public class DepotDispatchItemDto {
         dto.setDcNo(item.getDcNo());
         dto.setEwayBillNo(item.getEwayBillNo());
         dto.setDepotStage(item.getDepotStage());
+        dto.setRepairStatus(item.getRepairStatus());
+        dto.setDepotReturnDcNo(item.getDepotReturnDcNo());
+        dto.setDispatchTo(item.getDispatchTo());
         return dto;
     }
 
@@ -42,9 +45,36 @@ public class DepotDispatchItemDto {
     }
 
     private String depotStage;
+    // repairStatus is generally inherited or defined elsewhere if Duplicate, but
+    // here we just need to avoid redeclaration.
+    // If it was already there, we keep it but ensure no dupes.
+    // The lint said duplicate, so I will remove this one if it exists elsewhere.
+    // Actually, looking at the file (Step 1306/1320), I don't see another
+    // definition in the snippet,
+    // BUT the lint says there is one at line 154 (which is likely the original one
+    // I missed).
+    // I will just remove it from here.
+    private String depotReturnDcNo;
+    private String dispatchTo;
 
     public Long getId() {
         return id;
+    }
+
+    public String getDepotReturnDcNo() {
+        return depotReturnDcNo;
+    }
+
+    public void setDepotReturnDcNo(String depotReturnDcNo) {
+        this.depotReturnDcNo = depotReturnDcNo;
+    }
+
+    public String getDispatchTo() {
+        return dispatchTo;
+    }
+
+    public void setDispatchTo(String dispatchTo) {
+        this.dispatchTo = dispatchTo;
     }
 
     public void setId(Long id) {
@@ -129,5 +159,15 @@ public class DepotDispatchItemDto {
 
     public void setEwayBillNo(String ewayBillNo) {
         this.ewayBillNo = ewayBillNo;
+    }
+
+    private String repairStatus;
+
+    public String getRepairStatus() {
+        return repairStatus;
+    }
+
+    public void setRepairStatus(String repairStatus) {
+        this.repairStatus = repairStatus;
     }
 }

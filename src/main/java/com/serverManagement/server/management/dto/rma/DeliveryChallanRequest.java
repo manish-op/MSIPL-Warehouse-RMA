@@ -13,7 +13,16 @@ public class DeliveryChallanRequest {
     private String modeOfShipment;
     private String transporterId;
     private String transporterName;
+    private String dcNo;
     private List<DcItemDto> items;
+
+    public String getDcNo() {
+        return dcNo;
+    }
+
+    public void setDcNo(String dcNo) {
+        this.dcNo = dcNo;
+    }
 
     // Getters and Setters
     public String getTransporterId() {

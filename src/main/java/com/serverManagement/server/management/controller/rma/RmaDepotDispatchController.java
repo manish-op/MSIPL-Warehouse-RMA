@@ -52,6 +52,9 @@ public class RmaDepotDispatchController {
                 .toList();
     }
 
+    @Autowired
+    private com.serverManagement.server.management.dao.rma.DepotDispatchDAO depotDispatchDAO;
+
     // 2) POST: mark as dispatched to Bangalore
     @PostMapping("/depot/dispatch-to-bangalore")
     public ResponseEntity<?> dispatchToBangalore(HttpServletRequest request,
@@ -131,8 +134,38 @@ public class RmaDepotDispatchController {
             rmaAuditLogDAO.save(auditLog);
         }
 
-        rmaItemDAO.saveAll(items);
         return ResponseEntity.ok("Dispatched to Bangalore");
+    }
+
+    // 2.5) GET: Next DC Number
+    @GetMapping("/depot/next-dc-no")
+    public ResponseEntity<?> getNextDcNo() {
+        try {
+            DepotDispatchEntity lastDispatch = depotDispatchDAO.findTopByOrderByIdDesc();
+            String nextVal = "1";
+            if (lastDispatch != null && lastDispatch.getDcNo() != null) {
+                String lastDcNo = lastDispatch.getDcNo().trim();
+                try {
+                    long val = Long.parseLong(lastDcNo);
+                    nextVal = String.valueOf(val + 1);
+                } catch (NumberFormatException e) {
+                    java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)$");
+                    java.util.regex.Matcher m = p.matcher(lastDcNo);
+                    if (m.find()) {
+                        String numStr = m.group(1);
+                        long val = Long.parseLong(numStr);
+                        String prefix = lastDcNo.substring(0, lastDcNo.length() - numStr.length());
+                        nextVal = prefix + (val + 1);
+                    } else {
+                        nextVal = lastDcNo;
+                    }
+                }
+            }
+            return ResponseEntity.ok(java.util.Collections.singletonMap("dcNo", nextVal));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Collections.singletonMap("error", "Error generating DC No: " + e.getMessage()));
+        }
     }
 
     // 3) GET: depot items in transit or at depot
@@ -145,6 +178,7 @@ public class RmaDepotDispatchController {
                         "AT_DEPOT_UNREPAIRED",
                         "AT_DEPOT_REPAIRING",
                         "AT_DEPOT_REPAIRED",
+                        "IN_TRANSIT_FROM_DEPOT",
                         "GGN_RECEIVED_FROM_DEPOT",
                         "GGN_DISPATCHED_TO_CUSTOMER_HAND",
                         "GGN_DISPATCHED_TO_CUSTOMER_COURIER",
@@ -232,7 +266,12 @@ public class RmaDepotDispatchController {
 
                 String oldStage = item.getDepotStage();
                 item.setDepotStage("AT_DEPOT_REPAIRED");
-                item.setRepairStatus("REPAIRED_AT_DEPOT");
+
+                String status = req.getRepairStatus();
+                if (status == null || status.trim().isEmpty()) {
+                    status = "REPAIRED";
+                }
+                item.setRepairStatus(status + "_AT_DEPOT");
 
                 RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
                 auditLog.setRmaItemId(item.getId());
@@ -241,17 +280,18 @@ public class RmaDepotDispatchController {
                 auditLog.setRmaNo(rmaNo);
                 auditLog.setAction("DEPOT_STATUS_CHANGED");
                 auditLog.setOldValue("Stage: " + (oldStage != null ? oldStage : "UNKNOWN"));
-                auditLog.setNewValue("Stage: AT_DEPOT_REPAIRED");
+                auditLog.setNewValue("Stage: AT_DEPOT_REPAIRED (" + status + ")");
                 auditLog.setPerformedByEmail(loggedInUserEmail);
                 auditLog.setPerformedByName(loggedInUserName);
                 auditLog.setIpAddress(getClientIpAddress(request));
-                auditLog.setRemarks("Item repair completed at Depot");
+                auditLog.setRemarks("Item marked as " + status + " at Depot");
 
                 rmaAuditLogDAO.save(auditLog);
             }
 
             rmaItemDAO.saveAll(items);
-            return ResponseEntity.ok("Items marked as Repaired at Depot");
+            return ResponseEntity.ok("Items marked as "
+                    + (req.getRepairStatus() != null ? req.getRepairStatus() : "Repaired") + " at Depot");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -386,7 +426,83 @@ public class RmaDepotDispatchController {
         return ResponseEntity.ok("Items marked as Received at Gurgaon");
     }
 
-    // 7) NEW: plan dispatch from Gurgaon to Customer (by HAND or COURIER)
+    // 7) NEW: dispatch repaired depot item back to GGN or Customer
+    @PostMapping("/depot/dispatch-return")
+    public ResponseEntity<?> dispatchReturn(HttpServletRequest request,
+            @RequestBody DepotDispatchRequest req) {
+
+        String loggedInUserEmail;
+        String loggedInUserName;
+        try {
+            loggedInUserEmail = request.getUserPrincipal().getName();
+            AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+            loggedInUserName = loggedInUser != null ? loggedInUser.getName() : loggedInUserEmail;
+        } catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        List<RmaItemEntity> items = rmaItemDAO.findAllById(req.getItemIds());
+        if (items.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No items found");
+        }
+
+        for (RmaItemEntity item : items) {
+            // Only allow dispatch from correct stages
+            if (!"DEPOT".equalsIgnoreCase(item.getRepairType())) {
+                continue;
+            }
+
+            String oldStage = item.getDepotStage();
+            item.setDepotStage("IN_TRANSIT_FROM_DEPOT");
+
+            // Set Dispatch Details
+            item.setDepotReturnDcNo(req.getDcNo());
+            item.setDepotReturnEwayBillNo(req.getEwayBillNo());
+            item.setDepotReturnMethod(req.getDispatchMode() != null ? req.getDispatchMode() : "COURIER");
+            item.setDepotReturnDispatchDate(ZonedDateTime.now());
+
+            // Dispatch To Logic
+            if ("CUSTOMER".equalsIgnoreCase(req.getDispatchTo())) {
+                item.setDispatchTo("CUSTOMER");
+                item.setRepairStatus("DISPATCHED_TO_CUSTOMER_FROM_DEPOT");
+            } else {
+                item.setDispatchTo("GURGAON");
+                item.setRepairStatus("DISPATCHED_TO_GURGAON");
+            }
+
+            if ("COURIER".equalsIgnoreCase(item.getDepotReturnMethod())) {
+                item.setDepotReturnCourierName(req.getCourierName());
+                item.setDepotReturnTrackingNo(req.getTrackingNo());
+            } else {
+                // Handled locally or other method
+                item.setDepotReturnHandlerName(req.getHandlerName());
+                item.setDepotReturnHandlerContact(req.getHandlerContact());
+            }
+
+            RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
+            auditLog.setRmaItemId(item.getId());
+            String rmaNo = item.getRmaNo() != null ? item.getRmaNo()
+                    : (item.getRmaRequest() != null ? item.getRmaRequest().getRequestNumber() : null);
+            auditLog.setRmaNo(rmaNo);
+            auditLog.setAction("DEPOT_RETURN_DISPATCH");
+            auditLog.setOldValue("Stage: " + (oldStage != null ? oldStage : "UNKNOWN"));
+            auditLog.setNewValue("Stage: IN_TRANSIT_FROM_DEPOT, To: " + item.getDispatchTo());
+            auditLog.setPerformedByEmail(loggedInUserEmail);
+            auditLog.setPerformedByName(loggedInUserName);
+            auditLog.setIpAddress(getClientIpAddress(request));
+            auditLog.setRemarks("Item dispatched from Depot to " + item.getDispatchTo());
+
+            rmaAuditLogDAO.save(auditLog);
+        }
+
+        rmaItemDAO.saveAll(items);
+        return ResponseEntity.ok("Items dispatched from Depot successfully");
+    }
+
+    // 7.5) DEPRECATED/OLD: plan dispatch from Gurgaon to Customer (Local logic or
+    // secondary step)
+    // Kept for backward compatibility if needed, but above covers the depot return
+    // flow.
     @PostMapping("/depot/ggn-dispatch-plan")
     public ResponseEntity<?> planDispatchFromGgn(HttpServletRequest request,
             @RequestBody DepotDispatchRequest req) {

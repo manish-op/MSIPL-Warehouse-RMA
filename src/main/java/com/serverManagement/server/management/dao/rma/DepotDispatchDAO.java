@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DepotDispatchDAO extends JpaRepository<DepotDispatchEntity, Long> {
+    DepotDispatchEntity findTopByOrderByIdDesc();
 }
