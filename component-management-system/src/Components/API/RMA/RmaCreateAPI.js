@@ -95,7 +95,6 @@ export const RmaApi = {
       const responseData = await response.json();
       message.success("RMA Request submitted successfully!", 5);
       return { success: true, data: responseData };
-
     } catch (error) {
       message.error("Network Error: " + error.message, 5);
       return { success: false, error: error.message };
@@ -106,9 +105,9 @@ export const RmaApi = {
   getRmaDashboardStats: async () => apiGet("/rma/stats"),
 
   // Dashboard Interactive Modals
-  getRmaRequests: async (filter) => apiGet(`/rma/requests?filter=${filter || 'all'}`),
+  getRmaRequests: async (filter) => apiGet(`/rma/requests?filter=${filter || "all"}`),
   getAllItems: async () => apiGet("/rma/items/all"),
-  searchItems: async (query) => apiGet(`/rma/search/items?q=${encodeURIComponent(query || '')}`),
+  searchItems: async (query) => apiGet(`/rma/search/items?q=${encodeURIComponent(query || "")}`),
 
   // Workflow APIs
   getUnassignedItems: async () => apiGet("/rma/items/unassigned"),
@@ -143,8 +142,10 @@ export const RmaApi = {
       return { success: false, error: error.message };
     }
   },
-  //Depot Dispatch APIs
+
+  // ---------- Depot Dispatch APIs (to Depot / Bangalore) ----------
   getDepotReadyToDispatch: async () => apiGet("/rma/depot/ready-to-dispatch"),
+
   dispatchToBangalore: async (payload) => {
     const token = getAuthToken();
     if (!token) return { success: false, error: "No authentication token found" };
@@ -156,7 +157,7 @@ export const RmaApi = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -168,7 +169,9 @@ export const RmaApi = {
       return { success: false, error: error.message };
     }
   },
+
   getDepotInTransit: async () => apiGet("/rma/depot/in-transit"),
+
   markDepotReceived: async (payload) => {
     const token = getAuthToken();
     if (!token) return { success: false, error: "No authentication token found" };
@@ -180,11 +183,35 @@ export const RmaApi = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         const errorText = await response.text();
         return { success: false, error: errorText || "Failed to mark as received" };
+      }
+      const text = await response.text();
+      return { success: true, message: text };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  markDepotRepaired: async (payload) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/depot/mark-repaired`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { success: false, error: errorText || "Failed to mark as repaired" };
       }
       const text = await response.text();
       return { success: true, message: text };
@@ -205,7 +232,7 @@ export const RmaApi = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -213,6 +240,108 @@ export const RmaApi = {
       }
       const text = await response.text();
       return { success: true, message: text };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // ---------- Depot: Gurgaon side flow ----------
+  // Mark repaired depot items as received at Gurgaon
+  markDepotReceivedAtGurgaon: async (payload) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/depot/mark-received-gurgaon`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload), // { itemIds: [...] }
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { success: false, error: errorText || "Failed to mark received at Gurgaon" };
+      }
+      const text = await response.text();
+      return { success: true, message: text };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Plan dispatch from Gurgaon to customer (HAND / COURIER)
+  planDispatchFromGurgaon: async (payload) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/depot/ggn-dispatch-plan`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+        // { itemIds, dispatchMode, courierName, trackingNo, handlerName, handlerContact }
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { success: false, error: errorText || "Failed to plan dispatch from Gurgaon" };
+      }
+      const text = await response.text();
+      return { success: true, message: text };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Upload signed DC / proof of delivery and close depot cycle
+  uploadDepotProofOfDelivery: async (itemId, fileId, remarks) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/depot/upload-proof-of-delivery`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ itemId, fileId, remarks }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { success: false, error: errorText || "Failed to upload proof of delivery" };
+      }
+      const text = await response.text();
+      return { success: true, message: text };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Device returned to Gurgaon faulty again → close old RMA & create new
+  markDepotFaultyAndCreateNewRma: async (itemId) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/rma/depot/faulty-new-rma`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ itemIds: [itemId] }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { success: false, error: errorText || "Failed to create new RMA" };
+      }
+      const data = await response.text();
+      return { success: true, message: data };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -277,7 +406,8 @@ export const RmaApi = {
   // Customer APIs for auto-complete
   getAllCustomers: async () => apiGet("/rma/customers"),
 
-  searchCustomers: async (searchTerm) => apiGet(`/rma/customers/search?q=${encodeURIComponent(searchTerm || '')}`),
+  searchCustomers: async (searchTerm) =>
+    apiGet(`/rma/customers/search?q=${encodeURIComponent(searchTerm || "")}`),
 
   getCustomerById: async (customerId) => apiGet(`/rma/customers/${customerId}`),
 
@@ -288,20 +418,16 @@ export const RmaApi = {
       return { success: false, error: "No authentication token" };
     }
     try {
-      const response = await fetch(
-        `${URL}/rma/gatepass/generate/${requestNumber}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${URL}/rma/gatepass/generate/${requestNumber}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         const errorText = await response.text();
         return { success: false, error: errorText };
       }
-      // Return blob for PDF download
       const blob = await response.blob();
       return { success: true, blob };
     } catch (error) {
@@ -316,20 +442,16 @@ export const RmaApi = {
       return { success: false, error: "No authentication token" };
     }
     try {
-      const response = await fetch(
-        `${URL}/rma/outward-gatepass/generate/${requestNumber}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${URL}/rma/outward-gatepass/generate/${requestNumber}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         const errorText = await response.text();
         return { success: false, error: errorText };
       }
-      // Return blob for PDF download
       const blob = await response.blob();
       return { success: true, blob };
     } catch (error) {
@@ -348,24 +470,22 @@ export const RmaApi = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText);
       }
       const blob = await response.blob();
-      // Trigger download
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `DeliveryChallan_${data.rmaNo}.pdf`;
       document.body.appendChild(a);
       a.click();
 
-      // Delay cleanup to allow download to start
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);

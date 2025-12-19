@@ -12,6 +12,9 @@ public class DepotDispatchRequest {
     private String dcNo;
     private String ewayBillNo;
     private String remarks;
+    private String dispatchMode;
+    private String handlerName;
+    private String handlerContact;
 
     public String getRmaNo() {
         return rmaNo;
@@ -75,5 +78,29 @@ public class DepotDispatchRequest {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    public String getDispatchMode() {
+        return dispatchMode;
+    }
+
+    public void setDispatchMode(String dispatchMode) {
+        this.dispatchMode = dispatchMode;
+    }
+
+    public String getHandlerName() {
+        return handlerName;
+    }
+
+    public void setHandlerName(String handlerName) {
+        this.handlerName = handlerName;
+    }
+
+    public String getHandlerContact() {
+        return handlerContact;
+    }
+
+    public void setHandlerContact(String handlerContact) {
+        this.handlerContact = handlerContact;
     }
 }

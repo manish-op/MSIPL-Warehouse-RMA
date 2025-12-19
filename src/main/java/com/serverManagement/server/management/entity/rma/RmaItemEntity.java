@@ -102,6 +102,40 @@ public class RmaItemEntity {
     @Column(name = "last_reassignment_reason", length = 2000)
     private String lastReassignmentReason;
 
+    // ============ DEPOT RETURN TRACKING ============
+    @Column(name = "customer_name")
+    private String customerName;
+
+    @Column(name = "depot_cycle_closed")
+    private Boolean depotCycleClosed = false;
+
+    @Column(name = "depot_return_method")
+    private String depotReturnMethod; // HAND or COURIER
+
+    @Column(name = "depot_return_dispatch_date")
+    private ZonedDateTime depotReturnDispatchDate;
+
+    @Column(name = "depot_return_courier_name")
+    private String depotReturnCourierName;
+
+    @Column(name = "depot_return_tracking_no")
+    private String depotReturnTrackingNo;
+
+    @Column(name = "depot_return_handler_name")
+    private String depotReturnHandlerName;
+
+    @Column(name = "depot_return_handler_contact")
+    private String depotReturnHandlerContact;
+
+    @Column(name = "depot_proof_of_delivery_file_id")
+    private String depotProofOfDeliveryFileId;
+
+    @Column(name = "depot_proof_of_delivery_remarks")
+    private String depotProofOfDeliveryRemarks;
+
+    @Column(name = "depot_return_delivered_date")
+    private ZonedDateTime depotReturnDeliveredDate;
+
     // ============ DISPATCH TRACKING ============
     @Column(name = "dispatch_to")
     private String dispatchTo; // CUSTOMER or BANGALORE (auto-set based on repair_type)
@@ -500,6 +534,95 @@ public class RmaItemEntity {
 
     public void setLastReassignmentReason(String lastReassignmentReason) {
         this.lastReassignmentReason = lastReassignmentReason;
+    }
+
+    // ============ DEPOT RETURN GETTERS/SETTERS ============
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public Boolean getDepotCycleClosed() {
+        return depotCycleClosed;
+    }
+
+    public void setDepotCycleClosed(Boolean depotCycleClosed) {
+        this.depotCycleClosed = depotCycleClosed;
+    }
+
+    public String getDepotReturnMethod() {
+        return depotReturnMethod;
+    }
+
+    public void setDepotReturnMethod(String depotReturnMethod) {
+        this.depotReturnMethod = depotReturnMethod;
+    }
+
+    public ZonedDateTime getDepotReturnDispatchDate() {
+        return depotReturnDispatchDate;
+    }
+
+    public void setDepotReturnDispatchDate(ZonedDateTime depotReturnDispatchDate) {
+        this.depotReturnDispatchDate = depotReturnDispatchDate;
+    }
+
+    public String getDepotReturnCourierName() {
+        return depotReturnCourierName;
+    }
+
+    public void setDepotReturnCourierName(String depotReturnCourierName) {
+        this.depotReturnCourierName = depotReturnCourierName;
+    }
+
+    public String getDepotReturnTrackingNo() {
+        return depotReturnTrackingNo;
+    }
+
+    public void setDepotReturnTrackingNo(String depotReturnTrackingNo) {
+        this.depotReturnTrackingNo = depotReturnTrackingNo;
+    }
+
+    public String getDepotReturnHandlerName() {
+        return depotReturnHandlerName;
+    }
+
+    public void setDepotReturnHandlerName(String depotReturnHandlerName) {
+        this.depotReturnHandlerName = depotReturnHandlerName;
+    }
+
+    public String getDepotReturnHandlerContact() {
+        return depotReturnHandlerContact;
+    }
+
+    public void setDepotReturnHandlerContact(String depotReturnHandlerContact) {
+        this.depotReturnHandlerContact = depotReturnHandlerContact;
+    }
+
+    public String getDepotProofOfDeliveryFileId() {
+        return depotProofOfDeliveryFileId;
+    }
+
+    public void setDepotProofOfDeliveryFileId(String depotProofOfDeliveryFileId) {
+        this.depotProofOfDeliveryFileId = depotProofOfDeliveryFileId;
+    }
+
+    public String getDepotProofOfDeliveryRemarks() {
+        return depotProofOfDeliveryRemarks;
+    }
+
+    public void setDepotProofOfDeliveryRemarks(String depotProofOfDeliveryRemarks) {
+        this.depotProofOfDeliveryRemarks = depotProofOfDeliveryRemarks;
+    }
+
+    public ZonedDateTime getDepotReturnDeliveredDate() {
+        return depotReturnDeliveredDate;
+    }
+
+    public void setDepotReturnDeliveredDate(ZonedDateTime depotReturnDeliveredDate) {
+        this.depotReturnDeliveredDate = depotReturnDeliveredDate;
     }
 
     // ============ DISPATCH TRACKING GETTERS/SETTERS ============

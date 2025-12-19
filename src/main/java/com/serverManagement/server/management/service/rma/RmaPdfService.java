@@ -126,29 +126,70 @@ public class RmaPdfService {
                 textY = yPosition - rowHeight - 15;
                 drawText(contentStream, "Consignee", leftX, textY, true);
 
-                // Fixed Consignee Address (CTDI) - Spacing 70 (Reduced from 105)
                 detailsX = leftX + 70;
-                drawText(contentStream, "MOTOROLA SOLUTIONS INDIA", detailsX, textY, true);
-                textY -= 12;
-                drawText(contentStream, "PRIVATE LIMITED,", detailsX, textY, true);
-                textY -= 12;
-                drawText(contentStream, "C/O COMMUNICATION TEST", detailsX, textY, false);
-                textY -= 12;
-                drawText(contentStream, "DESIGN INDIA PRIVATE LIMITED", detailsX, textY, false);
-                textY -= 12;
-                drawText(contentStream, "No.48/1, 2nd Main Road,", detailsX, textY, false);
-                textY -= 12;
-                drawText(contentStream, "Peenya Industrial Area,", detailsX, textY, false);
-                textY -= 12;
-                drawText(contentStream, "Bangalore - 560 058 Karnataka,", detailsX, textY, false);
-                textY -= 12;
-                drawText(contentStream, "Land Mark: RBL Bank", detailsX, textY, false);
-                textY -= 12;
-                drawText(contentStream, "CONTACT NAME : K.UMAMAHESWARI", detailsX, textY, false);
-                textY -= 12;
-                drawText(contentStream, "GST # 29AAACM9343D1ZG", detailsX, textY, false);
-                textY -= 12;
-                drawText(contentStream, "Ph: +91 9844218850", detailsX, textY, false);
+                String cName = request.getConsigneeName();
+                String cAddress = request.getConsigneeAddress();
+
+                // Check if it's the default Bangalore case
+                boolean isDefaultBangalore = "Motorola Solutions India Pvt Ltd".equalsIgnoreCase(cName)
+                        && (cAddress == null || cAddress.trim().equalsIgnoreCase("Bangalore") || cAddress.isEmpty());
+
+                if (isDefaultBangalore) {
+                    drawText(contentStream, "MOTOROLA SOLUTIONS INDIA", detailsX, textY, true);
+                    textY -= 12;
+                    drawText(contentStream, "PRIVATE LIMITED,", detailsX, textY, true);
+                    textY -= 12;
+                    drawText(contentStream, "C/O COMMUNICATION TEST", detailsX, textY, false);
+                    textY -= 12;
+                    drawText(contentStream, "DESIGN INDIA PRIVATE LIMITED", detailsX, textY, false);
+                    textY -= 12;
+                    drawText(contentStream, "No.48/1, 2nd Main Road,", detailsX, textY, false);
+                    textY -= 12;
+                    drawText(contentStream, "Peenya Industrial Area,", detailsX, textY, false);
+                    textY -= 12;
+                    drawText(contentStream, "Bangalore - 560 058 Karnataka,", detailsX, textY, false);
+                    textY -= 12;
+                    drawText(contentStream, "Land Mark: RBL Bank", detailsX, textY, false);
+                    textY -= 12;
+                    drawText(contentStream, "CONTACT NAME : K.UMAMAHESWARI", detailsX, textY, false);
+                    textY -= 12;
+                    drawText(contentStream, "GST # 29AAACM9343D1ZG", detailsX, textY, false);
+                    textY -= 12;
+                    drawText(contentStream, "Ph: +91 9844218850", detailsX, textY, false);
+                } else {
+                    // Use Payload Values
+                    if (cName != null) {
+                        drawText(contentStream, cName, detailsX, textY, true);
+                        textY -= 12;
+                    }
+                    if (cAddress != null) {
+                        String[] lines = cAddress.split("\n");
+                        for (String line : lines) {
+                            // Basic wrapping or just printing lines
+                            // Avoiding proper text wrapping implementation for simplicity unless needed,
+                            // assuming users enter newlines or strings aren't infinitely long.
+                            if (line.length() > 40) {
+                                // Simple split if too long
+                                // (This is a naive approach, real wrapping is complex in PDFBox)
+                                String p1 = line.substring(0, 40);
+                                String p2 = line.substring(40);
+                                drawText(contentStream, p1, detailsX, textY, false);
+                                textY -= 12;
+                                drawText(contentStream, p2, detailsX, textY, false);
+                                textY -= 12;
+                            } else {
+                                drawText(contentStream, line, detailsX, textY, false);
+                                textY -= 12;
+                            }
+                        }
+                    }
+                    // Print GST if available in payload?
+                    // Currently DC Request has gstIn
+                    if (request.getGstIn() != null && !request.getGstIn().isEmpty()) {
+                        drawText(contentStream, "GST # " + request.getGstIn(), detailsX, textY, false);
+                        textY -= 12;
+                    }
+                }
 
                 // === RIGHT SIDE ===
                 // Top Right: Shipping Info

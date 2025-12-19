@@ -123,9 +123,11 @@ public class RmaOutwardGatepassService {
                 items = rmaItemDAO.findByRmaRequest(rmaRequest);
 
                 // Filter for REPAIRED items
-                // Use safe strings to avoid NPE
-                items.removeIf(
-                        item -> item.getRepairStatus() == null || !"REPAIRED".equalsIgnoreCase(item.getRepairStatus()));
+                // Modified to allow all items for the Request, as Depot items might have
+                // different statuses
+                // like "GGN_RECEIVED_FROM_DEPOT" etc.
+                // items.removeIf(item -> item.getRepairStatus() == null ||
+                // !"REPAIRED".equalsIgnoreCase(item.getRepairStatus()));
             }
 
             if (items.isEmpty()) {
