@@ -181,14 +181,15 @@ public class RmaService {
         // 4a. Auto-save customer details (find existing or create new)
         // This allows customers to be reused in future RMA requests
         try {
-            // Save return address customer
+            // Save return address customer with TAT
             var returnCustomer = customerService.findOrCreateCustomer(
                     createRmaRequest.getCompanyName(),
                     createRmaRequest.getContactName(),
                     createRmaRequest.getEmail(),
                     createRmaRequest.getTelephone(),
                     createRmaRequest.getMobile(),
-                    createRmaRequest.getReturnAddress());
+                    createRmaRequest.getReturnAddress(),
+                    createRmaRequest.getTat());
             rmaRequestEntity.setCustomer(returnCustomer);
 
             // Save invoice customer if different from return customer
@@ -202,7 +203,8 @@ public class RmaService {
                         createRmaRequest.getInvoiceEmail(),
                         createRmaRequest.getInvoiceTelephone(),
                         createRmaRequest.getInvoiceMobile(),
-                        createRmaRequest.getInvoiceAddress());
+                        createRmaRequest.getInvoiceAddress(),
+                        null); // Invoice customer doesn't use TAT
                 rmaRequestEntity.setInvoiceCustomer(invoiceCustomer);
             }
         } catch (Exception e) {

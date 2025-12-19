@@ -34,6 +34,9 @@ public class CreateRmaRequest {
     private String signature;
     private String repairType;
 
+    // Turn Around Time in days
+    private Integer tat;
+
     // List of Items
     private List<RmaItemRequest> items;
 
@@ -230,6 +233,14 @@ public class CreateRmaRequest {
 
     public void setItems(List<RmaItemRequest> items) {
         this.items = items;
+    }
+
+    public Integer getTat() {
+        return tat;
+    }
+
+    public void setTat(Integer tat) {
+        this.tat = tat;
     }
 
     @Override
