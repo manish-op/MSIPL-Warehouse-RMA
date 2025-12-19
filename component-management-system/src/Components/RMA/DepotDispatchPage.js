@@ -66,7 +66,6 @@ export default function DepotDispatchPage() {
   const [selectedRmaItems, setSelectedRmaItems] = useState([]);
   const [selectedDispatchItemIds, setSelectedDispatchItemIds] = useState([]);
   const [dispatchSubmitting, setDispatchSubmitting] = useState(false);
-  const [receiveSubmitting, setReceiveSubmitting] = useState(false);
   const [receivingIds, setReceivingIds] = useState(new Set());
 
   // DC Generation State
@@ -310,6 +309,7 @@ export default function DepotDispatchPage() {
         message.warning(`${excludedCount} item(s) excluded (missing RMA No or not Repaired).`);
     }
 
+  const openDcModal = async (rmaNo, rmaItems, isCustomerDispatch = false) => {
     setSelectedRmaNo(rmaNo);
     setIsReturnDispatch(isReturn);
     setIsCustomerDispatch(isCustomerDispatch);
@@ -362,6 +362,24 @@ export default function DepotDispatchPage() {
         dcNo: nextDcNo,
       });
     }
+
+    // Fetch Saved Rates
+    try {
+      const itemsToFetch = rmaItems.map(i => ({ product: i.product, model: i.model }));
+      const rateRes = await RmaApi.getProductRates(itemsToFetch);
+
+      if (rateRes.success) {
+        const ratesMap = rateRes.data;
+        const itemFormValues = tblData.map(item => {
+          const key = `${item.product?.trim() || ""}::${(item.model || "").trim()}`;
+          return { rate: ratesMap[key] || "" };
+        });
+        dcForm.setFieldsValue({ items: itemFormValues });
+      }
+    } catch (e) {
+      console.error("Failed to fetch rates", e);
+    }
+
     setDcModalVisible(true);
   };
 
@@ -507,8 +525,6 @@ export default function DepotDispatchPage() {
     const groupKey = rmaNo ? `GROUP_${rmaNo}` : null;
 
     try {
-      if (rmaNo) setReceiveSubmitting(true);
-
       setReceivingIds((prev) => {
         const next = new Set(prev);
         if (groupKey) next.add(groupKey);
@@ -530,7 +546,6 @@ export default function DepotDispatchPage() {
       console.error(err);
       message.error("Error marking received");
     } finally {
-      setReceiveSubmitting(false);
       setReceivingIds((prev) => {
         const next = new Set(prev);
         if (groupKey) next.delete(groupKey);
@@ -626,154 +641,154 @@ export default function DepotDispatchPage() {
                       <div className="rma-groups">
                         {Object.entries(groupedItems)
                           .sort(([rmaNoA, itemsA], [rmaNoB, itemsB]) => {
-                             const isAllCompletedA = itemsA.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
-                             const isAllCompletedB = itemsB.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
-                             
-                             if (!isAllCompletedA && isAllCompletedB) return -1; // A has active items, B is all done -> A comes first
-                             if (isAllCompletedA && !isAllCompletedB) return 1;  // A is all done, B has active items -> B comes first
-                             
-                             return 0;
+                            const isAllCompletedA = itemsA.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
+                            const isAllCompletedB = itemsB.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
+
+                            if (!isAllCompletedA && isAllCompletedB) return -1; // A has active items, B is all done -> A comes first
+                            if (isAllCompletedA && !isAllCompletedB) return 1;  // A is all done, B has active items -> B comes first
+
+                            return 0;
                           })
                           .map(([rmaNo, rmaItems]) => {
-                             // Sort items within the RMA
-                             rmaItems.sort((a, b) => {
-                                const isCompletedA = a.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || a.depotCycleClosed;
-                                const isCompletedB = b.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || b.depotCycleClosed;
-                                
-                                if (!isCompletedA && isCompletedB) return -1;
-                                if (isCompletedA && !isCompletedB) return 1;
-                                return 0;
-                             });
-                             
-                             return (
-                            <Card
-                              key={rmaNo}
-                              className="rma-group-card"
-                              title={
-                                <div className="rma-card-header">
-                                  <span className="rma-number">
-                                    <Tag color="#9254de">
-                                      RMA: {rmaNo}
-                                    </Tag>
-                                  </span>
-                                  <Badge
-                                    count={rmaItems.length}
-                                    style={{ backgroundColor: "#9254de" }}
-                                  />
-                                </div>
-                              }
-                              extra={
-                                <Space>
-                                  <Button
-                                    className="btn-generate-dc"
-                                    icon={<FilePdfOutlined />}
-                                    onClick={() =>
-                                      openDcModal(rmaNo, rmaItems)
-                                    }
-                                  >
-                                    Generate DC
-                                  </Button>
-                                  <Button
-                                    type="primary"
-                                    className="btn-dispatch"
-                                    icon={<SendOutlined />}
-                                    onClick={() =>
-                                      openDispatchModal(rmaNo, rmaItems)
-                                    }
-                                  >
-                                    Dispatch to Bangalore (
-                                    {rmaItems.length})
-                                  </Button>
-                                </Space>
-                              }
-                            >
-                              <Row gutter={[16, 16]}>
-                                {rmaItems.map((item) => (
-                                  <Col
-                                    xs={24}
-                                    md={12}
-                                    lg={8}
-                                    key={item.id}
-                                  >
-                                    <Card
-                                      className="item-card"
-                                      size="small"
-                                      actions={
-                                        !item.itemRmaNo
-                                          ? [
-                                              <Button
-                                                key="add-rma"
-                                                icon={<EditOutlined />}
-                                                onClick={() =>
-                                                  openEditRmaModal(item)
-                                                }
-                                              >
-                                                Add RMA No.
-                                              </Button>,
-                                            ]
-                                          : []
-                                      }
-                                      title={
-                                        <div
-                                          style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                          }}
-                                        >
-                                          <Text strong>
-                                            {item.product || "Item"}
-                                          </Text>
-                                          <Tag color="purple">
-                                            Depot Repair
-                                          </Tag>
-                                        </div>
+                            // Sort items within the RMA
+                            rmaItems.sort((a, b) => {
+                              const isCompletedA = a.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || a.depotCycleClosed;
+                              const isCompletedB = b.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || b.depotCycleClosed;
+
+                              if (!isCompletedA && isCompletedB) return -1;
+                              if (isCompletedA && !isCompletedB) return 1;
+                              return 0;
+                            });
+
+                            return (
+                              <Card
+                                key={rmaNo}
+                                className="rma-group-card"
+                                title={
+                                  <div className="rma-card-header">
+                                    <span className="rma-number">
+                                      <Tag color="#9254de">
+                                        RMA: {rmaNo}
+                                      </Tag>
+                                    </span>
+                                    <Badge
+                                      count={rmaItems.length}
+                                      style={{ backgroundColor: "#9254de" }}
+                                    />
+                                  </div>
+                                }
+                                extra={
+                                  <Space>
+                                    <Button
+                                      className="btn-generate-dc"
+                                      icon={<FilePdfOutlined />}
+                                      onClick={() =>
+                                        openDcModal(rmaNo, rmaItems)
                                       }
                                     >
-                                      <div className="item-content">
-                                        <div className="item-row">
-                                          <Text type="secondary">
-                                            Product
-                                          </Text>
-                                          <Text strong>
-                                            {item.product || "N/A"}
-                                          </Text>
-                                        </div>
-                                        <div className="item-row">
-                                          <Text type="secondary">
-                                            Serial No.
-                                          </Text>
-                                          <Text code>
-                                            {item.serialNo || "N/A"}
-                                          </Text>
-                                        </div>
-                                        <div className="item-row">
-                                          <Text type="secondary">
-                                            Model
-                                          </Text>
-                                          <Text>{item.model || "N/A"}</Text>
-                                        </div>
-                                        {item.itemRmaNo && (
-                                          <div className="item-row">
-                                            <Text type="secondary">
-                                              RMA No
+                                      Generate DC
+                                    </Button>
+                                    <Button
+                                      type="primary"
+                                      className="btn-dispatch"
+                                      icon={<SendOutlined />}
+                                      onClick={() =>
+                                        openDispatchModal(rmaNo, rmaItems)
+                                      }
+                                    >
+                                      Dispatch to Bangalore (
+                                      {rmaItems.length})
+                                    </Button>
+                                  </Space>
+                                }
+                              >
+                                <Row gutter={[16, 16]}>
+                                  {rmaItems.map((item) => (
+                                    <Col
+                                      xs={24}
+                                      md={12}
+                                      lg={8}
+                                      key={item.id}
+                                    >
+                                      <Card
+                                        className="item-card"
+                                        size="small"
+                                        actions={
+                                        !item.itemRmaNo
+                                          ? [
+                                                <Button
+                                                  key="add-rma"
+                                                  icon={<EditOutlined />}
+                                                  onClick={() =>
+                                                    openEditRmaModal(item)
+                                                  }
+                                                >
+                                                  Add RMA No. No.
+                                                </Button>,
+                                              ]
+                                          : []
+                                      }
+                                        title={
+                                          <div
+                                            style={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                            }}
+                                          >
+                                            <Text strong>
+                                              {item.product || "Item"}
                                             </Text>
                                             <Tag color="purple">
-                                              {item.itemRmaNo}
+                                              Depot Repair
                                             </Tag>
                                           </div>
-                                        )}
-                                        <div className="item-row">
-                                          <Text type="secondary">
-                                            Fault
-                                          </Text>
-                                          <Paragraph
-                                            ellipsis={{ rows: 1 }}
-                                            style={{ marginBottom: 0 }}
-                                          >
-                                            {item.faultDescription}
-                                          </Paragraph>
-                                        </div>
-                                        
+                                        }
+                                      >
+                                        <div className="item-content">
+                                          <div className="item-row">
+                                            <Text type="secondary">
+                                              Product
+                                            </Text>
+                                            <Text strong>
+                                              {item.product || "N/A"}
+                                            </Text>
+                                          </div>
+                                          <div className="item-row">
+                                            <Text type="secondary">
+                                              Serial No.
+                                            </Text>
+                                            <Text code>
+                                              {item.serialNo || "N/A"}
+                                            </Text>
+                                          </div>
+                                          <div className="item-row">
+                                            <Text type="secondary">
+                                              Model
+                                            </Text>
+                                            <Text>{item.model || "N/A"}</Text>
+                                          </div>
+                                          {item.itemRmaNo && (
+                                            <div className="item-row">
+                                              <Text type="secondary">
+                                                RMA No
+                                              </Text>
+                                              <Tag color="purple">
+                                                {item.itemRmaNo}
+                                              </Tag>
+                                            </div>
+                                          )}
+                                          <div className="item-row">
+                                            <Text type="secondary">
+                                              Fault
+                                            </Text>
+                                            <Paragraph
+                                              ellipsis={{ rows: 1 }}
+                                              style={{ marginBottom: 0 }}
+                                            >
+                                              {item.faultDescription}
+                                            </Paragraph>
+                                          </div>
+                                          
                                         {/* NEW: Dispatch Buttons for Repaired Items */}
                                         {item.depotStage === "AT_DEPOT_REPAIRED" && (
                                            <div style={{ marginTop: 8, display: 'flex', gap: '5px' }}>
@@ -796,12 +811,12 @@ export default function DepotDispatchPage() {
                                            </div>
                                         )}
                                       </div>
-                                    </Card>
-                                  </Col>
-                                ))}
-                              </Row>
-                            </Card>
-                             );
+                                      </Card>
+                                    </Col>
+                                  ))}
+                                </Row>
+                              </Card>
+                            );
                           })}
                       </div>
                     )}
@@ -826,20 +841,20 @@ export default function DepotDispatchPage() {
                       <div className="rma-groups">
                         {Object.entries(groupedInTransit)
                           .sort(([rmaNoA, itemsA], [rmaNoB, itemsB]) => {
-                             // 1. Prioritize In Transit to Depot
-                             const hasInTransitA = itemsA.some(i => i.depotStage === "IN_TRANSIT_TO_DEPOT");
-                             const hasInTransitB = itemsB.some(i => i.depotStage === "IN_TRANSIT_TO_DEPOT");
-                             if (hasInTransitA && !hasInTransitB) return -1;
-                             if (!hasInTransitA && hasInTransitB) return 1;
+                            // 1. Prioritize In Transit to Depot
+                            const hasInTransitA = itemsA.some(i => i.depotStage === "IN_TRANSIT_TO_DEPOT");
+                            const hasInTransitB = itemsB.some(i => i.depotStage === "IN_TRANSIT_TO_DEPOT");
+                            if (hasInTransitA && !hasInTransitB) return -1;
+                            if (!hasInTransitA && hasInTransitB) return 1;
 
-                             // 2. Push fully completed groups to the bottom
-                             const isAllCompletedA = itemsA.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
-                             const isAllCompletedB = itemsB.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
-                             
-                             if (!isAllCompletedA && isAllCompletedB) return -1;
-                             if (isAllCompletedA && !isAllCompletedB) return 1;
+                            // 2. Push fully completed groups to the bottom
+                            const isAllCompletedA = itemsA.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
+                            const isAllCompletedB = itemsB.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
 
-                             return 0;
+                            if (!isAllCompletedA && isAllCompletedB) return -1;
+                            if (isAllCompletedA && !isAllCompletedB) return 1;
+
+                            return 0;
                           })
                           .map(([rmaNo, rmaItems]) => {
                             const sortedItems = [...rmaItems].sort((a, b) => {
@@ -867,11 +882,11 @@ export default function DepotDispatchPage() {
                               return 0;
                             });
 
-                             const isAllCompleted = rmaItems.every(
-                               (i) =>
-                                 i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" ||
-                                 i.depotCycleClosed
-                             );
+                            const isAllCompleted = rmaItems.every(
+                              (i) =>
+                                i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" ||
+                                i.depotCycleClosed
+                            );
 
                             return (
                               <Card
@@ -977,7 +992,7 @@ export default function DepotDispatchPage() {
                                         size="small"
                                         actions={[
                                           item.depotStage ===
-                                            "IN_TRANSIT_TO_DEPOT" && (
+                                          "IN_TRANSIT_TO_DEPOT" && (
                                             <Button
                                               key="receive-item"
                                               type="text"
@@ -999,22 +1014,22 @@ export default function DepotDispatchPage() {
                                           <div style={{ marginBottom: 8 }}>
                                             {item.depotStage ===
                                               "IN_TRANSIT_TO_DEPOT" && (
-                                              <Tag color="processing">
-                                                In Transit
-                                              </Tag>
-                                            )}
+                                                <Tag color="processing">
+                                                  In Transit
+                                                </Tag>
+                                              )}
                                             {item.depotStage ===
                                               "AT_DEPOT_RECEIVED" && (
-                                              <Tag color="success">
-                                                Received at Depot
-                                              </Tag>
-                                            )}
+                                                <Tag color="success">
+                                                  Received at Depot
+                                                </Tag>
+                                              )}
                                             {item.depotStage ===
                                               "AT_DEPOT_REPAIRED" && (
-                                              <>
+                                                <>
                                                 {item.repairStatus?.includes("UNREPAIRED") && <Tag color="default">Unrepaired</Tag>}
                                                 {(!item.repairStatus || (item.repairStatus.includes("REPAIRED") && !item.repairStatus.includes("UNREPAIRED"))) && <Tag color="orange">Repaired</Tag>}
-                                                {item.repairStatus?.includes("REPLACED") && <Tag color="green">Replaced</Tag>}
+                                                  {item.repairStatus?.includes("REPLACED") && <Tag color="green">Replaced</Tag>}
                                                 {item.repairStatus?.includes("BER") && <Tag color="red">BER</Tag>}
                                               </>
                                             )}
@@ -1022,29 +1037,29 @@ export default function DepotDispatchPage() {
                                               "IN_TRANSIT_FROM_DEPOT" && (
                                               <Tag color="geekblue">
                                                 {item.dispatchTo === "CUSTOMER" ? "Dispatched Bangalore to customer" : "Dispatched to Gurgaon"}
-                                              </Tag>
-                                            )}
+                                                </Tag>
+                                              )}
                                             {item.depotStage ===
                                               "GGN_RECEIVED_FROM_DEPOT" && (
-                                              <Tag color="purple">
-                                                Received at GGN
-                                              </Tag>
-                                            )}
+                                                <Tag color="purple">
+                                                  Received at GGN
+                                                </Tag>
+                                              )}
                                             {[
                                               "GGN_DISPATCHED_TO_CUSTOMER_HAND",
                                               "GGN_DISPATCHED_TO_CUSTOMER_COURIER",
                                             ].includes(item.depotStage) && (
-                                              <Tag color="cyan">
-                                                Dispatched from GGN to customer
-                                              </Tag>
-                                            )}
+                                                <Tag color="cyan">
+                                                  Dispatched from GGN to customer
+                                                </Tag>
+                                              )}
                                             {(item.depotStage ===
                                               "GGN_DELIVERED_TO_CUSTOMER" ||
                                               item.depotCycleClosed) && (
-                                              <Tag color="#87d068">
-                                                Cycle Completed
-                                              </Tag>
-                                            )}
+                                                <Tag color="#87d068">
+                                                  Cycle Completed
+                                                </Tag>
+                                              )}
                                           </div>
                                           <div className="item-row">
                                             <Text type="secondary">
@@ -1183,33 +1198,32 @@ export default function DepotDispatchPage() {
 
                                             {item.depotStage ===
                                               "GGN_RETURNED_FAULTY" && (
-                                              <Button
-                                                danger
-                                                size="small"
-                                                onClick={async () => {
-                                                  const res =
-                                                    await RmaApi.markDepotFaultyAndCreateNewRma(
-                                                      item.id
-                                                    );
-                                                  if (res.success) {
-                                                    message.success(
-                                                      `New RMA created: ${
-                                                        res.data?.newRmaNo ||
+                                                <Button
+                                                  danger
+                                                  size="small"
+                                                  onClick={async () => {
+                                                    const res =
+                                                      await RmaApi.markDepotFaultyAndCreateNewRma(
+                                                        item.id
+                                                      );
+                                                    if (res.success) {
+                                                      message.success(
+                                                        `New RMA created: ${res.data?.newRmaNo ||
                                                         "created"
-                                                      }`
-                                                    );
-                                                    loadItems();
-                                                  } else {
-                                                    message.error(
-                                                      res.error ||
+                                                        }`
+                                                      );
+                                                      loadItems();
+                                                    } else {
+                                                      message.error(
+                                                        res.error ||
                                                         "Failed to create new RMA"
-                                                    );
-                                                  }
-                                                }}
-                                              >
-                                                Create New RMA
-                                              </Button>
-                                            )}
+                                                      );
+                                                    }
+                                                  }}
+                                                >
+                                                  Create New RMA
+                                                </Button>
+                                              )}
                                           </Space>
                                         </div>
                                       </div>

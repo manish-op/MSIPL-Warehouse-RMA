@@ -24,7 +24,7 @@ public class RmaItemEntity {
     @Column(nullable = false)
     private String product;
     private String model; // Model No./Part No.
-    @Column(nullable = false)
+    @Column(nullable = false) // Auto-filled with "N/A" for accessories without serial numbers
     private String serialNo;
 
     // Auto-generated RMA Number (Deprecated: Now stored at request level)

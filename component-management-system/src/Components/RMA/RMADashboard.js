@@ -107,7 +107,7 @@ function RmaDashboard() {
           result = allItems;
         }
       } else if (modalType === "search") {
-         result = await RmaApi.searchItems(searchQuery);
+        result = await RmaApi.searchItems(searchQuery);
       }
 
       if (result && result.success) {
@@ -137,8 +137,8 @@ function RmaDashboard() {
 
   const onSearch = (value) => {
     if (!value || value.trim() === "") {
-        message.warning("Please enter a search term");
-        return;
+      message.warning("Please enter a search term");
+      return;
     }
     setSearchQuery(value);
     setModalType("search");
@@ -165,6 +165,7 @@ function RmaDashboard() {
   const itemColumns = [
     { title: "Product", dataIndex: "product", key: "product" },
     { title: "Serial No", dataIndex: "serialNo", key: "serialNo" },
+    { title: "Model", dataIndex: "model", key: "model", render: (val) => val || "-" },
     {
       title: "RMA No", dataIndex: "itemRmaNo", key: "itemRmaNo", render: (val, record) => {
         // itemRmaNo contains the user-updated RMA number from rma_item table
@@ -195,7 +196,7 @@ function RmaDashboard() {
       case 'requests': return 'RMA Requests Details';
       case 'items': return 'All Inventory Items';
       case 'repaired': return 'Repaired History';
-      case 'unrepaired': return 'Pending / Unrepaired Items';
+      case 'unrepaired': return 'Unassigned / Pending Items';
       case 'search': return `Search Results for "${searchQuery}"`;
       default: return 'Details';
     }
@@ -214,12 +215,12 @@ function RmaDashboard() {
           </div>
           <div style={{ marginTop: 10 }}>
             <Search
-              placeholder="Search by Product or Serial No"
+              placeholder="Search by Product, Serial No, or Model No"
               allowClear
               enterButton={<Button type="primary" icon={<SearchOutlined />}>Search</Button>}
               size="large"
               onSearch={onSearch}
-              style={{ width: 400 }}
+              style={{ width: 450 }}
             />
           </div>
         </div>
@@ -274,12 +275,12 @@ function RmaDashboard() {
                 </Card>
               </Col>
 
-              {/* Card 4: Unrepaired */}
+              {/* Card 4: Unassigned */}
               <Col xs={24} sm={12} md={6}>
                 <Card className="kpi-card kpi-orange" hoverable onClick={() => handleCardClick('unrepaired')}>
                   <div className="kpi-icon-wrapper"><ClockCircleOutlined /></div>
                   <Statistic
-                    title="Unrepaired / Pending"
+                    title="Unassigned / Pending"
                     value={stats?.unrepairedCount || 0}
                     valueStyle={{ fontWeight: 'bold', fontSize: '28px' }}
                   />

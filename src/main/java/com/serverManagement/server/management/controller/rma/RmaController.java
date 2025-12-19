@@ -346,6 +346,19 @@ public class RmaController {
         }
     }
 
+    // ============ Product Values (Rates) Endpoints ============
+
+    @PostMapping("/product-rates")
+    public ResponseEntity<?> getProductRates(
+            @RequestBody List<com.serverManagement.server.management.dto.rma.ProductModelDTO> items) {
+        try {
+            return rmaService.getProductRates(items);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to fetch rates: " + e.getMessage());
+        }
+    }
+
     // ============ INWARD GATEPASS ENDPOINTS ============
 
     @Autowired

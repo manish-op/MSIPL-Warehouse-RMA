@@ -22,7 +22,11 @@ public class DepotDispatchItemDto {
         dto.setRmaNo(item.getRmaRequest() != null ? item.getRmaRequest().getRequestNumber() : null);
         dto.setItemRmaNo(item.getRmaNo()); // Map item-level RMA no
         dto.setProduct(item.getProduct());
-        dto.setSerialNo(item.getSerialNo());
+        String displaySerial = item.getSerialNo();
+        if (displaySerial != null && displaySerial.startsWith("NA-")) {
+            displaySerial = "N/A";
+        }
+        dto.setSerialNo(displaySerial);
         dto.setModel(item.getModel());
         dto.setFaultDescription(item.getFaultDescription());
         dto.setCompanyName(item.getRmaRequest() != null ? item.getRmaRequest().getCompanyName() : null);
