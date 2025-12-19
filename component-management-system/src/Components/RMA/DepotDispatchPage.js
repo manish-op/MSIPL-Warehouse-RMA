@@ -309,7 +309,7 @@ export default function DepotDispatchPage() {
         message.warning(`${excludedCount} item(s) excluded (missing RMA No or not Repaired).`);
     }
 
-  const openDcModal = async (rmaNo, rmaItems, isCustomerDispatch = false) => {
+
     setSelectedRmaNo(rmaNo);
     setIsReturnDispatch(isReturn);
     setIsCustomerDispatch(isCustomerDispatch);
@@ -370,7 +370,7 @@ export default function DepotDispatchPage() {
 
       if (rateRes.success) {
         const ratesMap = rateRes.data;
-        const itemFormValues = tblData.map(item => {
+        const itemFormValues = rmaItems.map(item => {
           const key = `${item.product?.trim() || ""}::${(item.model || "").trim()}`;
           return { rate: ratesMap[key] || "" };
         });
@@ -1835,5 +1835,4 @@ export default function DepotDispatchPage() {
       </div>
     </RmaLayout>
   );
-}
 }
