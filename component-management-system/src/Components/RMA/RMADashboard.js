@@ -97,11 +97,18 @@ function RmaDashboard() {
       } else if (modalType === "repaired") {
         result = await RmaApi.getRepairedItems();
       } else if (modalType === "unrepaired") {
+        // Match backend countUnrepaired logic: items NOT in completed statuses
         const allItems = await RmaApi.getAllItems();
         if (allItems.success) {
+          const completedStatuses = ['repaired', 'replaced', 'dispatched', 'received_at_gurgaon', 'delivered', 'closed', 'dispatched_to_customer', 'delivered_to_customer', 'repaired_at_depot', 'received_at_depot', 'dispatched_to_depot'];
           result = {
             success: true,
-            data: allItems.data.filter(item => item.repairStatus !== 'REPAIRED' && item.repairStatus !== 'REPLACED')
+            data: allItems.data.filter(item => {
+              const status = (item.repairStatus || '').toLowerCase();
+              // Include if status is empty/null OR not in completed list
+              if (!status) return true;
+              return !completedStatuses.some(s => status.includes(s));
+            })
           };
         } else {
           result = allItems;
@@ -180,12 +187,20 @@ function RmaDashboard() {
       title: "Status", dataIndex: "repairStatus", key: "repairStatus",
       render: (status) => {
         let color = 'default';
-        if (status === 'REPAIRED' || status === 'REPLACED') color = 'green';
-        if (status === 'UNASSIGNED') color = 'orange';
-        if (status === 'ASSIGNED') color = 'blue';
-        if (status === 'REPAIRING') color = 'geekblue';
-        if (status === 'BER') color = 'red';
-        return <Tag color={color}>{status}</Tag>
+        const s = (status || '').toUpperCase();
+        // Completed statuses (green)
+        if (['REPAIRED', 'REPLACED', 'REPAIRED_AT_DEPOT', 'DELIVERED', 'DELIVERED_TO_CUSTOMER', 'CLOSED'].includes(s)) color = 'green';
+        // Pending statuses (orange/blue)
+        else if (s === 'UNASSIGNED' || !status) color = 'orange';
+        else if (s === 'ASSIGNED') color = 'blue';
+        else if (s === 'REPAIRING') color = 'geekblue';
+        // Dispatched (cyan)
+        else if (['DISPATCHED', 'DISPATCHED_TO_CUSTOMER', 'DISPATCHED_TO_DEPOT'].includes(s)) color = 'cyan';
+        // Can't be repaired / BER (red)
+        else if (['BER', 'BER_AT_DEPOT', 'CANT_BE_REPAIRED'].includes(s)) color = 'red';
+        // Depot stages (purple)
+        else if (['AT_DEPOT_REPAIRED', 'RECEIVED_AT_DEPOT', 'RECEIVED_AT_GURGAON'].includes(s)) color = 'purple';
+        return <Tag color={color}>{status || 'UNASSIGNED'}</Tag>
       }
     },
     { title: "Technician", dataIndex: "assignedToName", key: "assignedToName" }
