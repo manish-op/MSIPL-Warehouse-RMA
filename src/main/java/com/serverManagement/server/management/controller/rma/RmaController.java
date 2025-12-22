@@ -105,6 +105,16 @@ public class RmaController {
         }
     }
 
+    @GetMapping("/tat-compliance-report")
+    public ResponseEntity<?> getTatComplianceReport() {
+        try {
+            return rmaService.getTatComplianceReport();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
     // ============ WORKFLOW ENDPOINTS ============
 
     @GetMapping("/items/unassigned")

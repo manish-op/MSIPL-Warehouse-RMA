@@ -1,4 +1,4 @@
-package com.serverManagement.server.management.controller;
+package com.serverManagement.server.management.controller.rma;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,7 +44,7 @@ public class FileController {
             if (originalFileName != null && originalFileName.contains(".")) {
                 fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
             }
-            
+
             String fileName = UUID.randomUUID().toString() + fileExtension;
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation);
@@ -53,10 +53,11 @@ public class FileController {
             response.put("fileId", fileName);
             response.put("fileName", fileName);
             response.put("message", "File uploaded successfully");
-            
+
             return ResponseEntity.ok(response);
         } catch (IOException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not upload file: " + ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Could not upload file: " + ex.getMessage());
         }
     }
 
@@ -69,7 +70,8 @@ public class FileController {
             if (resource.exists()) {
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType("application/octet-stream"))
-                        .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                        .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\"" + resource.getFilename() + "\"")
                         .body(resource);
             } else {
                 return ResponseEntity.notFound().build();

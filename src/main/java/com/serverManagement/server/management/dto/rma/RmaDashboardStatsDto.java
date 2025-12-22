@@ -11,6 +11,13 @@ public class RmaDashboardStatsDto {
     private List<DailyTrendDto> dailyTrends;
     private List<String> recentRmaNumbers; // Recent RMA numbers for display
 
+    // SLA Compliance Stats
+    private Long totalWithTat; // Requests that have TAT defined
+    private Long onTrackCount; // Green - within TAT with buffer
+    private Long atRiskCount; // Yellow - nearing deadline
+    private Long breachedCount; // Red - past due date
+    private Double complianceRate; // % of closed requests within TAT
+
     public RmaDashboardStatsDto() {
     }
 
@@ -79,5 +86,46 @@ public class RmaDashboardStatsDto {
 
     public void setRecentRmaNumbers(List<String> recentRmaNumbers) {
         this.recentRmaNumbers = recentRmaNumbers;
+    }
+
+    // SLA Compliance Getters and Setters
+    public Long getTotalWithTat() {
+        return totalWithTat;
+    }
+
+    public void setTotalWithTat(Long totalWithTat) {
+        this.totalWithTat = totalWithTat;
+    }
+
+    public Long getOnTrackCount() {
+        return onTrackCount;
+    }
+
+    public void setOnTrackCount(Long onTrackCount) {
+        this.onTrackCount = onTrackCount;
+    }
+
+    public Long getAtRiskCount() {
+        return atRiskCount;
+    }
+
+    public void setAtRiskCount(Long atRiskCount) {
+        this.atRiskCount = atRiskCount;
+    }
+
+    public Long getBreachedCount() {
+        return breachedCount;
+    }
+
+    public void setBreachedCount(Long breachedCount) {
+        this.breachedCount = breachedCount;
+    }
+
+    public Double getComplianceRate() {
+        return complianceRate;
+    }
+
+    public void setComplianceRate(Double complianceRate) {
+        this.complianceRate = complianceRate;
     }
 }

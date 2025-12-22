@@ -2,9 +2,6 @@ package com.serverManagement.server.management.entity.rma;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,6 +57,14 @@ public class RmaRequestEntity {
     // Repair Type (Local Repair / Depot Repair)
     @Column(name = "repair_type")
     private String repairType;
+
+    // Turn Around Time in days
+    @Column(name = "tat")
+    private Integer tat;
+
+    // Calculated deadline (createdDate + tat days)
+    @Column(name = "due_date")
+    private ZonedDateTime dueDate;
 
     // Auto-generated Request Number (created when request is submitted)
     @Column(name = "request_number", unique = true, nullable = true)
@@ -288,6 +293,22 @@ public class RmaRequestEntity {
 
     public void setRepairType(String repairType) {
         this.repairType = repairType;
+    }
+
+    public Integer getTat() {
+        return tat;
+    }
+
+    public void setTat(Integer tat) {
+        this.tat = tat;
+    }
+
+    public ZonedDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(ZonedDateTime dueDate) {
+        this.dueDate = dueDate;
     }
 
     public String getRequestNumber() {
