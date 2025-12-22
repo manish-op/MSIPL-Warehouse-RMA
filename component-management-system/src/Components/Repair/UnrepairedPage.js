@@ -393,13 +393,13 @@ export default function UnrepairedPage() {
         <RmaLayout>
             <div className="unrepaired-page">
                 {/* Header */}
-                <div className="unrepaired-header">
+                <div className="unrepaired-header header-unrepaired">
                     <div className="header-content">
                         <div className="header-title">
                             <ToolOutlined className="header-icon" />
                             <div>
-                                <Title level={2} style={{ margin: 0, color: "#fff" }}>Unrepaired Items</Title>
-                                <Text style={{ color: "rgba(255,255,255,0.7)" }}>Assign technicians and manage documentation</Text>
+                                <Title level={2} style={{ margin: 0 }}>Unrepaired Items</Title>
+                                <Text type="secondary">Assign technicians and manage documentation</Text>
                             </div>
                         </div>
                         <Button icon={<ReloadOutlined />} onClick={loadItems} loading={loading} className="refresh-btn">
@@ -427,7 +427,7 @@ export default function UnrepairedPage() {
                                                     <span className="rma-label">RMA Request</span>
                                                     <span className="rma-value">{rmaItems[0]?.itemRmaNo || rmaNo}</span>
                                                 </div>
-                                                <Badge count={rmaItems.length} style={{ backgroundColor: '#108ee9' }} />
+                                                <Badge count={rmaItems.length} />
                                                 <Tag color={rmaItems[0]?.repairType === "Local Repair" ? "purple" : "orange"}>
                                                     {rmaItems[0]?.repairType || "Standard"}
                                                 </Tag>

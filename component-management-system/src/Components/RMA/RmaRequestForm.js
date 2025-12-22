@@ -197,9 +197,8 @@ function RmaRequestForm() {
     const product = productCatalog.find(p => p.name === value);
     const items = form.getFieldValue("items") || [];
 
-    // Always update product name (store as string if possible, or keep as array if antd forces it)
-    // We'll handle both in finalSubmit but let's try to keep it as string in form state if we can
-    items[index] = { ...items[index], product: value };
+    // Keep as array because Select mode="tags" requires array value
+    items[index] = { ...items[index], product: Array.isArray(val) ? val : [val] };
 
     if (product && (product.model || product.partNo)) {
       items[index].partNo = product.model || product.partNo || "";
@@ -231,6 +230,11 @@ function RmaRequestForm() {
   const nextStep = async () => {
     const isValid = await validateStep(currentStep);
     if (isValid) {
+      if (currentStep === 2) {
+        if (!form.getFieldValue("signature")) {
+          form.setFieldsValue({ signature: form.getFieldValue("contactName") });
+        }
+      }
       setCurrentStep(currentStep + 1);
     }
   };
@@ -792,7 +796,7 @@ function RmaRequestForm() {
                         <Row gutter={[16, 0]}>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Codeplug" name={[name, "codeplugProgramming"]}>
-                              <Select placeholder="Select" defaultValue="Default">
+                              <Select placeholder="Select">
                                 <Option value="Default">Default</Option>
                                 <Option value="Customer Codeplug">Customer Codeplug</Option>
                               </Select>
@@ -810,7 +814,7 @@ function RmaRequestForm() {
                           </Col>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="FM/UL/ATEX" name={[name, "fmUlAtex"]}>
-                              <Select placeholder="Select" defaultValue="N">
+                              <Select placeholder="Select">
                                 <Option value="N">Non FM/UL/ATEX</Option>
                                 <Option value="Y-FM">FM Certified</Option>
                                 <Option value="Y-UL">UL Certified</Option>
@@ -822,7 +826,7 @@ function RmaRequestForm() {
                         <Row gutter={[16, 0]}>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Encryption" name={[name, "encryption"]}>
-                              <Select placeholder="Select" defaultValue="None">
+                              <Select placeholder="Select">
                                 <Option value="TETRA">Tetra</Option>
                                 <Option value="ASTRO">Astro</Option>
                               </Select>
@@ -866,7 +870,11 @@ function RmaRequestForm() {
 
                     <Button
                       type="dashed"
-                      onClick={() => add()}
+                      onClick={() => add({
+                        codeplugProgramming: "Default",
+                        fmUlAtex: "N",
+                        encryption: "None"
+                      })}
                       block
                       icon={<PlusOutlined />}
                       className="add-item-btn"
@@ -955,7 +963,6 @@ function RmaRequestForm() {
                   <Input
                     placeholder="Enter your name"
                     size="large"
-                    defaultValue={form.getFieldValue("contactName")}
                   />
                 </Form.Item>
               </div>

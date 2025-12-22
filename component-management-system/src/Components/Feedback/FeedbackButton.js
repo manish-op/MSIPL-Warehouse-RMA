@@ -83,7 +83,7 @@ const FeedbackButton = () => {
                 onCancel={handleClose}
                 footer={null}
                 width={650}
-                bodyStyle={{ padding: 0 }}
+                styles={{ body: { padding: 0 } }}
                 centered
             >
                 <div className="feedback-iframe-container">

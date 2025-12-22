@@ -151,6 +151,18 @@
    3. NEW DASHBOARD STYLING (For the new JS code)
    ========================================================================== */
 
+:root {
+  --status-success: #52c41a;
+  --status-warning: #faad14;
+  --status-error: #f5222d;
+}
+
+[data-theme='dark'] {
+  --status-success: #95de64;
+  --status-warning: #ffd666;
+  --status-error: #ff7875;
+}
+
 .rma-dashboard-container {
   padding: 24px;
   max-width: 1600px;
@@ -532,4 +544,132 @@ html[data-theme='dark'] .msipl-sider.theme-purple .ant-menu-item-selected,
   background: #1890ff !important;
   background-image: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%) !important;
   color: #fff !important;
+}
+
+
+/*6. RESPONSIVE / MOBILE FIXES*/
+
+
+.dashboard-search-wrapper {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.dashboard-search-input {
+  width: 100%;
+  max-width: 450px;
+}
+
+@media screen and (max-width: 768px) {
+  .rma-dashboard-container {
+    padding: 12px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .dashboard-search-wrapper {
+    margin-top: 0;
+  }
+
+  .dashboard-search-input {
+    max-width: 100%;
+  }
+
+  .welcome-text {
+    font-size: 20px;
+  }
+
+  .kpi-card {
+    margin-bottom: 8px;
+  }
+}
+/* TAT Compliance Status Section */
+.compliance-rate-container {
+  text-align: center;
+  padding: 16px;
+}
+
+.compliance-percentage {
+  margin: 0 !important;
+}
+[data-theme='dark'] .compliance-percentage.status-success { color: #95de64 !important; }
+[data-theme='dark'] .compliance-percentage.status-warning { color: #ffd666 !important; }
+[data-theme='dark'] .compliance-percentage.status-error { color: #ff7875 !important; }
+
+.compliance-indicator.status-success { background: rgba(82, 196, 26, 0.1); color: var(--status-success); }
+.compliance-indicator.status-warning { background: rgba(250, 173, 20, 0.1); color: var(--status-warning); }
+.compliance-indicator.status-error { background: rgba(245, 34, 45, 0.1); color: var(--status-error); }
+
+[data-theme='dark'] .compliance-indicator.status-success { background: rgba(149, 222, 100, 0.1); }
+[data-theme='dark'] .compliance-indicator.status-warning { background: rgba(255, 214, 102, 0.1); }
+[data-theme='dark'] .compliance-indicator.status-error { background: rgba(255, 120, 117, 0.1); }
+
+.compliance-label {
+  margin-top: 8px !important;
+  display: block;
+}
+
+.tat-card {
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.tat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1) !important;
+}
+
+.tat-on-track {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%) !important;
+}
+.tat-on-track .ant-statistic-title,
+.tat-on-track .ant-statistic-content {
+  color: #389e0d !important;
+}
+
+.tat-at-risk {
+  background: linear-gradient(135deg, #fffbe6 0%, #ffe58f 100%) !important;
+}
+.tat-at-risk .ant-statistic-title,
+.tat-at-risk .ant-statistic-content {
+  color: #d48806 !important;
+}
+
+.tat-breached {
+  background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%) !important;
+}
+.tat-breached .ant-statistic-title,
+.tat-breached .ant-statistic-content {
+  color: #cf1322 !important;
+}
+
+/* Dark Mode Overrides for TAT Cards */
+html[data-theme='dark'] .tat-on-track {
+  background: linear-gradient(135deg, #112110 0%, #234d1b 100%) !important;
+}
+html[data-theme='dark'] .tat-on-track .ant-statistic-title,
+html[data-theme='dark'] .tat-on-track .ant-statistic-content {
+  color: #95de64 !important;
+}
+
+html[data-theme='dark'] .tat-at-risk {
+  background: linear-gradient(135deg, #2b2111 0%, #594414 100%) !important;
+}
+html[data-theme='dark'] .tat-at-risk .ant-statistic-title,
+html[data-theme='dark'] .tat-at-risk .ant-statistic-content {
+  color: #ffd666 !important;
+}
+
+html[data-theme='dark'] .tat-breached {
+  background: linear-gradient(135deg, #2a1215 0%, #5c0011 100%) !important;
+}
+html[data-theme='dark'] .tat-breached .ant-statistic-title,
+html[data-theme='dark'] .tat-breached .ant-statistic-content {
+  color: #ff7875 !important;
 }

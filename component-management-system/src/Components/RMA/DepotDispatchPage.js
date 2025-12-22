@@ -24,7 +24,6 @@ import {
   Upload,
   Dropdown,
   Alert,
-  
 } from "antd";
 import {
   CarOutlined,
@@ -35,8 +34,6 @@ import {
   EditOutlined,
   DownOutlined,
   BarcodeOutlined,
-  InfoCircleOutlined,
-  EnvironmentOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
 import RmaLayout from "./RmaLayout";
@@ -44,7 +41,7 @@ import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import { URL } from "../API/URL";
 import "./DepotDispatchPage.css"; 
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const PREDEFINED_TRANSPORTERS = {
   "Blue Dart Express": "27AAACB0446L1ZS",
@@ -78,8 +75,8 @@ export default function DepotDispatchPage() {
   const [dcForm] = Form.useForm();
   const [dcSubmitting, setDcSubmitting] = useState(false);
   const [transporters, setTransporters] = useState([]);
-  const [isNewTransporter, setIsNewTransporter] = useState(false);
   const [dcTableData, setDcTableData] = useState([]);
+  const [isNewTransporter, setIsNewTransporter] = useState(false); // Added this based on handleTransporterChange usage
 
   //Gurgaon side state
   const [ggnPlanModalVisible, setGgnPlanModalVisible] = useState(false);
@@ -92,8 +89,7 @@ export default function DepotDispatchPage() {
   // New DC Fields
   const [ggnAddress, setGgnAddress] = useState("");
   const [ggnState, setGgnState] = useState("");
-  const [ggnCity, setGgnCity] = useState("");
-  const [ggnKw, setGgnKw] = useState(""); 
+  const [ggnCity, setGgnCity] = useState(""); // Added this based on openGgnDispatchModal usage
   const [ggnTransporterId, setGgnTransporterId] = useState("");
   const [ggnGst, setGgnGst] = useState("");
   const [ggnValue, setGgnValue] = useState("");
@@ -190,7 +186,6 @@ export default function DepotDispatchPage() {
   }, {});
 
   const totalRma = Object.keys(groupedItems).length;
-  const totalItems = items.length;
   const totalInTransitRma = Object.keys(groupedInTransit).length;
   const totalInTransitItems = inTransitItems.length;
 
@@ -543,15 +538,15 @@ export default function DepotDispatchPage() {
   return (
     <RmaLayout>
       <div className="depot-page">
-        <div className="depot-header" style={{background: "linear-gradient(135deg, #722ed1 0%, #9254de 100%)", boxShadow: "0 4px 20px rgba(114, 46, 209, 0.3)"}}>
+        <div className="unrepaired-header header-depot">
           <div className="header-content">
             <div className="header-title">
               <CarOutlined className="header-icon" />
               <div>
-                <Title level={2} style={{ margin: 0, color: "#fff" }}>
+                <Title level={2} style={{ margin: 0 }}>
                   Depot Dispatch &amp; Receiving
                 </Title>
-                <Text style={{ color: "rgba(255,255,255,0.85)" }}>
+                <Text type="secondary">
                   Manage dispatch to Bangalore and confirm receipt
                 </Text>
               </div>
@@ -574,7 +569,7 @@ export default function DepotDispatchPage() {
             items={[
               {
                 key: "1",
-                label: `Ready to Dispatch (${totalItems})`,
+                label: `Ready to Dispatch (${items.length})`,
                 children: (
                   <>
                     {loading ? (
@@ -599,12 +594,10 @@ export default function DepotDispatchPage() {
                             return 0;
                           })
                           .map(([rmaNo, rmaItems]) => {
-                            const isAllCompleted = rmaItems.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
                             return (
                               <Card
                                 key={rmaNo}
                                 className="rma-group-card"
-                                style={{borderLeft: "4px solid #722ed1"}}
                                 title={
                                   <div className="rma-card-header-flex">
                                     <div className="rma-identity">
@@ -612,7 +605,7 @@ export default function DepotDispatchPage() {
                                             <span className="rma-label">RMA Request</span>
                                             <span className="rma-value">{rmaNo}</span>
                                         </div>
-                                        <Badge count={rmaItems.length} style={{ backgroundColor: "#722ed1" }} />
+                                        <Badge count={rmaItems.length} />
                                     </div>
                                     <div className="rma-actions">
                                       <Button
@@ -626,7 +619,6 @@ export default function DepotDispatchPage() {
                                         type="primary"
                                         className="btn-dispatch"
                                         icon={<SendOutlined />}
-                                        style={{background: "#722ed1", borderColor: "#722ed1"}}
                                         onClick={() => openDispatchModal(rmaNo, rmaItems)}
                                       >
                                         Dispatch to Bangalore
@@ -638,10 +630,10 @@ export default function DepotDispatchPage() {
                                 {/* MODERN CARD GRID LAYOUT START */}
                                 <div className="rma-items-grid">
                                   {rmaItems.map((item) => (
-                                    <div key={item.id} className="rma-item-card-modern" style={{ borderColor: "#d9d9d9" }}>
+                                    <div key={item.id} className="rma-item-card-modern">
                                       {/* Header Strip */}
-                                      <div className="item-header" style={{ background: "#f9f0ff" }}>
-                                        <span className="item-product" style={{ color: "#722ed1" }}>{item.product || "Product"}</span>
+                                      <div className="item-header">
+                                        <span className="item-product">{item.product || "Product"}</span>
                                         <Tag color="purple">Depot Repair</Tag>
                                       </div>
 
@@ -662,8 +654,8 @@ export default function DepotDispatchPage() {
                                       </div>
 
                                       {/* Fault Box */}
-                                      <div className="fault-box" style={{background: "#f9f9f9", borderColor: "#eee"}}>
-                                        <span className="label" style={{color: "#888"}}>Fault Description</span>
+                                      <div className="fault-box">
+                                        <span className="label">Fault Description</span>
                                         <p className="fault-desc">{item.faultDescription}</p>
                                       </div>
 
@@ -714,7 +706,6 @@ export default function DepotDispatchPage() {
                               <Card
                                 key={rmaNo}
                                 className="rma-group-card"
-                                style={{borderLeft: "4px solid #13c2c2"}}
                                 title={
                                   <div className="rma-card-header-flex">
                                     <div className="rma-identity">
@@ -722,7 +713,7 @@ export default function DepotDispatchPage() {
                                             <span className="rma-label">RMA Request</span>
                                             <span className="rma-value">{rmaNo}</span>
                                         </div>
-                                        <Badge count={rmaItems.length} style={{ backgroundColor: "#13c2c2" }} />
+                                        <Badge count={rmaItems.length} />
                                     </div>
                                     <div className="rma-actions">
                                       <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap: '5px'}}>
@@ -741,8 +732,8 @@ export default function DepotDispatchPage() {
                                   </div>
                                 }
                               >
-                                 <div style={{padding: '0 16px 16px 16px', display:'flex', gap:'20px', alignItems:'center', background:'#f0f5ff', borderRadius:'4px', marginBottom:'16px'}}>
-                                     <CarOutlined style={{ fontSize: 24, color: "#13c2c2" }} />
+                                 <div className="fault-box" style={{margin: '0 0 16px 0', display:'flex', gap:'20px', alignItems:'center'}}>
+                                     <CarOutlined />
                                      <div>
                                          <Text type="secondary" style={{ fontSize: 12 }}>DC Number</Text>
                                          <div style={{fontWeight: 600}}>
@@ -771,10 +762,10 @@ export default function DepotDispatchPage() {
                                 {/* MODERN CARD GRID FOR TRANSIT ITEMS */}
                                 <div className="rma-items-grid">
                                   {sortedItems.map((item) => (
-                                    <div key={item.id} className="rma-item-card-modern" style={{ borderColor: item.depotStage === "IN_TRANSIT_TO_DEPOT" ? "#91d5ff" : "#b7eb8f" }}>
+                                    <div key={item.id} className="rma-item-card-modern">
                                         {/* Header */}
-                                        <div className="item-header" style={{ background: item.depotStage === "IN_TRANSIT_TO_DEPOT" ? "#e6f7ff" : "#f6ffed" }}>
-                                            <span className="item-product" style={{ color: "#0050b3" }}>{item.product}</span>
+                                        <div className="item-header">
+                                            <span className="item-product">{item.product}</span>
                                             {item.depotStage === "IN_TRANSIT_TO_DEPOT" && <Tag color="processing">In Transit</Tag>}
                                             {item.depotStage === "AT_DEPOT_RECEIVED" && <Tag color="success">Received at Depot</Tag>}
                                             {item.depotStage === "AT_DEPOT_REPAIRED" && (
@@ -818,12 +809,12 @@ export default function DepotDispatchPage() {
                                         </div>
 
                                         {/* Fault/Remarks */}
-                                        <div className="fault-box" style={{background: "#f9f9f9"}}>
-                                            <span className="label" style={{color: "#888"}}>Fault</span>
+                                        <div className="fault-box">
+                                            <span className="label">Fault Description</span>
                                             <p className="fault-desc" style={{marginBottom:'4px'}}>{item.faultDescription}</p>
                                             {item.repairRemarks && (
                                                 <>
-                                                    <span className="label" style={{color: "#faad14", marginTop: '4px'}}>Repair Note</span>
+                                                    <span className="label">Repair Note</span>
                                                     <p className="fault-desc">{item.repairRemarks}</p>
                                                 </>
                                             )}
@@ -837,7 +828,6 @@ export default function DepotDispatchPage() {
                                                 <Button type="primary" size="small" icon={<CheckCircleOutlined />} 
                                                     loading={receivingIds.has(item.id)}
                                                     onClick={() => handleMarkReceived(item)}
-                                                    style={{background: "#52c41a", borderColor: "#52c41a"}}
                                                 >
                                                     Receive Item
                                                 </Button>
@@ -861,7 +851,7 @@ export default function DepotDispatchPage() {
                                                         }
                                                     }}
                                                 >
-                                                    <Button size="small" type="primary" style={{backgroundColor: "#faad14", borderColor: "#faad14"}}>
+                                                    <Button size="small" type="primary">
                                                         Mark Status <DownOutlined />
                                                     </Button>
                                                 </Dropdown>
@@ -873,7 +863,7 @@ export default function DepotDispatchPage() {
                                                     <Button type="primary" size="small" style={{flex:1}} onClick={() => openDcModal(rmaNo, [item], false, true)}>
                                                         To Gurgaon
                                                     </Button>
-                                                    <Button type="primary" size="small" style={{flex:1, background: "#52c41a", borderColor: "#52c41a"}} onClick={() => openDcModal(rmaNo, [item], true, true)}>
+                                                    <Button type="primary" size="small" style={{flex:1}} onClick={() => openDcModal(rmaNo, [item], true, true)}>
                                                         To Customer
                                                     </Button>
                                                 </div>
@@ -896,7 +886,7 @@ export default function DepotDispatchPage() {
                                             {/* Upload Signed DC */}
                                             { (["GGN_DISPATCHED_TO_CUSTOMER_HAND", "GGN_DISPATCHED_TO_CUSTOMER_COURIER"].includes(item.depotStage) || 
                                               (item.depotStage === "IN_TRANSIT_FROM_DEPOT" && item.dispatchTo === "CUSTOMER")) && (
-                                                <Button size="small" type="primary" style={{ background: "#faad14", borderColor: "#faad14" }}
+                                                <Button size="small" type="primary"
                                                     onClick={() => {
                                                         setSelectedItem(item);
                                                         setGgnProofFileId(null);
@@ -1020,8 +1010,8 @@ export default function DepotDispatchPage() {
         <Modal
           title={
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {isReturnDispatch ? <SendOutlined style={{ color: "#1890ff" }} /> : <FilePdfOutlined style={{ color: "#faad14" }} />}
-              <span>{isReturnDispatch ? "Dispatch Details" : "Generate Delivery Challan"}</span>
+              {isReturnDispatch ? <SendOutlined /> : <FilePdfOutlined />}
+              <Title level={4} style={{ margin: 0 }}>{isReturnDispatch ? "Dispatch Details" : "Generate Delivery Challan"}</Title>
             </div>
           }
           open={dcModalVisible}
@@ -1061,7 +1051,6 @@ export default function DepotDispatchPage() {
                 <Card
                   title="Consignor Details"
                   size="small"
-                  style={{ background: "#f9f9f9" }}
                 >
                   <p>
                     <strong>Motorola Solutions India</strong>

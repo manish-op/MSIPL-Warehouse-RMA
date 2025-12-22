@@ -114,25 +114,23 @@
 }
 
 .menu-toggle-btn {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   font-size: 24px;
   color: #fff;
   cursor: pointer;
   margin-right: 12px;
   display: flex;
   align-items: center;
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px;
   transition: all 0.2s;
 }
 
-.menu-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
 [data-theme='light'] .menu-toggle-btn {
-  color: #001529; /* Match light theme header text */
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #001529;
 }
 
 /* Ensure Logo and Company Name align well with toggle */

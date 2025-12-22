@@ -376,14 +376,13 @@ export default function RepairedPage() {
     return (
         <RmaLayout>
             <div className="unrepaired-page">
-                {/* Header - Green Theme */}
-                <div className="unrepaired-header" style={{ background: "linear-gradient(135deg, #389e0d 0%, #52c41a 100%)" }}>
+                <div className="unrepaired-header header-repaired">
                     <div className="header-content">
                         <div className="header-title">
                             <CheckCircleOutlined className="header-icon" />
                             <div>
-                                <Title level={2} style={{ margin: 0, color: "#fff" }}>Local Repaired Items</Title>
-                                <Text style={{ color: "rgba(255,255,255,0.85)" }}>Items repaired locally and ready for dispatch</Text>
+                                <Title level={2} style={{ margin: 0 }}>Local Repaired Items</Title>
+                                <Text type="secondary">Items repaired locally and ready for dispatch</Text>
                             </div>
                         </div>
                         <Button icon={<ReloadOutlined />} onClick={loadItems} loading={loading} className="refresh-btn">Refresh</Button>
@@ -436,12 +435,12 @@ export default function RepairedPage() {
                                                                 <span className="rma-label">RMA Request</span>
                                                                 <span className="rma-value">{rmaNo}</span>
                                                             </div>
-                                                            <Badge count={rmaItems.length} style={{ backgroundColor: "#52c41a" }} />
+                                                            <Badge count={rmaItems.length} />
                                                         </div>
                                                         <div className="rma-actions">
                                                             <Button icon={<EyeOutlined />} onClick={() => openPreview(rmaItems, rmaNo)}>Outpass</Button>
                                                             <Button icon={<FilePdfOutlined />} onClick={() => openDcModal(rmaNo, rmaItems)}>DC</Button>
-                                                            <Button type="primary" icon={<SendOutlined />} onClick={() => openDispatchModal(rmaNo, rmaItems)} style={{ background: "#52c41a", borderColor: "#52c41a" }}>Dispatch</Button>
+                                                            <Button type="primary" icon={<SendOutlined />} onClick={() => openDispatchModal(rmaNo, rmaItems)}>Dispatch</Button>
                                                         </div>
                                                     </div>
                                                 }
@@ -449,9 +448,9 @@ export default function RepairedPage() {
                                                 {/* MODIFIED CARD LAYOUT */}
                                                 <div className="rma-items-grid">
                                                     {rmaItems.map((item) => (
-                                                        <div key={item.id} className="rma-item-card-modern" style={{ borderColor: item.repairStatus === "BER" ? "#ffccc7" : "#b7eb8f" }}>
-                                                            <div className="item-header" style={{ background: item.repairStatus === "BER" ? "#fff2f0" : "#f6ffed" }}>
-                                                                <span className="item-product" style={{color: item.repairStatus === "BER" ? "#cf1322" : "#389e0d"}}>{item.product || "Product"}</span>
+                                                        <div key={item.id} className="rma-item-card-modern">
+                                                            <div className="item-header">
+                                                                <span className="item-product">{item.product || "Product"}</span>
                                                                 {item.repairStatus === "BER" ? 
                                                                     <Tag color="red" icon={<WarningOutlined />}>BER</Tag> : 
                                                                     <Tag color="green" icon={<CheckCircleOutlined />}>REPAIRED</Tag>
@@ -477,8 +476,8 @@ export default function RepairedPage() {
                                                                 </div>
                                                             </div>
 
-                                                            <div className="fault-box" style={{background: "#f9f9f9", borderColor: "#f0f0f0"}}>
-                                                                <span className="label" style={{color: "#8c8c8c"}}>Repair Remarks</span>
+                                                            <div className="fault-box">
+                                                                <span className="label">Repair Remarks</span>
                                                                 <p className="fault-desc">{item.repairRemarks || "No remarks provided."}</p>
                                                             </div>
 
@@ -507,7 +506,6 @@ export default function RepairedPage() {
                                             <Card
                                                 key={rmaNo}
                                                 className="rma-group-card"
-                                                style={{ borderLeft: "4px solid #1890ff" }}
                                                 title={
                                                     <div className="rma-card-header-flex">
                                                         <div className="rma-identity">
@@ -515,7 +513,7 @@ export default function RepairedPage() {
                                                                 <span className="rma-label">RMA Request</span>
                                                                 <span className="rma-value">{rmaNo}</span>
                                                             </div>
-                                                            <Badge count={rmaItems.length} style={{ backgroundColor: "#1890ff" }} />
+                                                            <Badge count={rmaItems.length} />
                                                         </div>
                                                         <div className="rma-actions">
                                                             <Tag color="blue" icon={<SendOutlined />}>DISPATCHED</Tag>
@@ -531,9 +529,9 @@ export default function RepairedPage() {
                                                 {/* MODIFIED DISPATCHED CARD LAYOUT */}
                                                 <div className="rma-items-grid">
                                                     {rmaItems.map((item) => (
-                                                        <div key={item.id} className="rma-item-card-modern" style={{ borderColor: item.isDelivered ? "#b7eb8f" : "#91d5ff" }}>
-                                                            <div className="item-header" style={{ background: item.isDelivered ? "#f6ffed" : "#e6f7ff" }}>
-                                                                <span className="item-product" style={{color: "#0050b3"}}>{item.product}</span>
+                                                        <div key={item.id} className="rma-item-card-modern">
+                                                            <div className="item-header">
+                                                                <span className="item-product">{item.product}</span>
                                                                 {item.isDelivered ? 
                                                                     <Tag color="green">DELIVERED</Tag> : 
                                                                     <Tag color="blue">IN TRANSIT</Tag>
@@ -564,8 +562,8 @@ export default function RepairedPage() {
                                                             </div>
 
                                                             {item.isDelivered && (
-                                                                <div className="fault-box" style={{background: "#f6ffed", borderColor: "#b7eb8f"}}>
-                                                                    <span className="label" style={{color: "#389e0d"}}>Delivery Details</span>
+                                                                <div className="fault-box">
+                                                                    <span className="label">Delivery Details</span>
                                                                     <p className="fault-desc">
                                                                         Received by: <strong>{item.deliveredTo}</strong><br/>
                                                                         Date: {new Date(item.deliveryDate).toLocaleDateString()}
@@ -609,11 +607,11 @@ export default function RepairedPage() {
                     </Form>
                 </Modal>
 
-                <Modal title="Generate Delivery Challan" open={dcModalVisible} onCancel={() => setDcModalVisible(false)} width={1000} footer={[<Button key="cancel" onClick={() => setDcModalVisible(false)}>Cancel</Button>, <Button key="gen" type="primary" icon={<FilePdfOutlined />} onClick={() => dcForm.submit()} loading={dcSubmitting} style={{ background: "#faad14", borderColor: "#faad14" }}>Generate DC</Button>]}>
+                <Modal title="Generate Delivery Challan" open={dcModalVisible} onCancel={() => setDcModalVisible(false)} width={1000} footer={[<Button key="cancel" onClick={() => setDcModalVisible(false)}>Cancel</Button>, <Button key="gen" type="primary" icon={<FilePdfOutlined />} onClick={() => dcForm.submit()} loading={dcSubmitting}>Generate DC</Button>]}>
                     <Form form={dcForm} layout="vertical" onFinish={handleGenerateDC} initialValues={{ modeOfShipment: "ROAD", boxes: "1" }}>
                         <Row gutter={16}>
                             <Col span={12}>
-                                <Card title="Consignor Details" size="small" style={{ background: '#f9f9f9' }}>
+                                <Card title="Consignor Details" size="small">
                                     <p><strong>Motorola Solutions India</strong></p>
                                     <p>A, Building 8, DLF</p>
                                     <p>Gurgaon, Haryana, India</p>

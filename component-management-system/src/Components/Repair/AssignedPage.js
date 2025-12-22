@@ -222,15 +222,15 @@ export default function AssignedPage() {
         <RmaLayout>
             <div className="unrepaired-page">
                 {/* Header Section - Light Blue Theme (Matches Unrepaired) */}
-                <div className="unrepaired-header" style={{ background: "linear-gradient(90deg, #6aa1e6 0%, #36cfc9 100%)", boxShadow: "0 4px 12px rgba(24, 144, 255, 0.15)" }}>
+                <div className="unrepaired-header header-assigned">
                     <div className="header-content">
                         <div className="header-title">
                             <UserSwitchOutlined className="header-icon" />
                             <div>
-                                <Title level={2} style={{ margin: 0, color: "#fff" }}>
+                                <Title level={2} style={{ margin: 0 }}>
                                     Assigned Items
                                 </Title>
-                                <Text style={{ color: "rgba(255,255,255,0.85)" }}>
+                                <Text type="secondary">
                                     Items currently being worked on by technicians
                                 </Text>
                             </div>
@@ -287,7 +287,6 @@ export default function AssignedPage() {
                                 <Card
                                     key={rmaNo}
                                     className="rma-group-card"
-                                    style={{ borderLeft: "4px solid #1890ff" }}
                                     title={
                                         <div className="rma-card-header-flex">
                                             <div className="rma-identity">
@@ -297,7 +296,6 @@ export default function AssignedPage() {
                                                 </div>
                                                 <Badge
                                                     count={rmaItems.length}
-                                                    style={{ backgroundColor: "#1890ff" }}
                                                     overflowCount={99}
                                                 />
                                             </div>
@@ -307,11 +305,11 @@ export default function AssignedPage() {
                                     {/* MODERN CARD GRID */}
                                     <div className="rma-items-grid">
                                         {rmaItems.map((item) => (
-                                            <div key={item.id} className="rma-item-card-modern" style={{ borderColor: item.repairStatus === "BER" ? "#ffccc7" : "#91d5ff" }}>
+                                            <div key={item.id} className="rma-item-card-modern">
                                                 
                                                 {/* Header Strip */}
-                                                <div className="item-header" style={{ background: item.repairStatus === "BER" ? "#fff1f0" : "#e6f7ff" }}>
-                                                    <span className="item-product" style={{ color: item.repairStatus === "BER" ? "#cf1322" : "#0050b3" }}>
+                                                <div className="item-header">
+                                                    <span className="item-product">
                                                         {item.product || "Product"}
                                                     </span>
                                                     <Tag color={getStatusColor(item.repairStatus)}>
@@ -331,7 +329,7 @@ export default function AssignedPage() {
                                                     </div>
                                                     <div className="detail-box">
                                                         <span className="label"><UserOutlined/> Technician</span>
-                                                        <span className="value" style={{color: "#0050b3", fontWeight: 600}}>{item.assignedToName || "N/A"}</span>
+                                                        <span className="value">{item.assignedToName || "N/A"}</span>
                                                     </div>
                                                     <div className="detail-box">
                                                         <span className="label">RMA No</span>
@@ -340,13 +338,13 @@ export default function AssignedPage() {
                                                 </div>
 
                                                 {/* Fault / Reason Box */}
-                                                <div className="fault-box" style={{background: "#f0f5ff", borderColor: "#adc6ff"}}>
-                                                    <span className="label" style={{color: "#1d39c4"}}>Fault Description</span>
+                                                <div className="fault-box">
+                                                    <span className="label">Fault Description</span>
                                                     <p className="fault-desc">{item.faultDescription || "No description provided."}</p>
                                                     
                                                     {item.lastReassignmentReason && (
-                                                        <div style={{marginTop: '8px', borderTop: '1px dashed #91d5ff', paddingTop: '4px'}}>
-                                                            <span className="label" style={{color: "#cf1322"}}>Reassign Reason</span>
+                                                        <div style={{marginTop: '8px', borderTop: '1px dashed var(--border-split)', paddingTop: '4px'}}>
+                                                            <span className="label">Reassign Reason</span>
                                                             <p className="fault-desc" style={{fontStyle: 'italic'}}>{item.lastReassignmentReason}</p>
                                                         </div>
                                                     )}
@@ -360,7 +358,6 @@ export default function AssignedPage() {
                                                         size="small"
                                                         icon={<EditOutlined />} 
                                                         onClick={() => openStatusModal(item)}
-                                                        style={{backgroundColor: "#1890ff", borderColor: "#1890ff"}}
                                                     >
                                                         Update
                                                     </Button>
@@ -407,7 +404,7 @@ export default function AssignedPage() {
                         </Button>
                     ]}
                 >
-                    <div style={{background: '#e6f7ff', padding: '10px', borderRadius: '4px', marginBottom: '16px', border: '1px solid #91d5ff'}}>
+                    <div className="fault-box" style={{margin: '0 0 16px 0'}}>
                         <Row gutter={16}>
                             <Col span={12}>
                                 <Text type="secondary" style={{fontSize: '12px'}}>Product</Text>
@@ -489,7 +486,7 @@ export default function AssignedPage() {
                         </Button>
                     ]}
                 >
-                    <div style={{background: '#fff7e6', padding: '10px', borderRadius: '4px', marginBottom: '16px', border: '1px solid #ffd591'}}>
+                    <div className="fault-box" style={{margin: '0 0 16px 0'}}>
                          <Row gutter={16}>
                             <Col span={12}>
                                 <Text type="secondary" style={{fontSize: '12px'}}>Product</Text>

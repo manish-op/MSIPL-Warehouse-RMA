@@ -1,24 +1,108 @@
+:root {
+  --page-bg: #f5f7fa;
+  --header-text: #ffffff;
+  --card-bg: #ffffff;
+  --card-head-bg: #e6f7ff;
+  --card-head-border: #bae7ff;
+  --text-main: #262626;
+  --text-secondary: #8c8c8c;
+  --text-label: #0050b3;
+  --text-value: #002766;
+  --item-header-bg: linear-gradient(to right, #e6f7ff, #f0f5ff);
+  --item-header-text: #003a8c;
+  --item-card-border: #d9d9d9;
+  --fault-box-bg: #fffbe6;
+  --fault-box-border: #ffe58f;
+  --item-footer-bg: #f9f9f9;
+  --border-split: #f0f0f0;
+  --shadow-main: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] {
+  --page-bg: #000000;
+  --header-text: #ffffff; /* Keep header text bright on dark backgrounds */
+  --card-bg: #141414;
+  --card-head-bg: #1f1f1f;
+  --card-head-border: #303030;
+  --text-main: rgba(255, 255, 255, 0.85);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-label: #177ddc;
+  --text-value: rgba(255, 255, 255, 0.85);
+  --item-header-bg: #1d1d1d;
+  --item-header-text: #177ddc;
+  --item-card-border: #303030;
+  --fault-box-bg: #2b2111;
+  --fault-box-border: #594214;
+  --item-footer-bg: #141414;
+  --border-split: #303030;
+  --shadow-main: rgba(0, 0, 0, 0.4);
+}
+
 /* =========================================
    1. Page Layout & Global
    ========================================= */
 .unrepaired-page {
   padding: 0;
-  background-color: #f5f7fa; /* Slightly lighter gray */
+  background-color: var(--page-bg);
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* =========================================
-   2. Page Header (RESTORED LIGHT BLUE SHADE)
+   2. Page Header
    ========================================= */
 .unrepaired-header {
-  /* The "Lightish Blue" Shade */
-  background: linear-gradient(90deg, #6aa1e6 0%, #36cfc9 100%); 
-  /* Alternate option if you want pure blue: background: #1890ff; */
   padding: 24px 32px;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15); /* Blue-ish shadow */
   margin-bottom: 24px;
 }
+
+/* Header Gradient Themes */
+.header-unrepaired {
+  background: linear-gradient(90deg, #6aa1e6 0%, #36cfc9 100%);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
+.header-assigned {
+  background: linear-gradient(90deg, #6aa1e6 0%, #36cfc9 100%);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
+.header-repaired {
+  background: linear-gradient(135deg, #389e0d 0%, #52c41a 100%);
+  box-shadow: 0 4px 12px rgba(56, 158, 13, 0.15);
+}
+
+.header-cant-repair {
+  background: linear-gradient(135deg, #f5222d 0%, #cf1322 100%);
+  box-shadow: 0 4px 20px rgba(245, 34, 45, 0.3);
+}
+
+.header-depot {
+  background: linear-gradient(135deg, #722ed1 0%, #9254de 100%);
+  box-shadow: 0 4px 20px rgba(114, 46, 209, 0.3);
+}
+
+/* Dark mode dims the headers slightly for better eye comfort */
+[data-theme='dark'] .unrepaired-header {
+  opacity: 0.9;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Force text visibility in headers since they use colorful backgrounds */
+.unrepaired-header .ant-typography {
+  color: #ffffff !important;
+}
+
+.unrepaired-header .ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Header Icon Box */
 
 .header-content {
   display: flex;
@@ -36,7 +120,7 @@
 .header-icon {
   font-size: 28px;
   color: #fff;
-  background: rgba(255, 255, 255, 0.25); /* More transparent for light bg */
+  background: rgba(255, 255, 255, 0.25);
   padding: 12px;
   border-radius: 12px;
   backdrop-filter: blur(4px);
@@ -65,9 +149,10 @@
 .loading-container, .empty-state {
   text-align: center;
   padding: 60px;
-  background: white;
+  background: var(--card-bg);
+  color: var(--text-main);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px var(--shadow-main);
 }
 
 /* =========================================
@@ -77,15 +162,17 @@
   margin-bottom: 24px;
   border-radius: 12px;
   overflow: hidden;
-  border: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--card-head-border);
+  background: var(--card-bg);
+  box-shadow: 0 4px 20px var(--shadow-main);
 }
 
 /* Light Blue Header for the Group Card */
 .rma-group-card .ant-card-head {
-  background-color: #e6f7ff; 
-  border-bottom: 2px solid #bae7ff;
+  background-color: var(--card-head-bg);
+  border-bottom: 2px solid var(--card-head-border);
   padding: 0 24px;
+  color: var(--text-main);
 }
 
 .rma-card-header-flex {
@@ -111,7 +198,7 @@
 .rma-label {
   font-size: 11px;
   text-transform: uppercase;
-  color: #0050b3;
+  color: var(--text-label);
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -119,7 +206,7 @@
 .rma-value {
   font-size: 18px;
   font-weight: 700;
-  color: #002766;
+  color: var(--text-value);
 }
 
 .rma-actions {
@@ -153,8 +240,8 @@
    6. Individual Item Card
    ========================================= */
 .rma-item-card-modern {
-  background: white;
-  border: 1px solid #d9d9d9;
+  background: var(--card-bg);
+  border: 1px solid var(--item-card-border);
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -165,15 +252,15 @@
 
 .rma-item-card-modern:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.25);
+  box-shadow: 0 8px 24px var(--shadow-main);
   border-color: #40a9ff;
 }
 
 /* Item Header Strip */
 .item-header {
-  background: linear-gradient(to right, #e6f7ff, #f0f5ff);
+  background: var(--item-header-bg);
   padding: 12px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-split);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -182,7 +269,7 @@
 .item-product {
   font-weight: 700;
   font-size: 15px;
-  color: #003a8c;
+  color: var(--item-header-text);
 }
 
 /* Details */
@@ -200,30 +287,30 @@
 
 .detail-box .label {
   font-size: 11px;
-  color: #8c8c8c;
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
 .detail-box .value {
   font-size: 14px;
-  color: #262626;
+  color: var(--text-main);
   font-weight: 500;
 }
 
 .detail-box .value.monospace {
   font-family: 'Consolas', monospace;
-  background: #f0f2f5;
+  background: var(--page-bg);
   padding: 2px 6px;
   border-radius: 4px;
-  border: 1px solid #d9d9d9;
-  color: #595959;
+  border: 1px solid var(--item-card-border);
+  color: var(--text-main);
 }
 
 /* Fault Box */
 .fault-box {
   margin: 16px;
-  background: #fffbe6;
-  border: 1px solid #ffe58f;
+  background: var(--fault-box-bg);
+  border: 1px solid var(--fault-box-border);
   padding: 10px;
   border-radius: 6px;
   flex-grow: 1;
@@ -232,7 +319,7 @@
 .fault-box .label {
   font-size: 10px;
   font-weight: 700;
-  color: #faad14;
+  color: var(--text-secondary);
   text-transform: uppercase;
   display: block;
   margin-bottom: 4px;
@@ -240,7 +327,7 @@
 
 .fault-desc {
   font-size: 13px;
-  color: #595959;
+  color: var(--text-main);
   line-height: 1.4;
   margin: 0;
 }
@@ -248,8 +335,8 @@
 /* Item Footer */
 .item-footer {
   padding: 12px 16px;
-  background: #f9f9f9;
-  border-top: 1px solid #f0f0f0;
+  background: var(--item-footer-bg);
+  border-top: 1px solid var(--border-split);
 }
 
 .item-footer .ant-btn-primary {
@@ -263,5 +350,60 @@
 
 /* Modal Tweaks */
 .ant-modal-header {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-split);
+}
+
+/* =========================================
+   7. Ant Design Component Overrides (Dark Mode)
+   ========================================= */
+[data-theme='dark'] .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #177ddc !important;
+}
+
+/* Fix for default buttons that might have white backgrounds in dark mode */
+[data-theme='dark'] .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger):not(.ant-btn-link) {
+  background: #262626 !important;
+  border-color: #434343 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme='dark'] .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger):not(.ant-btn-link):hover {
+  background: #303030 !important;
+  border-color: #177ddc !important;
+  color: #177ddc !important;
+}
+
+/* Ensure empty state text is visible */
+[data-theme='dark'] .ant-empty-description {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Fix for Divider text in dark mode */
+[data-theme='dark'] .ant-divider-inner-text {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+/* Global Tag Fixes for Dark Mode */
+[data-theme='dark'] .ant-tag {
+  border: none !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Ensure tags with backgrounds are readable */
+[data-theme='dark'] .ant-tag-geekblue { background: #111d2c !important; color: #177ddc !important; border: 1px solid #153450 !important; }
+[data-theme='dark'] .ant-tag-orange { background: #2b2111 !important; color: #d89614 !important; border: 1px solid #594414 !important; }
+[data-theme='dark'] .ant-tag-cyan { background: #112123 !important; color: #13a8a8 !important; border: 1px solid #144848 !important; }
+[data-theme='dark'] .ant-tag-processing { background: #111d2c !important; color: #177ddc !important; border: 1px solid #153450 !important; }
+[data-theme='dark'] .ant-tag-red { background: #2a1215 !important; color: #a61d24 !important; border: 1px solid #5c0011 !important; }
+[data-theme='dark'] .ant-tag-purple { background: #1a1325 !important; color: #722ed1 !important; border: 1px solid #301c4d !important; }
+[data-theme='dark'] .ant-tag-blue { background: #111d2c !important; color: #177ddc !important; border: 1px solid #153450 !important; }
+[data-theme='dark'] .ant-tag-green { background: #162312 !important; color: #49aa19 !important; border: 1px solid #274916 !important; }
+
+/* Ensure fault-box children are visible if they are generic divs */
+[data-theme='dark'] .fault-box div {
+  color: var(--text-main) !important;
 }

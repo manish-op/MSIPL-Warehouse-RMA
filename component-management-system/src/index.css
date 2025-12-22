@@ -176,3 +176,127 @@ body {
 [data-theme='dark'] .ant-modal-confirm-body .ant-modal-confirm-content {
     color: #fff !important;
 }
+
+/* Dropdown Global Fix */
+[data-theme='dark'] .ant-dropdown-menu {
+  background-color: #1f1f1f !important;
+  border: 1px solid #303030 !important;
+}
+
+[data-theme='dark'] .ant-dropdown-menu-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme='dark'] .ant-dropdown-menu-item:hover,
+[data-theme='dark'] .ant-dropdown-menu-item-active {
+  background-color: #303030 !important;
+}
+
+[data-theme='dark'] .ant-dropdown-menu-item-divider {
+  background-color: #303030 !important;
+}
+
+/* Select Global Fix */
+[data-theme='dark'] .ant-select-dropdown {
+  background-color: #1f1f1f !important;
+  border: 1px solid #303030 !important;
+}
+
+[data-theme='dark'] .ant-select-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme='dark'] .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background-color: #177ddc !important;
+  color: #fff !important;
+}
+
+[data-theme='dark'] .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: #303030 !important;
+}
+
+/* Typography Global Fix */
+[data-theme='dark'] .ant-typography,
+[data-theme='dark'] h1.ant-typography,
+[data-theme='dark'] h2.ant-typography,
+[data-theme='dark'] h3.ant-typography,
+[data-theme='dark'] h4.ant-typography,
+[data-theme='dark'] h5.ant-typography {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme='dark'] .ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Specific Modal Title Fix for Typography */
+[data-theme='dark'] .ant-modal-title .ant-typography {
+  color: #fff !important;
+}
+
+/* Global Status Variables for Dashboards */
+:root {
+  --status-success: #52c41a;
+  --status-warning: #faad14;
+  --status-error: #f5222d;
+}
+
+[data-theme='dark'] {
+  --status-success: #95de64;
+  --status-warning: #ffd666;
+  --status-error: #ff7875;
+}
+
+/* Dashboard Theme Fixes */
+[data-theme='dark'] .compliance-label,
+[data-theme='dark'] .ant-statistic-title {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .tat-card {
+  background: #1f1f1f !important;
+}
+
+[data-theme='dark'] .tat-on-track { background: linear-gradient(135deg, #112110 0%, #234d1b 100%) !important; }
+[data-theme='dark'] .tat-at-risk { background: linear-gradient(135deg, #2b2111 0%, #594414 100%) !important; }
+[data-theme='dark'] .tat-breached { background: linear-gradient(135deg, #2a1215 0%, #5c0011 100%) !important; }
+
+/* Table Summary Dark Mode Fix - Extremely Aggressive */
+[data-theme='dark'] .ant-table-summary,
+[data-theme='dark'] .ant-table-summary-row > td,
+[data-theme='dark'] .ant-table-tbody > tr.ant-table-summary-row > td,
+[data-theme='dark'] .ant-table-tbody > tr.ant-table-summary-row:hover > td {
+  background-color: #1f1f1f !important;
+  background: #1f1f1f !important;
+  color: #fff !important;
+  border-top: 1px solid #303030 !important;
+  border-bottom: 1px solid #303030 !important;
+}
+
+[data-theme='dark'] .ant-table-summary-row strong,
+[data-theme='dark'] .ant-table-summary-row span {
+  color: #fff !important;
+}
+
+/* Fix for Tags inside Summary Row in Dark Mode */
+[data-theme='dark'] .ant-table-summary-row .ant-tag,
+[data-theme='dark'] .ant-table-summary-row .ant-tag-default {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: #434343 !important;
+  color: #fff !important;
+}
+
+[data-theme='dark'] .ant-table-summary-row .ant-tag-success,
+[data-theme='dark'] .ant-table-summary-row .ant-tag-has-color[style*="background-color: green"],
+[data-theme='dark'] .ant-tag-success {
+  background: rgba(35, 77, 27, 0.4) !important;
+  color: #95de64 !important;
+  border-color: #234d1b !important;
+}
+
+[data-theme='dark'] .ant-table-summary-row .ant-tag-error,
+[data-theme='dark'] .ant-tag-error {
+  background: rgba(92, 0, 17, 0.4) !important;
+  color: #ff7875 !important;
+  border-color: #5c0011 !important;
+}

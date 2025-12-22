@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Row, Col, Card, Statistic, Spin, message, Modal,
-  Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip, Input, Progress
+  Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip, Input, Progress, Typography
 } from "antd";
 import {
   FileTextOutlined,
@@ -26,8 +26,10 @@ import {
 import RmaLayout from "./RmaLayout";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import { TatIconIndicator } from "./TatIndicator";
+import { ThemeContext } from "../../context/ThemeContext";
 import "./RmaDashboard.css";
 
+const { Title, Text } = Typography;
 const { Option } = Select;
 const { Search } = Input;
 
@@ -35,6 +37,9 @@ const { Search } = Input;
 const PIE_COLORS = ['#52c41a', '#fa8c16', '#f5222d']; // Green, Orange, Red
 
 function RmaDashboard() {
+  const { theme } = useContext(ThemeContext);
+  const isDarkMode = theme === "dark";
+
   // --- State ---
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -230,24 +235,18 @@ function RmaDashboard() {
       render: (_, record) => {
         const rate = record.complianceRate;
         if (rate === null || rate === undefined) return <span style={{ color: '#999' }}>N/A</span>;
-        const isGreen = rate >= 80;
-        const isYellow = rate >= 50 && rate < 80;
-        const bgColor = isGreen ? '#f6ffed' : isYellow ? '#fffbe6' : '#fff1f0';
-        const borderColor = isGreen ? '#b7eb8f' : isYellow ? '#ffe58f' : '#ffa39e';
-        const textColor = isGreen ? '#389e0d' : isYellow ? '#d48806' : '#cf1322';
+        const status = rate >= 80 ? 'success' : rate >= 50 ? 'warning' : 'error';
         return (
-          <div style={{
+          <div className={`compliance-indicator status-${status}`} style={{
             display: 'inline-flex',
             alignItems: 'center',
             padding: '4px 12px',
             borderRadius: '20px',
-            background: bgColor,
-            border: `1px solid ${borderColor}`,
+            border: '1px solid currentColor',
           }}>
             <span style={{
               fontSize: '14px',
               fontWeight: 600,
-              color: textColor
             }}>
               {rate.toFixed(1)}%
             </span>
@@ -352,21 +351,22 @@ function RmaDashboard() {
             <h1 className="welcome-text">{getGreeting()}, {name}</h1>
             <p className="sub-text">Overview of your Return Merchandise Authorization status.</p>
           </div>
-          <div style={{ marginTop: 10 }}>
+          <div className="dashboard-search-wrapper">
             <Search
               placeholder="Search by Product, Serial No, or Model No"
               allowClear
               enterButton={<Button type="primary" icon={<SearchOutlined />}>Search</Button>}
               size="large"
               onSearch={onSearch}
-              style={{ width: 450 }}
+              className="dashboard-search-input"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="loading-container">
-            <Spin size="large" tip="Loading Dashboard..." />
+          <div className="loading-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <Spin size="large" />
+            <div style={{ marginTop: 16, fontSize: '16px', fontWeight: 500 }}>Loading Dashboard...</div>
           </div>
         ) : (
           <>
@@ -432,7 +432,7 @@ function RmaDashboard() {
             <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
               {/* Left: Trend Line Chart */}
               <Col xs={24} lg={16}>
-                <Card title="Incoming Requests Trend (Last 7 Days)" bordered={false} className="chart-card">
+                <Card title="Incoming Requests Trend (Last 7 Days)" variant="borderless" className="chart-card">
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={stats?.dailyTrends || []} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
@@ -456,7 +456,7 @@ function RmaDashboard() {
 
               {/* Right: Ratio Pie Chart */}
               <Col xs={24} lg={8}>
-                <Card title="Repair Outcome Ratio" bordered={false} className="chart-card">
+                <Card title="Repair Outcome Ratio" variant="borderless" className="chart-card">
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
@@ -491,31 +491,34 @@ function RmaDashboard() {
                         TAT Compliance Status
                       </span>
                     }
-                    bordered={false}
+                    variant="borderless"
                     className="chart-card"
                   >
                     <Row gutter={[16, 16]}>
                       {/* Compliance Rate */}
                       <Col xs={24} sm={12} md={6}>
-                        <div style={{ textAlign: 'center', padding: '16px' }}>
-                          <div style={{
-                            fontSize: '36px',
-                            fontWeight: 'bold',
-                            color: stats?.complianceRate >= 80 ? '#52c41a' : stats?.complianceRate >= 50 ? '#faad14' : '#f5222d'
+                        <div className="compliance-rate-container">
+                          <Title level={2} className={`compliance-percentage status-${stats?.complianceRate >= 80 ? 'success' : stats?.complianceRate >= 50 ? 'warning' : 'error'}`} style={{
+                            margin: 0
                           }}>
                             {stats?.complianceRate?.toFixed(1) || 0}%
-                          </div>
-                          <div style={{ color: '#666', marginTop: '8px' }}>Compliance Rate</div>
+                          </Title>
+                          <Text className="compliance-label" style={{ 
+                            color: isDarkMode ? 'rgba(255, 255, 255, 0.65)' : '#666',
+                            display: 'block',
+                            marginTop: 8
+                          }}>
+                            Compliance Rate
+                          </Text>
                         </div>
                       </Col>
 
                       {/* On Track */}
                       <Col xs={24} sm={12} md={6}>
-                        <Card size="small" style={{ background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)', border: 'none' }}>
+                        <Card size="small" className="tat-card tat-on-track" hoverable>
                           <Statistic
-                            title={<span style={{ color: '#389e0d' }}><CheckCircleOutlined /> On Track</span>}
+                            title={<span><CheckCircleOutlined /> On Track</span>}
                             value={stats?.onTrackCount || 0}
-                            valueStyle={{ color: '#389e0d', fontWeight: 'bold' }}
                             suffix="requests"
                           />
                         </Card>
@@ -523,11 +526,10 @@ function RmaDashboard() {
 
                       {/* At Risk */}
                       <Col xs={24} sm={12} md={6}>
-                        <Card size="small" style={{ background: 'linear-gradient(135deg, #fffbe6 0%, #ffe58f 100%)', border: 'none' }}>
+                        <Card size="small" className="tat-card tat-at-risk" hoverable>
                           <Statistic
-                            title={<span style={{ color: '#d48806' }}><WarningOutlined /> At Risk</span>}
+                            title={<span><WarningOutlined /> At Risk</span>}
                             value={stats?.atRiskCount || 0}
-                            valueStyle={{ color: '#d48806', fontWeight: 'bold' }}
                             suffix="requests"
                           />
                         </Card>
@@ -535,11 +537,10 @@ function RmaDashboard() {
 
                       {/* Breached */}
                       <Col xs={24} sm={12} md={6}>
-                        <Card size="small" style={{ background: 'linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%)', border: 'none' }}>
+                        <Card size="small" className="tat-card tat-breached" hoverable>
                           <Statistic
-                            title={<span style={{ color: '#cf1322' }}><CloseCircleOutlined /> Breached</span>}
+                            title={<span><CloseCircleOutlined /> Breached</span>}
                             value={stats?.breachedCount || 0}
-                            valueStyle={{ color: '#cf1322', fontWeight: 'bold' }}
                             suffix="requests"
                           />
                         </Card>
@@ -569,6 +570,7 @@ function RmaDashboard() {
           footer={null}
           width={1000}
           className="rma-detail-modal"
+          zIndex={1100}
         >
           {modalType === 'requests' && (
             <div style={{ marginBottom: 16, textAlign: 'right' }}>
@@ -606,6 +608,7 @@ function RmaDashboard() {
           footer={null}
           width={1200}
           className="rma-detail-modal"
+          zIndex={1100}
         >
           <Table
             columns={reportColumns}

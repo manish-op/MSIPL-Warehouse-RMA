@@ -140,11 +140,13 @@ const RmaLayout = ({ children }) => {
           className={`msipl-sider ${getSidebarTheme()}`}
           theme="dark"
           style={{
-            height: isMobile ? "calc(100vh - 64px)" : "auto", // Adjust for header
-            position: isMobile && !collapsed ? "absolute" : "relative",
-            zIndex: 1000,
+            height: isMobile ? (collapsed ? 0 : "100vh") : "auto", 
+            position: isMobile && !collapsed ? "fixed" : "relative",
+            zIndex: 100,
             left: 0,
-            top: 0
+            top: isMobile ? 0 : 0, 
+            display: isMobile && collapsed ? "none" : "block",
+            transition: "all 0.3s ease"
           }}
         >
           {/* Internal Toggle only if NOT mobile */}
@@ -203,8 +205,6 @@ const RmaLayout = ({ children }) => {
                 icon: <UserSwitchOutlined />,
                 label: "Assigned",
               },
-
-
               {
                 key: "repaired",
                 icon: <CheckCircleOutlined />,

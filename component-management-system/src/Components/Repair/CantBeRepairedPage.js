@@ -191,15 +191,15 @@ export default function CantBeRepairedPage() {
         <RmaLayout>
             <div className="unrepaired-page">
                 {/* Header Section - Red Theme for Critical/Replacement */}
-                <div className="unrepaired-header" style={{ background: "linear-gradient(135deg, #f5222d 0%, #cf1322 100%)", boxShadow: "0 4px 20px rgba(245, 34, 45, 0.3)" }}>
+                <div className="unrepaired-header header-cant-repair">
                     <div className="header-content">
                         <div className="header-title">
                             <WarningOutlined className="header-icon" />
                             <div>
-                                <Title level={2} style={{ margin: 0, color: "#fff" }}>
+                                <Title level={2} style={{ margin: 0 }}>
                                     Can't Be Repaired
                                 </Title>
-                                <Text style={{ color: "rgba(255,255,255,0.85)" }}>
+                                <Text type="secondary">
                                     Items requiring replacement
                                 </Text>
                             </div>
@@ -241,7 +241,7 @@ export default function CantBeRepairedPage() {
                     ) : (
                         <div className="rma-groups">
                             {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
-                                <Card key={rmaNo} className="rma-group-card" style={{ borderLeft: "4px solid #f5222d" }}
+                                <Card key={rmaNo} className="rma-group-card"
                                     title={
                                         <div className="rma-card-header-flex">
                                             <div className="rma-identity">
@@ -249,18 +249,19 @@ export default function CantBeRepairedPage() {
                                                     <span className="rma-label">RMA Request</span>
                                                     <span className="rma-value">{rmaNo}</span>
                                                 </div>
-                                                <Badge count={rmaItems.length} style={{ backgroundColor: "#f5222d" }} />
+                                                <Badge count={rmaItems.length} />
                                             </div>
                                         </div>
                                     }
                                 >
+                                    
                                     {/* MODERN CARD GRID LAYOUT */}
                                     <div className="rma-items-grid">
                                         {rmaItems.map((item) => (
-                                            <div key={item.id} className="rma-item-card-modern" style={{ borderColor: "#ffccc7" }}>
+                                            <div key={item.id} className="rma-item-card-modern">
                                                 {/* Header Strip */}
-                                                <div className="item-header" style={{ background: "#fff1f0" }}>
-                                                    <span className="item-product" style={{ color: "#cf1322" }}>{item.product || "Product"}</span>
+                                                <div className="item-header">
+                                                    <span className="item-product">{item.product || "Product"}</span>
                                                     <Tag color="red" icon={<WarningOutlined />}>REPLACE</Tag>
                                                 </div>
 
@@ -281,8 +282,8 @@ export default function CantBeRepairedPage() {
                                                 </div>
 
                                                 {/* Fault/Remarks Box */}
-                                                <div className="fault-box" style={{ background: "#fff2f0", borderColor: "#ffccc7" }}>
-                                                    <span className="label" style={{ color: "#cf1322" }}>Remarks</span>
+                                                <div className="fault-box">
+                                                    <span className="label">Remarks</span>
                                                     <p className="fault-desc">{item.repairRemarks || "No remarks provided"}</p>
                                                 </div>
 
@@ -292,7 +293,6 @@ export default function CantBeRepairedPage() {
                                                         type="primary" 
                                                         block 
                                                         icon={<SwapOutlined />} 
-                                                        style={{ backgroundColor: "#722ed1", borderColor: "#722ed1" }} 
                                                         onClick={() => handleProcessClick(item)}
                                                     >
                                                         Process Replacement
@@ -320,8 +320,8 @@ export default function CantBeRepairedPage() {
                     width={700} // Wider for logic table
                 >
                     <div style={{ padding: '10px 0' }}>
-                        <div style={{ marginBottom: 24, padding: '16px', background: '#fff1f0', border: '1px solid #ffa39e', borderRadius: '4px' }}>
-                            <Text strong style={{ color: '#cf1322' }}>Action: Replacement</Text><br />
+                    <div className="fault-box" style={{margin: '0 0 24px 0'}}>
+                            <Text strong>Action: Replacement</Text><br />
                             <Text type="secondary">Original Item from RMA <strong>{selectedItem.rmaNo}</strong> (Model: {selectedItem.modelNo}) will be marked as REPLACED.</Text>
                         </div>
 
