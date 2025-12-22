@@ -43,13 +43,49 @@ public class RmaDepotDispatchController {
     private com.serverManagement.server.management.dao.rma.RmaAuditLogDAO rmaAuditLogDAO;
 
     // 1) GET: depot items waiting for first dispatch
+    // RBAC: Only Bangalore users or Admins can see DEPOT items
     @GetMapping("/depot/ready-to-dispatch")
-    public List<DepotDispatchItemDto> getDepotReadyToDispatch() {
-        return rmaItemDAO
-                .findByRepairTypeAndDepotStage("DEPOT", "PENDING_DISPATCH_TO_DEPOT")
-                .stream()
-                .map(DepotDispatchItemDto::fromEntity)
-                .toList();
+    public ResponseEntity<?> getDepotReadyToDispatch(HttpServletRequest request) {
+        try {
+            // RBAC Check
+            String loggedInUserEmail = request.getUserPrincipal().getName();
+            AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+
+            if (!isAdminOrBangaloreUser(loggedInUser)) {
+                return ResponseEntity.ok(java.util.Collections.emptyList());
+            }
+
+            List<DepotDispatchItemDto> items = rmaItemDAO
+                    .findByRepairTypeAndDepotStage("DEPOT", "PENDING_DISPATCH_TO_DEPOT")
+                    .stream()
+                    .map(DepotDispatchItemDto::fromEntity)
+                    .toList();
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching depot items: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Helper method to check if user is Admin or from Bangalore region
+     */
+    private boolean isAdminOrBangaloreUser(AdminUserEntity user) {
+        if (user == null) {
+            return false;
+        }
+        // Check if Admin
+        if (user.getRoleModel() != null && "admin".equalsIgnoreCase(user.getRoleModel().getRoleName())) {
+            return true;
+        }
+        // Check if Bangalore region
+        if (user.getRegionEntity() != null) {
+            String city = user.getRegionEntity().getCity();
+            if (city != null && city.toUpperCase().contains("BANGALORE")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Autowired
@@ -171,23 +207,38 @@ public class RmaDepotDispatchController {
     }
 
     // 3) GET: depot items in transit or at depot
+    // RBAC: Only Bangalore users or Admins can see DEPOT items
     @GetMapping("/depot/in-transit")
-    public List<DepotDispatchItemDto> getInTransitItems() {
-        return rmaItemDAO
-                .findByRepairTypeAndDepotStageIn("DEPOT", List.of(
-                        "IN_TRANSIT_TO_DEPOT",
-                        "AT_DEPOT_RECEIVED",
-                        "AT_DEPOT_UNREPAIRED",
-                        "AT_DEPOT_REPAIRING",
-                        "AT_DEPOT_REPAIRED",
-                        "IN_TRANSIT_FROM_DEPOT",
-                        "GGN_RECEIVED_FROM_DEPOT",
-                        "GGN_DISPATCHED_TO_CUSTOMER_HAND",
-                        "GGN_DISPATCHED_TO_CUSTOMER_COURIER",
-                        "GGN_DELIVERED_TO_CUSTOMER"))
-                .stream()
-                .map(DepotDispatchItemDto::fromEntity)
-                .toList();
+    public ResponseEntity<?> getInTransitItems(HttpServletRequest request) {
+        try {
+            // RBAC Check
+            String loggedInUserEmail = request.getUserPrincipal().getName();
+            AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+
+            if (!isAdminOrBangaloreUser(loggedInUser)) {
+                return ResponseEntity.ok(java.util.Collections.emptyList());
+            }
+
+            List<DepotDispatchItemDto> items = rmaItemDAO
+                    .findByRepairTypeAndDepotStageIn("DEPOT", List.of(
+                            "IN_TRANSIT_TO_DEPOT",
+                            "AT_DEPOT_RECEIVED",
+                            "AT_DEPOT_UNREPAIRED",
+                            "AT_DEPOT_REPAIRING",
+                            "AT_DEPOT_REPAIRED",
+                            "IN_TRANSIT_FROM_DEPOT",
+                            "GGN_RECEIVED_FROM_DEPOT",
+                            "GGN_DISPATCHED_TO_CUSTOMER_HAND",
+                            "GGN_DISPATCHED_TO_CUSTOMER_COURIER",
+                            "GGN_DELIVERED_TO_CUSTOMER"))
+                    .stream()
+                    .map(DepotDispatchItemDto::fromEntity)
+                    .toList();
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching in-transit items: " + e.getMessage());
+        }
     }
 
     // 4) POST: mark as received at depot (Bangalore)

@@ -577,12 +577,133 @@ public class RmaService {
     // ============ WORKFLOW METHODS ============
 
     /**
-     * Get all unassigned RMA items (items without an assignee)
+     * Helper method to check if user is Admin
      */
-    public ResponseEntity<?> getUnassignedItems() {
+    private boolean isAdmin(AdminUserEntity user) {
+        return user != null && user.getRoleModel() != null
+                && "admin".equalsIgnoreCase(user.getRoleModel().getRoleName());
+    }
+
+    /**
+     * Helper method to check if user is from Bangalore region
+     */
+    private boolean isBangaloreUser(AdminUserEntity user) {
+        if (user == null || user.getRegionEntity() == null) {
+            return false;
+        }
+        String city = user.getRegionEntity().getCity();
+        return city != null && city.toLowerCase().contains("bangalore");
+    }
+
+    /**
+     * Helper method to get logged-in user from request
+     * Note: Forces initialization of lazy-loaded roleModel and regionEntity
+     */
+    private AdminUserEntity getLoggedInUser(HttpServletRequest request) {
         try {
+            String email = request.getUserPrincipal().getName();
+            AdminUserEntity user = adminUserDAO.findByEmail(email.toLowerCase());
+            if (user != null) {
+                // Force initialize lazy-loaded entities within transaction
+                if (user.getRoleModel() != null) {
+                    user.getRoleModel().getRoleName();
+                }
+                if (user.getRegionEntity() != null) {
+                    user.getRegionEntity().getCity();
+                }
+            }
+            return user;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Helper method to filter items based on user role, region, and repair type
+     * - DEPOT items: Only visible to Bangalore users or Admin
+     * - LOCAL items: Visible based on assigned_to_email or region
+     */
+    private List<RmaItemEntity> filterItemsByAccess(List<RmaItemEntity> items, AdminUserEntity user,
+            boolean filterByAssignee) {
+        if (user == null) {
+            return new ArrayList<>();
+        }
+
+        String userEmail = user.getEmail().toLowerCase();
+        boolean isUserAdmin = isAdmin(user);
+        boolean isUserFromBangalore = isBangaloreUser(user);
+
+        return items.stream()
+                .filter(item -> {
+                    // Check DEPOT repair type - only Bangalore users or Admin can see
+                    if ("DEPOT".equalsIgnoreCase(item.getRepairType())) {
+                        if (!isUserAdmin && !isUserFromBangalore) {
+                            return false; // Non-Bangalore users cannot see DEPOT items
+                        }
+                    }
+
+                    // If Admin, allow all (already passed DEPOT check above)
+                    if (isUserAdmin) {
+                        return true;
+                    }
+
+                    // For non-Admin: filter by assigned_to_email if required
+                    if (filterByAssignee) {
+                        return userEmail.equalsIgnoreCase(item.getAssignedToEmail());
+                    }
+
+                    return true;
+                })
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Get all unassigned RMA items (items without an assignee)
+     * RBAC: Admins see all, technicians see only their region's items
+     * DEPOT items: Only visible to Bangalore users or Admin
+     */
+    public ResponseEntity<?> getUnassignedItems(HttpServletRequest request) {
+        try {
+            AdminUserEntity loggedInUser = getLoggedInUser(request);
             List<RmaItemEntity> items = rmaItemDAO.findUnassignedItems();
-            return ResponseEntity.ok(convertToItemDTOList(items));
+
+            // If Admin, return all items
+            if (isAdmin(loggedInUser)) {
+                return ResponseEntity.ok(convertToItemDTOList(items));
+            }
+
+            // For non-Admin: filter by region and repair type
+            if (loggedInUser == null || loggedInUser.getRegionEntity() == null) {
+                return ResponseEntity.ok(convertToItemDTOList(items)); // Fallback to all if no region info
+            }
+
+            Long userRegionId = loggedInUser.getRegionEntity().getId();
+            boolean isUserFromBangalore = isBangaloreUser(loggedInUser);
+
+            // Filter items where the RMA request creator is from the same region
+            // Also filter DEPOT items for non-Bangalore users
+            List<RmaItemEntity> filteredItems = items.stream()
+                    .filter(item -> {
+                        // DEPOT items: only visible to Bangalore users
+                        if ("DEPOT".equalsIgnoreCase(item.getRepairType())) {
+                            if (!isUserFromBangalore) {
+                                return false;
+                            }
+                        }
+
+                        if (item.getRmaRequest() == null || item.getRmaRequest().getCreatedByEmail() == null) {
+                            return false;
+                        }
+                        AdminUserEntity creator = adminUserDAO.findByEmail(
+                                item.getRmaRequest().getCreatedByEmail().toLowerCase());
+                        if (creator == null || creator.getRegionEntity() == null) {
+                            return false;
+                        }
+                        return userRegionId.equals(creator.getRegionEntity().getId());
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+
+            return ResponseEntity.ok(convertToItemDTOList(filteredItems));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -636,11 +757,29 @@ public class RmaService {
 
     /**
      * Get all assigned RMA items (items with assignee, not yet completed)
+     * RBAC: Admins see all, technicians see only items assigned to them
+     * DEPOT items: Only visible to Bangalore users or Admin
      */
-    public ResponseEntity<?> getAssignedItems() {
+    public ResponseEntity<?> getAssignedItems(HttpServletRequest request) {
         try {
+            AdminUserEntity loggedInUser = getLoggedInUser(request);
             List<RmaItemEntity> items = rmaItemDAO.findAssignedItems();
-            return ResponseEntity.ok(convertToItemDTOList(items));
+
+            // If Admin, return all items
+            if (isAdmin(loggedInUser)) {
+                return ResponseEntity.ok(convertToItemDTOList(items));
+            }
+
+            // For non-Admin: filter by assigned_to_email and DEPOT region check
+            if (loggedInUser == null) {
+                return ResponseEntity.ok(new ArrayList<>()); // Return empty if not authenticated
+            }
+
+            // Use the helper method that handles both DEPOT region check and assignee
+            // filter
+            List<RmaItemEntity> filteredItems = filterItemsByAccess(items, loggedInUser, true);
+
+            return ResponseEntity.ok(convertToItemDTOList(filteredItems));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -650,12 +789,27 @@ public class RmaService {
 
     /**
      * Get all repaired RMA items
+     * RBAC: Admins see all, technicians see only items they repaired
+     * DEPOT items: Only visible to Bangalore users or Admin
      */
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getRepairedItems() {
+    public ResponseEntity<?> getRepairedItems(HttpServletRequest request) {
         try {
+            AdminUserEntity loggedInUser = getLoggedInUser(request);
             List<RmaItemEntity> items = rmaItemDAO.findRepairedItems();
-            return ResponseEntity.ok(convertToItemDTOList(items));
+
+            // If Admin, return all items
+            if (isAdmin(loggedInUser)) {
+                return ResponseEntity.ok(convertToItemDTOList(items));
+            }
+
+            // For non-Admin: filter by assigned_to_email and DEPOT region check
+            if (loggedInUser == null) {
+                return ResponseEntity.ok(new ArrayList<>());
+            }
+
+            List<RmaItemEntity> filteredItems = filterItemsByAccess(items, loggedInUser, true);
+            return ResponseEntity.ok(convertToItemDTOList(filteredItems));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -665,11 +819,26 @@ public class RmaService {
 
     /**
      * Get all items that can't be repaired
+     * RBAC: Admins see all, technicians see only items they worked on
+     * DEPOT items: Only visible to Bangalore users or Admin
      */
-    public ResponseEntity<?> getCantBeRepairedItems() {
+    public ResponseEntity<?> getCantBeRepairedItems(HttpServletRequest request) {
         try {
+            AdminUserEntity loggedInUser = getLoggedInUser(request);
             List<RmaItemEntity> items = rmaItemDAO.findCantBeRepairedItems();
-            return ResponseEntity.ok(convertToItemDTOList(items));
+
+            // If Admin, return all items
+            if (isAdmin(loggedInUser)) {
+                return ResponseEntity.ok(convertToItemDTOList(items));
+            }
+
+            // For non-Admin: filter with DEPOT region check and assignee filter
+            if (loggedInUser == null) {
+                return ResponseEntity.ok(new ArrayList<>());
+            }
+
+            List<RmaItemEntity> filteredItems = filterItemsByAccess(items, loggedInUser, true);
+            return ResponseEntity.ok(convertToItemDTOList(filteredItems));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -679,11 +848,26 @@ public class RmaService {
 
     /**
      * Get all dispatched items (is_dispatched = true)
+     * RBAC: Admins see all, technicians see only items they worked on
+     * DEPOT items: Only visible to Bangalore users or Admin
      */
-    public ResponseEntity<?> getDispatchedItems() {
+    public ResponseEntity<?> getDispatchedItems(HttpServletRequest request) {
         try {
+            AdminUserEntity loggedInUser = getLoggedInUser(request);
             List<RmaItemEntity> items = rmaItemDAO.findByIsDispatched(true);
-            return ResponseEntity.ok(convertToItemDTOList(items));
+
+            // If Admin, return all items
+            if (isAdmin(loggedInUser)) {
+                return ResponseEntity.ok(convertToItemDTOList(items));
+            }
+
+            // For non-Admin: filter with DEPOT region check and assignee filter
+            if (loggedInUser == null) {
+                return ResponseEntity.ok(new ArrayList<>());
+            }
+
+            List<RmaItemEntity> filteredItems = filterItemsByAccess(items, loggedInUser, true);
+            return ResponseEntity.ok(convertToItemDTOList(filteredItems));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
