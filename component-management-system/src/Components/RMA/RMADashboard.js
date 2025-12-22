@@ -105,6 +105,9 @@ function RmaDashboard() {
             success: true,
             data: allItems.data.filter(item => {
               const status = (item.repairStatus || '').toLowerCase();
+              // Explicitly include Can't Be Repaired / BER items
+              if (status === 'cant_be_repaired' || status === 'ber') return true;
+              
               // Include if status is empty/null OR not in completed list
               if (!status) return true;
               return !completedStatuses.some(s => status.includes(s));

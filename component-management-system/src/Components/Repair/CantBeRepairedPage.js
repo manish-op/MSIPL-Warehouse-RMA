@@ -19,13 +19,15 @@ import {
     ExclamationCircleOutlined,
     SwapOutlined,
     ReloadOutlined,
-    SafetyCertificateOutlined
+    SafetyCertificateOutlined,
+    BarcodeOutlined,
+    InfoCircleOutlined
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
 import Cookies from "js-cookie";
-import "./UnrepairedPage.css";
-import { URL } from "../API/URL"; // Fixed path
+import "./UnrepairedPage.css"; // Ensure this contains the modern CSS classes
+import { URL } from "../API/URL";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -139,7 +141,6 @@ export default function CantBeRepairedPage() {
                 })
             });
 
-            // ... (rest of handling same as before)
             const responseText = await response.text();
             let data;
             try {
@@ -173,7 +174,7 @@ export default function CantBeRepairedPage() {
         }
     };
 
-    // Group items... (Keep existing logic)
+    // Group items
     const groupedItems = items.reduce((acc, item) => {
         const rmaNo = item.rmaNo || "Unknown";
         if (!acc[rmaNo]) {
@@ -189,7 +190,7 @@ export default function CantBeRepairedPage() {
     return (
         <RmaLayout>
             <div className="unrepaired-page">
-                {/* ... (Header and Stats - Keep existing) ... */}
+                {/* Header Section - Red Theme for Critical/Replacement */}
                 <div className="unrepaired-header" style={{ background: "linear-gradient(135deg, #f5222d 0%, #cf1322 100%)", boxShadow: "0 4px 20px rgba(245, 34, 45, 0.3)" }}>
                     <div className="header-content">
                         <div className="header-title">
@@ -242,39 +243,65 @@ export default function CantBeRepairedPage() {
                             {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
                                 <Card key={rmaNo} className="rma-group-card" style={{ borderLeft: "4px solid #f5222d" }}
                                     title={
-                                        <div className="rma-card-header">
-                                            <span className="rma-number"><Tag color="#f5222d" style={{ fontSize: 14, padding: "4px 12px" }}>RMA: {rmaNo}</Tag></span>
-                                            <Badge count={rmaItems.length} style={{ backgroundColor: "#f5222d" }} overflowCount={99} />
+                                        <div className="rma-card-header-flex">
+                                            <div className="rma-identity">
+                                                <div className="rma-id-box">
+                                                    <span className="rma-label">RMA Request</span>
+                                                    <span className="rma-value">{rmaNo}</span>
+                                                </div>
+                                                <Badge count={rmaItems.length} style={{ backgroundColor: "#f5222d" }} />
+                                            </div>
                                         </div>
                                     }
                                 >
-                                    <Row gutter={[16, 16]}>
+                                    {/* MODERN CARD GRID LAYOUT */}
+                                    <div className="rma-items-grid">
                                         {rmaItems.map((item) => (
-                                            <Col xs={24} md={12} lg={8} key={item.id}>
-                                                <Card className="item-card" size="small" hoverable style={{ borderTop: "3px solid #f5222d" }}
-                                                    actions={[
-                                                        <Button type="primary" icon={<SwapOutlined />} style={{ backgroundColor: "#722ed1", borderColor: "#722ed1" }} className="assign-btn" onClick={() => handleProcessClick(item)}>
-                                                            Process Replacement
-                                                        </Button>
-                                                    ]}
-                                                >
-                                                    <div className="item-content">
-                                                        <div className="item-row"><Text type="secondary">Product</Text><Text strong>{item.product || "N/A"}</Text></div>
-                                                        <div className="item-row"><Text type="secondary">Serial No.</Text><Text code>{item.serialNo || "N/A"}</Text></div>
-                                                        <div className="item-row"><Text type="secondary">Model</Text><Text>{item.model || "N/A"}</Text></div>
-                                                        <div className="item-row"><Text type="secondary">Status</Text>
+                                            <div key={item.id} className="rma-item-card-modern" style={{ borderColor: "#ffccc7" }}>
+                                                {/* Header Strip */}
+                                                <div className="item-header" style={{ background: "#fff1f0" }}>
+                                                    <span className="item-product" style={{ color: "#cf1322" }}>{item.product || "Product"}</span>
+                                                    <Tag color="red" icon={<WarningOutlined />}>REPLACE</Tag>
+                                                </div>
 
-                                                            <Tag color="red" icon={<WarningOutlined />}>
-                                                                {item.repairStatus === "CANT_BE_REPAIRED" ? "Can't Be Repaired" : item.repairStatus === "BER" ? "BER (Beyond Economic Repair)" : item.repairStatus || "Unknown Status"}
-                                                            </Tag>
-                                                        </div>
-                                                        <Divider style={{ margin: "8px 0" }} />
-                                                        <div className="fault-section"><Text type="secondary">Remarks</Text><Paragraph ellipsis={{ rows: 2, expandable: true }} className="fault-text">{item.repairRemarks || "No remarks provided"}</Paragraph></div>
+                                                {/* Details Grid */}
+                                                <div className="item-details-grid">
+                                                    <div className="detail-box">
+                                                        <span className="label"><BarcodeOutlined/> Serial No</span>
+                                                        <span className="value monospace">{item.serialNo || "N/A"}</span>
                                                     </div>
-                                                </Card>
-                                            </Col>
+                                                    <div className="detail-box">
+                                                        <span className="label">Model</span>
+                                                        <span className="value">{item.model || "N/A"}</span>
+                                                    </div>
+                                                    <div className="detail-box">
+                                                        <span className="label">RMA No</span>
+                                                        <Tag color="red">{item.itemRmaNo || "N/A"}</Tag>
+                                                    </div>
+                                                </div>
+
+                                                {/* Fault/Remarks Box */}
+                                                <div className="fault-box" style={{ background: "#fff2f0", borderColor: "#ffccc7" }}>
+                                                    <span className="label" style={{ color: "#cf1322" }}>Remarks</span>
+                                                    <p className="fault-desc">{item.repairRemarks || "No remarks provided"}</p>
+                                                </div>
+
+                                                {/* Footer Actions */}
+                                                <div className="item-footer">
+                                                    <Button 
+                                                        type="primary" 
+                                                        block 
+                                                        icon={<SwapOutlined />} 
+                                                        style={{ backgroundColor: "#722ed1", borderColor: "#722ed1" }} 
+                                                        onClick={() => handleProcessClick(item)}
+                                                    >
+                                                        Process Replacement
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         ))}
-                                    </Row>
+                                    </div>
+                                    {/* END MODERN CARD GRID */}
                                 </Card>
                             ))}
                         </div>
@@ -368,4 +395,4 @@ export default function CantBeRepairedPage() {
             </div>
         </RmaLayout>
     );
-}   
+}

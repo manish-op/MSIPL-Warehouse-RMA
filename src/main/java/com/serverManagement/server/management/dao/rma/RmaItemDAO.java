@@ -28,11 +28,11 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     long countByRepairStatusContaining(@Param("keyword") String keyword);
 
     // Count items that are NOT repaired AND NOT replaced
-    @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE (r.repairStatus IS NULL OR r.repairStatus = '') OR (LOWER(r.repairStatus) NOT LIKE '%repaired%' AND LOWER(r.repairStatus) NOT LIKE '%replaced%' AND LOWER(r.repairStatus) NOT LIKE '%dispatched%' AND LOWER(r.repairStatus) NOT LIKE '%received_at_gurgaon%' AND LOWER(r.repairStatus) NOT LIKE '%delivered%' AND LOWER(r.repairStatus) != 'closed')")
+    @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE (r.repairStatus IS NULL OR r.repairStatus = '') OR ((LOWER(r.repairStatus) NOT LIKE '%repaired%' OR LOWER(r.repairStatus) IN ('cant_be_repaired', 'ber')) AND LOWER(r.repairStatus) NOT LIKE '%replaced%' AND LOWER(r.repairStatus) NOT LIKE '%dispatched%' AND LOWER(r.repairStatus) NOT LIKE '%received_at_gurgaon%' AND LOWER(r.repairStatus) NOT LIKE '%delivered%' AND LOWER(r.repairStatus) != 'closed')")
     long countUnrepaired();
 
     // Count items that ARE repaired OR replaced
-    @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) IN ('repaired', 'replaced', 'repaired_at_depot', 'received_at_gurgaon', 'dispatched_to_depot', 'received_at_depot', 'dispatched_to_customer', 'delivered_to_customer', 'closed')")
+    @Query("SELECT COUNT(r) FROM RmaItemEntity r WHERE LOWER(r.repairStatus) IN ('repaired', 'replaced', 'repaired_at_depot', 'received_at_gurgaon', 'dispatched_to_depot', 'received_at_depot', 'dispatched_to_customer', 'delivered_to_customer', 'closed', 'dispatched_to_customer_from_depot')")
     long countRepaired();
 
     // ============ WORKFLOW QUERIES ============
@@ -58,7 +58,7 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     List<RmaItemEntity> findAssignedItems();
 
     // Find repaired OR replaced items (both ready for dispatch)
-    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) IN ('repaired', 'replaced', 'repaired_at_depot', 'received_at_gurgaon', 'dispatched_to_depot', 'received_at_depot', 'dispatched_to_customer', 'delivered_to_customer', 'closed')")
+    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.repairStatus) IN ('repaired', 'replaced', 'repaired_at_depot', 'received_at_gurgaon', 'dispatched_to_depot', 'received_at_depot', 'dispatched_to_customer', 'delivered_to_customer', 'closed', 'dispatched_to_customer_from_depot')")
     List<RmaItemEntity> findRepairedItems();
 
     // Find items that can't be repaired (includes CANT_BE_REPAIRED and BER)

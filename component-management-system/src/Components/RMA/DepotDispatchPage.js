@@ -24,6 +24,7 @@ import {
   Upload,
   Dropdown,
   Alert,
+  
 } from "antd";
 import {
   CarOutlined,
@@ -33,17 +34,21 @@ import {
   CheckCircleOutlined,
   EditOutlined,
   DownOutlined,
+  BarcodeOutlined,
+  InfoCircleOutlined,
+  EnvironmentOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import RmaLayout from "./RmaLayout";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import { URL } from "../API/URL";
-import "./DepotDispatchPage.css";
+import "./DepotDispatchPage.css"; 
 
 const { Title, Text, Paragraph } = Typography;
 
 const PREDEFINED_TRANSPORTERS = {
   "Blue Dart Express": "27AAACB0446L1ZS",
-  "Blue Dart": "27AAACB0446L1ZS", // Match dropdown value
+  "Blue Dart": "27AAACB0446L1ZS", 
   "Safe Express": "27AAECS4363H2Z7",
 };
 
@@ -88,13 +93,17 @@ export default function DepotDispatchPage() {
   const [ggnAddress, setGgnAddress] = useState("");
   const [ggnState, setGgnState] = useState("");
   const [ggnCity, setGgnCity] = useState("");
-  const [ggnKw, setGgnKw] = useState(""); // For "Rate/Value" or similiar
+  const [ggnKw, setGgnKw] = useState(""); 
   const [ggnTransporterId, setGgnTransporterId] = useState("");
   const [ggnGst, setGgnGst] = useState("");
   const [ggnValue, setGgnValue] = useState("");
   const [ggnProofFileId, setGgnProofFileId] = useState(null);
   const [ggnProofRemarks, setGgnProofRemarks] = useState("");
   const [ggnSubmitting, setGgnSubmitting] = useState(false);
+
+  // Dispatch logic flags
+  const [isReturnDispatch, setIsReturnDispatch] = useState(false);
+  const [isCustomerDispatch, setIsCustomerDispatch] = useState(false);
 
   const loadItems = async () => {
     setLoading(true);
@@ -186,7 +195,6 @@ export default function DepotDispatchPage() {
   const totalInTransitItems = inTransitItems.length;
 
   const openDispatchModal = async (rmaNo, rmaItems) => {
-    // Partial Dispatch: Filter items that have an RMA Number
     const validItems = rmaItems.filter(item => item.itemRmaNo && item.itemRmaNo.trim() !== "");
     
     if (validItems.length === 0) {
@@ -263,14 +271,8 @@ export default function DepotDispatchPage() {
     }
   };
 
-  const [isReturnDispatch, setIsReturnDispatch] = useState(false);
-  const [isCustomerDispatch, setIsCustomerDispatch] = useState(false);
-
-  const { Option } = Select;
-
   const handleTransporterChange = (val) => {
     const selectedValue = Array.isArray(val) ? val[val.length - 1] : val;
-
     const exists = transporters.find((t) => t.transporterName === selectedValue);
     
     if (!exists) {
@@ -291,11 +293,9 @@ export default function DepotDispatchPage() {
   };
 
   const openDcModal = async (rmaNo, rmaItems, isCustomerDispatch = false, isReturn = false) => {
-    // Partial Dispatch: Filter items that have an RMA Number
     let validItems = rmaItems.filter(item => item.itemRmaNo && item.itemRmaNo.trim() !== "");
 
     if (isReturn) {
-        // Only include Repaired items for Depot Return logic
         validItems = validItems.filter(item => item.depotStage === "AT_DEPOT_REPAIRED");
     }
 
@@ -308,7 +308,6 @@ export default function DepotDispatchPage() {
         const excludedCount = rmaItems.length - validItems.length;
         message.warning(`${excludedCount} item(s) excluded (missing RMA No or not Repaired).`);
     }
-
 
     setSelectedRmaNo(rmaNo);
     setIsReturnDispatch(isReturn);
@@ -324,7 +323,6 @@ export default function DepotDispatchPage() {
 
     dcForm.resetFields();
     
-    // Auto-generate DC Number
     let nextDcNo = "";
     try {
         const res = await RmaApi.getNextDcNo();
@@ -341,15 +339,11 @@ export default function DepotDispatchPage() {
         modeOfShipment: "ROAD",
         boxes: "1",
         consigneeName: customerName,
-        consigneeAddress: "", // User to fill
+        consigneeAddress: "", 
         gstIn: "", 
         dcNo: nextDcNo,
       });
     } else {
-      // Dispatch to Gurgaon (or Depot originally)
-      // If it's Return (Depot -> Gurgaon), set Gurgaon address
-      // If it's Forward (Start -> Depot), set Bangalore address
-      
       const consigneeName = isReturn ? "Motorola Solutions India Pvt Ltd (Gurgaon)" : "Motorola Solutions India Pvt Ltd";
       const consigneeAddress = isReturn ? "Gurgaon" : "Bangalore";
 
@@ -363,7 +357,6 @@ export default function DepotDispatchPage() {
       });
     }
 
-    // Fetch Saved Rates
     try {
       const itemsToFetch = rmaItems.map(i => ({ product: i.product, model: i.model }));
       const rateRes = await RmaApi.getProductRates(itemsToFetch);
@@ -383,32 +376,6 @@ export default function DepotDispatchPage() {
     setDcModalVisible(true);
   };
 
-  const handleGenerateOutwardGatepass = async (rmaNo) => {
-    try {
-      message.loading({ content: "Generating Gatepass...", key: "gp_gen" });
-      const result = await RmaApi.generateOutwardGatepass(rmaNo);
-      if (result.success) {
-        // Create blob link to download
-        const url = window.URL.createObjectURL(result.blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `Outward_Gatepass_${rmaNo}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        link.parentNode.removeChild(link);
-        message.success({ content: "Gatepass Generated!", key: "gp_gen" });
-      } else {
-        message.error({
-          content: result.error || "Failed to generate gatepass",
-          key: "gp_gen",
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      message.error({ content: "Error generating gatepass", key: "gp_gen" });
-    }
-  };
-
   const handleGenerateDC = async (values) => {
     try {
       setDcSubmitting(true);
@@ -426,13 +393,6 @@ export default function DepotDispatchPage() {
         items: formItems,
       } = values;
 
-      if (isNewTransporter && transporterName) {
-        const tId = transporterId || null;
-        if (tId) {
-          // backend will persist if needed
-        }
-      }
-
       const formattedItems = dcTableData.map((item, index) => ({
         slNo: index + 1,
         product: item.product,
@@ -443,10 +403,9 @@ export default function DepotDispatchPage() {
           formItems && formItems[index] && formItems[index].rate
             ? formItems[index].rate
             : 0,
-            itemRmaNo: item.itemRmaNo, // Include Item RMA No (backend needs it?) - useful for UI
+            itemRmaNo: item.itemRmaNo,
       }));
 
-       // Need item IDs for backend dispatch
        const itemIds = dcTableData.map(item => item.id);
 
       const payload = {
@@ -466,19 +425,17 @@ export default function DepotDispatchPage() {
         items: formattedItems,
       };
 
-      // == NEW: Return Dispatch Logic ==
       if (isReturnDispatch) {
-          // Prepare payload for dispatch-return
           const returnPayload = {
               itemIds: itemIds,
-              dcNo: dcNo, // This is now "Docket NO" in form
-              ewayBillNo: "", // optional/future
+              dcNo: dcNo,
+              ewayBillNo: "", 
               dispatchMode: modeOfShipment === "HAND_CARRY" ? "HAND" : "COURIER",
               courierName: payload.transporterName,
-              trackingNo: "", // Tracking No removed from form
+              trackingNo: "", 
               dispatchTo: isCustomerDispatch ? "CUSTOMER" : "GURGAON",
               dispatchDate: values.dispatchDate ? values.dispatchDate.format("YYYY-MM-DD") : null,
-              remarks: `Docket: ${dcNo}`, // Updated remarks
+              remarks: `Docket: ${dcNo}`, 
           };
           
           const dispatchRes = await RmaApi.dispatchReturn(returnPayload);
@@ -489,20 +446,17 @@ export default function DepotDispatchPage() {
           }
           message.success("Items dispatched successfully!");
           
-          // == SKIP PDF GENERATION for Return Dispatch as per request ==
           setDcModalVisible(false);
           loadItems();
           setDcSubmitting(false);
           return;
       }
 
-      // Generate PDF (Only for Outward Dispatch)
       const result = await RmaApi.generateDeliveryChallan(payload);
       if (result.success) {
         message.success("Delivery Challan Generated Successfully");
         setDcModalVisible(false);
         fetchTransporters();
-        // Return dispatch handled above, so no need to refresh here for that case
       } else {
         message.error("Failed to Generate DC PDF");
       }
@@ -511,7 +465,6 @@ export default function DepotDispatchPage() {
       message.error("An error occurred");
     } finally {
       if (!isReturnDispatch) {
-          // Only reset submitting here if we didn't return early
           setDcSubmitting(false);
       }
     }
@@ -572,14 +525,12 @@ export default function DepotDispatchPage() {
 
   const openGgnDispatchModal = (item) => {
       setSelectedItem(item);
-      // Reset manual state
       setGgnDispatchMode("HAND");
       setGgnCourierName("");
       setGgnTrackingNo("");
       setGgnHandlerName("");
       setGgnHandlerContact("");
-      // Reset DC fields
-      setGgnAddress(item.customerAddress || ""); // Pre-fill if available
+      setGgnAddress(item.customerAddress || ""); 
       setGgnState(item.state || "");
       setGgnCity(item.city || "");
       setGgnValue("0");
@@ -592,7 +543,7 @@ export default function DepotDispatchPage() {
   return (
     <RmaLayout>
       <div className="depot-page">
-        <div className="depot-header">
+        <div className="depot-header" style={{background: "linear-gradient(135deg, #722ed1 0%, #9254de 100%)", boxShadow: "0 4px 20px rgba(114, 46, 209, 0.3)"}}>
           <div className="header-content">
             <div className="header-title">
               <CarOutlined className="header-icon" />
@@ -643,178 +594,95 @@ export default function DepotDispatchPage() {
                           .sort(([rmaNoA, itemsA], [rmaNoB, itemsB]) => {
                             const isAllCompletedA = itemsA.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
                             const isAllCompletedB = itemsB.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
-
-                            if (!isAllCompletedA && isAllCompletedB) return -1; // A has active items, B is all done -> A comes first
-                            if (isAllCompletedA && !isAllCompletedB) return 1;  // A is all done, B has active items -> B comes first
-
+                            if (!isAllCompletedA && isAllCompletedB) return -1;
+                            if (isAllCompletedA && !isAllCompletedB) return 1;
                             return 0;
                           })
                           .map(([rmaNo, rmaItems]) => {
-                            // Sort items within the RMA
-                            rmaItems.sort((a, b) => {
-                              const isCompletedA = a.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || a.depotCycleClosed;
-                              const isCompletedB = b.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || b.depotCycleClosed;
-
-                              if (!isCompletedA && isCompletedB) return -1;
-                              if (isCompletedA && !isCompletedB) return 1;
-                              return 0;
-                            });
-
+                            const isAllCompleted = rmaItems.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
                             return (
                               <Card
                                 key={rmaNo}
                                 className="rma-group-card"
+                                style={{borderLeft: "4px solid #722ed1"}}
                                 title={
-                                  <div className="rma-card-header">
-                                    <span className="rma-number">
-                                      <Tag color="#9254de">
-                                        RMA: {rmaNo}
-                                      </Tag>
-                                    </span>
-                                    <Badge
-                                      count={rmaItems.length}
-                                      style={{ backgroundColor: "#9254de" }}
-                                    />
+                                  <div className="rma-card-header-flex">
+                                    <div className="rma-identity">
+                                        <div className="rma-id-box">
+                                            <span className="rma-label">RMA Request</span>
+                                            <span className="rma-value">{rmaNo}</span>
+                                        </div>
+                                        <Badge count={rmaItems.length} style={{ backgroundColor: "#722ed1" }} />
+                                    </div>
+                                    <div className="rma-actions">
+                                      <Button
+                                        className="btn-generate-dc"
+                                        icon={<FilePdfOutlined />}
+                                        onClick={() => openDcModal(rmaNo, rmaItems)}
+                                      >
+                                        Generate DC
+                                      </Button>
+                                      <Button
+                                        type="primary"
+                                        className="btn-dispatch"
+                                        icon={<SendOutlined />}
+                                        style={{background: "#722ed1", borderColor: "#722ed1"}}
+                                        onClick={() => openDispatchModal(rmaNo, rmaItems)}
+                                      >
+                                        Dispatch to Bangalore
+                                      </Button>
+                                    </div>
                                   </div>
                                 }
-                                extra={
-                                  <Space>
-                                    <Button
-                                      className="btn-generate-dc"
-                                      icon={<FilePdfOutlined />}
-                                      onClick={() =>
-                                        openDcModal(rmaNo, rmaItems)
-                                      }
-                                    >
-                                      Generate DC
-                                    </Button>
-                                    <Button
-                                      type="primary"
-                                      className="btn-dispatch"
-                                      icon={<SendOutlined />}
-                                      onClick={() =>
-                                        openDispatchModal(rmaNo, rmaItems)
-                                      }
-                                    >
-                                      Dispatch to Bangalore (
-                                      {rmaItems.length})
-                                    </Button>
-                                  </Space>
-                                }
                               >
-                                <Row gutter={[16, 16]}>
+                                {/* MODERN CARD GRID LAYOUT START */}
+                                <div className="rma-items-grid">
                                   {rmaItems.map((item) => (
-                                    <Col
-                                      xs={24}
-                                      md={12}
-                                      lg={8}
-                                      key={item.id}
-                                    >
-                                      <Card
-                                        className="item-card"
-                                        size="small"
-                                        actions={
-                                        !item.itemRmaNo
-                                          ? [
-                                                <Button
-                                                  key="add-rma"
-                                                  icon={<EditOutlined />}
-                                                  onClick={() =>
-                                                    openEditRmaModal(item)
-                                                  }
-                                                >
-                                                  Add RMA No. No.
-                                                </Button>,
-                                              ]
-                                          : []
-                                      }
-                                        title={
-                                          <div
-                                            style={{
-                                              display: "flex",
-                                              justifyContent: "space-between",
-                                            }}
-                                          >
-                                            <Text strong>
-                                              {item.product || "Item"}
-                                            </Text>
-                                            <Tag color="purple">
-                                              Depot Repair
-                                            </Tag>
-                                          </div>
-                                        }
-                                      >
-                                        <div className="item-content">
-                                          <div className="item-row">
-                                            <Text type="secondary">
-                                              Product
-                                            </Text>
-                                            <Text strong>
-                                              {item.product || "N/A"}
-                                            </Text>
-                                          </div>
-                                          <div className="item-row">
-                                            <Text type="secondary">
-                                              Serial No.
-                                            </Text>
-                                            <Text code>
-                                              {item.serialNo || "N/A"}
-                                            </Text>
-                                          </div>
-                                          <div className="item-row">
-                                            <Text type="secondary">
-                                              Model
-                                            </Text>
-                                            <Text>{item.model || "N/A"}</Text>
-                                          </div>
-                                          {item.itemRmaNo && (
-                                            <div className="item-row">
-                                              <Text type="secondary">
-                                                RMA No
-                                              </Text>
-                                              <Tag color="purple">
-                                                {item.itemRmaNo}
-                                              </Tag>
-                                            </div>
-                                          )}
-                                          <div className="item-row">
-                                            <Text type="secondary">
-                                              Fault
-                                            </Text>
-                                            <Paragraph
-                                              ellipsis={{ rows: 1 }}
-                                              style={{ marginBottom: 0 }}
+                                    <div key={item.id} className="rma-item-card-modern" style={{ borderColor: "#d9d9d9" }}>
+                                      {/* Header Strip */}
+                                      <div className="item-header" style={{ background: "#f9f0ff" }}>
+                                        <span className="item-product" style={{ color: "#722ed1" }}>{item.product || "Product"}</span>
+                                        <Tag color="purple">Depot Repair</Tag>
+                                      </div>
+
+                                      {/* Details Grid */}
+                                      <div className="item-details-grid">
+                                        <div className="detail-box">
+                                            <span className="label"><BarcodeOutlined/> Serial No</span>
+                                            <span className="value monospace">{item.serialNo}</span>
+                                        </div>
+                                        <div className="detail-box">
+                                            <span className="label">Model</span>
+                                            <span className="value">{item.model}</span>
+                                        </div>
+                                        <div className="detail-box">
+                                            <span className="label">RMA Number</span>
+                                            {item.itemRmaNo ? <Tag color="purple">{item.itemRmaNo}</Tag> : <Text type="secondary" style={{fontSize: '12px'}}>None</Text>}
+                                        </div>
+                                      </div>
+
+                                      {/* Fault Box */}
+                                      <div className="fault-box" style={{background: "#f9f9f9", borderColor: "#eee"}}>
+                                        <span className="label" style={{color: "#888"}}>Fault Description</span>
+                                        <p className="fault-desc">{item.faultDescription}</p>
+                                      </div>
+
+                                      {/* Actions Footer */}
+                                      <div className="item-footer">
+                                        {!item.itemRmaNo && (
+                                            <Button 
+                                                block 
+                                                icon={<EditOutlined />} 
+                                                onClick={() => openEditRmaModal(item)}
                                             >
-                                              {item.faultDescription}
-                                            </Paragraph>
-                                          </div>
-                                          
-                                        {/* NEW: Dispatch Buttons for Repaired Items */}
-                                        {item.depotStage === "AT_DEPOT_REPAIRED" && (
-                                           <div style={{ marginTop: 8, display: 'flex', gap: '5px' }}>
-                                                <Button 
-                                                    type="primary" 
-                                                    size="small"
-                                                    style={{ flex: 1, backgroundColor: "#1890ff" }}
-                                                    onClick={() => openDcModal(rmaNo, rmaItems, false, true)} 
-                                                >
-                                                    To Gurgaon
-                                                </Button>
-                                                <Button 
-                                                    type="primary" 
-                                                    size="small" 
-                                                    style={{ flex: 1, backgroundColor: "#52c41a", borderColor: "#52c41a" }}
-                                                    onClick={() => openDcModal(rmaNo, rmaItems, true, true)}
-                                                >
-                                                    To Customer
-                                                </Button>
-                                           </div>
+                                                Add RMA No.
+                                            </Button>
                                         )}
                                       </div>
-                                      </Card>
-                                    </Col>
+                                    </div>
                                   ))}
-                                </Row>
+                                </div>
+                                {/* MODERN CARD GRID LAYOUT END */}
                               </Card>
                             );
                           })}
@@ -840,263 +708,142 @@ export default function DepotDispatchPage() {
                     ) : (
                       <div className="rma-groups">
                         {Object.entries(groupedInTransit)
-                          .sort(([rmaNoA, itemsA], [rmaNoB, itemsB]) => {
-                            // 1. Prioritize In Transit to Depot
-                            const hasInTransitA = itemsA.some(i => i.depotStage === "IN_TRANSIT_TO_DEPOT");
-                            const hasInTransitB = itemsB.some(i => i.depotStage === "IN_TRANSIT_TO_DEPOT");
-                            if (hasInTransitA && !hasInTransitB) return -1;
-                            if (!hasInTransitA && hasInTransitB) return 1;
-
-                            // 2. Push fully completed groups to the bottom
-                            const isAllCompletedA = itemsA.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
-                            const isAllCompletedB = itemsB.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed);
-
-                            if (!isAllCompletedA && isAllCompletedB) return -1;
-                            if (isAllCompletedA && !isAllCompletedB) return 1;
-
-                            return 0;
-                          })
                           .map(([rmaNo, rmaItems]) => {
-                            const sortedItems = [...rmaItems].sort((a, b) => {
-                              // Helper to determine if an item is completed
-                              const isCompletedA =
-                                a.depotStage === "GGN_DELIVERED_TO_CUSTOMER" ||
-                                a.depotCycleClosed;
-                              const isCompletedB =
-                                b.depotStage === "GGN_DELIVERED_TO_CUSTOMER" ||
-                                b.depotCycleClosed;
-
-                              // 1. In Transit items first
-                              const isInTransitA =
-                                a.depotStage === "IN_TRANSIT_TO_DEPOT";
-                              const isInTransitB =
-                                b.depotStage === "IN_TRANSIT_TO_DEPOT";
-
-                              if (isInTransitA && !isInTransitB) return -1;
-                              if (!isInTransitA && isInTransitB) return 1;
-
-                              // 2. Completed items last
-                              if (isCompletedA && !isCompletedB) return 1;
-                              if (!isCompletedA && isCompletedB) return -1;
-
-                              return 0;
-                            });
-
-                            const isAllCompleted = rmaItems.every(
-                              (i) =>
-                                i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" ||
-                                i.depotCycleClosed
-                            );
-
+                            const sortedItems = [...rmaItems];
                             return (
                               <Card
                                 key={rmaNo}
                                 className="rma-group-card"
+                                style={{borderLeft: "4px solid #13c2c2"}}
                                 title={
-                                  <div className="rma-card-header">
-                                    <span className="rma-number">
-                                      <Tag color="#9254de">
-                                        RMA: {rmaNo}
-                                      </Tag>
-                                    </span>
-                                    <Badge
-                                      count={rmaItems.length}
-                                      style={{ backgroundColor: "#9254de" }}
-                                    />
+                                  <div className="rma-card-header-flex">
+                                    <div className="rma-identity">
+                                        <div className="rma-id-box">
+                                            <span className="rma-label">RMA Request</span>
+                                            <span className="rma-value">{rmaNo}</span>
+                                        </div>
+                                        <Badge count={rmaItems.length} style={{ backgroundColor: "#13c2c2" }} />
+                                    </div>
+                                    <div className="rma-actions">
+                                      <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap: '5px'}}>
+                                          <Tag color="cyan" icon={<SendOutlined />}>Out for Delivery</Tag>
+                                          {!rmaItems.every(i => i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || i.depotCycleClosed) && (
+                                              <Button 
+                                                size="small" 
+                                                icon={<FilePdfOutlined />} 
+                                                onClick={() => openDcModal(rmaNo, rmaItems, true)}
+                                              >
+                                                Generate Customer DC
+                                              </Button>
+                                          )}
+                                      </div>
+                                    </div>
                                   </div>
                                 }
-                                extra={
-                                  <Space>
-                                    <Tag
-                                      color="cyan"
-                                      icon={<SendOutlined />}
-                                    >
-                                      Out for Delivery
-                                    </Tag>
-                                    {!isAllCompleted && (
-                                      <>
-                                        <Button
-                                          size="small"
-                                          icon={<FilePdfOutlined />}
-                                          onClick={() =>
-                                            openDcModal(rmaNo, rmaItems, true)
-                                          }
-                                        >
-                                          Generate DC (Customer)
-                                        </Button>
-                                      </>
-                                    )}
-                                  </Space>
-                                }
                               >
-                                <div className="in-transit-box">
-                                  <CarOutlined
-                                    style={{
-                                      fontSize: 24,
-                                      color: "#9254de",
-                                    }}
-                                  />
-                                  <Space size="large" style={{ flex: 1 }}>
-                                    <div>
-                                      <Text
-                                        type="secondary"
-                                        style={{
-                                          display: "block",
-                                          fontSize: 12,
-                                        }}
-                                      >
-                                        DC Number
-                                      </Text>
-                                      <Text strong>
-                                        {/* Show Return DC if returning, else Outward DC */}
-                                        {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" || 
-                                         rmaItems[0]?.depotStage?.includes("GGN_") 
-                                            ? rmaItems[0]?.depotReturnDcNo || "N/A"
-                                            : rmaItems[0]?.dcNo || "N/A"}
-                                      </Text>
-                                    </div>
-                                    <div>
-                                      <Text
-                                        type="secondary"
-                                        style={{
-                                          display: "block",
-                                          fontSize: 12,
-                                        }}
-                                      >
-                                        E-Way Bill
-                                      </Text>
-                                      <Text strong>
-                                        {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" || 
-                                         rmaItems[0]?.depotStage?.includes("GGN_")
-                                            ? rmaItems[0]?.depotReturnEwayBillNo || "N/A"
-                                            : rmaItems[0]?.ewayBillNo || "N/A"}
-                                      </Text>
-                                    </div>
-                                    {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" ? (
-                                        <Tag color="orange">In Transit from Depot</Tag>
-                                    ) : (
-                                        <Tag color="processing">In Transit to Depot</Tag>
-                                    )}
-                                  </Space>
-                                </div>
-                                <Row gutter={[16, 16]}>
+                                 <div style={{padding: '0 16px 16px 16px', display:'flex', gap:'20px', alignItems:'center', background:'#f0f5ff', borderRadius:'4px', marginBottom:'16px'}}>
+                                     <CarOutlined style={{ fontSize: 24, color: "#13c2c2" }} />
+                                     <div>
+                                         <Text type="secondary" style={{ fontSize: 12 }}>DC Number</Text>
+                                         <div style={{fontWeight: 600}}>
+                                            {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" || rmaItems[0]?.depotStage?.includes("GGN_") 
+                                                ? rmaItems[0]?.depotReturnDcNo || "N/A"
+                                                : rmaItems[0]?.dcNo || "N/A"}
+                                         </div>
+                                     </div>
+                                     <div>
+                                         <Text type="secondary" style={{ fontSize: 12 }}>E-Way Bill</Text>
+                                         <div style={{fontWeight: 600}}>
+                                            {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" || rmaItems[0]?.depotStage?.includes("GGN_")
+                                                ? rmaItems[0]?.depotReturnEwayBillNo || "N/A"
+                                                : rmaItems[0]?.ewayBillNo || "N/A"}
+                                         </div>
+                                     </div>
+                                     <div>
+                                        {rmaItems[0]?.depotStage === "IN_TRANSIT_FROM_DEPOT" ? (
+                                            <Tag color="orange">In Transit from Depot</Tag>
+                                        ) : (
+                                            <Tag color="processing">In Transit to Depot</Tag>
+                                        )}
+                                     </div>
+                                 </div>
+
+                                {/* MODERN CARD GRID FOR TRANSIT ITEMS */}
+                                <div className="rma-items-grid">
                                   {sortedItems.map((item) => (
-                                    <Col
-                                      xs={24}
-                                      md={12}
-                                      lg={8}
-                                      key={item.id}
-                                    >
-                                      <Card
-                                        className="item-card"
-                                        size="small"
-                                        actions={[
-                                          item.depotStage ===
-                                          "IN_TRANSIT_TO_DEPOT" && (
-                                            <Button
-                                              key="receive-item"
-                                              type="text"
-                                              icon={<CheckCircleOutlined />}
-                                              onClick={() =>
-                                                handleMarkReceived(item)
-                                              }
-                                              loading={receivingIds.has(
-                                                item.id
-                                              )}
-                                              style={{ color: "#52c41a" }}
-                                            >
-                                              Receive Item
-                                            </Button>
-                                          ),
-                                        ].filter(Boolean)}
-                                      >
-                                        <div className="item-content">
-                                          <div style={{ marginBottom: 8 }}>
-                                            {item.depotStage ===
-                                              "IN_TRANSIT_TO_DEPOT" && (
-                                                <Tag color="processing">
-                                                  In Transit
-                                                </Tag>
-                                              )}
-                                            {item.depotStage ===
-                                              "AT_DEPOT_RECEIVED" && (
-                                                <Tag color="success">
-                                                  Received at Depot
-                                                </Tag>
-                                              )}
-                                            {item.depotStage ===
-                                              "AT_DEPOT_REPAIRED" && (
-                                                <>
-                                                {item.repairStatus?.includes("UNREPAIRED") && <Tag color="default">Unrepaired</Tag>}
-                                                {(!item.repairStatus || (item.repairStatus.includes("REPAIRED") && !item.repairStatus.includes("UNREPAIRED"))) && <Tag color="orange">Repaired</Tag>}
-                                                  {item.repairStatus?.includes("REPLACED") && <Tag color="green">Replaced</Tag>}
-                                                {item.repairStatus?.includes("BER") && <Tag color="red">BER</Tag>}
-                                              </>
+                                    <div key={item.id} className="rma-item-card-modern" style={{ borderColor: item.depotStage === "IN_TRANSIT_TO_DEPOT" ? "#91d5ff" : "#b7eb8f" }}>
+                                        {/* Header */}
+                                        <div className="item-header" style={{ background: item.depotStage === "IN_TRANSIT_TO_DEPOT" ? "#e6f7ff" : "#f6ffed" }}>
+                                            <span className="item-product" style={{ color: "#0050b3" }}>{item.product}</span>
+                                            {item.depotStage === "IN_TRANSIT_TO_DEPOT" && <Tag color="processing">In Transit</Tag>}
+                                            {item.depotStage === "AT_DEPOT_RECEIVED" && <Tag color="success">Received at Depot</Tag>}
+                                            {item.depotStage === "AT_DEPOT_REPAIRED" && (
+                                                item.repairStatus?.includes("BER") ? <Tag color="red">BER</Tag> : <Tag color="orange">Repaired</Tag>
                                             )}
-                                            {item.depotStage ===
-                                              "IN_TRANSIT_FROM_DEPOT" && (
-                                              <Tag color="geekblue">
-                                                {item.dispatchTo === "CUSTOMER" ? "Dispatched Bangalore to customer" : "Dispatched to Gurgaon"}
-                                                </Tag>
-                                              )}
-                                            {item.depotStage ===
-                                              "GGN_RECEIVED_FROM_DEPOT" && (
-                                                <Tag color="purple">
-                                                  Received at GGN
-                                                </Tag>
-                                              )}
-                                            {[
-                                              "GGN_DISPATCHED_TO_CUSTOMER_HAND",
-                                              "GGN_DISPATCHED_TO_CUSTOMER_COURIER",
-                                            ].includes(item.depotStage) && (
-                                                <Tag color="cyan">
-                                                  Dispatched from GGN to customer
-                                                </Tag>
-                                              )}
-                                            {(item.depotStage ===
-                                              "GGN_DELIVERED_TO_CUSTOMER" ||
-                                              item.depotCycleClosed) && (
-                                                <Tag color="#87d068">
-                                                  Cycle Completed
-                                                </Tag>
-                                              )}
-                                          </div>
-                                          <div className="item-row">
-                                            <Text type="secondary">
-                                              Product
-                                            </Text>
-                                            <Text strong>
-                                              {item.product || "N/A"}
-                                            </Text>
-                                          </div>
-                                          <div className="item-row">
-                                            <Text type="secondary">
-                                              Serial No.
-                                            </Text>
-                                            <Text code>
-                                              {item.serialNo || "N/A"}
-                                            </Text>
-                                          </div>
-                                          <div className="item-row">
-                                            <Text type="secondary">
-                                              Model
-                                            </Text>
-                                            <Text>{item.model || "N/A"}</Text>
-                                          </div>
-                                          {item.itemRmaNo && (
-                                            <div className="item-row">
-                                              <Text type="secondary">
-                                                RMA Number
-                                              </Text>
-                                              <Tag color="purple">
-                                                {item.itemRmaNo}
-                                              </Tag>
+                                            {item.depotStage === "IN_TRANSIT_FROM_DEPOT" && <Tag color="geekblue">Returning</Tag>}
+                                            {item.depotStage === "GGN_RECEIVED_FROM_DEPOT" && <Tag color="purple">At GGN</Tag>}
+                                            {(item.depotStage === "GGN_DELIVERED_TO_CUSTOMER" || item.depotCycleClosed) && <Tag color="green">Completed</Tag>}
+                                        </div>
+
+                                        {/* Details */}
+                                        <div className="item-details-grid">
+                                            <div className="detail-box">
+                                                <span className="label">Serial No</span>
+                                                <span className="value monospace">{item.serialNo}</span>
                                             </div>
-                                          )}
-                                          <div>
-                                          <Space>
-                                           {/* NEW: Gurgaon actions - Replaced with Return Dispatch Options */}
-                                           <Divider style={{ margin: "8px 0" }} />
+                                            <div className="detail-box">
+                                                <span className="label">Model</span>
+                                                <span className="value">{item.model}</span>
+                                            </div>
+                                            <div className="detail-box">
+                                                <span className="label">RMA</span>
+                                                <Tag color="purple">{item.itemRmaNo}</Tag>
+                                            </div>
+                                            {(item.depotReturnDispatchDate || item.dispatchedDate) && (
+                                                <div className="detail-box">
+                                                    <span className="label"><CalendarOutlined/> Dispatch Date</span>
+                                                    <span className="value">
+                                                        {new Date(item.depotReturnDispatchDate || item.dispatchedDate).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {item.depotReturnDeliveredDate && (
+                                                <div className="detail-box">
+                                                    <span className="label"><CalendarOutlined/> Received Date</span>
+                                                    <span className="value">
+                                                        {new Date(item.depotReturnDeliveredDate).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Fault/Remarks */}
+                                        <div className="fault-box" style={{background: "#f9f9f9"}}>
+                                            <span className="label" style={{color: "#888"}}>Fault</span>
+                                            <p className="fault-desc" style={{marginBottom:'4px'}}>{item.faultDescription}</p>
+                                            {item.repairRemarks && (
+                                                <>
+                                                    <span className="label" style={{color: "#faad14", marginTop: '4px'}}>Repair Note</span>
+                                                    <p className="fault-desc">{item.repairRemarks}</p>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {/* Action Footer */}
+                                        <div className="item-footer" style={{display:'flex', flexDirection:'column', gap:'8px'}}>
+                                            
+                                            {/* Receive at Depot Button */}
+                                            {item.depotStage === "IN_TRANSIT_TO_DEPOT" && (
+                                                <Button type="primary" size="small" icon={<CheckCircleOutlined />} 
+                                                    loading={receivingIds.has(item.id)}
+                                                    onClick={() => handleMarkReceived(item)}
+                                                    style={{background: "#52c41a", borderColor: "#52c41a"}}
+                                                >
+                                                    Receive Item
+                                                </Button>
+                                            )}
+
+                                            {/* Status Dropdown at Depot */}
                                             {item.depotStage === "AT_DEPOT_RECEIVED" && (
                                                 <Dropdown
                                                     menu={{
@@ -1107,130 +854,75 @@ export default function DepotDispatchPage() {
                                                             { label: "Unrepaired", key: "UNREPAIRED" },
                                                         ],
                                                         onClick: async ({ key }) => {
-                                                            const statusLabels = {
-                                                                "REPAIRED": "Repaired",
-                                                                "REPLACED": "Replaced",
-                                                                "BER": "BER",
-                                                                "UNREPAIRED": "Unrepaired"
-                                                            };
-                                                            const payload = {
-                                                                itemIds: [item.id],
-                                                                repairStatus: key
-                                                            };
-                                                            
+                                                            const payload = { itemIds: [item.id], repairStatus: key };
                                                             const res = await RmaApi.markDepotRepaired(payload);
-                                                            
-                                                            if (res.success) {
-                                                                message.success(res.message || `Marked as ${statusLabels[key]}`);
-                                                                loadItems();
-                                                            } else {
-                                                                message.error(res.error || "Failed to update status");
-                                                            }
+                                                            if (res.success) { message.success("Status Updated"); loadItems(); }
+                                                            else { message.error(res.error || "Failed"); }
                                                         }
                                                     }}
                                                 >
-                                                    <Button
-                                                        size="small"
-                                                        type="primary"
-                                                        style={{
-                                                            backgroundColor: "#faad14",
-                                                            borderColor: "#faad14",
-                                                            width: "100%",
-                                                            marginBottom: 5
-                                                        }}
-                                                    >
+                                                    <Button size="small" type="primary" style={{backgroundColor: "#faad14", borderColor: "#faad14"}}>
                                                         Mark Status <DownOutlined />
                                                     </Button>
                                                 </Dropdown>
                                             )}
 
-                                           {/* Buttons for Repaired items (Restore to Tab 2) */}
-                                           {item.depotStage === "AT_DEPOT_REPAIRED" && (
-                                               <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: 5 }}>
-                                                    <Button 
-                                                        type="primary" 
-                                                        size="small"
-                                                        style={{ flex: 1, backgroundColor: "#1890ff" }}
-                                                        onClick={() => openDcModal(rmaNo, rmaItems, false, true)} 
-                                                    >
+                                            {/* Dispatch Buttons (Depot -> GGN/Customer) */}
+                                            {item.depotStage === "AT_DEPOT_REPAIRED" && (
+                                                <div style={{display:'flex', gap:'5px'}}>
+                                                    <Button type="primary" size="small" style={{flex:1}} onClick={() => openDcModal(rmaNo, [item], false, true)}>
                                                         To Gurgaon
                                                     </Button>
-                                                    <Button 
-                                                        type="primary" 
-                                                        size="small" 
-                                                        style={{ flex: 1, backgroundColor: "#52c41a", borderColor: "#52c41a" }}
-                                                        onClick={() => openDcModal(rmaNo, rmaItems, true, true)}
-                                                    >
+                                                    <Button type="primary" size="small" style={{flex:1, background: "#52c41a", borderColor: "#52c41a"}} onClick={() => openDcModal(rmaNo, [item], true, true)}>
                                                         To Customer
                                                     </Button>
-                                               </div>
-                                           )}
-                                           
-                                          {/* == Consolidated Action Buttons == */}
-                                            <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap', width: "100%" }}>
-                                                {item.depotStage === "IN_TRANSIT_FROM_DEPOT" && item.dispatchTo === "GURGAON" && (
-                                                    <Button size="small" type="primary" onClick={() => handleMarkReceivedGgn(item)}>
-                                                        Mark Received (GGN)
-                                                    </Button>
-                                                )}
-                                                
-                                                {item.depotStage === "GGN_RECEIVED_FROM_DEPOT" && (
-                                                    <Button size="small" type="primary" onClick={() => openGgnDispatchModal(item)}>
-                                                        Dispatch to Customer
-                                                    </Button>
-                                                )}
+                                                </div>
+                                            )}
 
-                                                {/* Allow GGN Dispatch OR Direct Customer Dispatch (IN_TRANSIT_FROM_DEPOT) flow to upload signed DC */}
-                                                { (["GGN_DISPATCHED_TO_CUSTOMER_HAND", "GGN_DISPATCHED_TO_CUSTOMER_COURIER"].includes(item.depotStage) || 
-                                                  (item.depotStage === "IN_TRANSIT_FROM_DEPOT" && item.dispatchTo === "CUSTOMER")) && (
-                                                    <Button size="small" type="primary" style={{ background: "#faad14", borderColor: "#faad14" }}
-                                                        onClick={() => {
-                                                            setSelectedItem(item);
-                                                            setGgnProofFileId(null);
-                                                            setGgnProofRemarks("");
-                                                            setGgnProofModalVisible(true);
-                                                        }}
-                                                    >
-                                                        Upload Signed DC
-                                                    </Button>
-                                                )}
-                                            </div>
-
-                                            {item.depotStage ===
-                                              "GGN_RETURNED_FAULTY" && (
-                                                <Button
-                                                  danger
-                                                  size="small"
-                                                  onClick={async () => {
-                                                    const res =
-                                                      await RmaApi.markDepotFaultyAndCreateNewRma(
-                                                        item.id
-                                                      );
-                                                    if (res.success) {
-                                                      message.success(
-                                                        `New RMA created: ${res.data?.newRmaNo ||
-                                                        "created"
-                                                        }`
-                                                      );
-                                                      loadItems();
-                                                    } else {
-                                                      message.error(
-                                                        res.error ||
-                                                        "Failed to create new RMA"
-                                                      );
-                                                    }
-                                                  }}
-                                                >
-                                                  Create New RMA
+                                            {/* Receive at Gurgaon */}
+                                            {item.depotStage === "IN_TRANSIT_FROM_DEPOT" && item.dispatchTo === "GURGAON" && (
+                                                <Button size="small" type="primary" onClick={() => handleMarkReceivedGgn(item)}>
+                                                    Mark Received (GGN)
                                                 </Button>
-                                              )}
-                                          </Space>
+                                            )}
+
+                                            {/* Dispatch GGN -> Customer */}
+                                            {item.depotStage === "GGN_RECEIVED_FROM_DEPOT" && (
+                                                <Button size="small" type="primary" onClick={() => openGgnDispatchModal(item)}>
+                                                    Dispatch to Customer
+                                                </Button>
+                                            )}
+
+                                            {/* Upload Signed DC */}
+                                            { (["GGN_DISPATCHED_TO_CUSTOMER_HAND", "GGN_DISPATCHED_TO_CUSTOMER_COURIER"].includes(item.depotStage) || 
+                                              (item.depotStage === "IN_TRANSIT_FROM_DEPOT" && item.dispatchTo === "CUSTOMER")) && (
+                                                <Button size="small" type="primary" style={{ background: "#faad14", borderColor: "#faad14" }}
+                                                    onClick={() => {
+                                                        setSelectedItem(item);
+                                                        setGgnProofFileId(null);
+                                                        setGgnProofRemarks("");
+                                                        setGgnProofModalVisible(true);
+                                                    }}
+                                                >
+                                                    Upload Signed DC
+                                                </Button>
+                                            )}
+
+                                            {/* Create New RMA for BER/Faulty */}
+                                            {item.depotStage === "GGN_RETURNED_FAULTY" && (
+                                                <Button danger size="small" onClick={async () => {
+                                                    const res = await RmaApi.markDepotFaultyAndCreateNewRma(item.id);
+                                                    if (res.success) { message.success("New RMA Created"); loadItems(); }
+                                                    else { message.error("Failed"); }
+                                                }}>
+                                                    Create New RMA
+                                                </Button>
+                                            )}
                                         </div>
-                                      </div>
-                                    </Card>
-                                    </Col>
+                                    </div>
                                   ))}
-                                </Row>
+                                </div>
+                                {/* MODERN CARD GRID END */}
                               </Card>
                             );
                           })}
@@ -1726,7 +1418,7 @@ export default function DepotDispatchPage() {
                                { label: "Blue Dart", value: "Blue Dart" },
                                { label: "Safe Express", value: "Safe Express" },
                              ]}
-                           />
+                            />
                     </Col>
                     <Col span={12}>
                         <Text strong>Transporter ID</Text>

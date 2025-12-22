@@ -36,6 +36,10 @@ public class RmaItemWorkflowDTO {
     private String dcNo; // Delivery Challan Number
     private String ewayBillNo; // E-Way Bill Number
 
+    // Depot Return Tracking
+    private ZonedDateTime depotReturnDispatchDate;
+    private ZonedDateTime depotReturnDeliveredDate;
+
     // Delivery confirmation fields
     private String deliveredTo; // Name of person who received
     private String deliveredBy; // Courier/person who delivered
@@ -298,5 +302,21 @@ public class RmaItemWorkflowDTO {
 
     public void setIsDelivered(Boolean isDelivered) {
         this.isDelivered = isDelivered;
+    }
+
+    public ZonedDateTime getDepotReturnDispatchDate() {
+        return depotReturnDispatchDate;
+    }
+
+    public void setDepotReturnDispatchDate(ZonedDateTime depotReturnDispatchDate) {
+        this.depotReturnDispatchDate = depotReturnDispatchDate;
+    }
+
+    public ZonedDateTime getDepotReturnDeliveredDate() {
+        return depotReturnDeliveredDate;
+    }
+
+    public void setDepotReturnDeliveredDate(ZonedDateTime depotReturnDeliveredDate) {
+        this.depotReturnDeliveredDate = depotReturnDeliveredDate;
     }
 }

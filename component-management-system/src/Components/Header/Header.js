@@ -26,7 +26,6 @@ function Header({ onToggleSidebar }) {
             onClick={onToggleSidebar}
             aria-label="Toggle Sidebar"
           >
-            <FaBars />
           </button>
         )}
         <img src={logo} alt="Company Logo" className="logo" />
