@@ -20,6 +20,7 @@ import com.serverManagement.server.management.dao.rma.TransporterDAO;
 import com.serverManagement.server.management.dto.rma.DeliveryChallanRequest;
 import com.serverManagement.server.management.dto.rma.ProductCatalogDTO;
 import com.serverManagement.server.management.dto.rma.ProductModelDTO;
+import com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto;
 import com.serverManagement.server.management.dto.rma.RmaItemWorkflowDTO;
 import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import com.serverManagement.server.management.entity.rma.DepotDispatchEntity;
@@ -184,6 +185,12 @@ public class RmaService {
         // RMA number will be set later by service team after approval
         // Do not auto-generate RMA number for items
         rmaRequestEntity.setRmaNo(null);
+
+        // Set TAT and calculate due date
+        if (createRmaRequest.getTat() != null && createRmaRequest.getTat() > 0) {
+            rmaRequestEntity.setTat(createRmaRequest.getTat());
+            rmaRequestEntity.setDueDate(now.plusDays(createRmaRequest.getTat()));
+        }
 
         // 4a. Auto-save customer details (find existing or create new)
         // This allows customers to be reused in future RMA requests
@@ -504,13 +511,60 @@ public class RmaService {
                 e.printStackTrace();
             }
 
-            com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto stats = new com.serverManagement.server.management.dto.rma.RmaDashboardStatsDto(
+            RmaDashboardStatsDto stats = new RmaDashboardStatsDto(
                     totalRequests,
                     totalItems,
                     repairedCount,
                     unrepairedCount,
                     dailyTrends,
                     recentRmaNumbers);
+
+            // Calculate SLA compliance stats
+            try {
+                List<RmaRequestEntity> allRequests = rmaRequestDAO.findAll();
+                long totalWithTat = 0;
+                long onTrack = 0;
+                long atRisk = 0;
+                long breached = 0;
+
+                for (RmaRequestEntity req : allRequests) {
+                    if (req.getTat() != null && req.getDueDate() != null) {
+                        totalWithTat++;
+                        long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(now, req.getDueDate());
+                        int halfTat = req.getTat() / 2;
+
+                        if (daysRemaining < 0) {
+                            breached++;
+                        } else if (daysRemaining <= halfTat) {
+                            atRisk++;
+                        } else {
+                            onTrack++;
+                        }
+                    }
+                }
+
+                stats.setTotalWithTat(totalWithTat);
+                stats.setOnTrackCount(onTrack);
+                stats.setAtRiskCount(atRisk);
+                stats.setBreachedCount(breached);
+
+                // Calculate compliance rate (closed within TAT)
+                // For now, use (onTrack + atRisk) / totalWithTat as a simple metric
+                if (totalWithTat > 0) {
+                    double complianceRate = (double) (totalWithTat - breached) / totalWithTat * 100;
+                    stats.setComplianceRate(Math.round(complianceRate * 10.0) / 10.0); // Round to 1 decimal
+                } else {
+                    stats.setComplianceRate(100.0); // No TAT defined = 100% compliant
+                }
+            } catch (Exception e) {
+                // SLA calculation failed, set defaults
+                stats.setTotalWithTat(0L);
+                stats.setOnTrackCount(0L);
+                stats.setAtRiskCount(0L);
+                stats.setBreachedCount(0L);
+                stats.setComplianceRate(100.0);
+                System.err.println("Warning: Failed to calculate SLA stats: " + e.getMessage());
+            }
 
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
@@ -1470,6 +1524,151 @@ public class RmaService {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to fetch product rates");
+        }
+    }
+
+    /**
+     * Get TAT Compliance Report - customer-wise breakdown
+     * Shows requests with TAT, completed within/after TAT, and compliance rate per
+     * customer
+     */
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getTatComplianceReport() {
+        try {
+            List<RmaRequestEntity> allRequests = rmaRequestDAO.findAll();
+            ZonedDateTime now = ZonedDateTime.now();
+
+            // Group requests by company name
+            java.util.Map<String, java.util.List<RmaRequestEntity>> requestsByCompany = allRequests.stream()
+                    .collect(java.util.stream.Collectors.groupingBy(RmaRequestEntity::getCompanyName));
+
+            List<com.serverManagement.server.management.dto.rma.TatComplianceReportDto> report = new java.util.ArrayList<>();
+
+            for (java.util.Map.Entry<String, java.util.List<RmaRequestEntity>> entry : requestsByCompany.entrySet()) {
+                String companyName = entry.getKey();
+                java.util.List<RmaRequestEntity> companyRequests = entry.getValue();
+
+                com.serverManagement.server.management.dto.rma.TatComplianceReportDto dto = new com.serverManagement.server.management.dto.rma.TatComplianceReportDto();
+                dto.setCompanyName(companyName);
+                dto.setTotalRequests((long) companyRequests.size());
+
+                // Get default TAT from customer if available
+                RmaRequestEntity firstReq = companyRequests.get(0);
+                if (firstReq.getCustomer() != null && firstReq.getCustomer().getTat() != null) {
+                    dto.setDefaultTat(firstReq.getCustomer().getTat());
+                }
+
+                long requestsWithTat = 0;
+                long completedWithinTat = 0;
+                long completedAfterTat = 0;
+                long stillOpen = 0;
+                long onTrack = 0;
+                long atRisk = 0;
+                long breached = 0;
+                ZonedDateTime oldestOpenDueDate = null;
+
+                for (RmaRequestEntity req : companyRequests) {
+                    if (req.getTat() == null || req.getDueDate() == null) {
+                        continue;
+                    }
+                    requestsWithTat++;
+
+                    // Check if all items in request are delivered (completed)
+                    // For Local repair: DELIVERED = cycle complete
+                    // For Depot repair: DELIVERED = cycle complete (after dispatch to customer or
+                    // Gurgaon)
+                    boolean allDelivered = true;
+                    ZonedDateTime latestDeliveryDate = null;
+
+                    if (req.getItems() != null) {
+                        for (RmaItemEntity item : req.getItems()) {
+                            String status = item.getRmaStatus();
+                            // Check for DELIVERED status (case-insensitive)
+                            if (status == null || !status.toUpperCase().contains("DELIVERED")) {
+                                allDelivered = false;
+                            } else {
+                                // Track latest delivery date
+                                // For LOCAL repairs: use deliveryDate
+                                // For DEPOT repairs: use depotReturnDeliveredDate
+                                ZonedDateTime itemDeliveryDate = item.getDeliveryDate();
+                                if (itemDeliveryDate == null) {
+                                    // Check depot return date for depot repairs
+                                    itemDeliveryDate = item.getDepotReturnDeliveredDate();
+                                }
+                                if (itemDeliveryDate != null) {
+                                    if (latestDeliveryDate == null
+                                            || itemDeliveryDate.isAfter(latestDeliveryDate)) {
+                                        latestDeliveryDate = itemDeliveryDate;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (allDelivered && latestDeliveryDate != null) {
+                        // Completed - check if within TAT
+                        if (!latestDeliveryDate.isAfter(req.getDueDate())) {
+                            completedWithinTat++;
+                        } else {
+                            completedAfterTat++;
+                        }
+                    } else {
+                        // Still open
+                        stillOpen++;
+                        long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(now, req.getDueDate());
+                        int halfTat = req.getTat() / 2;
+
+                        if (daysRemaining < 0) {
+                            breached++;
+                        } else if (daysRemaining <= halfTat) {
+                            atRisk++;
+                        } else {
+                            onTrack++;
+                        }
+
+                        // Track oldest open due date
+                        if (oldestOpenDueDate == null || req.getDueDate().isBefore(oldestOpenDueDate)) {
+                            oldestOpenDueDate = req.getDueDate();
+                        }
+                    }
+                }
+
+                dto.setRequestsWithTat(requestsWithTat);
+                dto.setCompletedWithinTat(completedWithinTat);
+                dto.setCompletedAfterTat(completedAfterTat);
+                dto.setStillOpen(stillOpen);
+                dto.setOnTrack(onTrack);
+                dto.setAtRisk(atRisk);
+                dto.setBreached(breached);
+                dto.setOldestOpenDueDate(oldestOpenDueDate);
+
+                // Calculate compliance rate (only for completed requests)
+                long totalCompleted = completedWithinTat + completedAfterTat;
+                if (totalCompleted > 0) {
+                    double rate = (double) completedWithinTat / totalCompleted * 100;
+                    dto.setComplianceRate(Math.round(rate * 10.0) / 10.0);
+                } else if (requestsWithTat > 0) {
+                    // No completed yet, show as N/A (null)
+                    dto.setComplianceRate(null);
+                } else {
+                    // No requests with TAT
+                    dto.setComplianceRate(null);
+                }
+
+                // Only include customers with at least one request with TAT
+                if (requestsWithTat > 0) {
+                    report.add(dto);
+                }
+            }
+
+            // Sort by company name
+            report.sort((a, b) -> a.getCompanyName().compareToIgnoreCase(b.getCompanyName()));
+
+            return ResponseEntity.ok(report);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to generate TAT compliance report: " + e.getMessage());
         }
     }
 }

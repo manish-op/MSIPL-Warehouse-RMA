@@ -292,7 +292,7 @@ function RmaRequestForm() {
           faultDescription: item.faultDescription,
           codeplug: item.codeplugProgramming || "Default",
           flashCode: "",
-          repairStatus: item.status || "",
+          repairStatus: "UNASSIGNED",  // New items start as UNASSIGNED
           invoiceNo: item.invoiceNo || "",
           dateCode: "",
           fmUlatex: item.fmUlAtex || "N",
@@ -799,7 +799,7 @@ function RmaRequestForm() {
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="Status" name={[name, "status"]}>
+                            <Form.Item {...restField} label="Warranty Status" name={[name, "status"]}>
                               <Select placeholder="Select warranty status">
                                 <Option value="WARR">Warranty</Option>
                                 <Option value="OOW">Out of Warranty</Option>
