@@ -15,16 +15,24 @@ import {
     Badge,
     Empty,
     Divider,
+    Dropdown,
+    Menu
 } from "antd";
 import {
     EditOutlined,
     UserSwitchOutlined,
     TeamOutlined,
     ReloadOutlined,
+    BarcodeOutlined,
+    UserOutlined,
+    InfoCircleOutlined,
+    WarningOutlined,
+    CheckCircleOutlined,
+    DownOutlined
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import RmaLayout from "../RMA/RmaLayout";
-import "./UnrepairedPage.css";
+import "./UnrepairedPage.css"; // Uses the shared modern CSS
 import BERCertificateForm from "./BERCertificateForm";
 
 const { Title, Text, Paragraph } = Typography;
@@ -92,7 +100,6 @@ export default function AssignedPage() {
             });
             if (response.ok) {
                 const data = await response.json();
-                // Map to consistent format: email and name
                 setEmployees(data || []);
             }
         } catch (error) {
@@ -105,7 +112,6 @@ export default function AssignedPage() {
         if (result.success) {
             setRepairStatuses(result.data || []);
         } else {
-            // Fallback if API fails
             console.error("Failed to load statuses: ", result.error);
             message.error("Could not load repair statuses");
             setRepairStatuses([]);
@@ -215,8 +221,8 @@ export default function AssignedPage() {
     return (
         <RmaLayout>
             <div className="unrepaired-page">
-                {/* Header Section */}
-                <div className="unrepaired-header">
+                {/* Header Section - Light Blue Theme (Matches Unrepaired) */}
+                <div className="unrepaired-header" style={{ background: "linear-gradient(90deg, #6aa1e6 0%, #36cfc9 100%)", boxShadow: "0 4px 12px rgba(24, 144, 255, 0.15)" }}>
                     <div className="header-content">
                         <div className="header-title">
                             <UserSwitchOutlined className="header-icon" />
@@ -281,96 +287,95 @@ export default function AssignedPage() {
                                 <Card
                                     key={rmaNo}
                                     className="rma-group-card"
+                                    style={{ borderLeft: "4px solid #1890ff" }}
                                     title={
-                                        <div className="rma-card-header">
-                                            <span className="rma-number">
-                                                <Tag color="#1890ff" style={{ fontSize: 14, padding: "4px 12px" }}>
-                                                    RMA: {rmaNo}
-                                                </Tag>
-                                            </span>
-                                            <Badge
-                                                count={rmaItems.length}
-                                                style={{ backgroundColor: "#1890ff" }}
-                                                overflowCount={99}
-                                            />
+                                        <div className="rma-card-header-flex">
+                                            <div className="rma-identity">
+                                                <div className="rma-id-box">
+                                                    <span className="rma-label">RMA Request</span>
+                                                    <span className="rma-value">{rmaNo}</span>
+                                                </div>
+                                                <Badge
+                                                    count={rmaItems.length}
+                                                    style={{ backgroundColor: "#1890ff" }}
+                                                    overflowCount={99}
+                                                />
+                                            </div>
                                         </div>
                                     }
                                 >
-                                    <Row gutter={[16, 16]}>
+                                    {/* MODERN CARD GRID */}
+                                    <div className="rma-items-grid">
                                         {rmaItems.map((item) => (
-                                            <Col xs={24} md={12} lg={8} key={item.id}>
-                                                <Card
-                                                    className="item-card"
-                                                    size="small"
-                                                    hoverable
-                                                    actions={[
-                                                        <Button
-                                                            type="primary"
-                                                            icon={<EditOutlined />}
-                                                            onClick={() => openStatusModal(item)}
-                                                            size="small"
-                                                        >
-                                                            Update Status
-                                                        </Button>,
-                                                        <Button
-                                                            type="default"
-                                                            icon={<UserSwitchOutlined />}
-                                                            onClick={() => openReassignModal(item)}
-                                                            size="small"
-                                                        >
-                                                            Reassign
-                                                        </Button>
-                                                    ]}
-                                                >
-                                                    <div className="item-content">
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Product</Text>
-                                                            <Text strong>{item.product || "N/A"}</Text>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Serial No.</Text>
-                                                            <Text code>{item.serialNo || "N/A"}</Text>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Assigned To</Text>
-                                                            <div>
-                                                                <Text>{item.assignedToName || "N/A"}</Text>
-                                                                {item.lastReassignmentReason && (
-                                                                    <div style={{ marginTop: 4, lineHeight: "1.2" }}>
-                                                                        <Text type="secondary" style={{ fontSize: 12, color: "#fa8c16" }}>
-                                                                            Re-Reason: {item.lastReassignmentReason}
-                                                                        </Text>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Status</Text>
-                                                            <Tag color={getStatusColor(item.repairStatus)}>
-                                                                {item.repairStatus || "ASSIGNED"}
-                                                            </Tag>
-                                                        </div>
-                                                        {item.itemRmaNo && (
-                                                            <div className="item-row">
-                                                                <Text type="secondary">RMA Number</Text>
-                                                                <Tag color="green">{item.itemRmaNo}</Tag>
-                                                            </div>
-                                                        )}
-                                                        <Divider style={{ margin: "8px 0" }} />
-                                                        <div className="fault-section">
-                                                            <Text type="secondary">Fault Description</Text>
-                                                            <Paragraph
-                                                                ellipsis={{ rows: 2, expandable: true }}
-                                                                className="fault-text"
-                                                            >
-                                                                {item.faultDescription || "No description"}
-                                                            </Paragraph>
-                                                        </div>
+                                            <div key={item.id} className="rma-item-card-modern" style={{ borderColor: item.repairStatus === "BER" ? "#ffccc7" : "#91d5ff" }}>
+                                                
+                                                {/* Header Strip */}
+                                                <div className="item-header" style={{ background: item.repairStatus === "BER" ? "#fff1f0" : "#e6f7ff" }}>
+                                                    <span className="item-product" style={{ color: item.repairStatus === "BER" ? "#cf1322" : "#0050b3" }}>
+                                                        {item.product || "Product"}
+                                                    </span>
+                                                    <Tag color={getStatusColor(item.repairStatus)}>
+                                                        {item.repairStatus || "ASSIGNED"}
+                                                    </Tag>
+                                                </div>
+
+                                                {/* Details Grid */}
+                                                <div className="item-details-grid">
+                                                    <div className="detail-box">
+                                                        <span className="label"><BarcodeOutlined/> Serial No</span>
+                                                        <span className="value monospace">{item.serialNo || "N/A"}</span>
                                                     </div>
-                                                </Card>
-                                            </Col>
+                                                    <div className="detail-box">
+                                                        <span className="label">Model</span>
+                                                        <span className="value">{item.model || "N/A"}</span>
+                                                    </div>
+                                                    <div className="detail-box">
+                                                        <span className="label"><UserOutlined/> Technician</span>
+                                                        <span className="value" style={{color: "#0050b3", fontWeight: 600}}>{item.assignedToName || "N/A"}</span>
+                                                    </div>
+                                                    <div className="detail-box">
+                                                        <span className="label">RMA No</span>
+                                                        {item.itemRmaNo ? <Tag color="blue">{item.itemRmaNo}</Tag> : <Text type="secondary" style={{fontSize:'11px'}}>None</Text>}
+                                                    </div>
+                                                </div>
+
+                                                {/* Fault / Reason Box */}
+                                                <div className="fault-box" style={{background: "#f0f5ff", borderColor: "#adc6ff"}}>
+                                                    <span className="label" style={{color: "#1d39c4"}}>Fault Description</span>
+                                                    <p className="fault-desc">{item.faultDescription || "No description provided."}</p>
+                                                    
+                                                    {item.lastReassignmentReason && (
+                                                        <div style={{marginTop: '8px', borderTop: '1px dashed #91d5ff', paddingTop: '4px'}}>
+                                                            <span className="label" style={{color: "#cf1322"}}>Reassign Reason</span>
+                                                            <p className="fault-desc" style={{fontStyle: 'italic'}}>{item.lastReassignmentReason}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Footer Actions */}
+                                                <div className="item-footer" style={{display:'flex', gap:'8px'}}>
+                                                    <Button 
+                                                        type="primary" 
+                                                        block 
+                                                        size="small"
+                                                        icon={<EditOutlined />} 
+                                                        onClick={() => openStatusModal(item)}
+                                                        style={{backgroundColor: "#1890ff", borderColor: "#1890ff"}}
+                                                    >
+                                                        Update
+                                                    </Button>
+                                                    <Button 
+                                                        block 
+                                                        size="small"
+                                                        icon={<UserSwitchOutlined />} 
+                                                        onClick={() => openReassignModal(item)}
+                                                    >
+                                                        Reassign
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         ))}
-                                    </Row>
+                                    </div>
                                 </Card>
                             ))}
                         </div>
@@ -396,33 +401,32 @@ export default function AssignedPage() {
                             type="primary"
                             loading={updating}
                             onClick={handleUpdateStatus}
+                            style={{ backgroundColor: "#1890ff", borderColor: "#1890ff" }}
                         >
                             Update Status
                         </Button>
                     ]}
-                    className="assign-modal"
                 >
-                    <div className="modal-item-info">
-                        <Card size="small" style={{ marginBottom: 16, backgroundColor: "#e6f7ff" }}>
-                            <Row gutter={16}>
-                                <Col span={12}>
-                                    <Text type="secondary">Product</Text>
-                                    <div><Text strong>{selectedItem?.product}</Text></div>
-                                </Col>
-                                <Col span={12}>
-                                    <Text type="secondary">Assigned To</Text>
-                                    <div><Text>{selectedItem?.assignedToName}</Text></div>
-                                </Col>
-                            </Row>
-                            <div style={{ marginTop: 12 }}>
-                                <Text type="secondary">Fault</Text>
-                                <Paragraph style={{ margin: 0 }}>{selectedItem?.faultDescription}</Paragraph>
-                            </div>
-                        </Card>
+                    <div style={{background: '#e6f7ff', padding: '10px', borderRadius: '4px', marginBottom: '16px', border: '1px solid #91d5ff'}}>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Text type="secondary" style={{fontSize: '12px'}}>Product</Text>
+                                <div><Text strong>{selectedItem?.product}</Text></div>
+                            </Col>
+                            <Col span={12}>
+                                <Text type="secondary" style={{fontSize: '12px'}}>Technician</Text>
+                                <div><Text strong>{selectedItem?.assignedToName}</Text></div>
+                            </Col>
+                        </Row>
+                        <div style={{marginTop: '8px'}}>
+                            <Text type="secondary" style={{fontSize: '12px'}}>Fault</Text>
+                            <Paragraph style={{margin:0, fontSize: '13px'}} ellipsis={{rows:2}}>{selectedItem?.faultDescription}</Paragraph>
+                        </div>
                     </div>
+
                     <Space direction="vertical" style={{ width: "100%" }} size="middle">
                         <div>
-                            <Text strong>Update Status *</Text>
+                            <Text strong>New Status *</Text>
                             <Select
                                 style={{ width: "100%", marginTop: 4 }}
                                 size="large"
@@ -450,7 +454,7 @@ export default function AssignedPage() {
                         <div>
                             <Text strong>Remarks</Text>
                             <TextArea
-                                rows={3}
+                                rows={2}
                                 placeholder="Enter remarks about the repair"
                                 value={remarks}
                                 onChange={(e) => setRemarks(e.target.value)}
@@ -484,25 +488,18 @@ export default function AssignedPage() {
                             Reassign
                         </Button>
                     ]}
-                    className="assign-modal"
                 >
-                    <div className="modal-item-info">
-                        <Card size="small" style={{ marginBottom: 16, backgroundColor: "#fff7e6" }}>
-                            <Row gutter={16}>
-                                <Col span={12}>
-                                    <Text type="secondary">Product</Text>
-                                    <div><Text strong>{selectedItem?.product}</Text></div>
-                                </Col>
-                                <Col span={12}>
-                                    <Text type="secondary">Current Assignee</Text>
-                                    <div><Text strong style={{ color: "#fa8c16" }}>{selectedItem?.assignedToName}</Text></div>
-                                </Col>
-                            </Row>
-                            <div style={{ marginTop: 12 }}>
-                                <Text type="secondary">Serial No.</Text>
-                                <div><Text code>{selectedItem?.serialNo}</Text></div>
-                            </div>
-                        </Card>
+                    <div style={{background: '#fff7e6', padding: '10px', borderRadius: '4px', marginBottom: '16px', border: '1px solid #ffd591'}}>
+                         <Row gutter={16}>
+                            <Col span={12}>
+                                <Text type="secondary" style={{fontSize: '12px'}}>Product</Text>
+                                <div><Text strong>{selectedItem?.product}</Text></div>
+                            </Col>
+                            <Col span={12}>
+                                <Text type="secondary" style={{fontSize: '12px'}}>Current Tech</Text>
+                                <div><Text strong>{selectedItem?.assignedToName}</Text></div>
+                            </Col>
+                        </Row>
                     </div>
                     <Space direction="vertical" style={{ width: "100%" }} size="middle">
                         <div>
@@ -542,6 +539,7 @@ export default function AssignedPage() {
                         </div>
                     </Space>
                 </Modal>
+
                 {showBERForm && (
                      <Modal
                      open={showBERForm}

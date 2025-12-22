@@ -177,7 +177,9 @@ public class RmaDepotDispatchController {
     @GetMapping("/depot/next-dc-no")
     public ResponseEntity<?> getNextDcNo() {
         try {
-            DepotDispatchEntity lastDispatch = depotDispatchDAO.findTopByOrderByIdDesc();
+            // FIX: Get last *Non-Null* DC No ordered by DATE (latest first) to handle
+            // updates to old IDs
+            DepotDispatchEntity lastDispatch = depotDispatchDAO.findTopByDcNoIsNotNullOrderByDispatchDateDesc();
             String nextVal = "1";
             if (lastDispatch != null && lastDispatch.getDcNo() != null) {
                 String lastDcNo = lastDispatch.getDcNo().trim();

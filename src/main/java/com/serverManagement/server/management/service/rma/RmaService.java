@@ -1364,6 +1364,10 @@ public class RmaService {
             dto.setDcNo(item.getDcNo());
             dto.setEwayBillNo(item.getEwayBillNo());
 
+            // Depot return dates
+            dto.setDepotReturnDispatchDate(item.getDepotReturnDispatchDate());
+            dto.setDepotReturnDeliveredDate(item.getDepotReturnDeliveredDate());
+
             // Delivery confirmation fields
             dto.setDeliveredTo(item.getDeliveredTo());
             dto.setDeliveredBy(item.getDeliveredBy());
@@ -1586,29 +1590,7 @@ public class RmaService {
         // DeliveryChallanRequest has rmaNo (DC No usually same or generated).
         // We will assume rmaNo in request IS the DC number for now or update if needed.
         // Actually DC PDF uses "MSIPL/2025/110" etc hardcoded in PDF service? No, PDF
-        // service uses what?
-        // PDF Service uses: request.getTransporterId().
-        // It hardcodes MSIPL part?
-        // Let's just save what we have.
-
         if (request.getTransporterId() != null && !request.getTransporterId().isEmpty()) {
-            // Find Transporter Entity by ID String (business ID) or Name?
-            // Request.transporterId comes from the form.
-            // Form sets `transporterId` field.
-            // We need to find TransporterEntity by `transporterId` (the string field) OR by
-            // `id` (PK)?
-            // The entity has `transporterId` (String).
-            // Let's assume the value coming in is valid.
-            // But wait, the SELECT option KEY was `t.id` (PK) but value was `t.name`?
-            // Logic in DepotDispatchPage: onSelect -> dcForm.setFieldsValue({
-            // transporterId: t.transporterId });
-            // So it sends the String ID (e.g. "27AA...").
-            // We need to look up TransporterEntity by this String ID? Or by Name?
-            // `TransporterEntity` has `transporterId` field.
-            // AND a PK `id`.
-            // `TransporterDAO` has `findByName`. I can add `findByTransporterId`.
-            // Or I can just look up by name if `transporterName` is passed.
-            // Request has `transporterName`? Yes.
 
             java.util.Optional<TransporterEntity> transParams = java.util.Optional.empty();
             // Try fetching by transporterId (String) if unique? DAO doesn't have it yet.
@@ -1631,11 +1613,26 @@ public class RmaService {
         }
 
         dispatch.setCourierName(request.getTransporterName()); // Legacy field
-        // dispatch.setTrackingNo(request.getTrackingNo()); // Request doesn't have
-        // tracking no?
+
+        // FIX: Save DC Number so auto-increment works
+        System.out.println("DEBUG: RmaService.saveDcDetails called. DC No from Request: " + request.getDcNo());
+        if (request.getDcNo() != null && !request.getDcNo().isEmpty()) {
+            dispatch.setDcNo(request.getDcNo());
+            dispatch.setDispatchDate(ZonedDateTime.now()); // FIX: Update date so it appears as latest
+            System.out.println("DEBUG: Setting DC No to Entity: " + request.getDcNo());
+        } else {
+            System.out.println("DEBUG: DC No in request is NULL or EMPTY");
+        }
 
         // Save dispatch
         dispatch = depotDispatchDAO.save(dispatch);
+        System.out.println("DEBUG: Saved Dispatch. ID: " + dispatch.getId() + ", DC No: " + dispatch.getDcNo());
+
+        // IMMEDIATE VERIFICATION
+        DepotDispatchEntity verified = depotDispatchDAO.findById(dispatch.getId()).orElse(null);
+        if (verified != null) {
+            System.out.println("DEBUG: Verified from DB - ID: " + verified.getId() + ", DC No: " + verified.getDcNo());
+        }
 
         // Link items
         for (RmaItemEntity item : rmaItems) {

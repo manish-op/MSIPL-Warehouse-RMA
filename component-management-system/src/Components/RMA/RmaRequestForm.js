@@ -211,9 +211,9 @@ function RmaRequestForm() {
   const validateStep = async (step) => {
     try {
       if (step === 0) {
-        await form.validateFields(["companyName", "email", "contactName", "telephone", "mobile", "returnAddress"]);
+        await form.validateFields(["companyName", "email", "contactName", "telephone", "mobile", "returnAddress", "tat"]);
       } else if (step === 1) {
-        await form.validateFields(["modeOfTransport", "shippingMethod"]);
+        await form.validateFields(["modeOfTransport", "shippingMethod", "courierCompanyName"]);
       } else if (step === 2) {
         const items = form.getFieldValue("items") || [];
         if (items.length === 0) {
@@ -524,7 +524,10 @@ function RmaRequestForm() {
                   <Form.Item
                     label="Telephone"
                     name="telephone"
-                    rules={[{ required: true, message: "Telephone is required" }]}
+                    rules={[
+                      { required: true, message: "Telephone is required" },
+                      { pattern: /^\d{10}$/, message: "Must be 10 digits" }
+                    ]}
                   >
                     <Input placeholder="Enter phone number" size="large" />
                   </Form.Item>
@@ -533,7 +536,10 @@ function RmaRequestForm() {
                   <Form.Item
                     label="Mobile"
                     name="mobile"
-                    rules={[{ required: true, message: "Mobile is required" }]}
+                    rules={[
+                      { required: true, message: "Mobile is required" },
+                      { pattern: /^\d{10}$/, message: "Must be 10 digits" }
+                    ]}
                   >
                     <Input placeholder="Enter mobile number" size="large" />
                   </Form.Item>
@@ -553,6 +559,7 @@ function RmaRequestForm() {
                   <Form.Item
                     label="TAT (Turn Around Time)"
                     name="tat"
+                    rules={[{ required: true, message: "TAT is required" }]}
                     tooltip="Expected number of days to complete repair and return items"
                   >
                     <Input

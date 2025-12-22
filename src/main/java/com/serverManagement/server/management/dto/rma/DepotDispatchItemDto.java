@@ -1,6 +1,7 @@
 package com.serverManagement.server.management.dto.rma;
 
 import com.serverManagement.server.management.entity.rma.RmaItemEntity;
+import java.time.ZonedDateTime;
 
 public class DepotDispatchItemDto {
     private Long id;
@@ -15,6 +16,10 @@ public class DepotDispatchItemDto {
     private String ewayBillNo;
 
     private String itemRmaNo;
+
+    private ZonedDateTime dispatchedDate;
+    private ZonedDateTime depotReturnDispatchDate;
+    private ZonedDateTime depotReturnDeliveredDate;
 
     public static DepotDispatchItemDto fromEntity(RmaItemEntity item) {
         DepotDispatchItemDto dto = new DepotDispatchItemDto();
@@ -37,7 +42,36 @@ public class DepotDispatchItemDto {
         dto.setRepairStatus(item.getRepairStatus());
         dto.setDepotReturnDcNo(item.getDepotReturnDcNo());
         dto.setDispatchTo(item.getDispatchTo());
+
+        dto.setDispatchedDate(item.getDispatchedDate());
+        dto.setDepotReturnDispatchDate(item.getDepotReturnDispatchDate());
+        dto.setDepotReturnDeliveredDate(item.getDepotReturnDeliveredDate());
+
         return dto;
+    }
+
+    public ZonedDateTime getDispatchedDate() {
+        return dispatchedDate;
+    }
+
+    public void setDispatchedDate(ZonedDateTime dispatchedDate) {
+        this.dispatchedDate = dispatchedDate;
+    }
+
+    public ZonedDateTime getDepotReturnDispatchDate() {
+        return depotReturnDispatchDate;
+    }
+
+    public void setDepotReturnDispatchDate(ZonedDateTime depotReturnDispatchDate) {
+        this.depotReturnDispatchDate = depotReturnDispatchDate;
+    }
+
+    public ZonedDateTime getDepotReturnDeliveredDate() {
+        return depotReturnDeliveredDate;
+    }
+
+    public void setDepotReturnDeliveredDate(ZonedDateTime depotReturnDeliveredDate) {
+        this.depotReturnDeliveredDate = depotReturnDeliveredDate;
     }
 
     public String getDepotStage() {

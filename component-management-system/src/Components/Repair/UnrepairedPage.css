@@ -1,542 +1,267 @@
-/* Unrepaired Page Styles */
+/* =========================================
+   1. Page Layout & Global
+   ========================================= */
 .unrepaired-page {
-    min-height: 100%;
-    background: #f0f2f5;
+  padding: 0;
+  background-color: #f5f7fa; /* Slightly lighter gray */
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Header Section */
+/* =========================================
+   2. Page Header (RESTORED LIGHT BLUE SHADE)
+   ========================================= */
 .unrepaired-header {
-    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-    padding: 24px 32px;
-    border-radius: 0 0 24px 24px;
-    box-shadow: 0 4px 20px rgba(24, 144, 255, 0.3);
+  /* The "Lightish Blue" Shade */
+  background: linear-gradient(90deg, #6aa1e6 0%, #36cfc9 100%); 
+  /* Alternate option if you want pure blue: background: #1890ff; */
+  padding: 24px 32px;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15); /* Blue-ish shadow */
+  margin-bottom: 24px;
 }
 
 .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header-title {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
+/* Header Icon Box */
 .header-icon {
-    font-size: 36px;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.2);
-    padding: 12px;
-    border-radius: 12px;
+  font-size: 28px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.25); /* More transparent for light bg */
+  padding: 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
 }
 
+/* Refresh Button */
 .refresh-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #fff;
-    border-radius: 8px;
-    font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: white;
+  font-weight: 500;
 }
-
 .refresh-btn:hover {
-    background: rgba(255, 255, 255, 0.3) !important;
-    border-color: rgba(255, 255, 255, 0.5) !important;
-    color: #fff !important;
+  background: white;
+  color: #1890ff;
+  border-color: white;
 }
 
-/* Stats Row */
-.stats-row {
-    margin-top: 16px;
-}
-
-.stat-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 16px 20px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    color: #fff;
-}
-
-.stat-box .anticon {
-    font-size: 24px;
-    opacity: 0.9;
-}
-
-.stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 12px;
-    opacity: 0.85;
-    margin-top: 2px;
-}
-
-/* Content Section */
+/* =========================================
+   3. Main Content Area
+   ========================================= */
 .unrepaired-content {
-    padding: 24px 32px;
+  padding: 0 32px 32px 32px;
 }
 
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 0;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+.loading-container, .empty-state {
+  text-align: center;
+  padding: 60px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.empty-state {
-    padding: 80px 0;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
-/* RMA Groups */
-.rma-groups {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
+/* =========================================
+   4. RMA Group Card
+   ========================================= */
 .rma-group-card {
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border: none;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
+/* Light Blue Header for the Group Card */
 .rma-group-card .ant-card-head {
-    background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
-    border-bottom: 1px solid #91d5ff;
-    padding: 16px 24px;
+  background-color: #e6f7ff; 
+  border-bottom: 2px solid #bae7ff;
+  padding: 0 24px;
 }
 
-.rma-group-card .ant-card-body {
-    padding: 20px;
-    background: #fafafa;
+.rma-card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 0;
 }
 
-.rma-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.rma-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-/* Item Cards */
-.item-card {
-    border-radius: 12px;
-    border: 1px solid #f0f0f0;
-    transition: all 0.3s ease;
-    height: 100%;
+.rma-id-box {
+  display: flex;
+  flex-direction: column;
 }
 
-.item-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.15);
-    border-color: #69c0ff;
+.rma-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #0050b3;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-.item-card .ant-card-body {
-    padding: 16px;
+.rma-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #002766;
 }
 
-.item-card .ant-card-actions {
-    background: #e6f7ff;
-    border-top: 1px solid #91d5ff;
-    padding: 8px 12px;
+.rma-actions {
+  display: flex;
+  gap: 10px;
 }
 
-.item-card .ant-card-actions>li {
-    margin: 0;
+/* Button overrides for blue theme */
+.rma-actions .ant-btn-default {
+  border-color: #91d5ff;
+  color: #0050b3;
+  background: white;
 }
-
-.item-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.item-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.item-row .ant-typography-secondary {
-    font-size: 12px;
-}
-
-.fault-section {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.fault-text {
-    margin: 0 !important;
-    color: #595959;
-    font-size: 13px;
-}
-
-.assign-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
-    border: none;
-    height: 36px;
-    font-weight: 500;
-    border-radius: 8px;
-}
-
-.assign-btn:hover {
-    background: linear-gradient(135deg, #40a9ff 0%, #69c0ff 100%) !important;
-}
-
-/* Modal Styles */
-.assign-modal .ant-modal-header {
-    border-bottom: 1px solid #91d5ff;
-    padding: 16px 24px;
-    background: #e6f7ff;
-}
-
-.assign-modal .ant-modal-body {
-    padding: 20px 24px;
-}
-
-.assign-modal .ant-modal-footer {
-    border-top: 1px solid #f0f0f0;
-    padding: 12px 24px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .unrepaired-header {
-        padding: 16px 20px;
-    }
-
-    .unrepaired-content {
-        padding: 16px 20px;
-    }
-
-    .header-content {
-        flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
-    }
-
-    .refresh-btn {
-        width: 100%;
-    }
-
-    .header-icon {
-        font-size: 28px;
-        padding: 10px;
-    }
-}
-
-/* FRU Sticker Preview Styles */
-.sticker-modal .ant-modal-header {
-    border-bottom: 1px solid #d3adf7;
-    padding: 16px 24px;
-    background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%);
-}
-
-.sticker-modal .ant-modal-body {
-    padding: 20px;
-    background: #fafafa;
-    max-height: 60vh;
-    overflow-y: auto;
-}
-
-.sticker-preview-container {
-    padding: 8px;
-}
-
-.sticker-preview {
-    border: 2px solid #d9d9d9;
-    border-radius: 8px;
-    background: #fff;
-    padding: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
-
-.sticker-preview:hover {
-    border-color: #722ed1;
-    box-shadow: 0 4px 12px rgba(114, 46, 209, 0.15);
-}
-
-.sticker-preview-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.sticker-preview-logo {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-}
-
-.sticker-preview-company {
-    font-weight: 600;
-    font-size: 12px;
-    color: #333;
-}
-
-.sticker-preview-content {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.sticker-preview-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.sticker-label {
-    min-width: 70px;
-    font-size: 11px !important;
-    flex-shrink: 0;
+.rma-actions .ant-btn-default:hover {
+  border-color: #40a9ff;
+  color: #096dd9;
+  background: #e6f7ff;
 }
 
-.sticker-preview-row .ant-typography {
-    font-size: 12px;
-    line-height: 1.4;
+/* =========================================
+   5. Item Grid Layout
+   ========================================= */
+.rma-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  padding: 8px;
 }
 
-/* Gatepass Preview Modal Styles */
-.gatepass-modal .ant-modal-header {
-    border-bottom: 1px solid #91d5ff;
-    padding: 16px 24px;
-    background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+/* =========================================
+   6. Individual Item Card
+   ========================================= */
+.rma-item-card-modern {
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.gatepass-modal .ant-modal-body {
-    padding: 20px;
-    background: #fafafa;
+.rma-item-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.25);
+  border-color: #40a9ff;
 }
 
-.gatepass-preview-container {
-    padding: 8px;
+/* Item Header Strip */
+.item-header {
+  background: linear-gradient(to right, #e6f7ff, #f0f5ff);
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.gatepass-info-card {
-    background: linear-gradient(135deg, #f0f5ff 0%, #e6f7ff 100%);
-    border: 1px solid #adc6ff;
-    border-radius: 8px;
-    margin-bottom: 16px;
+.item-product {
+  font-weight: 700;
+  font-size: 15px;
+  color: #003a8c;
 }
 
-.gatepass-info-card .ant-typography-secondary {
-    font-size: 12px;
-    display: block;
-    margin-bottom: 4px;
+/* Details */
+.item-details-grid {
+  padding: 16px 16px 0 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
-.gatepass-modal .ant-table {
-    border-radius: 8px;
-    overflow: hidden;
+.detail-box {
+  display: flex;
+  flex-direction: column;
 }
 
-.gatepass-modal .ant-table-thead>tr>th {
-    background: #1890ff;
-    color: #fff;
-    font-weight: 600;
+.detail-box .label {
+  font-size: 11px;
+  color: #8c8c8c;
+  margin-bottom: 4px;
 }
 
-/* ==========================================================================
-   DARK MODE SUPPORT
-   ========================================================================== */
-
-[data-theme='dark'] .unrepaired-page {
-    background: #000000;
-}
-
-/* HEADER STATS */
-[data-theme='dark'] .stat-box {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* CARDS & CONTAINERS */
-[data-theme='dark'] .rma-group-card,
-[data-theme='dark'] .item-card,
-[data-theme='dark'] .loading-container,
-[data-theme='dark'] .empty-state {
-    background: #141414 !important;
-    border-color: #303030;
-}
-
-[data-theme='dark'] .rma-group-card .ant-card-head {
-    background: #1f1f1f !important;
-    border-bottom: 1px solid #303030 !important;
-    color: #fff !important;
-}
-
-[data-theme='dark'] .rma-group-card .ant-card-body {
-    background: #141414 !important;
-}
-
-[data-theme='dark'] .item-card {
-    border-color: #303030 !important;
-    background: #1f1f1f !important;
-}
-
-[data-theme='dark'] .item-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    border-color: #177ddc !important;
-}
-
-/* ACTIONS FOOTER */
-[data-theme='dark'] .item-card .ant-card-actions {
-    background: #262626 !important;
-    border-top: 1px solid #303030 !important;
-}
-
-[data-theme='dark'] .item-card .ant-card-actions .ant-btn:not(.ant-btn-primary) {
-    background-color: transparent !important;
-    border-color: #434343 !important;
-    color: #ffffff !important;
-}
-
-[data-theme='dark'] .item-card .ant-card-actions .ant-btn:not(.ant-btn-primary):hover {
-    border-color: #1890ff !important;
-    color: #1890ff !important;
-}
-
-/* TEXT VISIBILITY */
-[data-theme='dark'] .fault-text,
-[data-theme='dark'] .ant-typography.fault-text {
-    color: #ffffff !important;
-    opacity: 1 !important;
-}
-
-[data-theme='dark'] .item-row .ant-typography-secondary {
-    color: rgba(255, 255, 255, 0.65) !important;
-}
-
-[data-theme='dark'] .ant-typography strong {
-    color: #fff !important;
-}
-
-/* TAGS VISIBILITY */
-[data-theme='dark'] .ant-tag {
-    opacity: 1 !important;
-    border-color: transparent !important;
-}
-
-[data-theme='dark'] .ant-tag-green {
-    background-color: #135200 !important;
-    color: #fff !important;
-    border: 1px solid #237804 !important;
-}
-
-[data-theme='dark'] .ant-tag-blue,
-[data-theme='dark'] .ant-tag-geekblue {
-    background-color: #061178 !important;
-    color: #fff !important;
-    border: 1px solid #10239e !important;
-}
-
-[data-theme='dark'] .ant-tag-purple {
-    background-color: #22075e !important;
-    color: #fff !important;
-    border: 1px solid #391085 !important;
-}
-
-[data-theme='dark'] .ant-tag-orange {
-    background-color: #612500 !important;
-    color: #fff !important;
-    border: 1px solid #873800 !important;
-}
-
-[data-theme='dark'] .ant-tag-red,
-[data-theme='dark'] .ant-tag-magenta {
-    background-color: #5c0011 !important;
-    color: #fff !important;
-    border: 1px solid #a8071a !important;
-}
-
-/* GLOBAL MODAL CONFIRM/WARNING FIXES */
-[data-theme='dark'] .ant-modal-confirm-title,
-[data-theme='dark'] .ant-modal-confirm-content {
-    color: #fff !important;
-}
-
-[data-theme='dark'] .ant-modal-confirm-body .anticon {
-    color: #faad14 !important; /* Keep warning icon yellow */
-}
-
-/* Fix Gatepass Header Icons in Dark Mode */
-[data-theme='dark'] .gatepass-modal .ant-modal-title span {
-    color: #fff !important;
-}
-
-/* Ensure Gatepass Preview Cards have high contrast */
-[data-theme='dark'] .gatepass-info-card .ant-typography-secondary {
-    color: rgba(255, 255, 255, 0.65) !important;
+.detail-box .value {
+  font-size: 14px;
+  color: #262626;
+  font-weight: 500;
 }
 
-[data-theme='dark'] .gatepass-info-card strong {
-    color: #fff !important;
+.detail-box .value.monospace {
+  font-family: 'Consolas', monospace;
+  background: #f0f2f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+  color: #595959;
 }
 
-/* MODALS */
-[data-theme='dark'] .assign-modal .ant-modal-header,
-[data-theme='dark'] .sticker-modal .ant-modal-header,
-[data-theme='dark'] .gatepass-modal .ant-modal-header {
-    background: #1f1f1f !important;
-    border-bottom-color: #303030 !important;
+/* Fault Box */
+.fault-box {
+  margin: 16px;
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  padding: 10px;
+  border-radius: 6px;
+  flex-grow: 1;
 }
 
-[data-theme='dark'] .assign-modal .ant-modal-body,
-[data-theme='dark'] .sticker-modal .ant-modal-body,
-[data-theme='dark'] .gatepass-modal .ant-modal-body {
-    background: #141414 !important;
-    color: #fff !important;
+.fault-box .label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #faad14;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
 }
 
-[data-theme='dark'] .sticker-preview {
-    background: #1f1f1f !important;
-    border-color: #303030 !important;
+.fault-desc {
+  font-size: 13px;
+  color: #595959;
+  line-height: 1.4;
+  margin: 0;
 }
 
-[data-theme='dark'] .sticker-preview-company,
-[data-theme='dark'] .sticker-preview-row .ant-typography {
-    color: #fff !important;
+/* Item Footer */
+.item-footer {
+  padding: 12px 16px;
+  background: #f9f9f9;
+  border-top: 1px solid #f0f0f0;
 }
 
-[data-theme='dark'] .gatepass-info-card {
-    background: #1f1f1f !important;
-    border-color: #303030 !important;
+.item-footer .ant-btn-primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
 }
-
-[data-theme='dark'] .gatepass-modal .ant-table-thead > tr > th {
-    background: #1f1f1f !important;
-    color: #fff !important;
-    border-bottom-color: #303030 !important;
-}
-
-[data-theme='dark'] .gatepass-modal .ant-table-tbody > tr > td {
-    background: #141414 !important;
-    border-bottom-color: #303030 !important;
-    color: #fff !important;
+.item-footer .ant-btn-primary:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
 }
 
-[data-theme='dark'] .gatepass-modal .ant-table-tbody > tr:hover > td {
-    background: #262626 !important;
+/* Modal Tweaks */
+.ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
 }
