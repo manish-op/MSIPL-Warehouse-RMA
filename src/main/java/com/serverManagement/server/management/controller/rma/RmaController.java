@@ -118,9 +118,9 @@ public class RmaController {
     // ============ WORKFLOW ENDPOINTS ============
 
     @GetMapping("/items/unassigned")
-    public ResponseEntity<?> getUnassignedItems() {
+    public ResponseEntity<?> getUnassignedItems(HttpServletRequest request) {
         try {
-            return rmaService.getUnassignedItems();
+            return rmaService.getUnassignedItems(request);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
@@ -128,9 +128,9 @@ public class RmaController {
     }
 
     @GetMapping("/items/assigned")
-    public ResponseEntity<?> getAssignedItems() {
+    public ResponseEntity<?> getAssignedItems(HttpServletRequest request) {
         try {
-            return rmaService.getAssignedItems();
+            return rmaService.getAssignedItems(request);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
@@ -138,9 +138,9 @@ public class RmaController {
     }
 
     @GetMapping("/items/repaired")
-    public ResponseEntity<?> getRepairedItems() {
+    public ResponseEntity<?> getRepairedItems(HttpServletRequest request) {
         try {
-            return rmaService.getRepairedItems();
+            return rmaService.getRepairedItems(request);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
@@ -148,9 +148,9 @@ public class RmaController {
     }
 
     @GetMapping("/items/cant-be-repaired")
-    public ResponseEntity<?> getCantBeRepairedItems() {
+    public ResponseEntity<?> getCantBeRepairedItems(HttpServletRequest request) {
         try {
-            return rmaService.getCantBeRepairedItems();
+            return rmaService.getCantBeRepairedItems(request);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
@@ -158,9 +158,9 @@ public class RmaController {
     }
 
     @GetMapping("/items/dispatched")
-    public ResponseEntity<?> getDispatchedItems() {
+    public ResponseEntity<?> getDispatchedItems(HttpServletRequest request) {
         try {
-            return rmaService.getDispatchedItems();
+            return rmaService.getDispatchedItems(request);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());

@@ -56,6 +56,8 @@ function RmaDashboard() {
 
   // User info
   const name = localStorage.getItem("name") || "Admin User";
+  const userRegion = localStorage.getItem("region") || "";
+  const userRole = localStorage.getItem("_User_role_for_MSIPL") || "";
 
   // --- Helpers ---
   const getGreeting = () => {
@@ -348,6 +350,43 @@ function RmaDashboard() {
           <div>
             <h1 className="welcome-text">{getGreeting()}, {name}</h1>
             <p className="sub-text">Overview of your Return Merchandise Authorization status.</p>
+            {/* User Region & Role Display */}
+            <div style={{
+              marginTop: 8,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              fontFamily: "'Inter', 'Segoe UI', sans-serif"
+            }}>
+              {userRegion && (
+                <Tag
+                  color="geekblue"
+                  style={{
+                    fontSize: '13px',
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    fontWeight: 500,
+                    letterSpacing: '0.3px'
+                  }}
+                >
+                  📍 Region: {userRegion}
+                </Tag>
+              )}
+              {userRole && (
+                <Tag
+                  color={userRole.toLowerCase() === 'admin' ? 'gold' : 'cyan'}
+                  style={{
+                    fontSize: '13px',
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    fontWeight: 500,
+                    letterSpacing: '0.3px'
+                  }}
+                >
+                  👤 {userRole}
+                </Tag>
+              )}
+            </div>
           </div>
           <div style={{ marginTop: 10 }}>
             <Search
