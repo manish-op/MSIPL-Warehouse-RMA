@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Row, Col, Card, Statistic, Spin, message, Modal,
-  Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip, Input
+  Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip, Input, Progress
 } from "antd";
 import {
   FileTextOutlined,
@@ -11,7 +11,12 @@ import {
   UserOutlined,
   RiseOutlined,
   FilterOutlined,
-  SearchOutlined
+  SearchOutlined,
+  WarningOutlined,
+  CloseCircleOutlined,
+  SafetyCertificateOutlined,
+  BarChartOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -20,6 +25,7 @@ import {
 } from 'recharts';
 import RmaLayout from "./RmaLayout";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { TatIconIndicator } from "./TatIndicator";
 import "./RmaDashboard.css";
 
 const { Option } = Select;
@@ -42,6 +48,11 @@ function RmaDashboard() {
 
   // Search State
   const [searchQuery, setSearchQuery] = useState("");
+
+  // TAT Report State
+  const [reportVisible, setReportVisible] = useState(false);
+  const [reportData, setReportData] = useState([]);
+  const [reportLoading, setReportLoading] = useState(false);
 
   // User info
   const name = localStorage.getItem("name") || "Admin User";
@@ -152,9 +163,99 @@ function RmaDashboard() {
     setModalVisible(true);
   };
 
+  // TAT Compliance Report Handler
+  const handleViewReport = async () => {
+    setReportVisible(true);
+    setReportLoading(true);
+    try {
+      const result = await RmaApi.getTatComplianceReport();
+      if (result.success) {
+        setReportData(result.data);
+      } else {
+        message.error("Failed to load TAT compliance report: " + (result.error || "Unknown error"));
+      }
+    } catch (error) {
+      message.error("Error loading report");
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const reportColumns = [
+    {
+      title: "Company", dataIndex: "companyName", key: "companyName", width: 180,
+      render: (val) => <span style={{ fontWeight: 500 }}>{val}</span>
+    },
+    {
+      title: "Default TAT", dataIndex: "defaultTat", key: "defaultTat", align: "center",
+      render: (val) => val ? <Tag color="blue">{val} days</Tag> : <span style={{ color: '#999' }}>-</span>
+    },
+    { title: "Total Requests", dataIndex: "totalRequests", key: "totalRequests", align: "center" },
+    { title: "With TAT", dataIndex: "requestsWithTat", key: "requestsWithTat", align: "center" },
+    {
+      title: "Completed (Within TAT)",
+      dataIndex: "completedWithinTat",
+      key: "completedWithinTat",
+      align: "center",
+      render: (val) => <Tag color="success">{val || 0}</Tag>
+    },
+    {
+      title: "Completed (After TAT)",
+      dataIndex: "completedAfterTat",
+      key: "completedAfterTat",
+      align: "center",
+      render: (val) => val > 0 ? <Tag color="error">{val}</Tag> : <Tag color="default">0</Tag>
+    },
+    {
+      title: "Still Open",
+      dataIndex: "stillOpen",
+      key: "stillOpen",
+      align: "center",
+      render: (val, record) => (
+        <AntTooltip title={`On Track: ${record.onTrack || 0}, At Risk: ${record.atRisk || 0}, Breached: ${record.breached || 0}`}>
+          <Tag color={record.breached > 0 ? "error" : record.atRisk > 0 ? "warning" : "processing"}>
+            {val || 0}
+          </Tag>
+        </AntTooltip>
+      )
+    },
+    {
+      title: "Compliance Rate",
+      key: "complianceRate",
+      align: "center",
+      width: 130,
+      render: (_, record) => {
+        const rate = record.complianceRate;
+        if (rate === null || rate === undefined) return <span style={{ color: '#999' }}>N/A</span>;
+        const isGreen = rate >= 80;
+        const isYellow = rate >= 50 && rate < 80;
+        const bgColor = isGreen ? '#f6ffed' : isYellow ? '#fffbe6' : '#fff1f0';
+        const borderColor = isGreen ? '#b7eb8f' : isYellow ? '#ffe58f' : '#ffa39e';
+        const textColor = isGreen ? '#389e0d' : isYellow ? '#d48806' : '#cf1322';
+        return (
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            background: bgColor,
+            border: `1px solid ${borderColor}`,
+          }}>
+            <span style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              color: textColor
+            }}>
+              {rate.toFixed(1)}%
+            </span>
+          </div>
+        );
+      }
+    },
+  ];
+
   // --- Table Columns ---
   const requestColumns = [
-    { title: "RMA No", dataIndex: "itemRmaNo", key: "itemRmaNo", render: (val) => val || "-" },
     { title: "Request No", dataIndex: "requestNumber", key: "requestNumber" },
     { title: "Company", dataIndex: "companyName", key: "companyName" },
     { title: "Date", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
@@ -165,6 +266,14 @@ function RmaDashboard() {
           : Array.isArray(record.items)
             ? record.items.length
             : 0,
+    },
+    {
+      title: "TAT Status",
+      key: "tatStatus",
+      align: "center",
+      render: (_, record) => (
+        <TatIconIndicator dueDate={record.dueDate} tat={record.tat} size={20} />
+      )
     },
     { title: "Status", key: "status", render: () => <Tag color="blue">Submitted</Tag> }
   ];
@@ -202,6 +311,18 @@ function RmaDashboard() {
         else if (['AT_DEPOT_REPAIRED', 'RECEIVED_AT_DEPOT', 'RECEIVED_AT_GURGAON'].includes(s)) color = 'purple';
         return <Tag color={color}>{status || 'UNASSIGNED'}</Tag>
       }
+    },
+    {
+      title: "TAT",
+      key: "tatStatus",
+      align: "center",
+      render: (_, record) => (
+        <TatIconIndicator
+          dueDate={record.requestDueDate || record.dueDate}
+          tat={record.requestTat || record.tat}
+          size={18}
+        />
+      )
     },
     { title: "Technician", dataIndex: "assignedToName", key: "assignedToName" }
   ];
@@ -355,6 +476,85 @@ function RmaDashboard() {
                 </Card>
               </Col>
             </Row>
+
+            {/* 4. SLA Compliance Section */}
+            {stats?.totalWithTat > 0 && (
+              <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+                <Col xs={24}>
+                  <Card
+                    title={
+                      <span>
+                        <SafetyCertificateOutlined style={{ marginRight: 8 }} />
+                        TAT Compliance Status
+                      </span>
+                    }
+                    bordered={false}
+                    className="chart-card"
+                  >
+                    <Row gutter={[16, 16]}>
+                      {/* Compliance Rate */}
+                      <Col xs={24} sm={12} md={6}>
+                        <div style={{ textAlign: 'center', padding: '16px' }}>
+                          <div style={{
+                            fontSize: '36px',
+                            fontWeight: 'bold',
+                            color: stats?.complianceRate >= 80 ? '#52c41a' : stats?.complianceRate >= 50 ? '#faad14' : '#f5222d'
+                          }}>
+                            {stats?.complianceRate?.toFixed(1) || 0}%
+                          </div>
+                          <div style={{ color: '#666', marginTop: '8px' }}>Compliance Rate</div>
+                        </div>
+                      </Col>
+
+                      {/* On Track */}
+                      <Col xs={24} sm={12} md={6}>
+                        <Card size="small" style={{ background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)', border: 'none' }}>
+                          <Statistic
+                            title={<span style={{ color: '#389e0d' }}><CheckCircleOutlined /> On Track</span>}
+                            value={stats?.onTrackCount || 0}
+                            valueStyle={{ color: '#389e0d', fontWeight: 'bold' }}
+                            suffix="requests"
+                          />
+                        </Card>
+                      </Col>
+
+                      {/* At Risk */}
+                      <Col xs={24} sm={12} md={6}>
+                        <Card size="small" style={{ background: 'linear-gradient(135deg, #fffbe6 0%, #ffe58f 100%)', border: 'none' }}>
+                          <Statistic
+                            title={<span style={{ color: '#d48806' }}><WarningOutlined /> At Risk</span>}
+                            value={stats?.atRiskCount || 0}
+                            valueStyle={{ color: '#d48806', fontWeight: 'bold' }}
+                            suffix="requests"
+                          />
+                        </Card>
+                      </Col>
+
+                      {/* Breached */}
+                      <Col xs={24} sm={12} md={6}>
+                        <Card size="small" style={{ background: 'linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%)', border: 'none' }}>
+                          <Statistic
+                            title={<span style={{ color: '#cf1322' }}><CloseCircleOutlined /> Breached</span>}
+                            value={stats?.breachedCount || 0}
+                            valueStyle={{ color: '#cf1322', fontWeight: 'bold' }}
+                            suffix="requests"
+                          />
+                        </Card>
+                      </Col>
+                    </Row>
+                    <div style={{ marginTop: 16, textAlign: 'center' }}>
+                      <Button
+                        type="primary"
+                        icon={<BarChartOutlined />}
+                        onClick={handleViewReport}
+                      >
+                        View Detailed Report
+                      </Button>
+                    </div>
+                  </Card>
+                </Col>
+              </Row>
+            )}
           </>
         )}
 
@@ -387,6 +587,49 @@ function RmaDashboard() {
             pagination={{ pageSize: 8 }}
             scroll={{ x: 'max-content' }}
             size="small"
+          />
+        </Modal>
+
+        {/* TAT Compliance Report Modal */}
+        <Modal
+          title={
+            <span>
+              <BarChartOutlined style={{ marginRight: 8 }} />
+              TAT Compliance Report - Customer Breakdown
+            </span>
+          }
+          open={reportVisible}
+          onCancel={() => { setReportVisible(false); setReportData([]); }}
+          footer={null}
+          width={1200}
+          className="rma-detail-modal"
+        >
+          <Table
+            columns={reportColumns}
+            dataSource={reportData}
+            loading={reportLoading}
+            rowKey={(record) => record.companyName || Math.random()}
+            pagination={{ pageSize: 10 }}
+            scroll={{ x: 'max-content' }}
+            size="small"
+            summary={(pageData) => {
+              if (pageData.length === 0) return null;
+              const totalCompleted = pageData.reduce((sum, r) => sum + (r.completedWithinTat || 0) + (r.completedAfterTat || 0), 0);
+              const withinTat = pageData.reduce((sum, r) => sum + (r.completedWithinTat || 0), 0);
+              const avgCompliance = totalCompleted > 0 ? (withinTat / totalCompleted * 100).toFixed(1) : 0;
+              return (
+                <Table.Summary.Row>
+                  <Table.Summary.Cell index={0}><strong>Total</strong></Table.Summary.Cell>
+                  <Table.Summary.Cell index={1} align="center">-</Table.Summary.Cell>
+                  <Table.Summary.Cell index={2} align="center"><strong>{pageData.reduce((s, r) => s + (r.totalRequests || 0), 0)}</strong></Table.Summary.Cell>
+                  <Table.Summary.Cell index={3} align="center"><strong>{pageData.reduce((s, r) => s + (r.requestsWithTat || 0), 0)}</strong></Table.Summary.Cell>
+                  <Table.Summary.Cell index={4} align="center"><Tag color="success"><strong>{withinTat}</strong></Tag></Table.Summary.Cell>
+                  <Table.Summary.Cell index={5} align="center"><Tag color="error"><strong>{pageData.reduce((s, r) => s + (r.completedAfterTat || 0), 0)}</strong></Tag></Table.Summary.Cell>
+                  <Table.Summary.Cell index={6} align="center"><strong>{pageData.reduce((s, r) => s + (r.stillOpen || 0), 0)}</strong></Table.Summary.Cell>
+                  <Table.Summary.Cell index={7} align="center"><strong>{avgCompliance}%</strong></Table.Summary.Cell>
+                </Table.Summary.Row>
+              );
+            }}
           />
         </Modal>
       </div>

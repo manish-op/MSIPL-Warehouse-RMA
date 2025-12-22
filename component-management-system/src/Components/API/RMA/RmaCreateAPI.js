@@ -104,6 +104,9 @@ export const RmaApi = {
   // Dashboard Statistics
   getRmaDashboardStats: async () => apiGet("/rma/stats"),
 
+  // TAT Compliance Report
+  getTatComplianceReport: async () => apiGet("/rma/tat-compliance-report"),
+
   // Dashboard Interactive Modals
   getRmaRequests: async (filter) => apiGet(`/rma/requests?filter=${filter || "all"}`),
   getAllItems: async () => apiGet("/rma/items/all"),
@@ -145,7 +148,7 @@ export const RmaApi = {
 
   // ---------- Depot Dispatch APIs (to Depot / Bangalore) ----------
   getDepotReadyToDispatch: async () => apiGet("/rma/depot/ready-to-dispatch"),
-  
+
   getNextDcNo: async () => apiGet("/rma/depot/next-dc-no"),
 
   dispatchToBangalore: async (payload) => {
