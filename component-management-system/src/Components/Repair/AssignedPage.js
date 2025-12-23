@@ -506,6 +506,7 @@ export default function AssignedPage() {
                                 size="large"
                                 placeholder="Select new technician"
                                 value={newAssignee ? newAssignee.email : undefined}
+                                optionLabelProp="value"
                                 onChange={(value) => {
                                     const emp = employees.find(e => e.email === value);
                                     setNewAssignee(emp);

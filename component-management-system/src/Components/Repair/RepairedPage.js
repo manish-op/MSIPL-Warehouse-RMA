@@ -451,8 +451,10 @@ export default function RepairedPage() {
                                                         <div key={item.id} className="rma-item-card-modern">
                                                             <div className="item-header">
                                                                 <span className="item-product">{item.product || "Product"}</span>
-                                                                {item.repairStatus === "BER" ? 
+                                                                {item.repairStatus?.toUpperCase() === "BER" ? 
                                                                     <Tag color="red" icon={<WarningOutlined />}>BER</Tag> : 
+                                                                    item.repairStatus?.toUpperCase() === "REPLACED" ?
+                                                                    <Tag color="cyan" icon={<ReloadOutlined />}>REPLACED</Tag> :
                                                                     <Tag color="green" icon={<CheckCircleOutlined />}>REPAIRED</Tag>
                                                                 }
                                                             </div>
@@ -468,7 +470,7 @@ export default function RepairedPage() {
                                                                 </div>
                                                                 <div className="detail-box">
                                                                     <span className="label"><UserOutlined/> Repaired By</span>
-                                                                    <span className="value">{item.repairedByName || "N/A"}</span>
+                                                                    <span className="value">{item.repairedByName || item.assignedToName || "N/A"}</span>
                                                                 </div>
                                                                 <div className="detail-box">
                                                                     <span className="label"><CalendarOutlined/> Date</span>

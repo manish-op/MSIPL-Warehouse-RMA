@@ -300,3 +300,22 @@ body {
   color: #ff7875 !important;
   border-color: #5c0011 !important;
 }
+
+/* Fix for Role tags in Dark Mode */
+[data-theme='dark'] .ant-tag-gold {
+  background: rgba(255, 214, 102, 0.15) !important;
+  color: #ffd666 !important;
+  border-color: #876800 !important;
+}
+
+[data-theme='dark'] .ant-tag-cyan {
+  background: rgba(19, 194, 194, 0.15) !important;
+  color: #5cdbd3 !important;
+  border-color: #006d75 !important;
+}
+
+[data-theme='dark'] .ant-tag-geekblue {
+  background: rgba(47, 84, 235, 0.15) !important;
+  color: #85a5ff !important;
+  border-color: #10239e !important;
+}

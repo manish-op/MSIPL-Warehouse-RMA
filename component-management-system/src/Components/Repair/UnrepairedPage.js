@@ -523,6 +523,11 @@ export default function UnrepairedPage() {
                         style={{ width: "100%" }}
                         placeholder="Select Technician"
                         value={assigneeEmail}
+                        optionLabelProp="value"
+                        showSearch
+                        filterOption={(input, option) =>
+                            option.children.toLowerCase().includes(input.toLowerCase())
+                        }
                         onChange={(val) => {
                             const emp = employees.find(e => e.email === val);
                             if(emp) { setAssigneeEmail(emp.email); setAssigneeName(emp.name); }
@@ -530,7 +535,7 @@ export default function UnrepairedPage() {
                         disabled={!isAdmin}
                     >
                         {(isAdmin ? employees : (currentUser ? [currentUser] : [])).map(e => (
-                            <Select.Option key={e.email} value={e.email}>{e.name}</Select.Option>
+                            <Select.Option key={e.email} value={e.email}>{e.name} ({e.email})</Select.Option>
                         ))}
                     </Select>
                 </Modal>
@@ -548,6 +553,11 @@ export default function UnrepairedPage() {
                         style={{ width: "100%" }}
                         placeholder="Select Technician"
                         value={assigneeEmail}
+                        optionLabelProp="value"
+                        showSearch
+                        filterOption={(input, option) =>
+                            option.children.toLowerCase().includes(input.toLowerCase())
+                        }
                         onChange={(val) => {
                              const emp = employees.find(e => e.email === val);
                              if(emp) { setAssigneeEmail(emp.email); setAssigneeName(emp.name); }
@@ -555,7 +565,7 @@ export default function UnrepairedPage() {
                         disabled={!isAdmin}
                     >
                         {(isAdmin ? employees : (currentUser ? [currentUser] : [])).map(e => (
-                            <Select.Option key={e.email} value={e.email}>{e.name}</Select.Option>
+                            <Select.Option key={e.email} value={e.email}>{e.name} ({e.email})</Select.Option>
                         ))}
                     </Select>
                 </Modal>

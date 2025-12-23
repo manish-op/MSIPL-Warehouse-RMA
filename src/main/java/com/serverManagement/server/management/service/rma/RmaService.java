@@ -1135,17 +1135,33 @@ public class RmaService {
 
             // Capture old values for audit
             String oldStatus = item.getRepairStatus();
+
             String oldRemarks = item.getRepairRemarks();
+
+            System.out.println("Updating item status. ID: " + itemId + ", Status: " + normalizedStatus);
 
             item.setRepairStatus(normalizedStatus);
             item.setRepairRemarks(remarks);
             item.setIssueFixed(issueFixed.trim());
 
-            // If marked as repaired, record who repaired it
-            if (normalizedStatus.equals("REPAIRED")) {
-                item.setRepairedByEmail(loggedInUserEmail);
-                item.setRepairedByName(loggedInUserName);
+            // If marked as repaired or replaced, record who processed it
+            if (normalizedStatus.equals("REPAIRED") || normalizedStatus.equals("REPLACED")) {
+                System.out.println("Processing REPAIRED/REPLACED status info...");
+                // Use assigned technician info if available, otherwise fall back to logged-in
+                // user
+                if (item.getAssignedToEmail() != null && !item.getAssignedToEmail().isEmpty()) {
+                    System.out.println("Using assigned tech: " + item.getAssignedToName() + " ("
+                            + item.getAssignedToEmail() + ")");
+                    item.setRepairedByEmail(item.getAssignedToEmail());
+                    item.setRepairedByName(item.getAssignedToName());
+                } else {
+                    System.out.println("No assigned tech found, using logged-in user: " + loggedInUserName);
+                    item.setRepairedByEmail(loggedInUserEmail);
+                    item.setRepairedByName(loggedInUserName);
+                }
                 item.setRepairedDate(ZonedDateTime.now());
+                System.out.println(
+                        "Repaired info set: Name=" + item.getRepairedByName() + ", Date=" + item.getRepairedDate());
             }
 
             // Note: DISPATCHED status is handled by separate dispatch endpoints
