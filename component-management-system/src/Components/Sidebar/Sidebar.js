@@ -17,11 +17,13 @@ import {
   RiSettings4Line,       // For Options
   RiExchangeLine,        // For Module Switch
 } from "react-icons/ri";
+import { CloseCircleOutlined } from "@ant-design/icons";
 import "./Sidebar.css";
 
 const { Sider } = Layout;
 
-function Sidebar() {
+// Receive props from Dashboard
+function Sidebar({ collapsed, setCollapsed, isMobile }) {
   const role = localStorage.getItem("_User_role_for_MSIPL");
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,24 +33,7 @@ function Sidebar() {
     return sessionStorage.getItem("msipl_service_mode") || "warehouse";
   });
 
-  // 1. Initialize state based on screen size
-  const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [openKeys, setOpenKeys] = useState(["dashboard"]);
-
-  // 2. Handle Screen Resize
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (mobile) {
-        setCollapsed(true);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // Handle module switch with confirmation
   const handleModuleSwitch = (newModule) => {
@@ -196,16 +181,6 @@ function Sidebar() {
         onClick={() => setCollapsed(true)}
       />
 
-      {/* Mobile Toggle Button */}
-      {isMobile && collapsed && (
-        <Button
-          type="primary"
-          className="mobile-toggle-btn"
-          onClick={() => setCollapsed(false)}
-          icon={<RiMenu3Line />}
-        />
-      )}
-
       <Sider
         width={260}
         theme="dark"
@@ -223,16 +198,32 @@ function Sidebar() {
         }}
       >
         <div className="sidebar-header">
-          <div className="logo-text">{collapsed}</div>
-          {!isMobile && (
-            <div className="desktop-toggle" onClick={() => setCollapsed(!collapsed)}>
-              {collapsed ? <RiMenu3Line /> : <RiMenuFold4Line />}
+          {/* Mobile Sidebar Header with Close Button */}
+          {isMobile && !collapsed && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              marginBottom: '8px',
+              width: '100%'
+            }}>
+              <span style={{ color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>Menu</span>
+              <CloseCircleOutlined
+                style={{ fontSize: '24px', color: '#ff4d4f', cursor: 'pointer' }}
+                onClick={() => setCollapsed(true)}
+              />
             </div>
           )}
-          {isMobile && !collapsed && (
-            <div className="mobile-close" onClick={() => setCollapsed(true)}>
-              <RiMenuFold4Line />
-            </div>
+
+          {!isMobile && (
+            <>
+              <div className="logo-text">{collapsed}</div>
+              <div className="desktop-toggle" onClick={() => setCollapsed(!collapsed)}>
+                {collapsed ? <RiMenu3Line /> : <RiMenuFold4Line />}
+              </div>
+            </>
           )}
         </div>
 

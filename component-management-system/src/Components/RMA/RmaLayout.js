@@ -15,6 +15,7 @@ import {
   HistoryOutlined,
   SwapOutlined,
   CarOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../Header/Header"; // Import Global Header
@@ -100,7 +101,7 @@ const RmaLayout = ({ children }) => {
     if (key === "depot-dispatch") navigate("/depot-dispatch");
     if (key === "audit-trail") navigate("/audit-trail");
     if (key === "logout") showLogoutConfirm();
-    
+
     // Auto-close sidebar on mobile after navigation
     if (isMobile) {
       setCollapsed(true);
@@ -118,8 +119,8 @@ const RmaLayout = ({ children }) => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {/* Global Header with Sidebar Toggle */}
-      <Header 
-        onLogout={showLogoutConfirm} 
+      <Header
+        onLogout={showLogoutConfirm}
         onToggleSidebar={() => setCollapsed(!collapsed)}
       />
 
@@ -140,24 +141,41 @@ const RmaLayout = ({ children }) => {
           className={`msipl-sider ${getSidebarTheme()}`}
           theme="dark"
           style={{
-            height: isMobile ? (collapsed ? 0 : "100vh") : "auto", 
+            height: isMobile ? (collapsed ? 0 : "100vh") : "auto",
             position: isMobile && !collapsed ? "fixed" : "relative",
             zIndex: 100,
             left: 0,
-            top: isMobile ? 0 : 0, 
+            top: isMobile ? 0 : 0,
             display: isMobile && collapsed ? "none" : "block",
             transition: "all 0.3s ease"
           }}
         >
-          {/* Internal Toggle only if NOT mobile */}
-          {!isMobile && (
-            <div
-              className="msipl-sider-toggle"
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          {/* Mobile Sidebar Header with Close Button */}
+          {isMobile && !collapsed && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              marginBottom: '8px'
+            }}>
+              <span style={{ color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>Menu</span>
+              <CloseCircleOutlined
+                style={{ fontSize: '24px', color: '#ff4d4f', cursor: 'pointer' }}
+                onClick={() => setCollapsed(true)}
+              />
             </div>
           )}
+
+          <div
+            className="msipl-sider-toggle"
+            onClick={() => setCollapsed(!collapsed)}
+            style={isMobile ? { display: 'none' } : {}}
+          >
+            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          </div>
+          )
 
           {/* Module Switcher */}
           {!collapsed && (

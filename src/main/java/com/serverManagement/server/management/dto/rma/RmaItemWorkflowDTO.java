@@ -46,8 +46,17 @@ public class RmaItemWorkflowDTO {
     private ZonedDateTime deliveryDate;
     private String deliveryNotes;
     private Boolean isDelivered; // Simple flag to check if delivery confirmed
+    private String userName; // Name of the creator
 
     // Getters and Setters
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public String getLastReassignmentReason() {
         return lastReassignmentReason;
     }

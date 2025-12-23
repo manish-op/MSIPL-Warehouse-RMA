@@ -294,15 +294,15 @@ function RmaRequestForm() {
           model: item.partNo || "",
           serialNo: item.serialNo,
           faultDescription: item.faultDescription,
-          codeplug: item.codeplugProgramming || "Default",
+          codeplug: item.codeplugProgramming || "",
           flashCode: "",
-          repairStatus: "UNASSIGNED",  // New items start as UNASSIGNED
+          repairStatus: "",  // New items start as UNASSIGNED
           invoiceNo: item.invoiceNo || "",
           dateCode: "",
-          fmUlatex: item.fmUlAtex || "N",
-          encryption: item.encryption || "None",
-          firmwareVersion: item.firmwareVersion || "Latest",
-          lowerFirmwareVersion: item.lowerFirmwareVersion || "Follow Depot Mainboard Inventory Version",
+          fmUlatex: item.fmUlAtex || "",
+          encryption: item.encryption || "",
+          firmwareVersion: item.firmwareVersion || "",
+          lowerFirmwareVersion: item.lowerFirmwareVersion || "",
           remarks: item.remarks || ""
         }))
       };
@@ -813,7 +813,12 @@ function RmaRequestForm() {
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="FM/UL/ATEX" name={[name, "fmUlAtex"]}>
+                            <Form.Item
+                              {...restField}
+                              label="FM/UL/ATEX"
+                              name={[name, "fmUlAtex"]}
+                              rules={[{ required: true, message: "Required" }]}
+                            >
                               <Select placeholder="Select">
                                 <Option value="N">Non FM/UL/ATEX</Option>
                                 <Option value="Y-FM">FM Certified</Option>
@@ -870,11 +875,7 @@ function RmaRequestForm() {
 
                     <Button
                       type="dashed"
-                      onClick={() => add({
-                        codeplugProgramming: "Default",
-                        fmUlAtex: "N",
-                        encryption: "None"
-                      })}
+                      onClick={() => add()}
                       block
                       icon={<PlusOutlined />}
                       className="add-item-btn"

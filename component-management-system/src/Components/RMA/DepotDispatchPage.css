@@ -13,7 +13,8 @@
   background: linear-gradient(135deg, #d3adf7 0%, #9254de 100%);
   padding: 24px 32px;
   border-radius: 0 0 24px 24px;
-  box-shadow: 0 4px 20px rgba(114, 46, 209, 0.2); /* Softer shadow */
+  box-shadow: 0 4px 20px rgba(114, 46, 209, 0.2);
+  /* Softer shadow */
 }
 
 .header-content {
@@ -104,7 +105,8 @@
 }
 
 .depot-content .ant-tabs-tab-active {
-  color: #9254de !important; /* Lighter Violet */
+  color: #9254de !important;
+  /* Lighter Violet */
   font-weight: 600;
 }
 
@@ -122,7 +124,8 @@
 .rma-group-card {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(146, 84, 222, 0.08); /* Lighter shadow */
+  box-shadow: 0 4px 16px rgba(146, 84, 222, 0.08);
+  /* Lighter shadow */
   border: none;
 }
 
@@ -186,6 +189,7 @@
   border-color: #d9d9d9 !important;
   color: #595959 !important;
 }
+
 .btn-generate-dc:hover {
   border-color: #9254de !important;
   color: #9254de !important;
@@ -197,6 +201,7 @@
   color: #fff !important;
   box-shadow: 0 2px 4px rgba(114, 46, 209, 0.15);
 }
+
 .btn-dispatch:hover {
   background: linear-gradient(135deg, #b37feb 0%, #722ed1 100%) !important;
   transform: translateY(-1px);
@@ -219,6 +224,7 @@
   background: #fff;
   border-radius: 16px;
 }
+
 /* CSS Cleanup - Removed user duplicate block */
 
 /* =========================================================================
@@ -255,7 +261,8 @@
 }
 
 [data-theme="dark"] .depot-content .ant-tabs-tab-active {
-  color: #d3adf7 !important; /* Keep purple theme but lighter for contrast */
+  color: #d3adf7 !important;
+  /* Keep purple theme but lighter for contrast */
 }
 
 [data-theme="dark"] .depot-content .ant-tabs-tab-btn {
@@ -272,7 +279,8 @@
 [data-theme='dark'] .dispatch-modal .ant-typography-secondary,
 [data-theme='dark'] .dispatch-modal span,
 [data-theme='dark'] .dispatch-modal strong,
-[data-theme='dark'] .dispatch-modal div, /* Aggressive catch-all */
+[data-theme='dark'] .dispatch-modal div,
+/* Aggressive catch-all */
 [data-theme='dark'] .dc-modal .ant-typography,
 [data-theme='dark'] .dc-modal .ant-typography-secondary,
 [data-theme='dark'] .dc-modal span,
@@ -292,13 +300,13 @@
 }
 
 /* Fix for Material Code Table in DC Modal */
-[data-theme="dark"] .dc-modal .ant-table-thead > tr > th {
+[data-theme="dark"] .dc-modal .ant-table-thead>tr>th {
   background: #262626 !important;
   color: #fff !important;
   border-bottom: 1px solid #434343;
 }
 
-[data-theme="dark"] .dc-modal .ant-table-tbody > tr > td {
+[data-theme="dark"] .dc-modal .ant-table-tbody>tr>td {
   background: #1f1f1f !important;
   color: #fff !important;
   border-bottom: 1px solid #434343;
@@ -409,13 +417,15 @@
 [data-theme="dark"] .ant-tag-processing {
   background: #111d2c !important;
   border: 1px solid #103362 !important;
-  color: #177ddc !important; /* Ant Design Dark Blue */
+  color: #177ddc !important;
+  /* Ant Design Dark Blue */
 }
 
 [data-theme="dark"] .ant-tag-success {
   background: #162312 !important;
   border: 1px solid #274916 !important;
-  color: #49aa19 !important; /* Ant Design Dark Green */
+  color: #49aa19 !important;
+  /* Ant Design Dark Green */
 }
 
 [data-theme="dark"] .ant-tag-cyan {
@@ -424,34 +434,9 @@
   color: #13c2c2 !important;
 }
 
-/* Fix for Modal Inputs and DatePicker in Dark Mode */
-[data-theme="dark"] .ant-modal-content,
-[data-theme="dark"] .ant-modal-header {
-  background-color: #1f1f1f !important;
-}
+/* [REMOVED REDUNDANT MODAL START] */
 
-[data-theme="dark"] .ant-modal-title {
-  color: #fff !important;
-}
-
-[data-theme="dark"] .ant-form-item-label > label {
-  color: rgba(255, 255, 255, 0.85) !important;
-}
-
-[data-theme="dark"] .ant-input,
-[data-theme="dark"] .ant-picker {
-  background-color: #141414 !important;
-  border-color: #434343 !important;
-  color: #fff !important;
-}
-
-[data-theme="dark"] .ant-picker-input > input {
-  color: #fff !important;
-}
-
-[data-theme="dark"] .ant-picker-suffix {
-  color: rgba(255, 255, 255, 0.45) !important;
-}
+/* [REMOVED REDUNDANT INPUT/PICKER OVERRIDES] */
 
 /* DatePicker Dropdown Fix */
 [data-theme="dark"] .ant-picker-dropdown,
@@ -473,22 +458,7 @@
   color: #fff !important;
 }
 
-[data-theme="dark"] .ant-picker-cell {
-  color: rgba(255, 255, 255, 0.65) !important;
-}
-
-[data-theme="dark"] .ant-picker-cell-in-view {
-  color: #fff !important;
-}
-
-[data-theme="dark"] .ant-picker-cell-inner {
-  color: #fff !important;
-}
-
-[data-theme="dark"] .ant-picker-cell-selected .ant-picker-cell-inner {
-  background: #1890ff !important;
-  color: #fff !important;
-}
+/* [REMOVED REDUNDANT PICKER CELL OVERRIDES] */
 
 /* Fix for DC Generation Modal Cards & Table */
 [data-theme="dark"] .ant-card-small {
@@ -505,40 +475,45 @@
   color: #fff !important;
 }
 
-[data-theme="dark"] .ant-card-body {
-  background: #1f1f1f !important;
-  color: #fff !important;
+/* [REMOVED REDUNDANT CARD/TABLE OVERRIDES] */
+
+/* RMA Card Header Styling */
+.rma-card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
-[data-theme="dark"] .ant-card-body strong,
-[data-theme="dark"] .ant-card-body p {
-  color: #fff !important;
+.rma-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-/* Table in Modal Fix */
-[data-theme="dark"] .ant-table {
-  background: #141414 !important;
-  color: #fff !important;
+.rma-id-box {
+  display: flex;
+  flex-direction: column;
 }
 
-[data-theme="dark"] .ant-table-thead > tr > th {
-  background: #1f1f1f !important;
-  color: #fff !important;
-  border-bottom: 1px solid #303030 !important;
+.rma-label {
+  font-size: 11px;
+  color: #8c8c8c;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
-[data-theme="dark"] .ant-table-tbody > tr > td {
-  background: #141414 !important;
-  color: #fff !important;
-  border-bottom: 1px solid #303030 !important;
+.rma-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
 }
 
-[data-theme="dark"] .ant-table-tbody > tr:hover > td {
-  background: #1f1f1f !important;
-}
-
-[data-theme="dark"] .ant-table-wrapper .ant-table-container {
-  border: 1px solid #303030 !important;
+.rma-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* =========================================================================
@@ -546,6 +521,7 @@
    ========================================================================= */
 
 @media (max-width: 768px) {
+
   /* Header Adjustments */
   .depot-header {
     padding: 16px;
@@ -557,7 +533,7 @@
     align-items: flex-start;
     gap: 16px;
   }
-  
+
   .header-content .refresh-btn {
     width: 100%;
     margin-top: 8px;
@@ -565,12 +541,13 @@
 
   /* Stats Row - Stack or Grid */
   .stats-row .ant-col {
-    width: 100% !important; /* Force full width on mobile */
+    width: 100% !important;
+    /* Force full width on mobile */
     max-width: 100% !important;
     flex: 0 0 100% !important;
     margin-bottom: 8px;
   }
-  
+
   .stat-box {
     padding: 12px;
   }
@@ -586,27 +563,109 @@
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .in-transit-box .ant-space {
     width: 100%;
     flex-direction: column;
     align-items: flex-start !important;
     gap: 12px !important;
   }
-  
+
   .in-transit-box .anticon {
-    font-size: 20px !important; /* Smaller icon */
+    font-size: 20px !important;
+    /* Smaller icon */
     align-self: flex-start;
   }
 
-  /* RMA Group Card Header */
-  .rma-card-header {
-    flex-wrap: wrap; 
+  /* Fault Box Mobile (In Transit Tab) */
+  .fault-box {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
   }
 
-  /* Item Cards */
+  .fault-box>div {
+    width: 100%;
+  }
+
+  /* 3. RMA Group Card */
+  .rma-card-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .rma-identity {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    /* Spread content out */
+    align-items: center;
+  }
+
+  .rma-actions {
+    width: 100%;
+    justify-content: flex-start;
+    /* items alignment: flex-end in JS override? */
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  /* Override the inline style from JS if possible, or ensure children behave */
+  .rma-actions>div {
+    align-items: flex-start !important;
+    /* Force left alignment on mobile */
+    width: 100%;
+    flex-direction: row !important;
+    /* Maybe keep row for tag + button? */
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .rma-actions .ant-btn {
+    flex: 1 1 auto;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  /* 4. Item Grid (Modern) */
+  .rma-items-grid {
+    grid-template-columns: 1fr;
+    /* Single column on mobile */
+    gap: 16px;
+  }
+
+  .rma-item-card-modern {
+    margin-bottom: 0;
+  }
+
+  /* 5. Item Details (Modern) */
+  .item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .item-product {
+    font-size: 14px;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .item-details-grid {
+    grid-template-columns: 1fr;
+    /* Stack details */
+    gap: 12px;
+  }
+
+  .detail-box .value {
+    word-break: break-all;
+    white-space: normal;
+  }
+
+  /* Legacy Item Card support (if still used) */
   .item-card {
-    border-radius: 8px; /* Slightly reduced radius */
+    border-radius: 8px;
   }
 
   .item-row {
@@ -615,29 +674,51 @@
     gap: 2px;
     margin-bottom: 8px;
   }
-  
+
   .item-row .ant-typography-secondary {
     font-size: 11px;
     margin-bottom: 0;
   }
-  
-  .item-row strong, .item-row span:not(.ant-typography-secondary) {
+
+  .item-row strong,
+  .item-row span:not(.ant-typography-secondary) {
     font-size: 13px;
-    /* Ensure long text breaks */
     word-break: break-word;
     white-space: normal;
   }
 
   /* Buttons */
-  .btn-dispatch, .btn-generate-dc {
-    width: 100%; /* Full width buttons on mobile */
+  .btn-dispatch,
+  .btn-generate-dc {
+    width: 100%;
     margin-top: 4px;
   }
-  
+
   /* Tabs Scrollable */
   .depot-content .ant-tabs-nav-list {
     overflow-x: auto;
     white-space: nowrap;
-    padding-bottom: 4px; /* Scrollbar space if needed */
+    padding-bottom: 4px;
+  }
+
+  /* DC Modal Mobile Adjustments */
+  .dc-modal .ant-modal-body {
+    padding: 16px;
+  }
+
+  .dc-modal .ant-card-head-title {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+
+  .dc-modal .ant-form-item {
+    margin-bottom: 12px;
+  }
+
+  /* Hide text on very small screens (<400px) */
+  @media screen and (max-width: 400px) {
+    .rma-actions .ant-btn>span:not(.anticon) {
+      display: none;
+    }
   }
 }

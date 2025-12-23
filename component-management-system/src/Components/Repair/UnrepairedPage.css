@@ -20,7 +20,8 @@
 
 [data-theme='dark'] {
   --page-bg: #000000;
-  --header-text: #ffffff; /* Keep header text bright on dark backgrounds */
+  --header-text: #ffffff;
+  /* Keep header text bright on dark backgrounds */
   --card-bg: #141414;
   --card-head-bg: #1f1f1f;
   --card-head-border: #303030;
@@ -133,6 +134,7 @@
   color: white;
   font-weight: 500;
 }
+
 .refresh-btn:hover {
   background: white;
   color: #1890ff;
@@ -146,7 +148,8 @@
   padding: 0 32px 32px 32px;
 }
 
-.loading-container, .empty-state {
+.loading-container,
+.empty-state {
   text-align: center;
   padding: 60px;
   background: var(--card-bg);
@@ -220,6 +223,7 @@
   color: #0050b3;
   background: white;
 }
+
 .rma-actions .ant-btn-default:hover {
   border-color: #40a9ff;
   color: #096dd9;
@@ -270,6 +274,23 @@
   font-weight: 700;
   font-size: 15px;
   color: var(--item-header-text);
+}
+
+.add-rma-btn {
+  background: #fff;
+  /* White background for padded effect against the header bg */
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.02);
+  color: #1890ff;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.add-rma-btn:hover {
+  color: #40a9ff;
+  border-color: #40a9ff;
+  background: #fff;
 }
 
 /* Details */
@@ -343,6 +364,7 @@
   background-color: #1890ff;
   border-color: #1890ff;
 }
+
 .item-footer .ant-btn-primary:hover {
   background-color: #40a9ff;
   border-color: #40a9ff;
@@ -394,16 +416,199 @@
 }
 
 /* Ensure tags with backgrounds are readable */
-[data-theme='dark'] .ant-tag-geekblue { background: #111d2c !important; color: #177ddc !important; border: 1px solid #153450 !important; }
-[data-theme='dark'] .ant-tag-orange { background: #2b2111 !important; color: #d89614 !important; border: 1px solid #594414 !important; }
-[data-theme='dark'] .ant-tag-cyan { background: #112123 !important; color: #13a8a8 !important; border: 1px solid #144848 !important; }
-[data-theme='dark'] .ant-tag-processing { background: #111d2c !important; color: #177ddc !important; border: 1px solid #153450 !important; }
-[data-theme='dark'] .ant-tag-red { background: #2a1215 !important; color: #a61d24 !important; border: 1px solid #5c0011 !important; }
-[data-theme='dark'] .ant-tag-purple { background: #1a1325 !important; color: #722ed1 !important; border: 1px solid #301c4d !important; }
-[data-theme='dark'] .ant-tag-blue { background: #111d2c !important; color: #177ddc !important; border: 1px solid #153450 !important; }
-[data-theme='dark'] .ant-tag-green { background: #162312 !important; color: #49aa19 !important; border: 1px solid #274916 !important; }
+[data-theme='dark'] .ant-tag-geekblue {
+  background: #111d2c !important;
+  color: #177ddc !important;
+  border: 1px solid #153450 !important;
+}
+
+[data-theme='dark'] .ant-tag-orange {
+  background: #2b2111 !important;
+  color: #d89614 !important;
+  border: 1px solid #594414 !important;
+}
+
+[data-theme='dark'] .ant-tag-cyan {
+  background: #112123 !important;
+  color: #13a8a8 !important;
+  border: 1px solid #144848 !important;
+}
+
+[data-theme='dark'] .ant-tag-processing {
+  background: #111d2c !important;
+  color: #177ddc !important;
+  border: 1px solid #153450 !important;
+}
+
+[data-theme='dark'] .ant-tag-red {
+  background: #2a1215 !important;
+  color: #a61d24 !important;
+  border: 1px solid #5c0011 !important;
+}
+
+[data-theme='dark'] .ant-tag-purple {
+  background: #1a1325 !important;
+  color: #722ed1 !important;
+  border: 1px solid #301c4d !important;
+}
+
+[data-theme='dark'] .ant-tag-blue {
+  background: #111d2c !important;
+  color: #177ddc !important;
+  border: 1px solid #153450 !important;
+}
+
+[data-theme='dark'] .ant-tag-green {
+  background: #162312 !important;
+  color: #49aa19 !important;
+  border: 1px solid #274916 !important;
+}
 
 /* Ensure fault-box children are visible if they are generic divs */
 [data-theme='dark'] .fault-box div {
   color: var(--text-main) !important;
+}
+
+/* =========================================
+   8. Responsive Design (Mobile/Tablet)
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+
+  /* 1. Page Layout */
+  .unrepaired-page {
+    background-color: var(--page-bg);
+  }
+
+  .unrepaired-content {
+    padding: 12px;
+  }
+
+  /* 2. Header */
+  .unrepaired-header {
+    padding: 16px;
+    margin-bottom: 16px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .header-title {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .header-icon {
+    font-size: 24px;
+    padding: 8px;
+  }
+
+  .header-title div h2.ant-typography {
+    font-size: 20px !important;
+    /* Force smaller size */
+  }
+
+  .refresh-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* 3. RMA Group Card */
+  .rma-group-card .ant-card-head {
+    padding: 0 12px;
+  }
+
+  .rma-card-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .rma-identity {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .rma-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    /* Allow buttons to wrap */
+    gap: 8px;
+  }
+
+  /* Make buttons more compact on mobile */
+  .rma-actions .ant-btn {
+    flex: 1 1 auto;
+    /* Grow to fill space */
+    font-size: 12px;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hide button text on very small screens if needed, 
+     or just let them wrap. Let's start by letting them 
+     wrap and reducing padding/text size. 
+     If still too crowded, we can hide the text. */
+
+  /* 5. Item Details */
+  .assign-all-btn {
+    width: 100%;
+    /* Force full width for primary action */
+  }
+
+  /* 4. Item Grid */
+  .rma-items-grid {
+    grid-template-columns: 1fr;
+    /* Single column on mobile */
+    gap: 16px;
+  }
+
+  .rma-item-card-modern {
+    margin-bottom: 0;
+  }
+
+  /* 5. Item Details */
+  .item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .item-product {
+    font-size: 14px;
+    word-break: break-word;
+    /* Prevent long names from being chopped */
+    white-space: normal;
+  }
+
+  .item-details-grid {
+    grid-template-columns: 1fr;
+    /* Stack details */
+    gap: 12px;
+  }
+
+  /* Prevent text chopping */
+  .detail-box .value {
+    word-break: break-all;
+    white-space: normal;
+  }
+}
+
+/* Ensure button text is always visible */
+.rma-actions .ant-btn {
+  color: #0050b3 !important;
+}
+
+.rma-actions .ant-btn-primary {
+  color: #fff !important;
 }

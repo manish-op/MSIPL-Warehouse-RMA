@@ -1,123 +1,66 @@
 .notification-bell {
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 50%;
+  /* Circle shape */
   transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
 }
 
 .notification-bell:hover {
+  background: rgba(0, 0, 0, 0.04);
+  /* Subtle hover */
+}
+
+/* Dark mode hover */
+[data-theme='dark'] .notification-bell:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
 .notification-bell .bell-icon {
-  font-size: 22px;
+  font-size: 24px;
+  /* Larger, clearer icon */
+  color: var(--text-color, #1c1e21);
+  /* Adapt to theme */
+  transition: color 0.2s ease;
+}
+
+[data-theme='dark'] .notification-bell .bell-icon {
   color: #fff;
-  transition: transform 0.2s ease;
 }
 
-.notification-bell:hover .bell-icon {
-  transform: scale(1.1);
-}
-
-/* --- Has Alerts State --- */
+/* Active State (Alerts exist) */
 .notification-bell.has-alerts .bell-icon {
-  animation: ring 0.5s ease;
+  color: #1c1e21;
 }
 
-@keyframes ring {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  10% {
-    transform: rotate(15deg);
-  }
-
-  20% {
-    transform: rotate(-15deg);
-  }
-
-  30% {
-    transform: rotate(10deg);
-  }
-
-  40% {
-    transform: rotate(-10deg);
-  }
-
-  50% {
-    transform: rotate(5deg);
-  }
-
-  60% {
-    transform: rotate(-5deg);
-  }
-
-  70% {
-    transform: rotate(2deg);
-  }
-
-  80% {
-    transform: rotate(-2deg);
-  }
-
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
-/* --- Pulse Animation for New Alerts --- */
-.notification-bell.pulse::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 77, 79, 0.4);
-  transform: translate(-50%, -50%);
-  animation: pulse-ring 1.5s ease-out infinite;
-  pointer-events: none;
-}
-
-@keyframes pulse-ring {
-  0% {
-    transform: translate(-50%, -50%) scale(0.8);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translate(-50%, -50%) scale(1.5);
-    opacity: 0;
-  }
+[data-theme='dark'] .notification-bell.has-alerts .bell-icon {
+  color: #fff;
 }
 
 /* --- Badge Styling --- */
+.notification-bell .ant-badge {
+  color: inherit;
+}
+
 .notification-bell .ant-badge-count {
-  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
-  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+  background-color: #ff4d4f;
+  /* Standard Error Color */
+  box-shadow: 0 0 0 1px #fff;
   font-weight: 600;
-  font-size: 11px;
+  font-size: 10px;
+  height: 18px;
+  line-height: 18px;
+  min-width: 18px;
+  padding: 0 4px;
 }
 
-.notification-bell .badge-active .ant-badge-count {
-  animation: badge-pulse 2s ease-in-out infinite;
-}
-
-@keyframes badge-pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.1);
-  }
+[data-theme='dark'] .notification-bell .ant-badge-count {
+  box-shadow: 0 0 0 1px #1f1f1f;
 }
 
 /* --- Popover Container --- */

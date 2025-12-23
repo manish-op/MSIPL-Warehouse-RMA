@@ -380,6 +380,30 @@ export const RmaApi = {
 
   getAllTransporters: async () => apiGet("/transporters"),
 
+  createTransporter: async (payload) => {
+    const token = getAuthToken();
+    if (!token) return { success: false, error: "No authentication token found" };
+
+    try {
+      const response = await fetch(`${URL}/transporters`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        return { success: true };
+      } else {
+        const errorText = await response.text();
+        return { success: false, error: errorText };
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
   // Get product catalog from ItemDetailsEntity
   getProductCatalog: async () => apiGet("/rma/product-catalog"),
 
