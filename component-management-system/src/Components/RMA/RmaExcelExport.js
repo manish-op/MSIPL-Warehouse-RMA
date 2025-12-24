@@ -1,12 +1,23 @@
 import { saveAs } from 'file-saver';
+import Cookies from "js-cookie";
+import { URL } from "../API/URL";
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
+const API_URL = URL;
 
 /**
- * Get auth token from localStorage
+ * Get auth token from cookie and decode it
  */
 const getToken = () => {
-    return localStorage.getItem('token') || localStorage.getItem('authToken');
+    const encodedToken = Cookies.get("authToken");
+    if (!encodedToken || encodedToken === "undefined" || encodedToken === "null") {
+        return null;
+    }
+    try {
+        return atob(encodedToken);
+    } catch (error) {
+        console.error("Failed to decode authToken:", error);
+        return null;
+    }
 };
 
 /**

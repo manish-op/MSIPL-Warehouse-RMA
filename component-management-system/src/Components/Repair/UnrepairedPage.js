@@ -359,6 +359,8 @@ export default function UnrepairedPage() {
                 rate: values.items && values.items[index]?.rate ? values.items[index].rate : item.rate
             }));
 
+            // Commented out DC Generation as per request
+            /*
             await RmaApi.generateDeliveryChallan({
                 rmaNo: selectedDcRmaNo,
                 ...values,
@@ -366,6 +368,8 @@ export default function UnrepairedPage() {
             });
             message.success("Delivery Challan generated!");
             setDcModalVisible(false);
+            */
+
         } catch (error) {
             console.error(error);
             message.error("Failed to generate DC");
@@ -587,9 +591,12 @@ export default function UnrepairedPage() {
                                                         <Button icon={<FileTextOutlined />} onClick={() => openGatepassPreview(rmaItems, rmaNo)}>
                                                             Gatepass
                                                         </Button>
-                                                        <Button icon={<FilePdfOutlined />} onClick={() => openDcModal(rmaItems, rmaNo)}>
-                                                            D. Challan
-                                                        </Button>
+                                                        {/* Commented out as requested */}
+                                                        {/* 
+                                                         <Button icon={<FilePdfOutlined />} onClick={() => openDcModal(rmaItems, rmaNo)}>
+                                                             D. Challan
+                                                         </Button>
+                                                        */}
                                                         <Button icon={<PrinterOutlined />} onClick={() => openStickerModal(rmaItems, rmaNo)}>
                                                             Stickers
                                                         </Button>

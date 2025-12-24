@@ -623,9 +623,13 @@
   }
 
   .rma-actions .ant-btn {
-    flex: 1 1 auto;
+    flex: 1 0 auto;
     font-size: 12px;
-    padding: 4px 8px;
+    padding: 6px 12px;
+    height: auto;
+    min-height: 32px;
+    white-space: nowrap;
+    overflow: visible;
   }
 
   /* 4. Item Grid (Modern) */
@@ -715,10 +719,12 @@
     margin-bottom: 12px;
   }
 
-  /* Hide text on very small screens (<400px) */
+  /* Hide text on very small screens (<400px) - REMOVED AS REQUESTED */
+  /*
   @media screen and (max-width: 400px) {
     .rma-actions .ant-btn>span:not(.anticon) {
       display: none;
     }
   }
+  */
 }

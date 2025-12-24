@@ -546,13 +546,14 @@
 
   /* Make buttons more compact on mobile */
   .rma-actions .ant-btn {
-    flex: 1 1 auto;
-    /* Grow to fill space */
+    flex: 1 0 auto;
+    /* Grow to fill, BUT DO NOT SHRINK */
     font-size: 12px;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 6px 12px;
+    height: auto;
+    min-height: 32px;
+    white-space: nowrap;
+    overflow: visible;
   }
 
   /* Hide button text on very small screens if needed, 
