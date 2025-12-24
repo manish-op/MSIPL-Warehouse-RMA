@@ -505,14 +505,14 @@ export default function AssignedPage() {
                                 }}
                                 showSearch
                                 filterOption={(input, option) =>
-                                    option.children.toLowerCase().includes(input.toLowerCase())
+                                    (option?.children ?? "").toString().toLowerCase().includes(input.toLowerCase())
                                 }
                             >
                                 {employees
                                     .filter(emp => emp.email !== selectedItem?.assignedToEmail)
                                     .map(emp => (
                                         <Option key={emp.email} value={emp.email}>
-                                            {emp.name} ({emp.email})
+                                            {`${emp.name} (${emp.email})`}
                                         </Option>
                                     ))}
                             </Select>

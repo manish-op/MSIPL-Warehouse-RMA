@@ -141,41 +141,10 @@ export default function DepotDispatchPage() {
     }
   };
 
-  /* AUTH CHECK: Only ADMIN or BANGALORE region allowed */
+  /* Access Control Removed by User Request */
   useEffect(() => {
-    const encodedToken = Cookies.get("authToken");
-    if (!encodedToken) {
-      window.location.href = "/login";
-      return;
-    }
-
-    try {
-      // 1. Decode the cookie to get the actual JWT
-      const jwt = atob(encodedToken);
-
-      // 2. Decode the JWT payload (2nd part)
-      const payload = JSON.parse(atob(jwt.split(".")[1]));
-
-      const userRole = payload.role || "";
-      const userRegion = payload.region || "";
-
-      const isBangaloreUser = userRegion.toUpperCase() === "BANGALORE";
-      const isAdminUser = userRole === "ADMIN";
-
-      // "if the user is from banglore with any role and usres having the Admin roles can acces"
-      // Logic: (Bangalore) OR (Admin)
-      if (isBangaloreUser || isAdminUser) {
-        loadItems();
-        fetchTransporters();
-      } else {
-        message.error("Access Denied: You do not have permission to view this page.");
-        window.location.href = "/dashboard";
-      }
-
-    } catch (e) {
-      console.error("Auth Token Error:", e);
-      window.location.href = "/login";
-    }
+    loadItems();
+    fetchTransporters();
   }, []);
 
   const openEditRmaModal = (item) => {

@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
@@ -41,10 +40,9 @@ public class CSVFileToItemListConverter {
     private final ItemAvailableStatusOptionDAO itemAvailableStatusDAO;
     private final ItemStatusOptionDAO itemStatusOptionDAO;
 
-
     public CSVFileToItemListConverter(ItemDetailsDAO itemDetailsDAO, RegionDAO regionDAO, KeywordDAO keywordDAO,
-                                      SubKeywordDAO subKeywordDAO, ItemAvailableStatusOptionDAO itemAvailableStatusDAO,
-                                      ItemStatusOptionDAO itemStatusOptionDAO) {
+            SubKeywordDAO subKeywordDAO, ItemAvailableStatusOptionDAO itemAvailableStatusDAO,
+            ItemStatusOptionDAO itemStatusOptionDAO) {
         super();
         this.itemDetailsDAO = itemDetailsDAO;
         this.regionDAO = regionDAO;
@@ -54,11 +52,11 @@ public class CSVFileToItemListConverter {
         this.itemStatusOptionDAO = itemStatusOptionDAO;
     }
 
-
     private static final String[] CANONICAL_FIELD_NAMES = {
             "serialNo", "rackNo", "boxNo", "spareLocation", "partNo", "modelNo", "keyword",
             "subKeyword", "system", "systemVersion", "moduleFor", "itemDescription", "partyName", "remark",
-            "region", "itemStatus", "availableStatus", "lastUpdatedByEmail", "addedByEmail", "update_Date", "adding_Date"
+            "region", "itemStatus", "availableStatus", "lastUpdatedByEmail", "addedByEmail", "update_Date",
+            "adding_Date"
     };
 
     public Set<ItemDetailsEntity> csvToItemSet(MultipartFile csvFile, AdminUserEntity userDetails)
@@ -67,7 +65,6 @@ public class CSVFileToItemListConverter {
         Set<ItemDetailsEntity> setOfItemDetails = new HashSet<ItemDetailsEntity>();
 
         try (Reader reader = new BufferedReader(new InputStreamReader(csvFile.getInputStream()))) {
-
 
             // --- : Use ColumnPositionMappingStrategy ---
             ColumnPositionMappingStrategy<AddItemRequest> strategy = new ColumnPositionMappingStrategy<>();
@@ -83,11 +80,11 @@ public class CSVFileToItemListConverter {
                     .build();
 
             /// start testing
-            String loggedInUserName=userDetails.getEmail().toLowerCase();
-            String loginUserRole=userDetails.getRoleModel().getRoleName().trim().toLowerCase();
-            RegionEntity forManagerRegion=userDetails.getRegionEntity();
-            if(loginUserRole.equals("manager")){
-                if(forManagerRegion==null) {
+            String loggedInUserName = userDetails.getEmail().toLowerCase();
+            String loginUserRole = userDetails.getRoleModel().getRoleName().trim().toLowerCase();
+            RegionEntity forManagerRegion = userDetails.getRegionEntity();
+            if (loginUserRole.equals("manager")) {
+                if (forManagerRegion == null) {
                     throw new Exception("No region assign to you");
                 }
             }
@@ -99,41 +96,42 @@ public class CSVFileToItemListConverter {
                     if (addComponent == null ||
                             addComponent.getSerialNo() == null || addComponent.getSerialNo().isBlank() ||
                             addComponent.getKeyword() == null || addComponent.getKeyword().isBlank()) {
-                      //  System.out.println("Skipping row: SerialNo or Keyword is blank.");
+                        // System.out.println("Skipping row: SerialNo or Keyword is blank.");
                         continue; // Skip rows without mandatory fields
                     }
-
 
                     boolean serialAvailable = itemDetailsDAO
                             .isSerialExist(addComponent.getSerialNo().trim().toLowerCase());
                     if (serialAvailable) {// check for duplicate serial no
-                       // System.out.println("Skipping row: SerialNo already exists: " + addComponent.getSerialNo());
+                        // System.out.println("Skipping row: SerialNo already exists: " +
+                        // addComponent.getSerialNo());
                         continue;
                     } else {
                         ItemDetailsEntity componentDetails = new ItemDetailsEntity();
                         ItemHistoryUpdatedByAdminEntity historyChangedByAdmin = new ItemHistoryUpdatedByAdminEntity();
-
 
                         if (addComponent.getSerialNo() != null && !addComponent.getSerialNo().isEmpty()) {
                             componentDetails.setSerial_No(addComponent.getSerialNo().trim().toLowerCase());
                             historyChangedByAdmin.setSerial_No(addComponent.getSerialNo().trim().toLowerCase());
                         }
                         // region adding section open
-                        if(loginUserRole.equals("admin")) {
+                        if (loginUserRole.equals("admin")) {
                             if (addComponent.getRegion() != null && addComponent.getRegion().trim().length() > 0) {
 
-                                RegionEntity regionEntity = regionDAO.findByCity(addComponent.getRegion().toLowerCase());
+                                RegionEntity regionEntity = regionDAO
+                                        .findByCity(addComponent.getRegion().toLowerCase());
                                 if (regionEntity != null) {
                                     componentDetails.setRegion(regionEntity);
                                     historyChangedByAdmin.setRegion(regionEntity);
                                 } else {
-                                    //System.out.println("Skipping row: Region not found in DB: " + addComponent.getRegion());
+                                    // System.out.println("Skipping row: Region not found in DB: " +
+                                    // addComponent.getRegion());
                                     continue;
                                 }
                             } else {
                                 continue;
                             }
-                        }else {
+                        } else {
                             componentDetails.setRegion(forManagerRegion);
                             historyChangedByAdmin.setRegion(forManagerRegion);
                         }
@@ -165,7 +163,8 @@ public class CSVFileToItemListConverter {
                                     }
                                 }
                             } else {
-                                //System.out.println("Skipping row: Keyword not found in DB: " + addComponent.getKeyword());
+                                // System.out.println("Skipping row: Keyword not found in DB: " +
+                                // addComponent.getKeyword());
                                 continue;
                             }
 
@@ -305,7 +304,6 @@ public class CSVFileToItemListConverter {
                             componentDetails.setItemHistoryUpdatedByAdminEntityList(historyChangedByAdminList);
                         }
                         // ... (End of your existing logic) ...
-
 
                         setOfItemDetails.add(componentDetails);
 
