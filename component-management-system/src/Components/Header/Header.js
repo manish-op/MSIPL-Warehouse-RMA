@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { Dropdown } from "antd";
 import { useLocation, Link } from "react-router-dom";
 import "./Header.css";
 import logo from "../../images/images.png";
@@ -21,8 +22,8 @@ function Header({ onToggleSidebar }) {
     <header className="header">
       <div className="header-left">
         {onToggleSidebar && (
-          <button 
-            className="menu-toggle-btn" 
+          <button
+            className="menu-toggle-btn"
             onClick={onToggleSidebar}
             aria-label="Toggle Sidebar"
           >
@@ -39,29 +40,50 @@ function Header({ onToggleSidebar }) {
           <span className="slider round"></span>
         </label>
 
-        {!showButton && (
-          <Link
-            to="https://sites.google.com/motorolasolutions.com/india-managed-support-services/india-support-services/fso-useful-links"
-            className="header-btn header-icon-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Service Help"
-          >
-            Service Webpage
-          </Link>
-        )}
-
         {!showButton && location.pathname.startsWith("/dashboard") && <NotificationBell />}
 
-        {showButton ? (
+        {!showButton ? (
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'service',
+                  label: (
+                    <a
+                      href="https://sites.google.com/motorolasolutions.com/india-managed-support-services/india-support-services/fso-useful-links"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                      <FaSignInAlt style={{ transform: 'rotate(0deg)' }} /> Service Webpage
+                    </a>
+                  ),
+                },
+                {
+                  type: 'divider',
+                },
+                {
+                  key: 'logout',
+                  label: (
+                    <Link to="/dashboard/logout" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <FaSignOutAlt /> Logout
+                    </Link>
+                  ),
+                  danger: true,
+                },
+              ]
+            }}
+            trigger={['click']}
+          >
+            <button className="header-btn">
+              <span style={{ marginRight: 8 }}>More</span>
+              <FaBars /> {/* Using Bars or ChevronDown */}
+            </button>
+          </Dropdown>
+        ) : (
           <Link to="/login" className="header-btn">
             Sign In
             <FaSignInAlt className="header-btn-icon" />
-          </Link>
-        ) : (
-          <Link to="/dashboard/logout" className="header-btn">
-            Logout
-            <FaSignOutAlt className="header-btn-icon" />
           </Link>
         )}
       </div>

@@ -1,4 +1,3 @@
-
 .header {
   display: flex;
   align-items: center;
@@ -45,9 +44,11 @@
   cursor: pointer;
   font-weight: 600;
   text-decoration: none;
-  display: inline-flex; /* Use inline-flex for better alignment */
+  display: inline-flex;
+  /* Use inline-flex for better alignment */
   align-items: center;
-  gap: 8px; /* Gap between text and icon */
+  gap: 8px;
+  /* Gap between text and icon */
   transition: all 0.2s ease-in-out;
   white-space: nowrap;
 }
@@ -82,32 +83,32 @@
   }
 
 
-  
+
   .header-icon-btn {
     padding: 8px;
-    font-size: 20px; 
+    font-size: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  
- 
+
+
   .header-right a.header-btn {
-    font-size: 0; 
+    font-size: 0;
     padding: 8px;
     width: 38px;
-    height: 38px; 
-    border-radius: 50%; 
+    height: 38px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0;
   }
 
-  
-  .header-right a.header-btn > svg {
-    font-size: 18px; 
+
+  .header-right a.header-btn>svg {
+    font-size: 18px;
     display: block;
     margin: 0;
   }
@@ -136,4 +137,11 @@
 /* Ensure Logo and Company Name align well with toggle */
 .header-left {
   gap: 4px;
+}
+
+/* Hide toggle button on desktop, show only on mobile */
+@media screen and (min-width: 769px) {
+  .menu-toggle-btn {
+    display: none;
+  }
 }

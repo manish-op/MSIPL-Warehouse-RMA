@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/transporters")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class TransporterController {
 
     @Autowired

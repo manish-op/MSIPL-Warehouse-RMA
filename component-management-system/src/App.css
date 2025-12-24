@@ -22,6 +22,17 @@
   --color-error: #ff4d4f;
   --color-warning: #faad14;
   --color-success: #52c41a;
+
+  /* Imported from index.css for consistency */
+  --header-bg: #1f3b57;
+  --header-text: #ffffff;
+  --button-bg: #316a9c;
+  --button-hover-bg: #468ac0;
+  --card-bg: #ffffff;
+  --card-border: #ddd;
+  --status-success: #52c41a;
+  --status-warning: #faad14;
+  --status-error: #f5222d;
 }
 
 /* Dark Theme */
@@ -43,6 +54,17 @@
   --color-error: #a61d24;
   --color-warning: #d89614;
   --color-success: #49aa19;
+
+  /* Imported from index.css */
+  --header-bg: #242526;
+  --header-text: #e4e6eb;
+  --button-bg: #4b5d75;
+  --button-hover-bg: #60738f;
+  --card-bg: #242526;
+  --card-border: #3a3b3c;
+  --status-success: #95de64;
+  --status-warning: #ffd666;
+  --status-error: #ff7875;
 }
 
 
@@ -679,20 +701,21 @@ Input:hover::after {
 [data-theme='dark'] .ant-form-item-label>label {
   color: #e8e6e3 !important;
 }
+
 /* 1. Force the Card Body itself to use the correct text color */
 [data-theme='dark'] .ant-card-body {
-    color: var(--text-color) !important;
+  color: var(--text-color) !important;
 }
 
 /* 2. Aggressively target all headings and generic text containers inside the card */
-[data-theme='dark'] .ant-card-body h1, 
-[data-theme='dark'] .ant-card-body h2, 
-[data-theme='dark'] .ant-card-body h3, 
-[data-theme='dark'] .ant-card-body h4, 
-[data-theme='dark'] .ant-card-body h5, 
-[data-theme='dark'] .ant-card-body div, 
+[data-theme='dark'] .ant-card-body h1,
+[data-theme='dark'] .ant-card-body h2,
+[data-theme='dark'] .ant-card-body h3,
+[data-theme='dark'] .ant-card-body h4,
+[data-theme='dark'] .ant-card-body h5,
+[data-theme='dark'] .ant-card-body div,
 [data-theme='dark'] .ant-card-body span {
-    color: var(--text-color) !important;
+  color: var(--text-color) !important;
 }
 
 /* 3. EXCEPTION: Re-apply colors for your status text (Green/Yellow/Red) 
@@ -701,20 +724,22 @@ Input:hover::after {
 [data-theme='dark'] .ant-card-body .ant-typography-success,
 [data-theme='dark'] .ant-card-body span[style*="color: green"],
 [data-theme='dark'] .ant-card-body span[style*="color: #52c41a"] {
-    color: var(--color-success) !important;
+  color: var(--color-success) !important;
 }
 
 [data-theme='dark'] .ant-card-body .text-warning,
 [data-theme='dark'] .ant-card-body .ant-typography-warning,
 [data-theme='dark'] .ant-card-body span[style*="color: orange"],
 [data-theme='dark'] .ant-card-body span[style*="color: #faad14"] {
-    color: var(--color-warning) !important;
+  color: var(--color-warning) !important;
 }
+
 /* FORCE FIX: Target Ant Design Statistic Components directly */
 
 /* 1. Fix the Title (e.g., "Total Requests") */
 [data-theme='dark'] .ant-statistic-title {
-    color: #b0b0b0 !important; /* Light Grey for title */
+  color: #b0b0b0 !important;
+  /* Light Grey for title */
 }
 
 /* 2. Fix the Value (e.g., "32", "36") */
@@ -722,17 +747,106 @@ Input:hover::after {
 [data-theme='dark'] .ant-statistic-content-value,
 [data-theme='dark'] .ant-statistic-content-value-int,
 [data-theme='dark'] .ant-statistic-content-value-decimal {
-    color: #ffffff !important; /* Pure White for numbers */
+  color: #ffffff !important;
+  /* Pure White for numbers */
 }
 
 /* 3. Safety Net for any other text inside the card */
 [data-theme='dark'] .ant-card-body span {
-    color: #ffffff !important; 
+  color: #ffffff !important;
 }
+
 /* FORCE FIX for "Total Requests" Title */
 html[data-theme='dark'] .ant-card .ant-statistic .ant-statistic-title,
 body[data-theme='dark'] .ant-card .ant-statistic .ant-statistic-title,
 [data-theme='dark'] .ant-statistic-title {
-    color: #cccccc !important; /* Light Grey */
-    opacity: 1 !important;     /* Force full visibility */
+  color: #cccccc !important;
+  /* Light Grey */
+  opacity: 1 !important;
+  /* Force full visibility */
+}
+
+/* ==========================================================================
+   IMPORTED FROM index.css (Consolidated)
+   ========================================================================== */
+
+/* Dashboard Theme Fixes */
+[data-theme='dark'] .compliance-label,
+[data-theme='dark'] .ant-statistic-title {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .tat-card {
+  background: #1f1f1f !important;
+}
+
+[data-theme='dark'] .tat-on-track {
+  background: linear-gradient(135deg, #112110 0%, #234d1b 100%) !important;
+}
+
+[data-theme='dark'] .tat-at-risk {
+  background: linear-gradient(135deg, #2b2111 0%, #594414 100%) !important;
+}
+
+[data-theme='dark'] .tat-breached {
+  background: linear-gradient(135deg, #2a1215 0%, #5c0011 100%) !important;
+}
+
+/* Table Summary Dark Mode Fix */
+[data-theme='dark'] .ant-table-summary,
+[data-theme='dark'] .ant-table-summary-row>td,
+[data-theme='dark'] .ant-table-tbody>tr.ant-table-summary-row>td,
+[data-theme='dark'] .ant-table-tbody>tr.ant-table-summary-row:hover>td {
+  background-color: #1f1f1f !important;
+  background: #1f1f1f !important;
+  color: #fff !important;
+  border-top: 1px solid #303030 !important;
+  border-bottom: 1px solid #303030 !important;
+}
+
+[data-theme='dark'] .ant-table-summary-row strong,
+[data-theme='dark'] .ant-table-summary-row span {
+  color: #fff !important;
+}
+
+/* Fix for Tags inside Summary Row in Dark Mode */
+[data-theme='dark'] .ant-table-summary-row .ant-tag,
+[data-theme='dark'] .ant-table-summary-row .ant-tag-default {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: #434343 !important;
+  color: #fff !important;
+}
+
+[data-theme='dark'] .ant-table-summary-row .ant-tag-success,
+[data-theme='dark'] .ant-table-summary-row .ant-tag-has-color[style*="background-color: green"],
+[data-theme='dark'] .ant-tag-success {
+  background: rgba(35, 77, 27, 0.4) !important;
+  color: #95de64 !important;
+  border-color: #234d1b !important;
+}
+
+[data-theme='dark'] .ant-table-summary-row .ant-tag-error,
+[data-theme='dark'] .ant-tag-error {
+  background: rgba(92, 0, 17, 0.4) !important;
+  color: #ff7875 !important;
+  border-color: #5c0011 !important;
+}
+
+/* Fix for Role tags in Dark Mode */
+[data-theme='dark'] .ant-tag-gold {
+  background: rgba(255, 214, 102, 0.15) !important;
+  color: #ffd666 !important;
+  border-color: #876800 !important;
+}
+
+[data-theme='dark'] .ant-tag-cyan {
+  background: rgba(19, 194, 194, 0.15) !important;
+  color: #5cdbd3 !important;
+  border-color: #006d75 !important;
+}
+
+[data-theme='dark'] .ant-tag-geekblue {
+  background: rgba(47, 84, 235, 0.15) !important;
+  color: #85a5ff !important;
+  border-color: #10239e !important;
 }

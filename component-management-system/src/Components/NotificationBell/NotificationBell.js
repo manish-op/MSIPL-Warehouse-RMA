@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Badge, Popover, Spin, Empty, Button } from 'antd';
+import { Badge, Popover, Spin, Empty, Button, Modal } from 'antd';
 import {
   BellOutlined,
   WarningOutlined,
@@ -136,6 +136,57 @@ const NotificationBell = () => {
     </div>
   );
 
+  // Handle Screen Resize for Mobile Detection
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleOpenAlerts = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const bellIcon = (
+    <span
+      className={`notification-bell ${alertCount > 0 ? "has-alerts" : ""} ${hasNewAlerts ? "pulse" : ""
+        }`}
+      onClick={isMobile ? handleOpenAlerts : undefined}
+    >
+      <Badge
+        count={alertCount}
+        overflowCount={99}
+        className={alertCount > 0 ? "badge-active" : ""}
+      >
+        <BellOutlined className="bell-icon" />
+      </Badge>
+    </span>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        {bellIcon}
+        <Modal
+          title={null}
+          footer={null}
+          open={isOpen}
+          onCancel={() => setIsOpen(false)}
+          centered
+          className="notification-modal"
+          bodyStyle={{ padding: 0 }}
+          width="90%"
+        >
+          {content}
+        </Modal>
+      </>
+    );
+  }
+
   return (
     <Popover
       content={content}
@@ -146,15 +197,7 @@ const NotificationBell = () => {
       overlayClassName="notification-popover"
       arrow={false}
     >
-      <span className={`notification-bell ${alertCount > 0 ? 'has-alerts' : ''} ${hasNewAlerts ? 'pulse' : ''}`}>
-        <Badge
-          count={alertCount}
-          overflowCount={99}
-          className={alertCount > 0 ? 'badge-active' : ''}
-        >
-          <BellOutlined className="bell-icon" />
-        </Badge>
-      </span>
+      {bellIcon}
     </Popover>
   );
 };

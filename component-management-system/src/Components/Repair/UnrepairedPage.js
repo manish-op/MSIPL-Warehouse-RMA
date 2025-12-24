@@ -37,6 +37,8 @@ import { URL as API_URL } from "../API/URL"; // Ensure this path is correct
 import RmaLayout from "../RMA/RmaLayout"; // Ensure this path is correct
 import "./UnrepairedPage.css";
 
+import companyLogo from "../../images/image.png";
+
 const { Title, Text, Paragraph } = Typography;
 
 const PREDEFINED_TRANSPORTERS = {
@@ -47,7 +49,7 @@ const PREDEFINED_TRANSPORTERS = {
 export default function UnrepairedPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
-    
+
     // --- Assign Modal State ---
     const [assignModalVisible, setAssignModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -94,18 +96,13 @@ export default function UnrepairedPage() {
     const fetchTransporters = async () => {
         try {
             const result = await RmaApi.getAllTransporters();
-            let allTransporters = result.success ? (result.data || []) : [];
-            
-            // Merge with predefined ones if not already in the database
-            Object.entries(PREDEFINED_TRANSPORTERS).forEach(([name, tid]) => {
-                if (!allTransporters.find(t => t.name === name)) {
-                    allTransporters.push({ id: `pre-${name}`, name, transporterId: tid });
-                }
-            });
-
-            setTransporters(allTransporters);
+            if (result.success && Array.isArray(result.data)) {
+                setTransporters(result.data);
+            } else {
+                console.error("Failed to fetch transporters:", result.error);
+            }
         } catch (error) {
-            console.error("Failed to fetch transporters", error);
+            console.error("Error fetching transporters:", error);
         }
     };
 
@@ -184,8 +181,8 @@ export default function UnrepairedPage() {
     // 1. Assign Single
     const openAssignModal = (item) => {
         if ((!item.itemRmaNo || item.itemRmaNo === "") && (!item.rmaNo || item.rmaNo === "Unknown")) {
-             message.warning("RMA Number is required before assigning.");
-             return;
+            message.warning("RMA Number is required before assigning.");
+            return;
         }
         setSelectedItem(item);
         if (!isAdmin && currentUser) {
@@ -222,12 +219,12 @@ export default function UnrepairedPage() {
             Modal.warning({ title: 'Missing RMA Numbers', content: 'Please assign RMA numbers first.' });
             return;
         }
-        
+
         const setupModal = (validItems) => {
             setBulkAssignItems(validItems);
             setSelectedRmaNo(rmaNo);
             setSelectedRmaItemCount(validItems.length);
-             if (!isAdmin && currentUser) {
+            if (!isAdmin && currentUser) {
                 setAssigneeName(currentUser.name);
                 setAssigneeEmail(currentUser.email);
             } else {
@@ -238,7 +235,7 @@ export default function UnrepairedPage() {
         };
 
         if (!status.allHaveRma) {
-             Modal.confirm({
+            Modal.confirm({
                 title: 'Partial Assignment',
                 content: `Only ${status.itemsWithRma.length} items have valid RMA numbers. Proceed?`,
                 onOk: () => setupModal(status.itemsWithRma)
@@ -284,11 +281,11 @@ export default function UnrepairedPage() {
 
     // 4. Gatepass
     const openGatepassPreview = (rmaItems, rmaNo) => {
-         const status = checkRmaStatus(rmaItems);
-         if (!status.hasAnyRma) { message.warning("RMA Numbers required"); return; }
-         setGatepassItems(status.itemsWithRma);
-         setGatepassRmaNo(rmaNo);
-         setGatepassPreviewVisible(true);
+        const status = checkRmaStatus(rmaItems);
+        if (!status.hasAnyRma) { message.warning("RMA Numbers required"); return; }
+        setGatepassItems(status.itemsWithRma);
+        setGatepassRmaNo(rmaNo);
+        setGatepassPreviewVisible(true);
     };
 
     const handleGenerateGatepass = async (requestNumber) => {
@@ -330,7 +327,7 @@ export default function UnrepairedPage() {
 
         setSelectedDcRmaNo(rmaNo);
         setDcTableData(tableData);
-        
+
         dcForm.resetFields();
 
         // Fetch Next DC Number
@@ -359,13 +356,12 @@ export default function UnrepairedPage() {
         setDcSubmitting(true);
         try {
             // Save Transporter Logic
-             if (isNewTransporter && values.transporterName && values.transporterId) {
+            if (isNewTransporter && values.transporterName && values.transporterId) {
                 const name = Array.isArray(values.transporterName) ? values.transporterName[values.transporterName.length - 1] : values.transporterName;
-                await fetch(`${API_URL}/api/transporters`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                    body: JSON.stringify({ name, transporterId: values.transporterId })
-                });
+                const result = await RmaApi.createTransporter({ name, transporterId: values.transporterId });
+                if (!result.success) {
+                    message.error("Failed to save transporter: " + result.error);
+                }
                 await fetchTransporters();
                 values.transporterName = name;
             } else if (Array.isArray(values.transporterName)) {
@@ -396,16 +392,155 @@ export default function UnrepairedPage() {
     const openStickerModal = (rmaItems, rmaNo) => {
         const status = checkRmaStatus(rmaItems);
         if (!status.hasAnyRma) { message.warning("RMA Numbers required"); return; }
-        setStickerItems(status.itemsWithRma.map(i => ({...i, displayRmaNo: i.itemRmaNo || rmaNo})));
+        setStickerItems(status.itemsWithRma.map(i => ({ ...i, displayRmaNo: i.itemRmaNo || rmaNo })));
         setStickerModalVisible(true);
     };
 
-    const handlePrintStickers = () => {
-         const printWindow = window.open('', '_blank');
-         // ... (Your existing print logic HTML goes here, kept short for brevity)
-         // Ensure you paste your full HTML generation code here from previous file
-         printWindow.document.write(`<html><body><h1>Printing...</h1><script>window.print();</script></body></html>`);
-         printWindow.document.close();
+    const handlePrintStickers = async () => {
+        const printWindow = window.open('', '_blank');
+
+        // Convert image to Base64 to ensure it shows up in the print window (which might be about:blank)
+        const getBase64FromUrl = async (url) => {
+            const data = await fetch(url);
+            const blob = await data.blob();
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    const base64data = reader.result;
+                    resolve(base64data);
+                }
+            });
+        }
+
+        let logoSrc = "";
+        try {
+            logoSrc = await getBase64FromUrl(companyLogo);
+        } catch (e) {
+            console.error("Could not load logo", e);
+            logoSrc = companyLogo; // Fallback
+        }
+
+        const stickersHtml = `
+            <div class="sticker-container">
+                ${stickerItems.map(item => `
+                    <div class="sticker">
+                        <div class="header">
+                            <img src="${logoSrc}" alt="Logo" class="logo"/>
+                            <span class="company-name">MOTOROLA</span>
+                        </div>
+                        <div class="content">
+                            <div class="row">
+                                <span class="label">Serial No:</span> 
+                                <span class="value bold">${item.serialNo || 'N/A'}</span>
+                            </div>
+                            <div class="row">
+                                <span class="label">Model:</span> 
+                                <span class="value">${item.model || 'N/A'}</span>
+                            </div>
+                            <div class="row">
+                                <span class="label">Fault:</span> 
+                                <span class="value">${item.faultDescription ? item.faultDescription.substring(0, 50) + (item.faultDescription.length > 50 ? '...' : '') : 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+         `;
+
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print Stickers</title>
+                    <style>
+                        @media print {
+                            @page {
+                                size: A4 portrait;
+                                margin: 10mm;
+                            }
+                            body { margin: 0; }
+                        }
+                        body {
+                            font-family: 'Arial', sans-serif;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .sticker-container {
+                            display: flex;
+                            flex-wrap: wrap;
+                            justify-content: flex-start;
+                            gap: 4mm;
+                        }
+                        .sticker {
+                            width: 90mm; /* Approx half of A4 width minus margins */
+                            height: 48mm;
+                            border: 3px double #000;
+                            box-sizing: border-box;
+                            padding: 5px;
+                            /* margin-bottom: 5px; Removed to rely on gap */
+                            display: flex;
+                            flex-direction: column;
+                            position: relative;
+                            page-break-inside: avoid;
+                        }
+                        .header {
+                            display: flex;
+                            align-items: center;
+                            border-bottom: 2px solid #000;
+                            padding-bottom: 5px;
+                            margin-bottom: 5px;
+                        }
+                        .logo {
+                            height: 30px;
+                            width: 30px;
+                            margin-right: 10px;
+                        }
+                        .company-name {
+                            font-weight: 800;
+                            font-size: 18px;
+                            letter-spacing: 1px;
+                            font-style: italic;
+                        }       
+                        .content {
+                            flex-grow: 1;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 4px;
+                        }
+                        .row {
+                            display: flex;
+                            align-items: baseline;
+                            font-size: 12px;
+                        }
+                        .label {
+                            width: 60px;
+                            font-weight: 600;
+                            color: #333;
+                            flex-shrink: 0;
+                        }
+                        .value {
+                            flex-grow: 1;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                        .value.bold {
+                            font-weight: bold;
+                            font-size: 14px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${stickersHtml}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        }
+                    </script>
+                </body>
+            </html>
+         `);
+        printWindow.document.close();
     };
 
     return (
@@ -444,14 +579,23 @@ export default function UnrepairedPage() {
                                             <div className="rma-identity">
                                                 <div className="rma-id-box">
                                                     <span className="rma-label">RMA Request</span>
-                                                    <span className="rma-value">{rmaItems[0]?.itemRmaNo || rmaNo}</span>
+                                                    <span className="rma-value">{rmaNo || rmaItems[0]?.itemRmaNo}</span>
                                                 </div>
+
+                                                {/* Created By Field */}
+                                                <div className="rma-id-box" style={{ paddingLeft: '16px', borderLeft: '1px solid #f0f0f0' }}>
+                                                    <span className="rma-label">Created By</span>
+                                                    <span className="rma-value" style={{ fontSize: '15px' }}>
+                                                        {rmaItems[0]?.userName || rmaItems[0]?.createdBy || "Unknown"}
+                                                    </span>
+                                                </div>
+
                                                 <Badge count={rmaItems.length} />
                                                 <Tag color={rmaItems[0]?.repairType === "Local Repair" ? "purple" : "orange"}>
                                                     {rmaItems[0]?.repairType || "Standard"}
                                                 </Tag>
                                             </div>
-                                            
+
                                             <div className="rma-actions">
                                                 {rmaItems[0]?.repairType !== "Depot Repair" && (
                                                     <>
@@ -466,9 +610,9 @@ export default function UnrepairedPage() {
                                                         </Button>
                                                     </>
                                                 )}
-                                                <Button 
-                                                    type="primary" 
-                                                    icon={<UserAddOutlined />} 
+                                                <Button
+                                                    type="primary"
+                                                    icon={<UserAddOutlined />}
                                                     onClick={() => openBulkAssignModal(rmaItems[0]?.itemRmaNo || rmaNo, rmaItems)}
                                                     className="assign-all-btn"
                                                 >
@@ -484,14 +628,19 @@ export default function UnrepairedPage() {
                                                 <div className="item-header">
                                                     <span className="item-product">{item.product || "Unknown Product"}</span>
                                                     {!item.itemRmaNo ? (
-                                                        <Button size="small" type="link" icon={<EditOutlined />} onClick={() => openEditRmaModal(item)}>
+                                                        <Button
+                                                            size="small"
+                                                            className="add-rma-btn"
+                                                            icon={<EditOutlined />}
+                                                            onClick={() => openEditRmaModal(item)}
+                                                        >
                                                             Add RMA
                                                         </Button>
                                                     ) : (
                                                         <Tag color="cyan">{item.itemRmaNo}</Tag>
                                                     )}
                                                 </div>
-                                                
+
                                                 <div className="item-details-grid">
                                                     <div className="detail-box">
                                                         <span className="label">Serial No</span>
@@ -509,11 +658,11 @@ export default function UnrepairedPage() {
                                                 </div>
 
                                                 <div className="item-footer">
-                                                    <Button 
-                                                        block 
-                                                        type="primary" 
-                                                        ghost 
-                                                        icon={<UserAddOutlined />} 
+                                                    <Button
+                                                        block
+                                                        type="primary"
+                                                        ghost
+                                                        icon={<UserAddOutlined />}
                                                         onClick={() => openAssignModal(item)}
                                                     >
                                                         Assign Technician
@@ -529,7 +678,7 @@ export default function UnrepairedPage() {
                 </div>
 
                 {/* --- ALL MODALS --- */}
-                
+
                 {/* 1. Assign Modal */}
                 <Modal
                     title="Assign Technician"
@@ -549,7 +698,7 @@ export default function UnrepairedPage() {
                         }
                         onChange={(val) => {
                             const emp = employees.find(e => e.email === val);
-                            if(emp) { setAssigneeEmail(emp.email); setAssigneeName(emp.name); }
+                            if (emp) { setAssigneeEmail(emp.email); setAssigneeName(emp.name); }
                         }}
                         disabled={!isAdmin}
                     >
@@ -578,8 +727,8 @@ export default function UnrepairedPage() {
                             option.children.toLowerCase().includes(input.toLowerCase())
                         }
                         onChange={(val) => {
-                             const emp = employees.find(e => e.email === val);
-                             if(emp) { setAssigneeEmail(emp.email); setAssigneeName(emp.name); }
+                            const emp = employees.find(e => e.email === val);
+                            if (emp) { setAssigneeEmail(emp.email); setAssigneeName(emp.name); }
                         }}
                         disabled={!isAdmin}
                     >
@@ -600,20 +749,14 @@ export default function UnrepairedPage() {
                 >
                     <Form form={dcForm} layout="vertical" onFinish={handleGenerateDC}>
                         <Row gutter={16}>
-                             <Col span={12}>
-                                <Card size="small" title="Consignor">
-                                    <p><strong>Motorola Solutions India</strong></p>
-                                    <p>A, Building 8, DLF</p>
-                                    <p>Gurgaon, Haryana, India</p>
-                                </Card>
-                                <Divider size="small" />
+                            <Col span={12}>
                                 <Card size="small" title="Consignee">
                                     <Form.Item name="consigneeName" label="Name"><Input /></Form.Item>
                                     <Form.Item name="consigneeAddress" label="Address"><Input.TextArea /></Form.Item>
                                     <Form.Item name="gstIn" label="GSTIN"><Input /></Form.Item>
                                 </Card>
-                             </Col>
-                             <Col span={12}>
+                            </Col>
+                            <Col span={12}>
                                 <Card size="small" title="Shipment">
                                     <Row gutter={8}>
                                         <Col span={12}><Form.Item name="boxes" label="Boxes" rules={[{required: true}]}><Input type="number" /></Form.Item></Col>
@@ -632,13 +775,13 @@ export default function UnrepairedPage() {
                                     </Row>
                                     <Form.Item name="dcNo" label="DC Number" rules={[{required: true}]}><Input placeholder="DC Number" /></Form.Item>
                                     <Form.Item name="transporterName" label="Transporter">
-                                        <Select 
-                                            mode="tags" 
+                                        <Select
+                                            mode="tags"
                                             onChange={(val) => {
-                                                const v = Array.isArray(val) ? val[val.length-1] : val;
+                                                const v = Array.isArray(val) ? val[val.length - 1] : val;
                                                 const t = transporters.find(x => x.name === v);
                                                 setIsNewTransporter(!t);
-                                                if(t) dcForm.setFieldValue('transporterId', t.transporterId);
+                                                if (t) dcForm.setFieldValue('transporterId', t.transporterId);
                                             }}
                                         >
                                             {transporters.map(t => <Select.Option key={t.id} value={t.name}>{t.name}</Select.Option>)}
@@ -646,34 +789,34 @@ export default function UnrepairedPage() {
                                     </Form.Item>
                                     <Form.Item name="transporterId" label="Transporter ID"><Input /></Form.Item>
                                 </Card>
-                             </Col>
+                            </Col>
                         </Row>
                         <Divider>Items</Divider>
-                        <Table 
-                            dataSource={dcTableData} 
+                        <Table
+                            dataSource={dcTableData}
                             pagination={false}
                             size="small"
                             columns={[
                                 { title: 'Product', dataIndex: 'product' },
                                 { title: 'Serial', dataIndex: 'serialNo' },
-                                { 
-                                    title: 'Value (₹)', 
-                                    render: (_,__,idx) => (
-                                        <Form.Item name={['items', idx, 'rate']} noStyle rules={[{required: true}]}>
+                                {
+                                    title: 'Value (₹)',
+                                    render: (_, __, idx) => (
+                                        <Form.Item name={['items', idx, 'rate']} noStyle rules={[{ required: true }]}>
                                             <Input type="number" placeholder="0" />
                                         </Form.Item>
-                                    ) 
+                                    )
                                 }
-                            ]} 
+                            ]}
                         />
                     </Form>
                 </Modal>
-                
+
                 {/* 4. Edit RMA Modal */}
-                <Modal 
-                    title="Update RMA Number" 
-                    open={editRmaModalVisible} 
-                    onOk={handleUpdateRma} 
+                <Modal
+                    title="Update RMA Number"
+                    open={editRmaModalVisible}
+                    onOk={handleUpdateRma}
                     onCancel={() => setEditRmaModalVisible(false)}
                     confirmLoading={updatingRma}
                 >
@@ -689,8 +832,8 @@ export default function UnrepairedPage() {
                         <Button key="dl" type="primary" icon={<DownloadOutlined />} onClick={() => handleGenerateGatepass(gatepassRmaNo)}>Download</Button>
                     ]}
                 >
-                    <Table 
-                        dataSource={gatepassItems} 
+                    <Table
+                        dataSource={gatepassItems}
                         size="small"
                         columns={[{ title: 'Product', dataIndex: 'product' }, { title: 'Serial', dataIndex: 'serialNo' }]}
                     />

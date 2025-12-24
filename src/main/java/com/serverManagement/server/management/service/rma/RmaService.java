@@ -1326,6 +1326,9 @@ public class RmaService {
      */
     private List<RmaItemWorkflowDTO> convertToItemDTOList(List<RmaItemEntity> items) {
         List<RmaItemWorkflowDTO> dtoList = new ArrayList<>();
+        // Cache to prevent redundant DB calls for the same user
+        java.util.Map<String, String> userEmailToNameMap = new java.util.HashMap<>();
+
         for (RmaItemEntity item : items) {
             RmaItemWorkflowDTO dto = new RmaItemWorkflowDTO();
             dto.setId(item.getId());
@@ -1364,6 +1367,30 @@ public class RmaService {
             } else {
                 // Fallback for items with missing parent request (Legacy data)
                 dto.setRmaNo(item.getRmaNo());
+            }
+
+            // Populate Created By User Name
+            if (item.getRmaRequest() != null) {
+                String creatorEmail = item.getRmaRequest().getCreatedByEmail();
+                if (creatorEmail != null && !creatorEmail.trim().isEmpty()) {
+                    String lowerEmail = creatorEmail.toLowerCase();
+                    if (userEmailToNameMap.containsKey(lowerEmail)) {
+                        dto.setUserName(userEmailToNameMap.get(lowerEmail));
+                    } else {
+                        try {
+                            AdminUserEntity user = adminUserDAO.findByEmail(lowerEmail);
+                            if (user != null) {
+                                userEmailToNameMap.put(lowerEmail, user.getName());
+                                dto.setUserName(user.getName());
+                            } else {
+                                userEmailToNameMap.put(lowerEmail, "Unknown");
+                                dto.setUserName("Unknown");
+                            }
+                        } catch (Exception e) {
+                            dto.setUserName("Unknown");
+                        }
+                    }
+                }
             }
 
             // Set the item-level RMA number (distinct from parent request number)
