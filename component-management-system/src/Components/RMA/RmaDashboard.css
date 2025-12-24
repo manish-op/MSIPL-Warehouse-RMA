@@ -587,6 +587,18 @@ html[data-theme='dark'] .msipl-sider.theme-purple .ant-menu-item-selected,
   .kpi-card {
     margin-bottom: 8px;
   }
+
+  .msipl-footer {
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    text-align: center;
+    height: auto;
+  }
+
+  .footer-details {
+    display: none;
+  }
 }
 
 /* Mobile Sidebar Close Button (Center Edge) */
