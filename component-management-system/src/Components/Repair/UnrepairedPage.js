@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import {
     Typography,
     Tag,
@@ -130,7 +131,7 @@ export default function UnrepairedPage() {
             }
 
             // Decode token safely to find current user
-            const encodedToken = document.cookie.split("authToken=")[1]?.split(";")[0];
+            const encodedToken = Cookies.get("authToken");
             let userEmail = null;
             if (encodedToken) {
                 try {
@@ -686,7 +687,7 @@ export default function UnrepairedPage() {
                         optionLabelProp="value"
                         showSearch
                         filterOption={(input, option) =>
-                            option.children.toLowerCase().includes(input.toLowerCase())
+                            (option?.children ?? "").toString().toLowerCase().includes(input.toLowerCase())
                         }
                         onChange={(val) => {
                             const emp = employees.find(e => e.email === val);
@@ -695,7 +696,7 @@ export default function UnrepairedPage() {
                         disabled={!isAdmin}
                     >
                         {(isAdmin ? employees : (currentUser ? [currentUser] : [])).map(e => (
-                            <Select.Option key={e.email} value={e.email}>{e.name} ({e.email})</Select.Option>
+                            <Select.Option key={e.email} value={e.email}>{`${e.name} (${e.email})`}</Select.Option>
                         ))}
                     </Select>
                 </Modal>
@@ -716,7 +717,7 @@ export default function UnrepairedPage() {
                         optionLabelProp="value"
                         showSearch
                         filterOption={(input, option) =>
-                            option.children.toLowerCase().includes(input.toLowerCase())
+                            (option?.children ?? "").toString().toLowerCase().includes(input.toLowerCase())
                         }
                         onChange={(val) => {
                             const emp = employees.find(e => e.email === val);
@@ -725,7 +726,7 @@ export default function UnrepairedPage() {
                         disabled={!isAdmin}
                     >
                         {(isAdmin ? employees : (currentUser ? [currentUser] : [])).map(e => (
-                            <Select.Option key={e.email} value={e.email}>{e.name} ({e.email})</Select.Option>
+                            <Select.Option key={e.email} value={e.email}>{`${e.name} (${e.email})`}</Select.Option>
                         ))}
                     </Select>
                 </Modal>

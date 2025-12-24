@@ -32,7 +32,6 @@ import {
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA/RmaCreateAPI";
 import { URL } from "../API/URL";
-import Cookies from "js-cookie";
 import RmaLayout from "../RMA/RmaLayout";
 import "./UnrepairedPage.css"; // Uses the shared modern CSS
 import BERCertificateForm from "./BERCertificateForm";
