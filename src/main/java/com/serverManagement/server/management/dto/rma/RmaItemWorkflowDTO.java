@@ -47,6 +47,10 @@ public class RmaItemWorkflowDTO {
     private String deliveryNotes;
     private Boolean isDelivered; // Simple flag to check if delivery confirmed
 
+    // Pre-fill fields for DC
+    private String returnAddress;
+    private String gstin;
+
     // Getters and Setters
     public String getLastReassignmentReason() {
         return lastReassignmentReason;
@@ -302,6 +306,22 @@ public class RmaItemWorkflowDTO {
 
     public void setIsDelivered(Boolean isDelivered) {
         this.isDelivered = isDelivered;
+    }
+
+    public String getReturnAddress() {
+        return returnAddress;
+    }
+
+    public void setReturnAddress(String returnAddress) {
+        this.returnAddress = returnAddress;
+    }
+
+    public String getGstin() {
+        return gstin;
+    }
+
+    public void setGstin(String gstin) {
+        this.gstin = gstin;
     }
 
     public ZonedDateTime getDepotReturnDispatchDate() {

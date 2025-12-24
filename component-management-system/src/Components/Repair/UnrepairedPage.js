@@ -93,13 +93,17 @@ export default function UnrepairedPage() {
     // --- Load Data ---
     const fetchTransporters = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/transporters`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            const result = await RmaApi.getAllTransporters();
+            let allTransporters = result.success ? (result.data || []) : [];
+            
+            // Merge with predefined ones if not already in the database
+            Object.entries(PREDEFINED_TRANSPORTERS).forEach(([name, tid]) => {
+                if (!allTransporters.find(t => t.name === name)) {
+                    allTransporters.push({ id: `pre-${name}`, name, transporterId: tid });
+                }
             });
-            if (response.ok) {
-                const data = await response.json();
-                setTransporters(data);
-            }
+
+            setTransporters(allTransporters);
         } catch (error) {
             console.error("Failed to fetch transporters", error);
         }
@@ -305,7 +309,7 @@ export default function UnrepairedPage() {
     };
 
     // 5. Delivery Challan (Fixed)
-    const openDcModal = (rmaItems, rmaNo) => {
+    const openDcModal = async (rmaItems, rmaNo) => {
         const status = checkRmaStatus(rmaItems);
         if (!status.hasAnyRma) {
             message.warning("RMA Number is required to generate a Delivery Challan.");
@@ -328,10 +332,25 @@ export default function UnrepairedPage() {
         setDcTableData(tableData);
         
         dcForm.resetFields();
+
+        // Fetch Next DC Number
+        let nextDcNo = "";
+        try {
+            const res = await RmaApi.getNextDcNo();
+            if (res.success && res.data && res.data.dcNo) {
+                nextDcNo = res.data.dcNo;
+            }
+        } catch (error) {
+            console.error("Failed to fetch next DC No", error);
+        }
+
         dcForm.setFieldsValue({
             modeOfShipment: "ROAD",
             boxes: "1",
-            transporterName: []
+            consigneeName: rmaItems[0]?.companyName || "",
+            consigneeAddress: rmaItems[0]?.returnAddress || "",
+            transporterName: [],
+            dcNo: nextDcNo
         });
         setDcModalVisible(true);
     };
@@ -582,6 +601,12 @@ export default function UnrepairedPage() {
                     <Form form={dcForm} layout="vertical" onFinish={handleGenerateDC}>
                         <Row gutter={16}>
                              <Col span={12}>
+                                <Card size="small" title="Consignor">
+                                    <p><strong>Motorola Solutions India</strong></p>
+                                    <p>A, Building 8, DLF</p>
+                                    <p>Gurgaon, Haryana, India</p>
+                                </Card>
+                                <Divider size="small" />
                                 <Card size="small" title="Consignee">
                                     <Form.Item name="consigneeName" label="Name"><Input /></Form.Item>
                                     <Form.Item name="consigneeAddress" label="Address"><Input.TextArea /></Form.Item>
@@ -591,9 +616,21 @@ export default function UnrepairedPage() {
                              <Col span={12}>
                                 <Card size="small" title="Shipment">
                                     <Row gutter={8}>
-                                        <Col span={12}><Form.Item name="boxes" label="Boxes"><Input type="number" /></Form.Item></Col>
+                                        <Col span={12}><Form.Item name="boxes" label="Boxes" rules={[{required: true}]}><Input type="number" /></Form.Item></Col>
                                         <Col span={12}><Form.Item name="weight" label="Weight"><Input /></Form.Item></Col>
                                     </Row>
+                                    <Row gutter={8}>
+                                        <Col span={12}><Form.Item name="dimensions" label="Dimensions"><Input /></Form.Item></Col>
+                                        <Col span={12}>
+                                            <Form.Item name="modeOfShipment" label="Mode">
+                                                <Select>
+                                                    <Select.Option value="ROAD">ROAD</Select.Option>
+                                                    <Select.Option value="AIR">AIR</Select.Option>
+                                                </Select>
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Form.Item name="dcNo" label="DC Number" rules={[{required: true}]}><Input placeholder="DC Number" /></Form.Item>
                                     <Form.Item name="transporterName" label="Transporter">
                                         <Select 
                                             mode="tags" 
