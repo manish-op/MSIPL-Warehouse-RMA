@@ -76,7 +76,7 @@ function Header({ onToggleSidebar }) {
             trigger={['click']}
           >
             <button className="header-btn">
-              <span style={{ marginRight: 8 }}>More</span>
+              <span style={{ marginRight: 8 }}></span>
               <FaBars /> {/* Using Bars or ChevronDown */}
             </button>
           </Dropdown>
