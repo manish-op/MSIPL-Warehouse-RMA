@@ -66,6 +66,11 @@ public class JWTUtils {
 		return doGenerateToken(claims, userDetails.getUsername());
 	}
 
+	// generate token with custom claims
+	public String generateToken(UserDetails userDetails, Map<String, Object> claims) {
+		return doGenerateToken(claims, userDetails.getUsername());
+	}
+
 	private String doGenerateToken(Map<String, Object> claims, String subject) {
 
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))

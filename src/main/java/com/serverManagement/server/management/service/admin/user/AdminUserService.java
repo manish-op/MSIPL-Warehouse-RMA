@@ -54,8 +54,8 @@ public class AdminUserService {
 		this.regionDAO = regionDAO;
 	}
 
-//	@Value("${contact_us_email}")
-//	private String sendMailId;
+	// @Value("${contact_us_email}")
+	// private String sendMailId;
 
 	public ResponseEntity<?> createAdminUser(HttpServletRequest request, AddUserRequest requestUser) throws Exception {
 
@@ -89,10 +89,10 @@ public class AdminUserService {
 					if (password != null && password.length() > 0) {
 						password = passwordEncoder.encode(password);
 					} else {
-//				password = generateRandomPassword();
-//				String mailBody = "Your account is created and password is - " + password;
-// 				sendMail("Password", requestUser.getEmail(), mailBody);
-//				password = passwordEncoder.encode(password);
+						// password = generateRandomPassword();
+						// String mailBody = "Your account is created and password is - " + password;
+						// sendMail("Password", requestUser.getEmail(), mailBody);
+						// password = passwordEncoder.encode(password);
 						return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 								.body("Password not provided, it's required");
 					}
@@ -171,63 +171,64 @@ public class AdminUserService {
 				}
 
 			}
-		}catch(NullValueException e) {
+		} catch (NullValueException e) {
 			e.printStackTrace();
 			throw e;
-		}catch(DuplicateValueException e) {
+		} catch (DuplicateValueException e) {
 			e.printStackTrace();
 			throw e;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new Exception("Something Went Wrong");
 		}
-		
 
 	}
 
-//
-//	public ResponseEntity<?> getUserList(HttpServletRequest requestServlet, int pageNo, int noOfRecord,
-//			String searchKey, String role) throws Exception {
-//
-//		String loggedInUserName = requestServlet.getUserPrincipal().getName();
-//		if (loggedInUserName != null && loggedInUserName.length() > 0) {
-//			AdminUserModel userModel = adminUserDAO.findByEmail(loggedInUserName);
-//			if (userModel == null) {
-//				throw new Exception("User not logged In");
-//			}
-//		}
-//
-//		String message = "";
-//		String statusCode = "";
-//		List<AdminUserModel> userList = new ArrayList<AdminUserModel>();
-//		AdminUserResponse response;
-//		try {
-//
-//			Pageable pageRequest = PageRequest.of(pageNo, noOfRecord);
-//
-//			Page<AdminUserEntity> userListPage;
-//			if (searchKey != null && searchKey.length() > 0) {
-//				userListPage = adminUserDAO.getUserList(searchKey, pageRequest);
-//				userList.addAll(userListPage.getContent());
-//			} else {
-//				userListPage = adminUserDAO.getUserList(pageRequest);
-//				userList.addAll(userListPage.getContent());
-//			}
-//
-//			statusCode = "200 ok";
-//			message = "User Details Fetch Successfully";
-//
-//			PageDetails pageDetails = new PageDetails(pageNo, noOfRecord, userListPage.getTotalPages(),
-//					userListPage.getTotalElements());
-//
-//			response = new AdminUserResponse(message, statusCode, userList, pageDetails);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			throw e;
-//		}
-//
-//		return response;
-//	}
+	//
+	// public ResponseEntity<?> getUserList(HttpServletRequest requestServlet, int
+	// pageNo, int noOfRecord,
+	// String searchKey, String role) throws Exception {
+	//
+	// String loggedInUserName = requestServlet.getUserPrincipal().getName();
+	// if (loggedInUserName != null && loggedInUserName.length() > 0) {
+	// AdminUserModel userModel = adminUserDAO.findByEmail(loggedInUserName);
+	// if (userModel == null) {
+	// throw new Exception("User not logged In");
+	// }
+	// }
+	//
+	// String message = "";
+	// String statusCode = "";
+	// List<AdminUserModel> userList = new ArrayList<AdminUserModel>();
+	// AdminUserResponse response;
+	// try {
+	//
+	// Pageable pageRequest = PageRequest.of(pageNo, noOfRecord);
+	//
+	// Page<AdminUserEntity> userListPage;
+	// if (searchKey != null && searchKey.length() > 0) {
+	// userListPage = adminUserDAO.getUserList(searchKey, pageRequest);
+	// userList.addAll(userListPage.getContent());
+	// } else {
+	// userListPage = adminUserDAO.getUserList(pageRequest);
+	// userList.addAll(userListPage.getContent());
+	// }
+	//
+	// statusCode = "200 ok";
+	// message = "User Details Fetch Successfully";
+	//
+	// PageDetails pageDetails = new PageDetails(pageNo, noOfRecord,
+	// userListPage.getTotalPages(),
+	// userListPage.getTotalElements());
+	//
+	// response = new AdminUserResponse(message, statusCode, userList, pageDetails);
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// throw e;
+	// }
+	//
+	// return response;
+	// }
 
 	public ResponseEntity<?> adminLogin(LoginRequest request) throws Exception {
 
@@ -255,7 +256,8 @@ public class AdminUserService {
 			try {
 
 				authenticationManager.authenticate(
-						new UsernamePasswordAuthenticationToken(request.getEmail().toLowerCase(), request.getPassword()));
+						new UsernamePasswordAuthenticationToken(request.getEmail().toLowerCase(),
+								request.getPassword()));
 			} catch (BadCredentialsException e) {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
 			} catch (UsernameNotFoundException e) {
@@ -265,7 +267,7 @@ public class AdminUserService {
 			}
 			UserDetails userDetails = loginService.loadUserByUsername(request.getEmail());
 			AdminUserEntity adminUserModel = adminUserDAO.findByEmail(request.getEmail());
-			authToken = jwtUtil.generateToken(userDetails);
+
 			role = adminUserModel.getRoleModel().getRoleName().toLowerCase();
 			name = adminUserModel.getName().toUpperCase();
 			email = adminUserModel.getEmail().toLowerCase();
@@ -275,6 +277,14 @@ public class AdminUserService {
 					region = adminUserModel.getRegionEntity().getCity().toUpperCase();
 				}
 			}
+
+			// Add claims to token
+			java.util.Map<String, Object> claims = new java.util.HashMap<>();
+			claims.put("role", role);
+			claims.put("region", region); // region might be empty string if admin or not assigned, fits logic
+
+			authToken = jwtUtil.generateToken(userDetails, claims);
+
 			message = "Logged in Successfully";
 
 		} catch (Exception e) {
@@ -306,36 +316,37 @@ public class AdminUserService {
 		}
 	}
 
-//	private String generateRandomPassword() {
-//
-//		String lowerCaseText = "abcdefghijklmnopqrstuvwxyz";
-//		String upperCaseText = lowerCaseText.toUpperCase();
-//		String digit = "0123456789";
-//
-//		String password = lowerCaseText + upperCaseText + digit;
-//		SecureRandom random = new SecureRandom();
-//
-//		StringBuilder sb = new StringBuilder(15);
-//		for (int indexCount = 0; indexCount < 15; indexCount++) {
-//			int charPosition = random.nextInt(password.length());
-//			char passwordChar = password.charAt(charPosition);
-//
-//			sb.append(passwordChar);
-//		}
-//		return sb.toString();
-//	}
+	// private String generateRandomPassword() {
+	//
+	// String lowerCaseText = "abcdefghijklmnopqrstuvwxyz";
+	// String upperCaseText = lowerCaseText.toUpperCase();
+	// String digit = "0123456789";
+	//
+	// String password = lowerCaseText + upperCaseText + digit;
+	// SecureRandom random = new SecureRandom();
+	//
+	// StringBuilder sb = new StringBuilder(15);
+	// for (int indexCount = 0; indexCount < 15; indexCount++) {
+	// int charPosition = random.nextInt(password.length());
+	// char passwordChar = password.charAt(charPosition);
+	//
+	// sb.append(passwordChar);
+	// }
+	// return sb.toString();
+	// }
 
-//	public void sendMail(String subject, String sendTOEmail, String mailBody) throws Exception {
-//		MimeMessage message = emailSender.createMimeMessage();
-//		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-//
-//		helper.setFrom(sendMailId);
-//		helper.setTo(sendTOEmail);
-//		helper.setSubject(subject);
-//		helper.setText(mailBody, true);
-//
-//		emailSender.send(message);
-//	}
+	// public void sendMail(String subject, String sendTOEmail, String mailBody)
+	// throws Exception {
+	// MimeMessage message = emailSender.createMimeMessage();
+	// MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+	//
+	// helper.setFrom(sendMailId);
+	// helper.setTo(sendTOEmail);
+	// helper.setSubject(subject);
+	// helper.setText(mailBody, true);
+	//
+	// emailSender.send(message);
+	// }
 
 	public ResponseEntity<?> changePassword(HttpServletRequest requestServlet, PasswordRequest requestBody)
 			throws Exception {
@@ -419,9 +430,9 @@ public class AdminUserService {
 			}
 		}
 		String role = userModel.getRoleModel().getRoleName().toLowerCase();
-		
+
 		if (role.equals("admin")) {
-			if (email == null || (email!=null && email.trim().length()<=0)) {
+			if (email == null || (email != null && email.trim().length() <= 0)) {
 				return ResponseEntity.status(HttpStatus.CONFLICT).body("Email id required");
 			}
 			if (email.toLowerCase().equals(loggedInUserName.toLowerCase())) {
@@ -431,14 +442,14 @@ public class AdminUserService {
 				AdminUserEntity adminModel = adminUserDAO.findByEmail(email);
 				if (adminModel == null) {
 					return ResponseEntity.status(HttpStatus.NOT_FOUND).body("user not register with this Email");
-				}else {
-				if(adminModel.getRoleModel()!=null) {
-					if(adminModel.getRoleModel().getRoleName().toLowerCase().equals("admin")) {
-						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No one can delete admin user");
+				} else {
+					if (adminModel.getRoleModel() != null) {
+						if (adminModel.getRoleModel().getRoleName().toLowerCase().equals("admin")) {
+							return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No one can delete admin user");
+						}
 					}
-				}
-				adminUserDAO.delete(adminModel);
-				return ResponseEntity.status(HttpStatus.OK).body("delete successfully");
+					adminUserDAO.delete(adminModel);
+					return ResponseEntity.status(HttpStatus.OK).body("delete successfully");
 				}
 
 			} catch (Exception e) {
@@ -472,64 +483,75 @@ public class AdminUserService {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
 			}
 		}
-		if(adminModel.getRoleModel()==null) {
+		if (adminModel.getRoleModel() == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No Role assign to you, contact to admin");
 		}
 		String role = adminModel.getRoleModel().getRoleName().toLowerCase();
 
-		if (role.equals("admin") || role.equals("manager")){
-			if (passRequestBody == null || passRequestBody.getEmpEmail() == null || (passRequestBody.getEmpEmail()!=null && passRequestBody.getEmpEmail().trim().length()<=0)
-					|| (passRequestBody.getNewPassword() != null && passRequestBody.getNewPassword().trim().length() <=0)) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide all field, Like Employee Emial and new Password");
+		if (role.equals("admin") || role.equals("manager")) {
+			if (passRequestBody == null || passRequestBody.getEmpEmail() == null
+					|| (passRequestBody.getEmpEmail() != null && passRequestBody.getEmpEmail().trim().length() <= 0)
+					|| (passRequestBody.getNewPassword() != null
+							&& passRequestBody.getNewPassword().trim().length() <= 0)) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body("Please provide all field, Like Employee Emial and new Password");
 			}
 			try {
 				AdminUserEntity userModel = adminUserDAO.findByEmail(passRequestBody.getEmpEmail().toLowerCase());
 				if (userModel != null) {
-					if(userModel.getRoleModel().getRoleName()==null || adminModel.getRoleModel().getRoleName()!=null && adminModel.getRoleModel().getRoleName().trim().length()<=0) {
-						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No role assign to this user, First contact to admin to assign a role");
+					if (userModel.getRoleModel().getRoleName() == null
+							|| adminModel.getRoleModel().getRoleName() != null
+									&& adminModel.getRoleModel().getRoleName().trim().length() <= 0) {
+						return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+								.body("No role assign to this user, First contact to admin to assign a role");
 					}
-					String employeeRole=userModel.getRoleModel().getRoleName().toLowerCase();
+					String employeeRole = userModel.getRoleModel().getRoleName().toLowerCase();
 					if (employeeRole.equals("admin")) {
 						return ResponseEntity.status(HttpStatus.FORBIDDEN)
 								.body("admin password can not changed by this panel");
-					}else if(employeeRole.equals(role)){
-						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You can not change any employee password, Who is equals to your Role");
-					}else {
-						if(role.equals("manager")) {
-							if(adminModel.getRegionEntity()==null) {
-								return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No region Assign to you, contact to admin");
-						}else {
-							if(userModel.getRegionEntity()==null) {
-								return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No region Assign to this Employee, contact to admin");
-							}else if(!adminModel.getRegionEntity().equals(userModel.getRegionEntity())) {
-								return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This employee not belonging to your region");
-							}else {
-								//blank not need to do any thing
+					} else if (employeeRole.equals(role)) {
+						return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+								.body("You can not change any employee password, Who is equals to your Role");
+					} else {
+						if (role.equals("manager")) {
+							if (adminModel.getRegionEntity() == null) {
+								return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+										.body("No region Assign to you, contact to admin");
+							} else {
+								if (userModel.getRegionEntity() == null) {
+									return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+											.body("No region Assign to this Employee, contact to admin");
+								} else if (!adminModel.getRegionEntity().equals(userModel.getRegionEntity())) {
+									return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+											.body("This employee not belonging to your region");
+								} else {
+									// blank not need to do any thing
+								}
 							}
 						}
-					}
-					String newPassword= passwordEncoder.encode(passRequestBody.getNewPassword());
-					userModel.setPassword(newPassword);
-					userModel = adminUserDAO.save(userModel);
-					if (userModel != null) {
-						return ResponseEntity.status(HttpStatus.OK).body("Employee Password Changed SuccessFully");
-					} else {
-						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
-					}
+						String newPassword = passwordEncoder.encode(passRequestBody.getNewPassword());
+						userModel.setPassword(newPassword);
+						userModel = adminUserDAO.save(userModel);
+						if (userModel != null) {
+							return ResponseEntity.status(HttpStatus.OK).body("Employee Password Changed SuccessFully");
+						} else {
+							return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
+						}
 					}
 				} else {
 
 					return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not register with this Email");
 				}
-				}catch (Exception e) {
-					e.printStackTrace();
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
-				}
-			
+			} catch (Exception e) {
+				e.printStackTrace();
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
+			}
+
 		} else {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only ADMIN or Manager can change Employee password");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body("Only ADMIN or Manager can change Employee password");
 		}
-	
-		}
+
+	}
 
 }
