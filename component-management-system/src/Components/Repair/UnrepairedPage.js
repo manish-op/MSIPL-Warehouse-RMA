@@ -307,7 +307,7 @@ export default function UnrepairedPage() {
     };
 
     // 5. Delivery Challan (Fixed)
-    const openDcModal = (rmaItems, rmaNo) => {
+    const openDcModal = async (rmaItems, rmaNo) => {
         const status = checkRmaStatus(rmaItems);
         if (!status.hasAnyRma) {
             message.warning("RMA Number is required to generate a Delivery Challan.");
@@ -330,10 +330,25 @@ export default function UnrepairedPage() {
         setDcTableData(tableData);
 
         dcForm.resetFields();
+
+        // Fetch Next DC Number
+        let nextDcNo = "";
+        try {
+            const res = await RmaApi.getNextDcNo();
+            if (res.success && res.data && res.data.dcNo) {
+                nextDcNo = res.data.dcNo;
+            }
+        } catch (error) {
+            console.error("Failed to fetch next DC No", error);
+        }
+
         dcForm.setFieldsValue({
             modeOfShipment: "ROAD",
             boxes: "1",
-            transporterName: []
+            consigneeName: rmaItems[0]?.companyName || "",
+            consigneeAddress: rmaItems[0]?.returnAddress || "",
+            transporterName: [],
+            dcNo: nextDcNo
         });
         setDcModalVisible(true);
     };
@@ -752,35 +767,32 @@ export default function UnrepairedPage() {
                             <Col span={12}>
                                 <Card size="small" title="Shipment">
                                     <Row gutter={8}>
-                                        <Col span={12}><Form.Item name="boxes" label="Boxes"><Input type="number" /></Form.Item></Col>
+                                        <Col span={12}><Form.Item name="boxes" label="Boxes" rules={[{required: true}]}><Input type="number" /></Form.Item></Col>
                                         <Col span={12}><Form.Item name="weight" label="Weight"><Input /></Form.Item></Col>
                                     </Row>
-                                    <Form.Item name="modeOfShipment" label="Mode of Shipment" initialValue="ROAD">
-                                        <Select>
-                                            <Select.Option value="ROAD">Road</Select.Option>
-                                            <Select.Option value="AIR">Air</Select.Option>
-
-                                            <Select.Option value="COURIER">Courier</Select.Option>
-                                            <Select.Option value="HAND">Hand Delivery</Select.Option>
-                                        </Select>
-                                    </Form.Item>
+                                    <Row gutter={8}>
+                                        <Col span={12}><Form.Item name="dimensions" label="Dimensions"><Input /></Form.Item></Col>
+                                        <Col span={12}>
+                                            <Form.Item name="modeOfShipment" label="Mode">
+                                                <Select>
+                                                    <Select.Option value="ROAD">ROAD</Select.Option>
+                                                    <Select.Option value="AIR">AIR</Select.Option>
+                                                </Select>
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Form.Item name="dcNo" label="DC Number" rules={[{required: true}]}><Input placeholder="DC Number" /></Form.Item>
                                     <Form.Item name="transporterName" label="Transporter">
                                         <Select
                                             mode="tags"
-                                            placeholder="Select or Type Transporter"
                                             onChange={(val) => {
-                                                // Handle single selection from tags mode
                                                 const v = Array.isArray(val) ? val[val.length - 1] : val;
                                                 const t = transporters.find(x => x.name === v);
                                                 setIsNewTransporter(!t);
-                                                if (t) {
-                                                    dcForm.setFieldValue('transporterId', t.transporterId);
-                                                } else {
-                                                    dcForm.setFieldValue('transporterId', '');
-                                                }
+                                                if (t) dcForm.setFieldValue('transporterId', t.transporterId);
                                             }}
                                         >
-                                            {transporters.map(t => <Select.Option key={t.id || t.name} value={t.name}>{t.name}</Select.Option>)}
+                                            {transporters.map(t => <Select.Option key={t.id} value={t.name}>{t.name}</Select.Option>)}
                                         </Select>
                                     </Form.Item>
                                     <Form.Item name="transporterId" label="Transporter ID"><Input /></Form.Item>

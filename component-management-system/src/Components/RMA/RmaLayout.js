@@ -258,11 +258,11 @@ const RmaLayout = ({ children }) => {
           <Content className="msipl-content">{children}</Content>
 
           <Footer className="msipl-footer">
-            <span className="footer-company">Motorola Solutions India Pvt Ltd</span>
-            <span className="footer-details">📍 Address: Gurgaon, Haryana, India</span>
-            <span className="footer-details">📞 Contact: 01244192000</span>
-            <span className="footer-details">About</span>
-            <span className="footer-details">Help</span>
+            <span>Motorola Solutions India Pvt Ltd</span>
+            <span>📍 Address: Gurgaon, Haryana, India</span>
+            <span>📞 Contact: 01244192000</span>
+            <span>About</span>
+            <span>Help</span>
           </Footer>
         </Layout>
       </Layout>

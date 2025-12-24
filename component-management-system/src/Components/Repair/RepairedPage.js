@@ -41,9 +41,8 @@ import "./UnrepairedPage.css"; // Ensures styles match the previous page
 const { Title, Text, Paragraph } = Typography;
 
 const PREDEFINED_TRANSPORTERS = {
-    "BlueDart": "BD001",
-    "DTDC": "DT001",
-    "Delhivery": "DL001"
+    "Blue Dart Express": "27AAACB0446L1ZS",
+    "Safe Express": "27AAECS4363H2Z7"
 };
 
 export default function RepairedPage() {
@@ -120,9 +119,20 @@ export default function RepairedPage() {
     };
 
     const fetchTransporters = async () => {
-        const result = await RmaApi.getAllTransporters();
-        if (result.success) {
-            setTransporters(result.data);
+        try {
+            const result = await RmaApi.getAllTransporters();
+            let allTransporters = result.success ? (result.data || []) : [];
+            
+            // Merge with predefined ones if not already in the database
+            Object.entries(PREDEFINED_TRANSPORTERS).forEach(([name, tid]) => {
+                if (!allTransporters.find(t => t.name === name)) {
+                    allTransporters.push({ id: `pre-${name}`, name, transporterId: tid });
+                }
+            });
+
+            setTransporters(allTransporters);
+        } catch (error) {
+            console.error("Failed to fetch transporters", error);
         }
     };
 
@@ -157,12 +167,12 @@ export default function RepairedPage() {
             console.error("Failed to fetch next DC No", error);
         }
 
-        const customerDetails = rmaItems[0]?.rmaRequest;
+        const firstItem = rmaItems[0];
         dcForm.setFieldsValue({
             modeOfShipment: "ROAD",
             boxes: "1",
-            consigneeName: customerDetails?.companyName || "",
-            consigneeAddress: customerDetails?.returnAddress || "",
+            consigneeName: firstItem?.companyName || "",
+            consigneeAddress: firstItem?.returnAddress || "",
             dcNo: nextDcNo // Auto-fill DC Number
         });
 
