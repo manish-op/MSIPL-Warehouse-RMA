@@ -23,7 +23,7 @@ import {
     BarcodeOutlined,
     InfoCircleOutlined
 } from "@ant-design/icons";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
 import RmaLayout from "../RMA/RmaLayout";
 import Cookies from "js-cookie";
 import "./UnrepairedPage.css"; // Ensure this contains the modern CSS classes
@@ -254,7 +254,7 @@ export default function CantBeRepairedPage() {
                                         </div>
                                     }
                                 >
-                                    
+
                                     {/* MODERN CARD GRID LAYOUT */}
                                     <div className="rma-items-grid">
                                         {rmaItems.map((item) => (
@@ -268,7 +268,7 @@ export default function CantBeRepairedPage() {
                                                 {/* Details Grid */}
                                                 <div className="item-details-grid">
                                                     <div className="detail-box">
-                                                        <span className="label"><BarcodeOutlined/> Serial No</span>
+                                                        <span className="label"><BarcodeOutlined /> Serial No</span>
                                                         <span className="value monospace">{item.serialNo || "N/A"}</span>
                                                     </div>
                                                     <div className="detail-box">
@@ -289,10 +289,10 @@ export default function CantBeRepairedPage() {
 
                                                 {/* Footer Actions */}
                                                 <div className="item-footer">
-                                                    <Button 
-                                                        type="primary" 
-                                                        block 
-                                                        icon={<SwapOutlined />} 
+                                                    <Button
+                                                        type="primary"
+                                                        block
+                                                        icon={<SwapOutlined />}
                                                         onClick={() => handleProcessClick(item)}
                                                     >
                                                         Process Replacement
@@ -320,7 +320,7 @@ export default function CantBeRepairedPage() {
                     width={700} // Wider for logic table
                 >
                     <div style={{ padding: '10px 0' }}>
-                    <div className="fault-box" style={{margin: '0 0 24px 0'}}>
+                        <div className="fault-box" style={{ margin: '0 0 24px 0' }}>
                             <Text strong>Action: Replacement</Text><br />
                             <Text type="secondary">Original Item from RMA <strong>{selectedItem.rmaNo}</strong> (Model: {selectedItem.modelNo}) will be marked as REPLACED.</Text>
                         </div>

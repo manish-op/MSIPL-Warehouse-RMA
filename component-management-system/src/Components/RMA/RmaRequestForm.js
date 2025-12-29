@@ -34,7 +34,7 @@ import {
 import RmaLayout from "./RmaLayout";
 import "./RmaRequestForm.css";
 import { useNavigate } from "react-router-dom";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
 import { exportRmaToExcel } from "./RmaExcelExport";
 
 const { TextArea } = Input;

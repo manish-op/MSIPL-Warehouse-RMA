@@ -23,7 +23,7 @@ import {
     SwapOutlined,
     FilterOutlined,
 } from "@ant-design/icons";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
 import RmaLayout from "./RmaLayout";
 import "./AuditTrail.css";
 

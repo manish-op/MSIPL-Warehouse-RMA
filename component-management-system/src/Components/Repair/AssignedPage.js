@@ -30,7 +30,7 @@ import {
     CheckCircleOutlined,
     DownOutlined
 } from "@ant-design/icons";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
 import RmaLayout from "../RMA/RmaLayout";
 import "./UnrepairedPage.css"; // Uses the shared modern CSS
 import BERCertificateForm from "./BERCertificateForm";
@@ -163,7 +163,7 @@ export default function AssignedPage() {
             loadItems();
 
             //if status is BER
-            if(newStatus === "BER"){
+            if (newStatus === "BER") {
                 setBerProductData({
                     customer: selectedItem.customerName || selectedItem.customer || "",
                     consignee: selectedItem.consignee || "",
@@ -306,7 +306,7 @@ export default function AssignedPage() {
                                     <div className="rma-items-grid">
                                         {rmaItems.map((item) => (
                                             <div key={item.id} className="rma-item-card-modern">
-                                                
+
                                                 {/* Header Strip */}
                                                 <div className="item-header">
                                                     <span className="item-product">
@@ -320,7 +320,7 @@ export default function AssignedPage() {
                                                 {/* Details Grid */}
                                                 <div className="item-details-grid">
                                                     <div className="detail-box">
-                                                        <span className="label"><BarcodeOutlined/> Serial No</span>
+                                                        <span className="label"><BarcodeOutlined /> Serial No</span>
                                                         <span className="value monospace">{item.serialNo || "N/A"}</span>
                                                     </div>
                                                     <div className="detail-box">
@@ -328,12 +328,12 @@ export default function AssignedPage() {
                                                         <span className="value">{item.model || "N/A"}</span>
                                                     </div>
                                                     <div className="detail-box">
-                                                        <span className="label"><UserOutlined/> Technician</span>
+                                                        <span className="label"><UserOutlined /> Technician</span>
                                                         <span className="value">{item.assignedToName || "N/A"}</span>
                                                     </div>
                                                     <div className="detail-box">
                                                         <span className="label">RMA No</span>
-                                                        {item.itemRmaNo ? <Tag color="blue">{item.itemRmaNo}</Tag> : <Text type="secondary" style={{fontSize:'11px'}}>None</Text>}
+                                                        {item.itemRmaNo ? <Tag color="blue">{item.itemRmaNo}</Tag> : <Text type="secondary" style={{ fontSize: '11px' }}>None</Text>}
                                                     </div>
                                                 </div>
 
@@ -341,30 +341,30 @@ export default function AssignedPage() {
                                                 <div className="fault-box">
                                                     <span className="label">Fault Description</span>
                                                     <p className="fault-desc">{item.faultDescription || "No description provided."}</p>
-                                                    
+
                                                     {item.lastReassignmentReason && (
-                                                        <div style={{marginTop: '8px', borderTop: '1px dashed var(--border-split)', paddingTop: '4px'}}>
+                                                        <div style={{ marginTop: '8px', borderTop: '1px dashed var(--border-split)', paddingTop: '4px' }}>
                                                             <span className="label">Reassign Reason</span>
-                                                            <p className="fault-desc" style={{fontStyle: 'italic'}}>{item.lastReassignmentReason}</p>
+                                                            <p className="fault-desc" style={{ fontStyle: 'italic' }}>{item.lastReassignmentReason}</p>
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Footer Actions */}
-                                                <div className="item-footer" style={{display:'flex', gap:'8px'}}>
-                                                    <Button 
-                                                        type="primary" 
-                                                        block 
+                                                <div className="item-footer" style={{ display: 'flex', gap: '8px' }}>
+                                                    <Button
+                                                        type="primary"
+                                                        block
                                                         size="small"
-                                                        icon={<EditOutlined />} 
+                                                        icon={<EditOutlined />}
                                                         onClick={() => openStatusModal(item)}
                                                     >
                                                         Update
                                                     </Button>
-                                                    <Button 
-                                                        block 
+                                                    <Button
+                                                        block
                                                         size="small"
-                                                        icon={<UserSwitchOutlined />} 
+                                                        icon={<UserSwitchOutlined />}
                                                         onClick={() => openReassignModal(item)}
                                                     >
                                                         Reassign
@@ -404,20 +404,20 @@ export default function AssignedPage() {
                         </Button>
                     ]}
                 >
-                    <div className="fault-box" style={{margin: '0 0 16px 0'}}>
+                    <div className="fault-box" style={{ margin: '0 0 16px 0' }}>
                         <Row gutter={16}>
                             <Col span={12}>
-                                <Text type="secondary" style={{fontSize: '12px'}}>Product</Text>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>Product</Text>
                                 <div><Text strong>{selectedItem?.product}</Text></div>
                             </Col>
                             <Col span={12}>
-                                <Text type="secondary" style={{fontSize: '12px'}}>Technician</Text>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>Technician</Text>
                                 <div><Text strong>{selectedItem?.assignedToName}</Text></div>
                             </Col>
                         </Row>
-                        <div style={{marginTop: '8px'}}>
-                            <Text type="secondary" style={{fontSize: '12px'}}>Fault</Text>
-                            <Paragraph style={{margin:0, fontSize: '13px'}} ellipsis={{rows:2}}>{selectedItem?.faultDescription}</Paragraph>
+                        <div style={{ marginTop: '8px' }}>
+                            <Text type="secondary" style={{ fontSize: '12px' }}>Fault</Text>
+                            <Paragraph style={{ margin: 0, fontSize: '13px' }} ellipsis={{ rows: 2 }}>{selectedItem?.faultDescription}</Paragraph>
                         </div>
                     </div>
 
@@ -486,14 +486,14 @@ export default function AssignedPage() {
                         </Button>
                     ]}
                 >
-                    <div className="fault-box" style={{margin: '0 0 16px 0'}}>
-                         <Row gutter={16}>
+                    <div className="fault-box" style={{ margin: '0 0 16px 0' }}>
+                        <Row gutter={16}>
                             <Col span={12}>
-                                <Text type="secondary" style={{fontSize: '12px'}}>Product</Text>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>Product</Text>
                                 <div><Text strong>{selectedItem?.product}</Text></div>
                             </Col>
                             <Col span={12}>
-                                <Text type="secondary" style={{fontSize: '12px'}}>Current Tech</Text>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>Current Tech</Text>
                                 <div><Text strong>{selectedItem?.assignedToName}</Text></div>
                             </Col>
                         </Row>
@@ -539,28 +539,28 @@ export default function AssignedPage() {
                 </Modal>
 
                 {showBERForm && (
-                     <Modal
-                     open={showBERForm}
-                     onCancel={()=>setShowBERForm(false)}
-                     width={1000}
-                     closable={true}
-                     maskClosable={false}
-                     styles={{ body: { height: '80vh', overflowY: 'auto', padding: 0 } }}
-                     footer={[
-                         <Button key="close" onClick={() => setShowBERForm(false)}>
-                             Close
-                         </Button>,
-                         <Button key="download" type="primary" onClick={() => berFormRef.current?.handleDownloadPDF()}>
-                             Download PDF
-                         </Button>,
-                     ]}
-                     >
-                         <BERCertificateForm
-                         ref={berFormRef}
-                         productData={berProductData}
-                         onClose={()=>setShowBERForm(false)}
-                         />
-                     </Modal>
+                    <Modal
+                        open={showBERForm}
+                        onCancel={() => setShowBERForm(false)}
+                        width={1000}
+                        closable={true}
+                        maskClosable={false}
+                        styles={{ body: { height: '80vh', overflowY: 'auto', padding: 0 } }}
+                        footer={[
+                            <Button key="close" onClick={() => setShowBERForm(false)}>
+                                Close
+                            </Button>,
+                            <Button key="download" type="primary" onClick={() => berFormRef.current?.handleDownloadPDF()}>
+                                Download PDF
+                            </Button>,
+                        ]}
+                    >
+                        <BERCertificateForm
+                            ref={berFormRef}
+                            productData={berProductData}
+                            onClose={() => setShowBERForm(false)}
+                        />
+                    </Modal>
                 )}
             </div>
         </RmaLayout>

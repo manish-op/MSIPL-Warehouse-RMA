@@ -37,7 +37,7 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 import RmaLayout from "./RmaLayout";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
 import { URL } from "../API/URL";
 import "./DepotDispatchPage.css";
 

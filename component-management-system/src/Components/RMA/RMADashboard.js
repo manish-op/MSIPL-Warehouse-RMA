@@ -24,7 +24,7 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts';
 import RmaLayout from "./RmaLayout";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
 import { TatIconIndicator } from "./TatIndicator";
 import { ThemeContext } from "../../context/ThemeContext";
 import "./RmaDashboard.css";
@@ -125,7 +125,7 @@ function RmaDashboard() {
               const status = (item.repairStatus || '').toLowerCase();
               // Explicitly include Can't Be Repaired / BER items
               if (status === 'cant_be_repaired' || status === 'ber') return true;
-              
+
               // Include if status is empty/null OR not in completed list
               if (!status) return true;
               return !completedStatuses.some(s => status.includes(s));
@@ -542,7 +542,7 @@ function RmaDashboard() {
                           }}>
                             {stats?.complianceRate?.toFixed(1) || 0}%
                           </Title>
-                          <Text className="compliance-label" style={{ 
+                          <Text className="compliance-label" style={{
                             color: isDarkMode ? 'rgba(255, 255, 255, 0.65)' : '#666',
                             display: 'block',
                             marginTop: 8

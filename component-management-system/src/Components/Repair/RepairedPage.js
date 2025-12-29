@@ -34,7 +34,7 @@ import {
     BarcodeOutlined,
     TruckOutlined
 } from "@ant-design/icons";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
 import RmaLayout from "../RMA/RmaLayout";
 import "./UnrepairedPage.css"; // Ensures styles match the previous page
 
@@ -48,13 +48,13 @@ const PREDEFINED_TRANSPORTERS = {
 
 export default function RepairedPage() {
     const [items, setItems] = useState([]);
-    const [dispatchedItems, setDispatchedItems] = useState([]); 
+    const [dispatchedItems, setDispatchedItems] = useState([]);
     const [activeTab, setActiveTab] = useState("1");
     const [loading, setLoading] = useState(false);
     const [generatingGatepass, setGeneratingGatepass] = useState(null);
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewData, setPreviewData] = useState({ rmaNo: "", items: [] });
-    
+
     // DC Modal State
     const [dcModalVisible, setDcModalVisible] = useState(false);
     const [dcSubmitting, setDcSubmitting] = useState(false);
@@ -63,7 +63,7 @@ export default function RepairedPage() {
     const [isNewTransporter, setIsNewTransporter] = useState(false);
     const [selectedRmaForDc, setSelectedRmaForDc] = useState(null);
     const [dcForm] = Form.useForm();
-    
+
     // Dispatch Modal State
     const [dispatchModalVisible, setDispatchModalVisible] = useState(false);
     const [dispatchSubmitting, setDispatchSubmitting] = useState(false);
@@ -132,7 +132,7 @@ export default function RepairedPage() {
     }, []);
 
     // ... [KEEPING EXISTING MODAL LOGIC SAME AS PROVIDED] ...
-    
+
     // Open DC Modal
     const openDcModal = async (rmaNo, rmaItems) => {
         const pendingRma = rmaItems.some(item => !item.itemRmaNo || item.itemRmaNo.trim() === '');
@@ -151,7 +151,7 @@ export default function RepairedPage() {
         try {
             const res = await RmaApi.getNextDcNo();
             if (res.success && res.data && res.data.dcNo) {
-                 nextDcNo = res.data.dcNo;
+                nextDcNo = res.data.dcNo;
             }
         } catch (error) {
             console.error("Failed to fetch next DC No", error);
@@ -171,7 +171,7 @@ export default function RepairedPage() {
             const rateRes = await RmaApi.getProductRates(itemsToFetch);
 
             if (rateRes.success) {
-                const ratesMap = rateRes.data; 
+                const ratesMap = rateRes.data;
                 const itemFormValues = tableData.map(item => {
                     const key = `${item.product?.trim() || ""}::${(item.model || "").trim()}`;
                     return { rate: ratesMap[key] || "" };
@@ -451,17 +451,17 @@ export default function RepairedPage() {
                                                         <div key={item.id} className="rma-item-card-modern">
                                                             <div className="item-header">
                                                                 <span className="item-product">{item.product || "Product"}</span>
-                                                                {item.repairStatus?.toUpperCase() === "BER" ? 
-                                                                    <Tag color="red" icon={<WarningOutlined />}>BER</Tag> : 
+                                                                {item.repairStatus?.toUpperCase() === "BER" ?
+                                                                    <Tag color="red" icon={<WarningOutlined />}>BER</Tag> :
                                                                     item.repairStatus?.toUpperCase() === "REPLACED" ?
-                                                                    <Tag color="cyan" icon={<ReloadOutlined />}>REPLACED</Tag> :
-                                                                    <Tag color="green" icon={<CheckCircleOutlined />}>REPAIRED</Tag>
+                                                                        <Tag color="cyan" icon={<ReloadOutlined />}>REPLACED</Tag> :
+                                                                        <Tag color="green" icon={<CheckCircleOutlined />}>REPAIRED</Tag>
                                                                 }
                                                             </div>
-                                                            
+
                                                             <div className="item-details-grid">
                                                                 <div className="detail-box">
-                                                                    <span className="label"><BarcodeOutlined/> Serial No</span>
+                                                                    <span className="label"><BarcodeOutlined /> Serial No</span>
                                                                     <span className="value monospace">{item.serialNo}</span>
                                                                 </div>
                                                                 <div className="detail-box">
@@ -469,11 +469,11 @@ export default function RepairedPage() {
                                                                     <span className="value">{item.model}</span>
                                                                 </div>
                                                                 <div className="detail-box">
-                                                                    <span className="label"><UserOutlined/> Repaired By</span>
+                                                                    <span className="label"><UserOutlined /> Repaired By</span>
                                                                     <span className="value">{item.repairedByName || item.assignedToName || "N/A"}</span>
                                                                 </div>
                                                                 <div className="detail-box">
-                                                                    <span className="label"><CalendarOutlined/> Date</span>
+                                                                    <span className="label"><CalendarOutlined /> Date</span>
                                                                     <span className="value">{item.repairedDate ? new Date(item.repairedDate).toLocaleDateString() : "N/A"}</span>
                                                                 </div>
                                                             </div>
@@ -484,7 +484,7 @@ export default function RepairedPage() {
                                                             </div>
 
                                                             <div className="item-footer">
-                                                                <span style={{fontSize: '12px', color: '#8c8c8c'}}>RMA: </span>
+                                                                <span style={{ fontSize: '12px', color: '#8c8c8c' }}>RMA: </span>
                                                                 <Tag color="green">{item.itemRmaNo || "N/A"}</Tag>
                                                             </div>
                                                         </div>
@@ -534,12 +534,12 @@ export default function RepairedPage() {
                                                         <div key={item.id} className="rma-item-card-modern">
                                                             <div className="item-header">
                                                                 <span className="item-product">{item.product}</span>
-                                                                {item.isDelivered ? 
-                                                                    <Tag color="green">DELIVERED</Tag> : 
+                                                                {item.isDelivered ?
+                                                                    <Tag color="green">DELIVERED</Tag> :
                                                                     <Tag color="blue">IN TRANSIT</Tag>
                                                                 }
                                                             </div>
-                                                            
+
                                                             <div className="item-details-grid">
                                                                 <div className="detail-box">
                                                                     <span className="label">Serial No</span>
@@ -550,7 +550,7 @@ export default function RepairedPage() {
                                                                     <span className="value">{item.model}</span>
                                                                 </div>
                                                                 <div className="detail-box">
-                                                                    <span className="label"><TruckOutlined/> Courier</span>
+                                                                    <span className="label"><TruckOutlined /> Courier</span>
                                                                     <span className="value">{item.courierName || "N/A"}</span>
                                                                 </div>
                                                                 <div className="detail-box">
@@ -558,7 +558,7 @@ export default function RepairedPage() {
                                                                     <span className="value">{item.trackingNo || "N/A"}</span>
                                                                 </div>
                                                                 <div className="detail-box">
-                                                                    <span className="label"><CalendarOutlined/> Dispatch Date</span>
+                                                                    <span className="label"><CalendarOutlined /> Dispatch Date</span>
                                                                     <span className="value">{item.dispatchedDate ? new Date(item.dispatchedDate).toLocaleDateString() : "N/A"}</span>
                                                                 </div>
                                                             </div>
@@ -567,14 +567,14 @@ export default function RepairedPage() {
                                                                 <div className="fault-box">
                                                                     <span className="label">Delivery Details</span>
                                                                     <p className="fault-desc">
-                                                                        Received by: <strong>{item.deliveredTo}</strong><br/>
+                                                                        Received by: <strong>{item.deliveredTo}</strong><br />
                                                                         Date: {new Date(item.deliveryDate).toLocaleDateString()}
                                                                     </p>
                                                                 </div>
                                                             )}
 
                                                             <div className="item-footer">
-                                                                <span style={{fontSize: '12px', color: '#8c8c8c'}}>RMA: </span>
+                                                                <span style={{ fontSize: '12px', color: '#8c8c8c' }}>RMA: </span>
                                                                 <Tag color="blue">{item.itemRmaNo}</Tag>
                                                             </div>
                                                         </div>
@@ -591,7 +591,7 @@ export default function RepairedPage() {
 
                 {/* --- MODALS (Dispatch, DC, Gatepass, Delivery) --- */}
                 {/* [Modals are kept structurally same as your original, just rendering them here] */}
-                
+
                 <Modal title={`Dispatch to Customer - ${selectedRmaNo || ""}`} open={dispatchModalVisible} onCancel={() => setDispatchModalVisible(false)} confirmLoading={dispatchSubmitting} onOk={handleConfirmDispatch} okText="Confirm Dispatch" width={700}>
                     <Form form={dispatchForm} layout="vertical">
                         <Row gutter={16}>
@@ -624,34 +624,34 @@ export default function RepairedPage() {
                                     <Form.Item name="consigneeName" label="Name"><Input /></Form.Item>
                                     <Form.Item name="consigneeAddress" label="Address"><Input.TextArea rows={2} /></Form.Item>
                                     <Form.Item name="gstIn" label="GST IN"><Input /></Form.Item>
-                                    <Form.Item name="dcNo" label="Delivery Challan No." rules={[{required: true}]}><Input placeholder="Auto-generated" /></Form.Item>
+                                    <Form.Item name="dcNo" label="Delivery Challan No." rules={[{ required: true }]}><Input placeholder="Auto-generated" /></Form.Item>
                                 </Card>
                             </Col>
                         </Row>
                         <Divider orientation="left">Shipment</Divider>
                         <Row gutter={16}>
-                            <Col span={6}><Form.Item name="boxes" label="Boxes" rules={[{required: true}]}><Input type="number" /></Form.Item></Col>
+                            <Col span={6}><Form.Item name="boxes" label="Boxes" rules={[{ required: true }]}><Input type="number" /></Form.Item></Col>
                             <Col span={6}><Form.Item name="dimensions" label="Dims"><Input /></Form.Item></Col>
                             <Col span={6}><Form.Item name="weight" label="Weight"><Input /></Form.Item></Col>
                             <Col span={6}><Form.Item name="modeOfShipment" label="Mode"><Select><Select.Option value="ROAD">ROAD</Select.Option><Select.Option value="AIR">AIR</Select.Option></Select></Form.Item></Col>
                         </Row>
                         <Row gutter={16}>
-                            <Col span={12}><Form.Item name="courierName" label="Courier Name" rules={[{required: true, message: 'Required'}]}><Select mode="tags" onChange={(val)=>{ const v = Array.isArray(val)?val[val.length-1]:val; const t = transporters.find(x=>x.name===v); if(t) dcForm.setFieldValue('transporterId', t.transporterId); }}>{transporters.map(t=><Select.Option key={t.id} value={t.name}>{t.name}</Select.Option>)}</Select></Form.Item></Col>
+                            <Col span={12}><Form.Item name="courierName" label="Courier Name" rules={[{ required: true, message: 'Required' }]}><Select mode="tags" onChange={(val) => { const v = Array.isArray(val) ? val[val.length - 1] : val; const t = transporters.find(x => x.name === v); if (t) dcForm.setFieldValue('transporterId', t.transporterId); }}>{transporters.map(t => <Select.Option key={t.id} value={t.name}>{t.name}</Select.Option>)}</Select></Form.Item></Col>
                             <Col span={12}><Form.Item name="transporterId" label="Transporter ID"><Input /></Form.Item></Col>
                         </Row>
                         <Divider>Items</Divider>
-                        <Table dataSource={dcTableData} pagination={false} size="small" columns={[{ title: 'Sr No', dataIndex: 'slNo', width: 60 }, { title: 'Material', dataIndex: 'serialNo' }, { title: 'Desc', dataIndex: 'product' }, { title: 'Value', render: (_,__,idx) => <Form.Item name={['items', idx, 'rate']} style={{margin: 0}} rules={[{required: true, message: 'Required'}]}><Input prefix="₹" type="number" /></Form.Item> }]} />
+                        <Table dataSource={dcTableData} pagination={false} size="small" columns={[{ title: 'Sr No', dataIndex: 'slNo', width: 60 }, { title: 'Material', dataIndex: 'serialNo' }, { title: 'Desc', dataIndex: 'product' }, { title: 'Value', render: (_, __, idx) => <Form.Item name={['items', idx, 'rate']} style={{ margin: 0 }} rules={[{ required: true, message: 'Required' }]}><Input prefix="₹" type="number" /></Form.Item> }]} />
                     </Form>
                 </Modal>
 
-                <Modal title="Gatepass Preview" open={previewVisible} onCancel={() => setPreviewVisible(false)} width={800} footer={[<Button key="c" onClick={()=>setPreviewVisible(false)}>Close</Button>, <Button key="d" type="primary" icon={<DownloadOutlined/>} onClick={confirmGenerateGatepass} loading={generatingGatepass===previewData.rmaNo}>Download PDF</Button>]}>
-                    <Table dataSource={previewData.items} size="small" columns={[{title:'Product', dataIndex:'product'}, {title:'Serial', dataIndex:'serialNo'}, {title:'Remarks', dataIndex:'repairRemarks'}]} />
+                <Modal title="Gatepass Preview" open={previewVisible} onCancel={() => setPreviewVisible(false)} width={800} footer={[<Button key="c" onClick={() => setPreviewVisible(false)}>Close</Button>, <Button key="d" type="primary" icon={<DownloadOutlined />} onClick={confirmGenerateGatepass} loading={generatingGatepass === previewData.rmaNo}>Download PDF</Button>]}>
+                    <Table dataSource={previewData.items} size="small" columns={[{ title: 'Product', dataIndex: 'product' }, { title: 'Serial', dataIndex: 'serialNo' }, { title: 'Remarks', dataIndex: 'repairRemarks' }]} />
                 </Modal>
 
-                <Modal title="Confirm Delivery" open={deliveryModalVisible} onCancel={() => setDeliveryModalVisible(false)} onOk={handleConfirmDelivery} confirmLoading={deliverySubmitting} okButtonProps={{style: {background: "#52c41a", borderColor: "#52c41a"}}}>
+                <Modal title="Confirm Delivery" open={deliveryModalVisible} onCancel={() => setDeliveryModalVisible(false)} onOk={handleConfirmDelivery} confirmLoading={deliverySubmitting} okButtonProps={{ style: { background: "#52c41a", borderColor: "#52c41a" } }}>
                     <p>Confirming delivery for {selectedDeliveryItems.length} items.</p>
                     <Form form={deliveryForm} layout="vertical">
-                        <Form.Item name="deliveredTo" label="Receiver Name" rules={[{required:true}]}><Input /></Form.Item>
+                        <Form.Item name="deliveredTo" label="Receiver Name" rules={[{ required: true }]}><Input /></Form.Item>
                         <Form.Item name="deliveredBy" label="Delivered By"><Input /></Form.Item>
                         <Form.Item name="deliveryNotes" label="Notes"><Input.TextArea /></Form.Item>
                     </Form>
