@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import {
     Typography,
     Tag,
@@ -130,7 +131,7 @@ export default function UnrepairedPage() {
             }
 
             // Decode token safely to find current user
-            const encodedToken = document.cookie.split("authToken=")[1]?.split(";")[0];
+            const encodedToken = Cookies.get("authToken");
             let userEmail = null;
             if (encodedToken) {
                 try {
@@ -306,7 +307,7 @@ export default function UnrepairedPage() {
     };
 
     // 5. Delivery Challan (Fixed)
-    const openDcModal = (rmaItems, rmaNo) => {
+    const openDcModal = async (rmaItems, rmaNo) => {
         const status = checkRmaStatus(rmaItems);
         if (!status.hasAnyRma) {
             message.warning("RMA Number is required to generate a Delivery Challan.");
@@ -329,10 +330,25 @@ export default function UnrepairedPage() {
         setDcTableData(tableData);
 
         dcForm.resetFields();
+
+        // Fetch Next DC Number
+        let nextDcNo = "";
+        try {
+            const res = await RmaApi.getNextDcNo();
+            if (res.success && res.data && res.data.dcNo) {
+                nextDcNo = res.data.dcNo;
+            }
+        } catch (error) {
+            console.error("Failed to fetch next DC No", error);
+        }
+
         dcForm.setFieldsValue({
             modeOfShipment: "ROAD",
             boxes: "1",
-            transporterName: []
+            consigneeName: rmaItems[0]?.companyName || "",
+            consigneeAddress: rmaItems[0]?.returnAddress || "",
+            transporterName: [],
+            dcNo: nextDcNo
         });
         setDcModalVisible(true);
     };
@@ -359,6 +375,8 @@ export default function UnrepairedPage() {
                 rate: values.items && values.items[index]?.rate ? values.items[index].rate : item.rate
             }));
 
+            // Commented out DC Generation as per request
+            /*
             await RmaApi.generateDeliveryChallan({
                 rmaNo: selectedDcRmaNo,
                 ...values,
@@ -366,6 +384,8 @@ export default function UnrepairedPage() {
             });
             message.success("Delivery Challan generated!");
             setDcModalVisible(false);
+            */
+
         } catch (error) {
             console.error(error);
             message.error("Failed to generate DC");
@@ -587,9 +607,12 @@ export default function UnrepairedPage() {
                                                         <Button icon={<FileTextOutlined />} onClick={() => openGatepassPreview(rmaItems, rmaNo)}>
                                                             Gatepass
                                                         </Button>
-                                                        <Button icon={<FilePdfOutlined />} onClick={() => openDcModal(rmaItems, rmaNo)}>
-                                                            D. Challan
-                                                        </Button>
+                                                        {/* Commented out as requested */}
+                                                        {/* 
+                                                         <Button icon={<FilePdfOutlined />} onClick={() => openDcModal(rmaItems, rmaNo)}>
+                                                             D. Challan
+                                                         </Button>
+                                                        */}
                                                         <Button icon={<PrinterOutlined />} onClick={() => openStickerModal(rmaItems, rmaNo)}>
                                                             Stickers
                                                         </Button>
@@ -679,7 +702,7 @@ export default function UnrepairedPage() {
                         optionLabelProp="value"
                         showSearch
                         filterOption={(input, option) =>
-                            option.children.toLowerCase().includes(input.toLowerCase())
+                            (option?.children ?? "").toString().toLowerCase().includes(input.toLowerCase())
                         }
                         onChange={(val) => {
                             const emp = employees.find(e => e.email === val);
@@ -688,7 +711,7 @@ export default function UnrepairedPage() {
                         disabled={!isAdmin}
                     >
                         {(isAdmin ? employees : (currentUser ? [currentUser] : [])).map(e => (
-                            <Select.Option key={e.email} value={e.email}>{e.name} ({e.email})</Select.Option>
+                            <Select.Option key={e.email} value={e.email}>{`${e.name} (${e.email})`}</Select.Option>
                         ))}
                     </Select>
                 </Modal>
@@ -709,7 +732,7 @@ export default function UnrepairedPage() {
                         optionLabelProp="value"
                         showSearch
                         filterOption={(input, option) =>
-                            option.children.toLowerCase().includes(input.toLowerCase())
+                            (option?.children ?? "").toString().toLowerCase().includes(input.toLowerCase())
                         }
                         onChange={(val) => {
                             const emp = employees.find(e => e.email === val);
@@ -718,7 +741,7 @@ export default function UnrepairedPage() {
                         disabled={!isAdmin}
                     >
                         {(isAdmin ? employees : (currentUser ? [currentUser] : [])).map(e => (
-                            <Select.Option key={e.email} value={e.email}>{e.name} ({e.email})</Select.Option>
+                            <Select.Option key={e.email} value={e.email}>{`${e.name} (${e.email})`}</Select.Option>
                         ))}
                     </Select>
                 </Modal>
@@ -744,9 +767,21 @@ export default function UnrepairedPage() {
                             <Col span={12}>
                                 <Card size="small" title="Shipment">
                                     <Row gutter={8}>
-                                        <Col span={12}><Form.Item name="boxes" label="Boxes"><Input type="number" /></Form.Item></Col>
+                                        <Col span={12}><Form.Item name="boxes" label="Boxes" rules={[{required: true}]}><Input type="number" /></Form.Item></Col>
                                         <Col span={12}><Form.Item name="weight" label="Weight"><Input /></Form.Item></Col>
                                     </Row>
+                                    <Row gutter={8}>
+                                        <Col span={12}><Form.Item name="dimensions" label="Dimensions"><Input /></Form.Item></Col>
+                                        <Col span={12}>
+                                            <Form.Item name="modeOfShipment" label="Mode">
+                                                <Select>
+                                                    <Select.Option value="ROAD">ROAD</Select.Option>
+                                                    <Select.Option value="AIR">AIR</Select.Option>
+                                                </Select>
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Form.Item name="dcNo" label="DC Number" rules={[{required: true}]}><Input placeholder="DC Number" /></Form.Item>
                                     <Form.Item name="transporterName" label="Transporter">
                                         <Select
                                             mode="tags"

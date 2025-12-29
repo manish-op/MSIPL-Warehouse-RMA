@@ -641,6 +641,13 @@ public class RmaDepotDispatchController {
         try {
             loggedInUserEmail = request.getUserPrincipal().getName();
             AdminUserEntity loggedInUser = adminUserDAO.findByEmail(loggedInUserEmail.toLowerCase());
+
+            // Access Check: Only Admin or Bangalore
+            if (!isAdminOrBangaloreUser(loggedInUser)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Access Denied: Only Admin or Bangalore users can upload POD.");
+            }
+
             loggedInUserName = loggedInUser != null ? loggedInUser.getName() : loggedInUserEmail;
         } catch (NullPointerException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");

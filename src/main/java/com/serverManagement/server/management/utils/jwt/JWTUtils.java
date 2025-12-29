@@ -5,12 +5,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
 import javax.crypto.spec.SecretKeySpec;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -63,6 +60,11 @@ public class JWTUtils {
 	// generate token for user
 	public String generateToken(UserDetails userDetails) {
 		Map<String, Object> claims = new HashMap<>();
+		return doGenerateToken(claims, userDetails.getUsername());
+	}
+
+	// generate token with custom claims
+	public String generateToken(UserDetails userDetails, Map<String, Object> claims) {
 		return doGenerateToken(claims, userDetails.getUsername());
 	}
 

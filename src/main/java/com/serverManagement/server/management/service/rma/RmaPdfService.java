@@ -13,7 +13,6 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.stereotype.Service;
-
 import com.serverManagement.server.management.dto.rma.DeliveryChallanRequest;
 
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
@@ -497,6 +496,9 @@ public class RmaPdfService {
 
     private void drawText(PDPageContentStream contentStream, String text, float x, float y, boolean bold)
             throws IOException {
+        if (text == null) {
+            text = "";
+        }
         contentStream.beginText();
         contentStream.setFont(
                 new PDType1Font(bold ? Standard14Fonts.FontName.HELVETICA_BOLD : Standard14Fonts.FontName.HELVETICA),

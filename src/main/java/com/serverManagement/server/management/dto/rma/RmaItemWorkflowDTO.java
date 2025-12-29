@@ -48,6 +48,10 @@ public class RmaItemWorkflowDTO {
     private Boolean isDelivered; // Simple flag to check if delivery confirmed
     private String userName; // Name of the creator
 
+    // Pre-fill fields for DC
+    private String returnAddress;
+    private String gstin;
+
     // Getters and Setters
     public String getUserName() {
         return userName;
@@ -311,6 +315,22 @@ public class RmaItemWorkflowDTO {
 
     public void setIsDelivered(Boolean isDelivered) {
         this.isDelivered = isDelivered;
+    }
+
+    public String getReturnAddress() {
+        return returnAddress;
+    }
+
+    public void setReturnAddress(String returnAddress) {
+        this.returnAddress = returnAddress;
+    }
+
+    public String getGstin() {
+        return gstin;
+    }
+
+    public void setGstin(String gstin) {
+        this.gstin = gstin;
     }
 
     public ZonedDateTime getDepotReturnDispatchDate() {

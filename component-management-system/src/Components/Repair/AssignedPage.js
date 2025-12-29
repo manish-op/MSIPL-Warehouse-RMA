@@ -31,6 +31,7 @@ import {
     DownOutlined
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA";
+import { URL } from "../API/URL";
 import RmaLayout from "../RMA/RmaLayout";
 import "./UnrepairedPage.css"; // Uses the shared modern CSS
 import BERCertificateForm from "./BERCertificateForm";
@@ -89,21 +90,11 @@ export default function AssignedPage() {
     };
 
     const loadEmployees = async () => {
-        try {
-            const encodedToken = document.cookie.split("authToken=")[1]?.split(";")[0];
-            if (!encodedToken) return;
-
-            const response = await fetch("http://localhost:8081/api/all-users", {
-                headers: {
-                    Authorization: `Bearer ${atob(encodedToken)}`,
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setEmployees(data || []);
-            }
-        } catch (error) {
-            console.error("Failed to load employees:", error);
+        const result = await RmaApi.getAllUsers();
+        if (result.success) {
+            setEmployees(result.data || []);
+        } else {
+            console.error("Failed to load employees:", result.error);
         }
     };
 
@@ -513,14 +504,14 @@ export default function AssignedPage() {
                                 }}
                                 showSearch
                                 filterOption={(input, option) =>
-                                    option.children.toLowerCase().includes(input.toLowerCase())
+                                    (option?.children ?? "").toString().toLowerCase().includes(input.toLowerCase())
                                 }
                             >
                                 {employees
                                     .filter(emp => emp.email !== selectedItem?.assignedToEmail)
                                     .map(emp => (
                                         <Option key={emp.email} value={emp.email}>
-                                            {emp.name} ({emp.email})
+                                            {`${emp.name} (${emp.email})`}
                                         </Option>
                                     ))}
                             </Select>
