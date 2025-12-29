@@ -19,6 +19,8 @@ import {
     DatePicker,
     Space,
     Tabs,
+    Collapse,
+    Tooltip
 } from "antd";
 import {
     CheckCircleOutlined,
@@ -39,6 +41,7 @@ import RmaLayout from "../RMA/RmaLayout";
 import "./UnrepairedPage.css"; // Ensures styles match the previous page
 
 const { Title, Text, Paragraph } = Typography;
+const { Panel } = Collapse;
 
 const PREDEFINED_TRANSPORTERS = {
     "Blue Dart Express": "27AAACB0446L1ZS",
@@ -122,7 +125,7 @@ export default function RepairedPage() {
         try {
             const result = await RmaApi.getAllTransporters();
             let allTransporters = result.success ? (result.data || []) : [];
-            
+
             // Merge with predefined ones if not already in the database
             Object.entries(PREDEFINED_TRANSPORTERS).forEach(([name, tid]) => {
                 if (!allTransporters.find(t => t.name === name)) {
@@ -433,76 +436,127 @@ export default function RepairedPage() {
                                 ) : totalRmaRequests === 0 ? (
                                     <Empty description="No local repaired items found" />
                                 ) : (
-                                    <div className="rma-groups">
-                                        {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
-                                            <Card
-                                                key={rmaNo}
-                                                className="rma-group-card"
-                                                title={
-                                                    <div className="rma-card-header-flex">
-                                                        <div className="rma-identity">
-                                                            <div className="rma-id-box">
-                                                                <span className="rma-label">RMA Request</span>
-                                                                <span className="rma-value">{rmaNo}</span>
-                                                            </div>
-                                                            <Badge count={rmaItems.length} />
-                                                        </div>
-                                                        <div className="rma-actions">
-                                                            <Button icon={<EyeOutlined />} onClick={() => openPreview(rmaItems, rmaNo)}>Outpass</Button>
-                                                            <Button icon={<FilePdfOutlined />} onClick={() => openDcModal(rmaNo, rmaItems)}>DC</Button>
-                                                            <Button type="primary" icon={<SendOutlined />} onClick={() => openDispatchModal(rmaNo, rmaItems)}>Dispatch</Button>
-                                                        </div>
-                                                    </div>
-                                                }
-                                            >
-                                                {/* MODIFIED CARD LAYOUT */}
-                                                <div className="rma-items-grid">
-                                                    {rmaItems.map((item) => (
-                                                        <div key={item.id} className="rma-item-card-modern">
-                                                            <div className="item-header">
-                                                                <span className="item-product">{item.product || "Product"}</span>
-                                                                {item.repairStatus?.toUpperCase() === "BER" ?
-                                                                    <Tag color="red" icon={<WarningOutlined />}>BER</Tag> :
-                                                                    item.repairStatus?.toUpperCase() === "REPLACED" ?
-                                                                        <Tag color="cyan" icon={<ReloadOutlined />}>REPLACED</Tag> :
-                                                                        <Tag color="green" icon={<CheckCircleOutlined />}>REPAIRED</Tag>
-                                                                }
-                                                            </div>
+                                    <Collapse
+                                        className="rma-collapse"
+                                        defaultActiveKey={[]}
+                                        expandIconPosition="end"
+                                        ghost
+                                    >
+                                        {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => {
+                                            const firstItem = rmaItems[0];
+                                            const createdDate = firstItem.receivedDate ? new Date(firstItem.receivedDate).toLocaleDateString() : "N/A";
+                                            const itemCount = rmaItems.length;
 
-                                                            <div className="item-details-grid">
-                                                                <div className="detail-box">
-                                                                    <span className="label"><BarcodeOutlined /> Serial No</span>
-                                                                    <span className="value monospace">{item.serialNo}</span>
+                                            const headerContent = (
+                                                <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
+                                                    <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
+                                                        {/* Col 1: Identity */}
+                                                        <Col xs={24} sm={12} md={6} lg={5} xl={4}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <Title level={5} style={{ margin: 0, color: '#1890ff', whiteSpace: 'nowrap' }}>
+                                                                        {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
+                                                                    </Title>
                                                                 </div>
-                                                                <div className="detail-box">
-                                                                    <span className="label">Model</span>
-                                                                    <span className="value">{item.model}</span>
-                                                                </div>
-                                                                <div className="detail-box">
-                                                                    <span className="label"><UserOutlined /> Repaired By</span>
-                                                                    <span className="value">{item.repairedByName || item.assignedToName || "N/A"}</span>
-                                                                </div>
-                                                                <div className="detail-box">
-                                                                    <span className="label"><CalendarOutlined /> Date</span>
-                                                                    <span className="value">{item.repairedDate ? new Date(item.repairedDate).toLocaleDateString() : "N/A"}</span>
-                                                                </div>
+                                                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                                                    <span role="img" aria-label="user">👤</span> {firstItem.userName || "User"}
+                                                                </Text>
                                                             </div>
+                                                        </Col>
 
-                                                            <div className="fault-box">
-                                                                <span className="label">Repair Remarks</span>
-                                                                <p className="fault-desc">{item.repairRemarks || "No remarks provided."}</p>
+                                                        {/* Col 2: Date */}
+                                                        <Col xs={12} sm={12} md={6} lg={5} xl={4}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                <Text type="secondary" style={{ fontSize: '11px' }}>Created Date</Text>
+                                                                <Text strong>{createdDate}</Text>
                                                             </div>
+                                                        </Col>
 
-                                                            <div className="item-footer">
-                                                                <span style={{ fontSize: '12px', color: '#8c8c8c' }}>RMA: </span>
-                                                                <Tag color="green">{item.itemRmaNo || "N/A"}</Tag>
+                                                        {/* Col 3: Items */}
+                                                        <Col xs={12} sm={8} md={6} lg={5} xl={4}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
+                                                                <div>
+                                                                    <Badge count={itemCount} style={{ backgroundColor: '#52c41a' }} showZero />
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        </Col>
+
+                                                        {/* Col 4: Actions */}
+                                                        <Col xs={24} sm={24} md={24} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                            <div
+                                                                className="header-actions"
+                                                                onClick={e => e.stopPropagation()}
+                                                                style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}
+                                                            >
+                                                                <Tooltip title="View Outpass Item List">
+                                                                    <Button icon={<EyeOutlined />} onClick={() => openPreview(rmaItems, rmaNo)}>Outpass</Button>
+                                                                </Tooltip>
+                                                                <Tooltip title="Generate Delivery Challan">
+                                                                    <Button icon={<FilePdfOutlined />} onClick={() => openDcModal(rmaNo, rmaItems)}>DC</Button>
+                                                                </Tooltip>
+                                                                <Button type="primary" icon={<SendOutlined />} onClick={() => openDispatchModal(rmaNo, rmaItems)}>Dispatch</Button>
+                                                            </div>
+                                                        </Col>
+                                                    </Row>
                                                 </div>
-                                            </Card>
-                                        ))}
-                                    </div>
+                                            );
+
+                                            return (
+                                                <Panel
+                                                    key={rmaNo}
+                                                    header={headerContent}
+                                                    className="rma-panel"
+                                                    style={{ marginBottom: 16, background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden' }}
+                                                >
+                                                    <div className="rma-items-grid">
+                                                        {rmaItems.map((item) => (
+                                                            <div key={item.id} className="rma-item-card-modern">
+                                                                <div className="item-header">
+                                                                    <span className="item-product">{item.product || "Product"}</span>
+                                                                    {item.repairStatus?.toUpperCase() === "BER" ?
+                                                                        <Tag color="red" icon={<WarningOutlined />}>BER</Tag> :
+                                                                        item.repairStatus?.toUpperCase() === "REPLACED" ?
+                                                                            <Tag color="cyan" icon={<ReloadOutlined />}>REPLACED</Tag> :
+                                                                            <Tag color="green" icon={<CheckCircleOutlined />}>REPAIRED</Tag>
+                                                                    }
+                                                                </div>
+
+                                                                <div className="item-details-grid">
+                                                                    <div className="detail-box">
+                                                                        <span className="label"><BarcodeOutlined /> Serial No</span>
+                                                                        <span className="value monospace">{item.serialNo}</span>
+                                                                    </div>
+                                                                    <div className="detail-box">
+                                                                        <span className="label">Model</span>
+                                                                        <span className="value">{item.model}</span>
+                                                                    </div>
+                                                                    <div className="detail-box">
+                                                                        <span className="label"><UserOutlined /> Repaired By</span>
+                                                                        <span className="value">{item.repairedByName || item.assignedToName || "N/A"}</span>
+                                                                    </div>
+                                                                    <div className="detail-box">
+                                                                        <span className="label"><CalendarOutlined /> Date</span>
+                                                                        <span className="value">{item.repairedDate ? new Date(item.repairedDate).toLocaleDateString() : "N/A"}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="fault-box">
+                                                                    <span className="label">Repair Remarks</span>
+                                                                    <p className="fault-desc">{item.repairRemarks || "No remarks provided."}</p>
+                                                                </div>
+
+                                                                <div className="item-footer">
+                                                                    <span style={{ fontSize: '12px', color: '#8c8c8c' }}>RMA: </span>
+                                                                    <Tag color="green">{item.itemRmaNo || "N/A"}</Tag>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </Panel>
+                                            );
+                                        })}
+                                    </Collapse>
                                 ),
                             },
                             {
@@ -513,86 +567,133 @@ export default function RepairedPage() {
                                 ) : totalDispatchedRma === 0 ? (
                                     <Empty description="No dispatched items found" />
                                 ) : (
-                                    <div className="rma-groups">
-                                        {Object.entries(groupedDispatchedItems).map(([rmaNo, rmaItems]) => (
-                                            <Card
-                                                key={rmaNo}
-                                                className="rma-group-card"
-                                                title={
-                                                    <div className="rma-card-header-flex">
-                                                        <div className="rma-identity">
-                                                            <div className="rma-id-box">
-                                                                <span className="rma-label">RMA Request</span>
-                                                                <span className="rma-value">{rmaNo}</span>
-                                                            </div>
-                                                            <Badge count={rmaItems.length} />
-                                                        </div>
-                                                        <div className="rma-actions">
-                                                            <Tag color="blue" icon={<SendOutlined />}>DISPATCHED</Tag>
-                                                            {rmaItems.some(item => !item.isDelivered) && (
-                                                                <Button type="primary" icon={<CheckCircleOutlined />} onClick={() => openDeliveryModal(rmaItems)}>
-                                                                    Confirm Delivery
-                                                                </Button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                }
-                                            >
-                                                {/* MODIFIED DISPATCHED CARD LAYOUT */}
-                                                <div className="rma-items-grid">
-                                                    {rmaItems.map((item) => (
-                                                        <div key={item.id} className="rma-item-card-modern">
-                                                            <div className="item-header">
-                                                                <span className="item-product">{item.product}</span>
-                                                                {item.isDelivered ?
-                                                                    <Tag color="green">DELIVERED</Tag> :
-                                                                    <Tag color="blue">IN TRANSIT</Tag>
-                                                                }
-                                                            </div>
+                                    <Collapse
+                                        className="rma-collapse"
+                                        defaultActiveKey={[]}
+                                        expandIconPosition="end"
+                                        ghost
+                                    >
+                                        {Object.entries(groupedDispatchedItems).map(([rmaNo, rmaItems]) => {
+                                            const firstItem = rmaItems[0];
+                                            const dispatchedDate = firstItem.dispatchedDate ? new Date(firstItem.dispatchedDate).toLocaleDateString() : "N/A";
+                                            const itemCount = rmaItems.length;
 
-                                                            <div className="item-details-grid">
-                                                                <div className="detail-box">
-                                                                    <span className="label">Serial No</span>
-                                                                    <span className="value monospace">{item.serialNo}</span>
+                                            const headerContent = (
+                                                <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
+                                                    <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
+                                                        {/* Col 1 */}
+                                                        <Col xs={24} sm={12} md={6} lg={5} xl={4}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <Title level={5} style={{ margin: 0, color: '#1890ff', whiteSpace: 'nowrap' }}>
+                                                                        {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
+                                                                    </Title>
                                                                 </div>
-                                                                <div className="detail-box">
-                                                                    <span className="label">Model</span>
-                                                                    <span className="value">{item.model}</span>
-                                                                </div>
-                                                                <div className="detail-box">
-                                                                    <span className="label"><TruckOutlined /> Courier</span>
-                                                                    <span className="value">{item.courierName || "N/A"}</span>
-                                                                </div>
-                                                                <div className="detail-box">
-                                                                    <span className="label">Tracking</span>
-                                                                    <span className="value">{item.trackingNo || "N/A"}</span>
-                                                                </div>
-                                                                <div className="detail-box">
-                                                                    <span className="label"><CalendarOutlined /> Dispatch Date</span>
-                                                                    <span className="value">{item.dispatchedDate ? new Date(item.dispatchedDate).toLocaleDateString() : "N/A"}</span>
+                                                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                                                    <span role="img" aria-label="courier">🚚</span> {firstItem.courierName || "Courier"}
+                                                                </Text>
+                                                            </div>
+                                                        </Col>
+
+                                                        {/* Col 2 */}
+                                                        <Col xs={12} sm={12} md={6} lg={5} xl={4}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                <Text type="secondary" style={{ fontSize: '11px' }}>Dispatch Date</Text>
+                                                                <Text strong>{dispatchedDate}</Text>
+                                                            </div>
+                                                        </Col>
+
+                                                        {/* Col 3 */}
+                                                        <Col xs={12} sm={8} md={6} lg={5} xl={4}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
+                                                                <div>
+                                                                    <Badge count={itemCount} style={{ backgroundColor: '#1890ff' }} showZero />
                                                                 </div>
                                                             </div>
+                                                        </Col>
 
-                                                            {item.isDelivered && (
-                                                                <div className="fault-box">
-                                                                    <span className="label">Delivery Details</span>
-                                                                    <p className="fault-desc">
-                                                                        Received by: <strong>{item.deliveredTo}</strong><br />
-                                                                        Date: {new Date(item.deliveryDate).toLocaleDateString()}
-                                                                    </p>
-                                                                </div>
-                                                            )}
-
-                                                            <div className="item-footer">
-                                                                <span style={{ fontSize: '12px', color: '#8c8c8c' }}>RMA: </span>
-                                                                <Tag color="blue">{item.itemRmaNo}</Tag>
+                                                        {/* Col 4: Actions */}
+                                                        <Col xs={24} sm={24} md={24} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                            <div
+                                                                className="header-actions"
+                                                                onClick={e => e.stopPropagation()}
+                                                                style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}
+                                                            >
+                                                                <Tag color="blue" icon={<SendOutlined />}>DISPATCHED</Tag>
+                                                                {rmaItems.some(item => !item.isDelivered) && (
+                                                                    <Button size="small" type="primary" icon={<CheckCircleOutlined />} onClick={() => openDeliveryModal(rmaItems)}>
+                                                                        Confirm Delivery
+                                                                    </Button>
+                                                                )}
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        </Col>
+                                                    </Row>
                                                 </div>
-                                            </Card>
-                                        ))}
-                                    </div>
+                                            );
+
+                                            return (
+                                                <Panel
+                                                    key={rmaNo}
+                                                    header={headerContent}
+                                                    className="rma-panel"
+                                                    style={{ marginBottom: 16, background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden' }}
+                                                >
+                                                    <div className="rma-items-grid">
+                                                        {rmaItems.map((item) => (
+                                                            <div key={item.id} className="rma-item-card-modern">
+                                                                <div className="item-header">
+                                                                    <span className="item-product">{item.product}</span>
+                                                                    {item.isDelivered ?
+                                                                        <Tag color="green">DELIVERED</Tag> :
+                                                                        <Tag color="blue">IN TRANSIT</Tag>
+                                                                    }
+                                                                </div>
+
+                                                                <div className="item-details-grid">
+                                                                    <div className="detail-box">
+                                                                        <span className="label">Serial No</span>
+                                                                        <span className="value monospace">{item.serialNo}</span>
+                                                                    </div>
+                                                                    <div className="detail-box">
+                                                                        <span className="label">Model</span>
+                                                                        <span className="value">{item.model}</span>
+                                                                    </div>
+                                                                    <div className="detail-box">
+                                                                        <span className="label"><TruckOutlined /> Courier</span>
+                                                                        <span className="value">{item.courierName || "N/A"}</span>
+                                                                    </div>
+                                                                    <div className="detail-box">
+                                                                        <span className="label">Tracking</span>
+                                                                        <span className="value">{item.trackingNo || "N/A"}</span>
+                                                                    </div>
+                                                                    <div className="detail-box">
+                                                                        <span className="label"><CalendarOutlined /> Dispatch Date</span>
+                                                                        <span className="value">{item.dispatchedDate ? new Date(item.dispatchedDate).toLocaleDateString() : "N/A"}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {item.isDelivered && (
+                                                                    <div className="fault-box">
+                                                                        <span className="label">Delivery Details</span>
+                                                                        <p className="fault-desc">
+                                                                            Received by: <strong>{item.deliveredTo}</strong><br />
+                                                                            Date: {new Date(item.deliveryDate).toLocaleDateString()}
+                                                                        </p>
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="item-footer">
+                                                                    <span style={{ fontSize: '12px', color: '#8c8c8c' }}>RMA: </span>
+                                                                    <Tag color="blue">{item.itemRmaNo}</Tag>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </Panel>
+                                            );
+                                        })}
+                                    </Collapse>
                                 ),
                             },
                         ]}

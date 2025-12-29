@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.serverManagement.server.management.entity.rma.RmaAuditLogEntity;
+import com.serverManagement.server.management.entity.rma.common.RmaAuditLogEntity;
 
 /**
  * Repository for RMA audit log operations

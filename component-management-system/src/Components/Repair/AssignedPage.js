@@ -16,7 +16,9 @@ import {
     Empty,
     Divider,
     Dropdown,
-    Menu
+    Menu,
+    Collapse,
+    Tooltip
 } from "antd";
 import {
     EditOutlined,
@@ -39,6 +41,7 @@ import BERCertificateForm from "./BERCertificateForm";
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
+const { Panel } = Collapse;
 
 export default function AssignedPage() {
     const [items, setItems] = useState([]);
@@ -273,100 +276,152 @@ export default function AssignedPage() {
                             className="empty-state"
                         />
                     ) : (
-                        <div className="rma-groups">
-                            {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
-                                <Card
-                                    key={rmaNo}
-                                    className="rma-group-card"
-                                    title={
-                                        <div className="rma-card-header-flex">
-                                            <div className="rma-identity">
-                                                <div className="rma-id-box">
-                                                    <span className="rma-label">RMA Request</span>
-                                                    <span className="rma-value">{rmaNo}</span>
-                                                </div>
-                                                <Badge
-                                                    count={rmaItems.length}
-                                                    overflowCount={99}
-                                                />
-                                            </div>
-                                        </div>
-                                    }
-                                >
-                                    {/* MODERN CARD GRID */}
-                                    <div className="rma-items-grid">
-                                        {rmaItems.map((item) => (
-                                            <div key={item.id} className="rma-item-card-modern">
+                        <Collapse
+                            className="rma-collapse"
+                            defaultActiveKey={[]}
+                            expandIconPosition="end"
+                            ghost
+                        >
+                            {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => {
+                                const firstItem = rmaItems[0];
+                                const createdDate = firstItem.receivedDate ? new Date(firstItem.receivedDate).toLocaleDateString() : "N/A";
+                                const itemCount = rmaItems.length;
 
-                                                {/* Header Strip */}
-                                                <div className="item-header">
-                                                    <span className="item-product">
-                                                        {item.product || "Product"}
-                                                    </span>
-                                                    <Tag color={getStatusColor(item.repairStatus)}>
-                                                        {item.repairStatus || "ASSIGNED"}
-                                                    </Tag>
+                                const headerContent = (
+                                    <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
+                                        <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
+                                            {/* Column 1: RMA Identity */}
+                                            <Col xs={24} sm={12} md={6} lg={6} xl={5}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <Title level={5} style={{ margin: 0, color: '#1890ff', whiteSpace: 'nowrap' }}>
+                                                            {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
+                                                        </Title>
+                                                    </div>
+                                                    <Text type="secondary" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span role="img" aria-label="user">👤</span> {firstItem.userName || firstItem.assignedToName || "User"}
+                                                    </Text>
                                                 </div>
+                                            </Col>
 
-                                                {/* Details Grid */}
-                                                <div className="item-details-grid">
-                                                    <div className="detail-box">
-                                                        <span className="label"><BarcodeOutlined /> Serial No</span>
-                                                        <span className="value monospace">{item.serialNo || "N/A"}</span>
-                                                    </div>
-                                                    <div className="detail-box">
-                                                        <span className="label">Model</span>
-                                                        <span className="value">{item.model || "N/A"}</span>
-                                                    </div>
-                                                    <div className="detail-box">
-                                                        <span className="label"><UserOutlined /> Technician</span>
-                                                        <span className="value">{item.assignedToName || "N/A"}</span>
-                                                    </div>
-                                                    <div className="detail-box">
-                                                        <span className="label">RMA No</span>
-                                                        {item.itemRmaNo ? <Tag color="blue">{item.itemRmaNo}</Tag> : <Text type="secondary" style={{ fontSize: '11px' }}>None</Text>}
+                                            {/* Column 2: Date */}
+                                            <Col xs={12} sm={12} md={6} lg={6} xl={5}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <Text type="secondary" style={{ fontSize: '11px' }}>Created Date</Text>
+                                                    <Text strong>{createdDate}</Text>
+                                                </div>
+                                            </Col>
+
+                                            {/* Column 3: Stats */}
+                                            <Col xs={12} sm={8} md={6} lg={6} xl={5}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
+                                                    <div>
+                                                        <Badge
+                                                            count={itemCount}
+                                                            style={{ backgroundColor: '#52c41a' }}
+                                                            showZero
+                                                        />
                                                     </div>
                                                 </div>
+                                            </Col>
 
-                                                {/* Fault / Reason Box */}
-                                                <div className="fault-box">
-                                                    <span className="label">Fault Description</span>
-                                                    <p className="fault-desc">{item.faultDescription || "No description provided."}</p>
-
-                                                    {item.lastReassignmentReason && (
-                                                        <div style={{ marginTop: '8px', borderTop: '1px dashed var(--border-split)', paddingTop: '4px' }}>
-                                                            <span className="label">Reassign Reason</span>
-                                                            <p className="fault-desc" style={{ fontStyle: 'italic' }}>{item.lastReassignmentReason}</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Footer Actions */}
-                                                <div className="item-footer" style={{ display: 'flex', gap: '8px' }}>
-                                                    <Button
-                                                        type="primary"
-                                                        block
-                                                        size="small"
-                                                        icon={<EditOutlined />}
-                                                        onClick={() => openStatusModal(item)}
-                                                    >
-                                                        Update
-                                                    </Button>
-                                                    <Button
-                                                        block
-                                                        size="small"
-                                                        icon={<UserSwitchOutlined />}
-                                                        onClick={() => openReassignModal(item)}
-                                                    >
-                                                        Reassign
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            {/* Column 4: Types/Status Summary (optional) */}
+                                            <Col xs={12} sm={16} md={6} lg={6} xl={9} style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                                {/* Placeholder for future group actions */}
+                                            </Col>
+                                        </Row>
                                     </div>
-                                </Card>
-                            ))}
-                        </div>
+                                );
+
+                                return (
+                                    <Panel
+                                        key={rmaNo}
+                                        header={headerContent}
+                                        className="rma-panel"
+                                        style={{
+                                            marginBottom: 16,
+                                            background: '#fff',
+                                            borderRadius: 8,
+                                            border: '1px solid #f0f0f0',
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        {/* MODERN CARD GRID */}
+                                        <div className="rma-items-grid">
+                                            {rmaItems.map((item) => (
+                                                <div key={item.id} className="rma-item-card-modern">
+
+                                                    {/* Header Strip */}
+                                                    <div className="item-header">
+                                                        <span className="item-product">
+                                                            {item.product || "Product"}
+                                                        </span>
+                                                        <Tag color={getStatusColor(item.repairStatus)}>
+                                                            {item.repairStatus || "ASSIGNED"}
+                                                        </Tag>
+                                                    </div>
+
+                                                    {/* Details Grid */}
+                                                    <div className="item-details-grid">
+                                                        <div className="detail-box">
+                                                            <span className="label"><BarcodeOutlined /> Serial No</span>
+                                                            <span className="value monospace">{item.serialNo || "N/A"}</span>
+                                                        </div>
+                                                        <div className="detail-box">
+                                                            <span className="label">Model</span>
+                                                            <span className="value">{item.model || "N/A"}</span>
+                                                        </div>
+                                                        <div className="detail-box">
+                                                            <span className="label"><UserOutlined /> Technician</span>
+                                                            <span className="value">{item.assignedToName || "N/A"}</span>
+                                                        </div>
+                                                        <div className="detail-box">
+                                                            <span className="label">RMA No</span>
+                                                            {item.itemRmaNo ? <Tag color="blue">{item.itemRmaNo}</Tag> : <Text type="secondary" style={{ fontSize: '11px' }}>None</Text>}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Fault / Reason Box */}
+                                                    <div className="fault-box">
+                                                        <span className="label">Fault Description</span>
+                                                        <p className="fault-desc">{item.faultDescription || "No description provided."}</p>
+
+                                                        {item.lastReassignmentReason && (
+                                                            <div style={{ marginTop: '8px', borderTop: '1px dashed var(--border-split)', paddingTop: '4px' }}>
+                                                                <span className="label">Reassign Reason</span>
+                                                                <p className="fault-desc" style={{ fontStyle: 'italic' }}>{item.lastReassignmentReason}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Footer Actions */}
+                                                    <div className="item-footer" style={{ display: 'flex', gap: '8px' }}>
+                                                        <Button
+                                                            type="primary"
+                                                            block
+                                                            size="small"
+                                                            icon={<EditOutlined />}
+                                                            onClick={() => openStatusModal(item)}
+                                                        >
+                                                            Update
+                                                        </Button>
+                                                        <Button
+                                                            block
+                                                            size="small"
+                                                            icon={<UserSwitchOutlined />}
+                                                            onClick={() => openReassignModal(item)}
+                                                        >
+                                                            Reassign
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Panel>
+                                );
+                            })}
+                        </Collapse>
                     )}
                 </div>
 

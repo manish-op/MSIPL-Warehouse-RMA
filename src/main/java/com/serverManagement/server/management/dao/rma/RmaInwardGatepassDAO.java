@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.serverManagement.server.management.entity.rma.RmaInwardGatepassEntity;
+import com.serverManagement.server.management.entity.rma.workflow.RmaInwardGatepassEntity;
 
 @Repository
 public interface RmaInwardGatepassDAO extends JpaRepository<RmaInwardGatepassEntity, Long> {

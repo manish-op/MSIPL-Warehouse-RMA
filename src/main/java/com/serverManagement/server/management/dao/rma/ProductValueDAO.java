@@ -1,6 +1,6 @@
 package com.serverManagement.server.management.dao.rma;
 
-import com.serverManagement.server.management.entity.rma.ProductValueEntity;
+import com.serverManagement.server.management.entity.rma.common.ProductValueEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

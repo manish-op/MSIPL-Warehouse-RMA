@@ -18,6 +18,8 @@ import {
     Table,
     Form,
     Select,
+    Collapse,
+    Tooltip,
 } from "antd";
 import {
     UserAddOutlined,
@@ -41,6 +43,7 @@ import "./UnrepairedPage.css";
 import companyLogo from "../../images/image.png";
 
 const { Title, Text, Paragraph } = Typography;
+const { Panel } = Collapse;
 
 const PREDEFINED_TRANSPORTERS = {
     "Blue Dart Express": "27AAACB0446L1ZS",
@@ -568,120 +571,265 @@ export default function UnrepairedPage() {
                 </div>
 
                 {/* Content */}
+                {/* Content */}
                 <div className="unrepaired-content">
                     {loading ? (
                         <div className="loading-container"><Spin size="large" /></div>
                     ) : totalRmaRequests === 0 ? (
                         <Empty description="No unassigned items found" />
                     ) : (
-                        <div className="rma-groups">
-                            {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
-                                <Card
-                                    key={rmaNo}
-                                    className="rma-group-card"
-                                    title={
-                                        <div className="rma-card-header-flex">
-                                            <div className="rma-identity">
-                                                <div className="rma-id-box">
-                                                    <span className="rma-label">RMA Request</span>
-                                                    <span className="rma-value">{rmaNo || rmaItems[0]?.itemRmaNo}</span>
-                                                </div>
+                        <Collapse
+                            className="rma-collapse"
+                            defaultActiveKey={[]}
+                            expandIconPosition="end"
+                            ghost
+                        >
+                            {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => {
+                                // Extract Group Details
+                                const firstItem = rmaItems[0];
+                                const createdDate = firstItem.receivedDate ? new Date(firstItem.receivedDate).toLocaleDateString() : "N/A";
+                                const tatDays = firstItem.tat || "N/A";
+                                const itemCount = rmaItems.length;
+                                const isDepot = firstItem.repairType === "Depot Repair";
 
-                                                {/* Created By Field */}
-                                                <div className="rma-id-box" style={{ paddingLeft: '16px', borderLeft: '1px solid #f0f0f0' }}>
-                                                    <span className="rma-label">Created By</span>
-                                                    <span className="rma-value" style={{ fontSize: '15px' }}>
-                                                        {rmaItems[0]?.userName || rmaItems[0]?.createdBy || "Unknown"}
-                                                    </span>
-                                                </div>
+                                // Header Component
+                                const headerContent = (
+                                    <div className="rma-collapse-header">
+                                        <div className="header-main-info">
+                                            <div className="info-block">
+                                                <Title level={5} style={{ margin: 0, color: '#1890ff' }}>{rmaNo !== "Unknown" ? rmaNo : "No RMA Number"}</Title>
+                                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                                    {firstItem.userName || "Unknown User"}
+                                                </Text>
+                                            </div>
 
-                                                <Badge count={rmaItems.length} />
-                                                <Tag color={rmaItems[0]?.repairType === "Local Repair" ? "purple" : "orange"}>
-                                                    {rmaItems[0]?.repairType || "Standard"}
+                                            <Divider type="vertical" />
+
+                                            <div className="info-block">
+                                                <Text type="secondary" style={{ fontSize: '11px' }}>Created Date</Text>
+                                                <Text strong>{createdDate}</Text>
+                                            </div>
+
+                                            <Divider type="vertical" />
+
+                                            <div className="info-block">
+                                                <Text type="secondary" style={{ fontSize: '11px' }}>TAT</Text>
+                                                <Tag color={tatDays !== "N/A" ? "blue" : "default"}>
+                                                    {tatDays !== "N/A" ? `${tatDays} Days` : "N/A"}
                                                 </Tag>
                                             </div>
 
-                                            <div className="rma-actions">
-                                                {rmaItems[0]?.repairType !== "Depot Repair" && (
-                                                    <>
-                                                        <Button icon={<FileTextOutlined />} onClick={() => openGatepassPreview(rmaItems, rmaNo)}>
-                                                            Gatepass
-                                                        </Button>
-                                                        {/* Commented out as requested */}
-                                                        {/* 
-                                                         <Button icon={<FilePdfOutlined />} onClick={() => openDcModal(rmaItems, rmaNo)}>
-                                                             D. Challan
-                                                         </Button>
-                                                        */}
-                                                        <Button icon={<PrinterOutlined />} onClick={() => openStickerModal(rmaItems, rmaNo)}>
-                                                            Stickers
-                                                        </Button>
-                                                    </>
-                                                )}
-                                                <Button
-                                                    type="primary"
-                                                    icon={<UserAddOutlined />}
-                                                    onClick={() => openBulkAssignModal(rmaItems[0]?.itemRmaNo || rmaNo, rmaItems)}
-                                                    className="assign-all-btn"
-                                                >
-                                                    Assign All
-                                                </Button>
+                                            <Divider type="vertical" />
+
+                                            <div className="info-block">
+                                                <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
+                                                <Badge count={itemCount} style={{ backgroundColor: '#52c41a' }} />
                                             </div>
+
+                                            <Divider type="vertical" />
+
+                                            <Tag color={firstItem.repairType === "Local Repair" ? "purple" : "orange"}>
+                                                {firstItem.repairType || "Standard"}
+                                            </Tag>
                                         </div>
-                                    }
-                                >
-                                    <div className="rma-items-grid">
-                                        {rmaItems.map((item) => (
-                                            <div key={item.id} className="rma-item-card-modern">
-                                                <div className="item-header">
-                                                    <span className="item-product">{item.product || "Unknown Product"}</span>
-                                                    {!item.itemRmaNo ? (
+
+                                        <div className="header-actions" onClick={e => e.stopPropagation()}>
+                                            {!isDepot && (
+                                                <>
+                                                    <Tooltip title="Preview Gatepass">
                                                         <Button
-                                                            size="small"
-                                                            className="add-rma-btn"
-                                                            icon={<EditOutlined />}
-                                                            onClick={() => openEditRmaModal(item)}
-                                                        >
-                                                            Add RMA
-                                                        </Button>
-                                                    ) : (
-                                                        <Tag color="cyan">{item.itemRmaNo}</Tag>
+                                                            type="text"
+                                                            icon={<FileTextOutlined />}
+                                                            onClick={() => openGatepassPreview(rmaItems, rmaNo)}
+                                                        />
+                                                    </Tooltip>
+                                                    <Tooltip title="Print Stickers">
+                                                        <Button
+                                                            type="text"
+                                                            icon={<PrinterOutlined />}
+                                                            onClick={() => openStickerModal(rmaItems, rmaNo)}
+                                                        />
+                                                    </Tooltip>
+                                                </>
+                                            )}
+                                            <Button
+                                                type="primary"
+                                                ghost
+                                                size="small"
+                                                icon={<UserAddOutlined />}
+                                                onClick={() => openBulkAssignModal(firstItem.itemRmaNo || rmaNo, rmaItems)}
+                                            >
+                                                Assign All
+                                            </Button>
+                                        </div>
+                                    </div>
+                                );
+
+                                // Header Component with Responsive Design
+                                const headerContentResponsive = (
+                                    <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
+                                        <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
+                                            {/* Column 1: RMA Identity */}
+                                            <Col xs={24} sm={12} md={6} lg={5} xl={4}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <Title level={5} style={{ margin: 0, color: '#1890ff', whiteSpace: 'nowrap' }}>
+                                                            {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
+                                                        </Title>
+                                                        {isDepot && <Tag color="orange">Depot</Tag>}
+                                                    </div>
+                                                    <Text type="secondary" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span role="img" aria-label="user">👤</span> {firstItem.userName || "Unknown"}
+                                                    </Text>
+                                                </div>
+                                            </Col>
+
+                                            {/* Column 2: Key Stats (Date, TAT) */}
+                                            <Col xs={12} sm={12} md={6} lg={5} xl={4}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <Text type="secondary" style={{ fontSize: '11px' }}>Created Date</Text>
+                                                    <Text strong>{createdDate}</Text>
+                                                </div>
+                                            </Col>
+
+                                            <Col xs={12} sm={8} md={4} lg={3} xl={3}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <Text type="secondary" style={{ fontSize: '11px' }}>TAT</Text>
+                                                    <Tag color={tatDays !== "N/A" ? (tatDays > 7 ? "red" : "blue") : "default"}>
+                                                        {tatDays !== "N/A" ? `${tatDays} Days` : "N/A"}
+                                                    </Tag>
+                                                </div>
+                                            </Col>
+
+                                            {/* Column 3: Items & Type */}
+                                            <Col xs={12} sm={8} md={4} lg={3} xl={3}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
+                                                    <div>
+                                                        <Badge
+                                                            count={itemCount}
+                                                            style={{ backgroundColor: '#52c41a' }}
+                                                            showZero
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </Col>
+
+                                            <Col xs={12} sm={8} md={4} lg={3} xl={3}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <Text type="secondary" style={{ fontSize: '11px' }}>Type</Text>
+                                                    <Tag color={firstItem.repairType === "Local Repair" ? "purple" : "cyan"}>
+                                                        {firstItem.repairType === "Local Repair" ? "Local" : "Local"}
+                                                    </Tag>
+                                                </div>
+                                            </Col>
+
+                                            {/* Column 4: Actions (Right Aligned on desktop, full width/wrap on mobile) */}
+                                            <Col xs={24} sm={24} md={24} lg={5} xl={7} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                <div
+                                                    className="header-actions"
+                                                    onClick={e => e.stopPropagation()}
+                                                    style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}
+                                                >
+                                                    {!isDepot && (
+                                                        <>
+                                                            <Tooltip title="Preview Gatepass">
+                                                                <Button
+                                                                    size="middle"
+                                                                    icon={<FileTextOutlined />}
+                                                                    onClick={() => openGatepassPreview(rmaItems, rmaNo)}
+                                                                />
+                                                            </Tooltip>
+                                                            <Tooltip title="Print Stickers">
+                                                                <Button
+                                                                    size="middle"
+                                                                    icon={<PrinterOutlined />}
+                                                                    onClick={() => openStickerModal(rmaItems, rmaNo)}
+                                                                />
+                                                            </Tooltip>
+                                                        </>
                                                     )}
-                                                </div>
-
-                                                <div className="item-details-grid">
-                                                    <div className="detail-box">
-                                                        <span className="label">Serial No</span>
-                                                        <span className="value monospace">{item.serialNo || "N/A"}</span>
-                                                    </div>
-                                                    <div className="detail-box">
-                                                        <span className="label">Model</span>
-                                                        <span className="value">{item.model || "N/A"}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="fault-box">
-                                                    <span className="label">Reported Fault</span>
-                                                    <p className="fault-desc">{item.faultDescription || "No description provided."}</p>
-                                                </div>
-
-                                                <div className="item-footer">
                                                     <Button
-                                                        block
                                                         type="primary"
                                                         ghost
+                                                        size="middle"
                                                         icon={<UserAddOutlined />}
-                                                        onClick={() => openAssignModal(item)}
+                                                        onClick={() => openBulkAssignModal(firstItem.itemRmaNo || rmaNo, rmaItems)}
                                                     >
-                                                        Assign Technician
+                                                        Assign All
                                                     </Button>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            </Col>
+                                        </Row>
                                     </div>
-                                </Card>
-                            ))}
-                        </div>
+                                );
+
+                                return (
+                                    <Panel
+                                        header={headerContentResponsive}
+                                        key={rmaNo}
+                                        className="rma-panel"
+                                        style={{
+                                            marginBottom: 16,
+                                            background: '#fff',
+                                            borderRadius: 8,
+                                            border: '1px solid #f0f0f0',
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        <div className="rma-items-grid">
+                                            {rmaItems.map((item) => (
+                                                <div key={item.id} className="rma-item-card-modern">
+                                                    <div className="item-header">
+                                                        <span className="item-product">{item.product || "Unknown Product"}</span>
+                                                        {!item.itemRmaNo ? (
+                                                            <Button
+                                                                size="small"
+                                                                className="add-rma-btn"
+                                                                icon={<EditOutlined />}
+                                                                onClick={() => openEditRmaModal(item)}
+                                                            >
+                                                                Add RMA
+                                                            </Button>
+                                                        ) : (
+                                                            <Tag color="cyan">{item.itemRmaNo}</Tag>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="item-details-grid">
+                                                        <div className="detail-box">
+                                                            <span className="label">Serial No</span>
+                                                            <span className="value monospace">{item.serialNo || "N/A"}</span>
+                                                        </div>
+                                                        <div className="detail-box">
+                                                            <span className="label">Model</span>
+                                                            <span className="value">{item.model || "N/A"}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="fault-box">
+                                                        <span className="label">Reported Fault</span>
+                                                        <p className="fault-desc">{item.faultDescription || "No description provided."}</p>
+                                                    </div>
+
+                                                    <div className="item-footer">
+                                                        <Button
+                                                            block
+                                                            type="primary"
+                                                            ghost
+                                                            icon={<UserAddOutlined />}
+                                                            onClick={() => openAssignModal(item)}
+                                                        >
+                                                            Assign Technician
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Panel>
+                                );
+                            })}
+                        </Collapse>
                     )}
                 </div>
 
@@ -767,7 +915,7 @@ export default function UnrepairedPage() {
                             <Col span={12}>
                                 <Card size="small" title="Shipment">
                                     <Row gutter={8}>
-                                        <Col span={12}><Form.Item name="boxes" label="Boxes" rules={[{required: true}]}><Input type="number" /></Form.Item></Col>
+                                        <Col span={12}><Form.Item name="boxes" label="Boxes" rules={[{ required: true }]}><Input type="number" /></Form.Item></Col>
                                         <Col span={12}><Form.Item name="weight" label="Weight"><Input /></Form.Item></Col>
                                     </Row>
                                     <Row gutter={8}>
@@ -781,7 +929,7 @@ export default function UnrepairedPage() {
                                             </Form.Item>
                                         </Col>
                                     </Row>
-                                    <Form.Item name="dcNo" label="DC Number" rules={[{required: true}]}><Input placeholder="DC Number" /></Form.Item>
+                                    <Form.Item name="dcNo" label="DC Number" rules={[{ required: true }]}><Input placeholder="DC Number" /></Form.Item>
                                     <Form.Item name="transporterName" label="Transporter">
                                         <Select
                                             mode="tags"

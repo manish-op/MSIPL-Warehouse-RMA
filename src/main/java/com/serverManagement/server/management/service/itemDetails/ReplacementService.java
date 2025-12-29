@@ -3,6 +3,7 @@ package com.serverManagement.server.management.service.itemDetails;
 import com.serverManagement.server.management.request.itemDetails.ReplacementRequest;
 import com.serverManagement.server.management.entity.itemDetails.ItemDetailsEntity;
 import com.serverManagement.server.management.entity.options.ItemAvailableStatusOptionEntity;
+import com.serverManagement.server.management.entity.rma.request.RmaItemEntity;
 import com.serverManagement.server.management.dao.itemDetails.ItemDetailsDAO;
 import com.serverManagement.server.management.dao.option.ItemAvailableStatusOptionDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,15 +31,12 @@ public class ReplacementService {
     @Transactional
     public String processReplacement(ReplacementRequest request, String userEmail) {
 
-        System.out.println(
-                "Processing replacement for RMA: " + request.getRmaNumber() + ", Model: " + request.getModelNo());
-
         ItemDetailsEntity replacementUnit = null;
 
         // 1. Find Replacement Unit
         if (request.getReplacementSerial() != null && !request.getReplacementSerial().isEmpty()) {
             // A. Specific Serial Requested
-            System.out.println("Processing explicit replacement with Serial: " + request.getReplacementSerial());
+
             replacementUnit = itemDao.getItemDetailsBySerialNo(request.getReplacementSerial());
 
             if (replacementUnit == null) {
@@ -60,7 +58,6 @@ public class ReplacementService {
             // B. Auto-find by Model (Legacy behavior)
             // Ensure DAO method uses 'AVAILABLE'
             List<ItemDetailsEntity> availableItems = itemDao.findAvailableByModel(request.getModelNo());
-            System.out.println("Available items found: " + availableItems.size());
 
             if (availableItems.isEmpty()) {
                 throw new RuntimeException("OUT_OF_STOCK");
@@ -90,19 +87,18 @@ public class ReplacementService {
             replacementUnit.setUpdate_Date(java.time.ZonedDateTime.now());
 
             itemDao.save(replacementUnit);
-            System.out.println("Updated replacement item to status: " + issuedStatus.getItemAvailableOption());
+
         } else {
             // Fallback: If no status found, we might still have to delete or throw error?
             // For now, let's log error but proceed with logic or revert to delete if
             // strict?
             // User EXPLICITLY asked to update to ISSUED. If we can't find it, that's an
             // issue.
-            System.err.println(
-                    "CRITICAL: Could not find 'Issued' or 'Assigned' status in DB. Item state might be inconsistent.");
+
         }
 
         // 3. Update Original RMA Item
-        List<com.serverManagement.server.management.entity.rma.RmaItemEntity> rmaItems = rmaItemDao
+        List<RmaItemEntity> rmaItems = rmaItemDao
                 .findByRmaRequest_RequestNumber(request.getRmaNumber());
 
         // Fallback for legacy items or explicit RMA numbers
@@ -110,14 +106,14 @@ public class ReplacementService {
             rmaItems = rmaItemDao.findByRmaNo(request.getRmaNumber());
         }
         // Find the specific item matching model
-        com.serverManagement.server.management.entity.rma.RmaItemEntity targetItem = rmaItems.stream()
+        RmaItemEntity targetItem = rmaItems.stream()
                 .filter(item -> request.getModelNo().trim().equalsIgnoreCase(item.getModel().trim()))
                 .findFirst()
                 .orElse(null);
 
         // Fallback: Try contains if exact match fails (handling partial model numbers)
         if (targetItem == null) {
-            System.out.println("Exact model match failed. Trying partial match for: " + request.getModelNo());
+
             targetItem = rmaItems.stream()
                     .filter(item -> item.getModel() != null
                             && item.getModel().toLowerCase().contains(request.getModelNo().trim().toLowerCase()))
@@ -148,9 +144,9 @@ public class ReplacementService {
             }
 
             rmaItemDao.saveAndFlush(targetItem);
-            System.out.println("Updated RMA Item status to REPLACED for Model: " + targetItem.getModel());
+
         } else {
-            System.out.println("CRITICAL WARNING: Could not find original RMA item to update status.");
+
         }
 
         return replacementSerial;
