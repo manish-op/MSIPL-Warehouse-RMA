@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Menu, Layout, Button, Segmented, Modal } from "antd";
+import React, { useState, useMemo } from "react";
+import { Menu, Layout, Segmented, Modal } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   RiMenu3Line,

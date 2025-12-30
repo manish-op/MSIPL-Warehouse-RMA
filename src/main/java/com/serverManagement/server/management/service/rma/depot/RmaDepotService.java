@@ -2,6 +2,7 @@ package com.serverManagement.server.management.service.rma.depot;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
 import com.serverManagement.server.management.dao.rma.TransporterDAO;
 import com.serverManagement.server.management.dto.rma.depot.DeliveryChallanRequest;
 import com.serverManagement.server.management.entity.rma.depot.DepotDispatchEntity;
+import com.serverManagement.server.management.entity.rma.common.ProductValueEntity;
 import com.serverManagement.server.management.entity.rma.common.RmaAuditLogEntity;
 import com.serverManagement.server.management.entity.rma.request.RmaItemEntity;
 import com.serverManagement.server.management.entity.rma.request.RmaRequestEntity;
@@ -124,16 +126,16 @@ public class RmaDepotService {
                         rate = rate.trim();
 
                         // Check if exists
-                        java.util.Optional<com.serverManagement.server.management.entity.rma.common.ProductValueEntity> startVal = productValueDAO
+                        Optional<ProductValueEntity> startVal = productValueDAO
                                 .findByProductAndModel(product, model);
 
-                        com.serverManagement.server.management.entity.rma.common.ProductValueEntity valEntity;
+                        ProductValueEntity valEntity;
                         if (startVal.isPresent()) {
                             valEntity = startVal.get();
                             valEntity.setValue(rate); // update with new rate
                             valEntity.setLastUpdated(ZonedDateTime.now());
                         } else {
-                            valEntity = new com.serverManagement.server.management.entity.rma.common.ProductValueEntity();
+                            valEntity = new ProductValueEntity();
                             valEntity.setProduct(product);
                             valEntity.setModel(model);
                             valEntity.setValue(rate);
