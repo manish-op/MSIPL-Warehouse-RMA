@@ -1,4 +1,4 @@
-package com.serverManagement.server.management.dao.rma;
+package com.serverManagement.server.management.dao.rma.depot;
 
 import com.serverManagement.server.management.entity.rma.depot.DepotDispatchEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

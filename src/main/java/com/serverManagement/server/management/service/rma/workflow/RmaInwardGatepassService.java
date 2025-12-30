@@ -7,10 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
-
 import javax.imageio.ImageIO;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -30,9 +29,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
-import com.serverManagement.server.management.dao.rma.RmaInwardGatepassDAO;
-import com.serverManagement.server.management.dao.rma.RmaItemDAO;
-import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
+import com.serverManagement.server.management.dao.rma.workflow.RmaInwardGatepassDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaRequestDAO;
 import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import com.serverManagement.server.management.entity.rma.workflow.RmaInwardGatepassEntity;
 import com.serverManagement.server.management.entity.rma.request.RmaItemEntity;
@@ -438,7 +437,7 @@ public class RmaInwardGatepassService {
 
     private List<String> splitTextIntoLines(PDFont font, float fontSize, String text, float maxWidth)
             throws IOException {
-        List<String> lines = new java.util.ArrayList<>();
+        List<String> lines = new ArrayList<>();
         if (text == null || text.isEmpty()) {
             lines.add("");
             return lines;

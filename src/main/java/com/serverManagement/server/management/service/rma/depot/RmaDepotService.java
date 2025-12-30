@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.serverManagement.server.management.dao.rma.DepotDispatchDAO;
-import com.serverManagement.server.management.dao.rma.ProductValueDAO;
-import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
-import com.serverManagement.server.management.dao.rma.RmaItemDAO;
-import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
-import com.serverManagement.server.management.dao.rma.TransporterDAO;
+import com.serverManagement.server.management.dao.rma.depot.DepotDispatchDAO;
+import com.serverManagement.server.management.dao.rma.common.ProductValueDAO;
+import com.serverManagement.server.management.dao.rma.common.RmaAuditLogDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaRequestDAO;
+import com.serverManagement.server.management.dao.rma.common.TransporterDAO;
 import com.serverManagement.server.management.dto.rma.depot.DeliveryChallanRequest;
 import com.serverManagement.server.management.entity.rma.depot.DepotDispatchEntity;
 import com.serverManagement.server.management.entity.rma.common.ProductValueEntity;
@@ -77,7 +77,7 @@ public class RmaDepotService {
         // Update fields
         if (request.getTransporterId() != null && !request.getTransporterId().isEmpty()) {
 
-            java.util.Optional<TransporterEntity> transParams = java.util.Optional.empty();
+            Optional<TransporterEntity> transParams = Optional.empty();
             if (request.getTransporterName() != null) {
                 transParams = transporterDAO.findByName(request.getTransporterName());
             }

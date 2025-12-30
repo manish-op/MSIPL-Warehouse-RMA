@@ -1,6 +1,6 @@
 package com.serverManagement.server.management.controller.rma.common;
 
-import com.serverManagement.server.management.dao.rma.TransporterDAO;
+import com.serverManagement.server.management.dao.rma.common.TransporterDAO;
 import com.serverManagement.server.management.entity.rma.common.TransporterEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;

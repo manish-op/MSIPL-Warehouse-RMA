@@ -1,4 +1,4 @@
-package com.serverManagement.server.management.dao.rma;
+package com.serverManagement.server.management.dao.rma.common;
 
 import com.serverManagement.server.management.entity.rma.common.ProductValueEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

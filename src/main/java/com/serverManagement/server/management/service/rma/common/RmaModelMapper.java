@@ -12,6 +12,7 @@ import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
 import com.serverManagement.server.management.dto.rma.workflow.RmaItemWorkflowDTO;
 import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import com.serverManagement.server.management.entity.rma.request.RmaItemEntity;
+import com.serverManagement.server.management.dto.rma.depot.DepotDispatchItemDto;
 
 @Component
 public class RmaModelMapper {
@@ -117,6 +118,44 @@ public class RmaModelMapper {
             dto.setDeliveryNotes(item.getDeliveryNotes());
             dto.setIsDelivered(item.getDeliveredTo() != null); // Mark as delivered if deliveredTo is set
 
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+
+    /**
+     * Convert to Depot Dispatch DTO List with User Name population
+     */
+    public List<DepotDispatchItemDto> convertToDepotDTOList(List<RmaItemEntity> items) {
+        List<DepotDispatchItemDto> dtoList = new ArrayList<>();
+        Map<String, String> userEmailToNameMap = new HashMap<>();
+
+        for (RmaItemEntity item : items) {
+            DepotDispatchItemDto dto = DepotDispatchItemDto.fromEntity(item);
+
+            // Populate Created By User Name
+            if (item.getRmaRequest() != null) {
+                String creatorEmail = item.getRmaRequest().getCreatedByEmail();
+                if (creatorEmail != null && !creatorEmail.trim().isEmpty()) {
+                    String lowerEmail = creatorEmail.toLowerCase();
+                    if (userEmailToNameMap.containsKey(lowerEmail)) {
+                        dto.setUserName(userEmailToNameMap.get(lowerEmail));
+                    } else {
+                        try {
+                            AdminUserEntity user = adminUserDAO.findByEmail(lowerEmail);
+                            if (user != null) {
+                                userEmailToNameMap.put(lowerEmail, user.getName());
+                                dto.setUserName(user.getName());
+                            } else {
+                                userEmailToNameMap.put(lowerEmail, "Unknown");
+                                dto.setUserName("Unknown");
+                            }
+                        } catch (Exception e) {
+                            dto.setUserName("Unknown");
+                        }
+                    }
+                }
+            }
             dtoList.add(dto);
         }
         return dtoList;

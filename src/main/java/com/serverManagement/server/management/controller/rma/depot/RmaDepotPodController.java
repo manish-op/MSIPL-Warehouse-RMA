@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
-import com.serverManagement.server.management.dao.rma.DepotProofOfDeliveryDAO;
-import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
-import com.serverManagement.server.management.dao.rma.RmaItemDAO;
+import com.serverManagement.server.management.dao.rma.depot.DepotProofOfDeliveryDAO;
+import com.serverManagement.server.management.dao.rma.common.RmaAuditLogDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
 import com.serverManagement.server.management.dto.rma.depot.ProofOfDeliveryRequest;
 import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import com.serverManagement.server.management.entity.rma.depot.DepotProofOfDeliveryEntity;
@@ -58,6 +58,10 @@ public class RmaDepotPodController {
             loggedInUserName = loggedInUser != null ? loggedInUser.getName() : loggedInUserEmail;
         } catch (NullPointerException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        if (req.getItemId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Item ID is required");
         }
 
         RmaItemEntity item = rmaItemDAO.findById(req.getItemId()).orElse(null);

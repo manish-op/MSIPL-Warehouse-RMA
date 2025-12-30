@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -17,7 +18,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import java.io.InputStream;
 
 import com.serverManagement.server.management.entity.rma.depot.DepotDispatchEntity;
-import com.serverManagement.server.management.dao.rma.DepotDispatchDAO;
+import com.serverManagement.server.management.dao.rma.depot.DepotDispatchDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
@@ -37,7 +38,6 @@ public class RmaPdfService {
                 float yStart = 780;
                 float tableWidth = page.getMediaBox().getWidth() - 2 * margin;
                 float yPosition = yStart;
-                float bottomMargin = 70;
 
                 // Title
                 // Load Logo
@@ -221,7 +221,7 @@ public class RmaPdfService {
                         if (!exists) {
                             DepotDispatchEntity newDispatch = new DepotDispatchEntity();
                             newDispatch.setDcNo(finalDcNumber);
-                            newDispatch.setDispatchDate(java.time.ZonedDateTime.now());
+                            newDispatch.setDispatchDate(ZonedDateTime.now());
                             newDispatch.setCourierName("Local/Customer"); // Placeholder
                             depotDispatchDAO.save(newDispatch);
                         }
@@ -305,8 +305,6 @@ public class RmaPdfService {
                     contentStream.stroke();
                 }
                 drawTableScanline(contentStream, margin, currentY, tableWidth);
-
-                float headerBottomY = currentY;
 
                 // Draw Items
                 double totalAmount = 0;

@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
-import com.serverManagement.server.management.dao.rma.DepotDispatchDAO;
-import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
-import com.serverManagement.server.management.dao.rma.RmaItemDAO;
+import com.serverManagement.server.management.dao.rma.depot.DepotDispatchDAO;
+import com.serverManagement.server.management.dao.rma.common.RmaAuditLogDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
 import com.serverManagement.server.management.dto.rma.depot.DepotDispatchRequest;
 import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import com.serverManagement.server.management.entity.rma.common.RmaAuditLogEntity;

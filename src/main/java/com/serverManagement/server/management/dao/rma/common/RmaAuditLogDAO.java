@@ -1,4 +1,4 @@
-package com.serverManagement.server.management.dao.rma;
+package com.serverManagement.server.management.dao.rma.common;
 
 import java.util.List;
 

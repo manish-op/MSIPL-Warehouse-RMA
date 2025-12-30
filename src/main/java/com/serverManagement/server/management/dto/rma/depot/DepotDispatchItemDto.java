@@ -16,6 +16,7 @@ public class DepotDispatchItemDto {
     private String ewayBillNo;
 
     private String itemRmaNo;
+    private String userName;
 
     private ZonedDateTime dispatchedDate;
     private ZonedDateTime depotReturnDispatchDate;
@@ -207,5 +208,13 @@ public class DepotDispatchItemDto {
 
     public void setRepairStatus(String repairStatus) {
         this.repairStatus = repairStatus;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

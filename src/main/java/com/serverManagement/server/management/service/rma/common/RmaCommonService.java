@@ -1,18 +1,20 @@
 package com.serverManagement.server.management.service.rma.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.serverManagement.server.management.dao.rma.ProductValueDAO;
+import com.serverManagement.server.management.dao.rma.common.ProductValueDAO;
 import com.serverManagement.server.management.dto.rma.common.ProductModelDTO;
 import com.serverManagement.server.management.entity.rma.common.ProductValueEntity;
 import com.serverManagement.server.management.dao.keyword.KeywordDAO;
-import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
+import com.serverManagement.server.management.dao.rma.common.RmaAuditLogDAO;
 import com.serverManagement.server.management.dto.rma.common.ProductCatalogDTO;
 import com.serverManagement.server.management.entity.rma.common.RmaAuditLogEntity;
 
@@ -90,7 +92,7 @@ public class RmaCommonService {
      */
     public ResponseEntity<?> getProductRates(List<ProductModelDTO> items) {
         try {
-            java.util.Map<String, String> rates = new java.util.HashMap<>();
+            Map<String, String> rates = new HashMap<>();
             // Optimize: find all by (product, model) - but JPA might not support "IN"
             // tuples easily without custom query.
             // For now, iterate. If list is small (DC items usually < 20), it's fine.

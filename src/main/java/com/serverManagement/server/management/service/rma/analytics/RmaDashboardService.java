@@ -1,15 +1,23 @@
 package com.serverManagement.server.management.service.rma.analytics;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.serverManagement.server.management.dao.rma.RmaItemDAO;
-import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaRequestDAO;
 import com.serverManagement.server.management.dto.rma.dashboard.DailyTrendDto;
 import com.serverManagement.server.management.dto.rma.dashboard.RmaDashboardStatsDto;
 import com.serverManagement.server.management.dto.rma.dashboard.TatComplianceReportDto;
@@ -47,17 +55,17 @@ public class RmaDashboardService {
 
             // Create a map for quick lookups
             // Group by Date (YYYY-MM-DD)
-            java.util.Map<java.time.LocalDate, Long> requestsByDate = recentRequests.stream()
-                    .collect(java.util.stream.Collectors.groupingBy(
+            Map<LocalDate, Long> requestsByDate = recentRequests.stream()
+                    .collect(Collectors.groupingBy(
                             req -> req.getCreatedDate().withZoneSameInstant(now.getZone()).toLocalDate(),
-                            java.util.stream.Collectors.counting()));
+                            Collectors.counting()));
 
             // Iterate last 7 days to ensure all days are present even if 0 requests
-            java.time.format.DateTimeFormatter dayFormatter = java.time.format.DateTimeFormatter.ofPattern("EEE");
+            DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEE");
 
             for (int i = 6; i >= 0; i--) {
                 ZonedDateTime date = now.minusDays(i);
-                java.time.LocalDate localDate = date.toLocalDate();
+                LocalDate localDate = date.toLocalDate();
 
                 String dayName = date.format(dayFormatter); // Mon, Tue, etc.
                 long count = requestsByDate.getOrDefault(localDate, 0L);
@@ -76,7 +84,7 @@ public class RmaDashboardService {
                         .map(RmaItemEntity::getRmaNo)
                         .distinct()
                         .limit(10)
-                        .collect(java.util.stream.Collectors.toList());
+                        .collect(Collectors.toList());
             } catch (Exception e) {
                 // If failed to fetch, just return empty list
                 e.printStackTrace();
@@ -101,7 +109,7 @@ public class RmaDashboardService {
                 for (RmaRequestEntity req : allRequests) {
                     if (req.getTat() != null && req.getDueDate() != null) {
                         totalWithTat++;
-                        long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(now, req.getDueDate());
+                        long daysRemaining = ChronoUnit.DAYS.between(now, req.getDueDate());
                         int halfTat = req.getTat() / 2;
 
                         if (daysRemaining < 0) {
@@ -148,21 +156,20 @@ public class RmaDashboardService {
     /**
      * Get TAT Compliance Report - customer-wise breakdown
      */
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getTatComplianceReport() {
         try {
             List<RmaRequestEntity> allRequests = rmaRequestDAO.findAll();
             ZonedDateTime now = ZonedDateTime.now();
 
-            // Group requests by company name
-            java.util.Map<String, java.util.List<RmaRequestEntity>> requestsByCompany = allRequests.stream()
-                    .collect(java.util.stream.Collectors.groupingBy(RmaRequestEntity::getCompanyName));
+            Map<String, List<RmaRequestEntity>> requestsByCompany = allRequests.stream()
+                    .collect(Collectors.groupingBy(RmaRequestEntity::getCompanyName));
 
-            List<TatComplianceReportDto> report = new java.util.ArrayList<>();
+            List<TatComplianceReportDto> report = new ArrayList<>();
 
-            for (java.util.Map.Entry<String, java.util.List<RmaRequestEntity>> entry : requestsByCompany.entrySet()) {
+            for (Entry<String, List<RmaRequestEntity>> entry : requestsByCompany.entrySet()) {
                 String companyName = entry.getKey();
-                java.util.List<RmaRequestEntity> companyRequests = entry.getValue();
+                List<RmaRequestEntity> companyRequests = entry.getValue();
 
                 TatComplianceReportDto dto = new TatComplianceReportDto();
                 dto.setCompanyName(companyName);
@@ -225,7 +232,7 @@ public class RmaDashboardService {
                     } else {
                         // Still open
                         stillOpen++;
-                        long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(now, req.getDueDate());
+                        long daysRemaining = ChronoUnit.DAYS.between(now, req.getDueDate());
                         int halfTat = req.getTat() / 2;
 
                         if (daysRemaining < 0) {

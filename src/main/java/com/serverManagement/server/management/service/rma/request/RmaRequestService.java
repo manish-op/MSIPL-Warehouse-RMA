@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
-import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
-import com.serverManagement.server.management.dao.rma.RmaItemDAO;
-import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
+import com.serverManagement.server.management.dao.rma.common.RmaAuditLogDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaRequestDAO;
 import com.serverManagement.server.management.response.rma.RmaItemsGroupedResponse;
 import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import com.serverManagement.server.management.entity.rma.common.RmaAuditLogEntity;

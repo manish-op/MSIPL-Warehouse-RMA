@@ -6,6 +6,8 @@ import com.serverManagement.server.management.entity.options.ItemAvailableStatus
 import com.serverManagement.server.management.entity.rma.request.RmaItemEntity;
 import com.serverManagement.server.management.dao.itemDetails.ItemDetailsDAO;
 import com.serverManagement.server.management.dao.option.ItemAvailableStatusOptionDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,7 @@ public class ReplacementService {
     private ItemAvailableStatusOptionDAO statusRepo;
 
     @Autowired
-    private com.serverManagement.server.management.dao.rma.RmaItemDAO rmaItemDao;
+    private RmaItemDAO rmaItemDao;
 
     public List<ItemDetailsEntity> searchReplacementItems(String query) {
         return itemDao.searchAllItems(query);

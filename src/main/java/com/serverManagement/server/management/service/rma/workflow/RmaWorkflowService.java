@@ -2,7 +2,9 @@ package com.serverManagement.server.management.service.rma.workflow;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.serverManagement.server.management.dao.admin.user.AdminUserDAO;
-import com.serverManagement.server.management.dao.rma.RmaAuditLogDAO;
-import com.serverManagement.server.management.dao.rma.RmaItemDAO;
+import com.serverManagement.server.management.dao.rma.common.RmaAuditLogDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
 
 import com.serverManagement.server.management.entity.adminUser.AdminUserEntity;
 import com.serverManagement.server.management.entity.rma.common.RmaAuditLogEntity;
@@ -74,7 +76,7 @@ public class RmaWorkflowService {
                         }
                         return userRegionId.equals(creator.getRegionEntity().getId());
                     })
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
 
             return ResponseEntity.ok(rmaModelMapper.convertToItemDTOList(filteredItems));
         } catch (Exception e) {
@@ -352,7 +354,6 @@ public class RmaWorkflowService {
             item.setAssignedToName(newAssigneeName);
             item.setAssignedDate(ZonedDateTime.now());
             item.setLastReassignmentReason(reason);
-
             rmaItemDAO.save(item);
 
             RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
@@ -414,8 +415,7 @@ public class RmaWorkflowService {
             if (!isValidStatus) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Invalid status. Must be one of: " +
-                                java.util.Arrays
-                                        .toString(com.serverManagement.server.management.enums.RepairStatus.values()));
+                                Arrays.toString(com.serverManagement.server.management.enums.RepairStatus.values()));
             }
 
             if (issueFixed == null || issueFixed.trim().isEmpty()) {
@@ -746,7 +746,7 @@ public class RmaWorkflowService {
 
                     return true;
                 })
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     private String getClientIpAddress(HttpServletRequest request) {

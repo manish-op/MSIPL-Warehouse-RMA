@@ -608,6 +608,7 @@ export default function DepotDispatchPage() {
                               return 0;
                             })
                             .map(([rmaNo, rmaItems]) => {
+                              const firstItem = rmaItems[0];
                               const headerContentResponsive = (
                                 <div
                                   className="rma-collapse-header"
@@ -644,6 +645,20 @@ export default function DepotDispatchPage() {
                                             {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
                                           </Title>
                                         </div>
+                                        <Text
+                                          type="secondary"
+                                          style={{
+                                            fontSize: "12px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "4px",
+                                          }}
+                                        >
+                                          <span role="img" aria-label="user">
+                                            👤
+                                          </span>{" "}
+                                          {firstItem.userName || "Unknown"}
+                                        </Text>
                                         <Text
                                           type="secondary"
                                           style={{
@@ -876,6 +891,20 @@ export default function DepotDispatchPage() {
                                           {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
                                         </Title>
                                       </div>
+                                      <Text
+                                        type="secondary"
+                                        style={{
+                                          fontSize: "12px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                        }}
+                                      >
+                                        <span role="img" aria-label="user">
+                                          👤
+                                        </span>{" "}
+                                        {firstItem.userName || "Unknown"}
+                                      </Text>
                                       <Text
                                         type="secondary"
                                         style={{

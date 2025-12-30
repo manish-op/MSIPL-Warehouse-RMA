@@ -49,7 +49,47 @@ const RepairRequestFormWrapper = () => {
   return <RepairRequestForm formData={formData} items={items} onFormSubmit={() => { }} />;
 };
 
+// ⚠️ MAINTENANCE MODE TOGGLE - Set to true when deploying updates
+const MAINTENANCE_MODE = false;
+
+const MaintenancePage = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    flexDirection: 'column',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    fontFamily: 'Arial, sans-serif',
+    textAlign: 'center',
+    padding: '20px'
+  }}>
+    <div style={{
+      background: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: '20px',
+      padding: '40px 60px',
+      backdropFilter: 'blur(10px)',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+    }}>
+      <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔧</div>
+      <h1 style={{ margin: '0 0 15px 0', fontSize: '2.5rem' }}>Under Maintenance</h1>
+      <p style={{ margin: '0', fontSize: '1.2rem', opacity: 0.9 }}>
+        We're making improvements to serve you better.
+      </p>
+      <p style={{ margin: '10px 0 0 0', fontSize: '1rem', opacity: 0.7 }}>
+        Please check back shortly.
+      </p>
+    </div>
+  </div>
+);
+
 function App() {
+  // Show maintenance page when MAINTENANCE_MODE is true
+  if (MAINTENANCE_MODE) {
+    return <MaintenancePage />;
+  }
+
   return (
     <ThemeProvider>
       <div className="App">

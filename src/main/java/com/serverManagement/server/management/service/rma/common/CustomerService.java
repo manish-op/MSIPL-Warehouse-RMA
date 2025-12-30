@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.serverManagement.server.management.dao.rma.CustomerDAO;
+import com.serverManagement.server.management.dao.rma.common.CustomerDAO;
 import com.serverManagement.server.management.entity.rma.common.CustomerEntity;
 
 @Service
@@ -91,6 +91,9 @@ public class CustomerService {
      * Get customer by ID
      */
     public ResponseEntity<?> getCustomerById(Long id) {
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer ID is required");
+        }
         try {
             Optional<CustomerEntity> customer = customerDAO.findById(id);
             if (customer.isPresent()) {
@@ -109,6 +112,9 @@ public class CustomerService {
      */
     @Transactional
     public ResponseEntity<?> updateCustomer(Long id, CustomerEntity updatedCustomer) {
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer ID is required");
+        }
         try {
             Optional<CustomerEntity> existingOpt = customerDAO.findById(id);
             if (!existingOpt.isPresent()) {
