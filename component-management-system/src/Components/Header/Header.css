@@ -26,6 +26,11 @@
   font-size: 18px;
   font-weight: bold;
   color: var(--header-text);
+  transition: color 0.2s linear;
+}
+
+[data-theme='dark'] .companyName {
+  color: #e4e6eb !important;
 }
 
 .header-right {
