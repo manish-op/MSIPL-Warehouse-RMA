@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.serverManagement.server.management.request.rma.CreateRmaRequest;
 import com.serverManagement.server.management.service.rma.request.RmaExcelExportService;
 import com.serverManagement.server.management.service.rma.request.RmaRequestService;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -30,6 +31,9 @@ public class RmaRequestController {
 
     @Autowired
     private RmaExcelExportService excelExportService;
+
+    @Autowired
+    private RmaItemDAO rmaItemDAO;
 
     @GetMapping("/requests")
     public ResponseEntity<?> getAllRmaRequests(@RequestParam(name = "timeFilter", required = false) String timeFilter) {
@@ -81,6 +85,26 @@ public class RmaRequestController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Failed to export Excel: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/serial-history")
+    public ResponseEntity<?> getSerialHistory(@RequestParam String serialNo) {
+        try {
+            return rmaRequestService.getSerialHistory(serialNo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/raw-history")
+    public ResponseEntity<?> getRawHistory(@RequestParam String serialNo) {
+        try {
+            return ResponseEntity.ok(rmaItemDAO.findBySerialNoIgnoreCaseOrderByIdDesc(serialNo));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
     }
 }

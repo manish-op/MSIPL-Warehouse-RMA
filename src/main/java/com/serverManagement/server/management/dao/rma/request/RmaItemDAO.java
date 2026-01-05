@@ -105,6 +105,10 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     @Query("SELECT r FROM RmaItemEntity r WHERE r.isDispatched = true AND r.deliveryConfirmedDate IS NULL")
     List<RmaItemEntity> findDispatchedPendingDelivery();
 
+    // Find all items with a specific serial number for history (ordered by newest
+    // first, case-insensitive)
+    List<RmaItemEntity> findBySerialNoIgnoreCaseOrderByIdDesc(String serialNo);
+
     // Search items by Product or Serial Number (case-insensitive)
     @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.product) LIKE LOWER(:query) OR LOWER(r.serialNo) LIKE LOWER(:query)")
     List<RmaItemEntity> searchItems(@Param("query") String query);

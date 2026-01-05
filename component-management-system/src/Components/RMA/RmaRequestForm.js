@@ -66,6 +66,51 @@ function RmaRequestForm() {
   const [customerOptions, setCustomerOptions] = useState([]);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
 
+  //for serial history
+  const [serialHistory, setSerialHistory] = useState([]);
+  const [serialHistoryVisible, setSerialHistoryVisible] = useState(false);
+  const [serialChecking, setSerialChecking] = useState(false);
+
+  //handler for serial history
+  const handleSerialBlur = async(name) =>{
+    console.log("DEBUG: handleSerialBlur triggered for item name/index:", name);
+    
+    // Use the name path from the Form.List to get the specific item's serial number
+    const serialNo = form.getFieldValue(["items", name, "serialNo"])?.toString()?.trim();
+    console.log("DEBUG: Retrieved serialNo:", serialNo);
+    
+    if(!serialNo || serialNo.length < 1) {
+      console.log("DEBUG: serialNo is empty, skipping check");
+      return;
+    }
+
+    setSerialChecking(true);
+    try{
+      console.log(`DEBUG: Fetching history for serialNo: ${serialNo}`);
+      const res = await RmaApi.getSerialHistory(serialNo);
+      console.log("DEBUG: Response from serial-history API:", res);
+      
+      if(res.success){
+        if(Array.isArray(res.data) && res.data.length > 0){
+          console.log(`DEBUG: Found ${res.data.length} history records`);
+          setSerialHistory(res.data);
+          setSerialHistoryVisible(true);
+          message.warning(`Previous history found for Serial No. ${serialNo}`);
+        } else {
+          console.log("DEBUG: No history found for this serial number");
+        }
+      } else {
+        console.error("DEBUG: Serial history API failure:", res.error);
+        // Show silent notification if it fails to help debug
+        if(res.error) message.debug ? message.debug(res.error) : console.warn("API Error:", res.error);
+      }
+    } catch(error) {
+      console.error("DEBUG: Serial history check exception:", error);
+    } finally {
+      setSerialChecking(false);
+    }
+  };
+
   const navigate = useNavigate();
 
   // Fetch product catalog from backend
@@ -189,19 +234,24 @@ function RmaRequestForm() {
   };
 
   // Product selection handler - auto-fill model
-  const handleProductSelect = (val, index) => {
+  const handleProductSelect = (val, name) => {
     // Select with mode="tags" returns an array
     const value = Array.isArray(val) ? val[0] : val;
     if (!value) return;
 
     const product = productCatalog.find(p => p.name === value);
+    
+    // Get current items and update specifically using name index
     const items = form.getFieldValue("items") || [];
+    
+    // Ensure the item object at 'name' exists
+    if (!items[name]) items[name] = {};
 
     // Keep as array because Select mode="tags" requires array value
-    items[index] = { ...items[index], product: Array.isArray(val) ? val : [val] };
+    items[name] = { ...items[name], product: Array.isArray(val) ? val : [val] };
 
     if (product && (product.model || product.partNo)) {
-      items[index].partNo = product.model || product.partNo || "";
+      items[name].partNo = product.model || product.partNo || "";
     }
     form.setFieldsValue({ items });
   };
@@ -744,7 +794,7 @@ function RmaRequestForm() {
                                 maxCount={1}
                                 showSearch
                                 loading={loadingProducts}
-                                onChange={(val) => handleProductSelect(val, index)}
+                                onChange={(val) => handleProductSelect(val, name)}
                                 filterOption={(input, option) => {
                                   const label = option.children?.[0] || option.value || "";
                                   return label.toString().toLowerCase().includes(input.toLowerCase());
@@ -775,7 +825,14 @@ function RmaRequestForm() {
                               name={[name, "serialNo"]}
                               tooltip="Optional - leave blank for accessories without serial numbers"
                             >
-                              <Input placeholder="Enter serial number " size="large" />
+                              <Input placeholder="Enter serial number " 
+                              size="large" 
+                              onBlur={()=>{
+                                console.log("onBlur event fired for serial number at name:", name);
+                                handleSerialBlur(name);
+                              }}
+                              suffix={serialChecking ? "..." : null}
+                              />
                             </Form.Item>
                           </Col>
                         </Row>
@@ -1066,6 +1123,132 @@ function RmaRequestForm() {
           </div>
         </Modal>
       </div>
+      <Modal
+        title={
+          <Space>
+            <FileSearchOutlined style={{ color: '#1890ff' }} />
+            <span>Serial Number History</span>
+          </Space>
+        }
+        open={serialHistoryVisible}
+        onCancel={() => setSerialHistoryVisible(false)}
+        footer={[
+          <Button key="close" type="primary" onClick={() => setSerialHistoryVisible(false)}>
+            Got it
+          </Button>
+        ]}
+        width={700}
+        centered
+        className="serial-history-modal"
+      >
+        <Paragraph type="secondary" style={{ marginBottom: 16 }}>
+          Historical records found for this serial number in the system.
+        </Paragraph>
+        
+        {serialHistory.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <InboxOutlined style={{ fontSize: 32, color: '#d9d9d9', marginBottom: 8 }} />
+            <Text type="secondary">No previous records found for this serial number.</Text>
+          </div>
+        ) : (
+          <div className="history-box">
+            {serialHistory.map((h, idx) => (
+              <Card 
+                key={idx} 
+                size="small" 
+                className="history-card"
+                title={
+                  <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                    <Col>
+                      <Text strong style={{ color: '#003a8c' }}>{h.rmaNo}</Text>
+                      <Text type="secondary" style={{ fontSize: 10, marginLeft: 8 }}>
+                        Record ID: #{h.itemId || "MISSING"}
+                      </Text>
+                    </Col>
+                    <Col>
+                      <Text type="secondary" style={{ fontSize: '12px' }}>{h.createdDate}</Text>
+                    </Col>
+                  </Row>
+                }
+              >
+                <Space direction="vertical" style={{ width: "100%" }} size={4}>
+                  <Row align="middle" gutter={8}>
+                    <Col>
+                      <Tag color="cyan">{h.currentStatus || "NO_STATUS"}</Tag>
+                    </Col>
+                    {h.repairStatus && (
+                      <Col>
+                        <Tag color="green" style={{ fontWeight: 600 }}>{h.repairStatus}</Tag>
+                      </Col>
+                    )}
+                    {h.depotStage && (
+                      <Col>
+                        <Tag color="purple">{h.depotStage}</Tag>
+                      </Col>
+                    )}
+                    <Col>
+                      <Tag color="orange" style={{ fontSize: 10 }}>DEBUG: {h.serialNo}</Tag>
+                    </Col>
+                  </Row>
+
+                  <div style={{ marginTop: 8 }}>
+                    <Text strong style={{ fontSize: 15 }}>{h.product}</Text>
+                    {h.model && <Text type="secondary" style={{ marginLeft: 8 }}>({h.model})</Text>}
+                  </div>
+
+                  <div style={{ color: 'rgba(0,0,0,0.65)', fontSize: 13, marginBottom: 8 }}>
+                    <UserOutlined style={{ marginRight: 4, color: '#1890ff' }} />
+                    <Text strong>{h.customerName}</Text>
+                  </div>
+
+                  <Divider style={{ margin: '8px 0' }} />
+
+                  <Row gutter={16}>
+                    <Col span={12}>
+                      <Space direction="vertical" size={0}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>ASSIGNED TO</Text>
+                        <Text strong style={{ fontSize: 13 }}>{h.assignedTechnician || "N/A"}</Text>
+                      </Space>
+                    </Col>
+                    <Col span={12}>
+                      <Space direction="vertical" size={0}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>REPAIRED BY</Text>
+                        <Text strong style={{ fontSize: 13 }}>{h.repairedBy || "N/A"}</Text>
+                        {h.repairedDate && <Text type="secondary" style={{ fontSize: 10 }}>on {h.repairedDate}</Text>}
+                      </Space>
+                    </Col>
+                  </Row>
+
+                  <div style={{ marginTop: 12 }}>
+                    <Text type="secondary" style={{ fontSize: 11 }}>FAULT DESCRIPTION</Text>
+                    <Paragraph style={{ margin: 0, fontSize: 13 }}>{h.faultDescription}</Paragraph>
+                  </div>
+
+                  {h.issueFixed && h.issueFixed !== "N/A" && (
+                    <div className="issue-fixed-box">
+                      <Text strong style={{ color: '#389e0d', fontSize: 11 }}>ISSUE FIXED / ACTION TAKEN</Text>
+                      <Paragraph style={{ margin: 0, fontSize: 13 }}>{h.issueFixed}</Paragraph>
+                    </div>
+                  )}
+
+                  <div style={{ 
+                    marginTop: 8, 
+                    backgroundColor: 'rgba(0,0,0,0.02)', 
+                    padding: '8px', 
+                    borderRadius: 4,
+                    borderLeft: '3px solid #faad14'
+                  }}>
+                    <Text strong style={{ fontSize: 11, color: '#d46b08' }}>TECHNICIAN REMARKS</Text>
+                    <Paragraph style={{ marginBottom: 0, marginTop: 4, fontSize: 13, fontStyle: 'italic' }}>
+                      {h.repairRemarks || "No remarks provided."}
+                    </Paragraph>
+                  </div>
+                </Space>
+              </Card>
+            ))}
+          </div>
+        )}
+      </Modal>
     </RmaLayout >
   );
 }

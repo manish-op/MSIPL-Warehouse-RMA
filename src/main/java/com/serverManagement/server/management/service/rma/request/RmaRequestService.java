@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -472,6 +475,83 @@ public class RmaRequestService {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to search items: " + e.getMessage());
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getSerialHistory(String serialNo) {
+        try {
+            if (serialNo == null || serialNo.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Serial number cannot be empty");
+            }
+            System.out.println("DEBUG: Fetching serial history for: " + serialNo);
+            List<RmaItemEntity> items = rmaItemDAO.findBySerialNoIgnoreCaseOrderByIdDesc(serialNo.trim());
+            System.out.println("DEBUG: Found items: " + (items != null ? items.size() : 0));
+
+            List<Map<String, Object>> history = new ArrayList<>();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+
+            for (RmaItemEntity item : items) {
+                Map<String, Object> h = new HashMap<>();
+                RmaRequestEntity req = item.getRmaRequest();
+
+                if (req == null) {
+                    System.out.println("DEBUG: Skipping item ID " + item.getId() + " because RmaRequest is null");
+                    continue;
+                }
+
+                String rmaNum = req.getRmaNo() != null ? req.getRmaNo() : req.getRequestNumber();
+                if (rmaNum != null && rmaNum.toUpperCase().startsWith("RMA")) {
+                    h.put("rmaNo", rmaNum);
+                } else {
+                    h.put("rmaNo", "RMA " + rmaNum);
+                }
+
+                h.put("itemId", item.getId());
+                h.put("currentStatus", item.getRmaStatus());
+                h.put("repairStatus", item.getRepairStatus());
+                h.put("depotStage", item.getDepotStage() != null ? item.getDepotStage() : item.getLocalStage());
+                h.put("product", item.getProduct());
+                h.put("model", item.getModel());
+                h.put("serialNo", item.getSerialNo());
+                h.put("createdDate", req.getCreatedDate() != null ? req.getCreatedDate().format(formatter) : "N/A");
+                h.put("repairedDate", item.getRepairedDate() != null ? item.getRepairedDate().format(formatter) : null);
+                h.put("customerName", req.getCompanyName());
+                h.put("faultDescription", item.getFaultDescription());
+                h.put("issueFixed", item.getIssueFixed() != null ? item.getIssueFixed() : "N/A");
+
+                // Logic for technician names with email fallback
+                String assignedName = item.getAssignedToName();
+                String assignedEmail = item.getAssignedToEmail();
+
+                if (isBlank(assignedName)) {
+                    assignedName = assignedEmail;
+                }
+                h.put("assignedTechnician", !isBlank(assignedName) ? assignedName : "N/A");
+
+                String repairedName = item.getRepairedByName();
+                String repairedEmail = item.getRepairedByEmail();
+
+                if (isBlank(repairedName)) {
+                    repairedName = repairedEmail;
+                }
+                h.put("repairedBy", !isBlank(repairedName) ? repairedName : "N/A");
+
+                // Fallback for remarks
+                String repairs = item.getRepairRemarks();
+                if (isBlank(repairs)) {
+                    repairs = item.getRemarks(); // Fallback to general remarks
+                }
+                h.put("repairRemarks", !isBlank(repairs) ? repairs : "N/A");
+
+                history.add(h);
+            }
+
+            return ResponseEntity.ok(history);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching serial history: " + e.getMessage());
         }
     }
 

@@ -522,3 +522,64 @@ html[data-theme='dark'] .rma-wizard-container .ant-form-item-explain-error,
 [data-theme='dark'] .rma-number-card .ant-typography strong {
   color: #fff !important;
 }
+
+/* SERIAL HISTORY POPUP STYLES */
+.history-box {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.history-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s;
+  overflow: hidden;
+}
+
+.history-card .ant-card-head {
+  background: #e6f7ff;
+  border-bottom: 1px solid #d9d9d9;
+  min-height: 40px;
+}
+
+.history-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: #1890ff;
+}
+
+.issue-fixed-box {
+  margin-top: 8px;
+  padding: 10px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 6px;
+}
+
+[data-theme='dark'] .history-box {
+  background: #1f1f1f !important;
+  border: 1px solid #303030;
+}
+
+[data-theme='dark'] .history-card {
+  background: #141414 !important;
+  border-color: #303030 !important;
+}
+
+[data-theme='dark'] .history-card .ant-card-head {
+  background: #1f1f1f !important;
+  border-bottom-color: #303030 !important;
+}
+
+[data-theme='dark'] .history-card:hover {
+  border-color: #177ddc !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme='dark'] .issue-fixed-box {
+  background: #132313 !important;
+  border-color: #237804 !important;
+}

@@ -1,6 +1,6 @@
 import { message } from "antd";
 import { URL } from "../URL";
-import { getAuthToken } from "./ApiClient";
+import { getAuthToken, apiGet } from "./ApiClient";
 
 export const RmaRequestApi = {
     createRmaRequest: async (rmaData) => {
@@ -35,4 +35,8 @@ export const RmaRequestApi = {
             return { success: false, error: error.message };
         }
     },
+    //serial no history
+    getSerialHistory: async (serialNo) => {
+        return apiGet(`/rma/serial-history?serialNo=${encodeURIComponent(serialNo)}`);
+    }
 };
