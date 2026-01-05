@@ -1,14 +1,14 @@
 :root{
-  --bg-1: linear-gradient(135deg, #1f3b57 0%, #316a9c 100%);
-  --card-bg: rgba(255,255,255,0.98);
+  --bg-1: url('../../images/office.png') no-repeat center center fixed;
+  --card-bg: rgba(255,255,255,0.75);
   --accent: #316a9c;
   --accent-2: #468ac0;
   --text-color: #0f1720;
 }
 
 [data-theme='dark'] {
-  --bg-1: linear-gradient(135deg, #18191a 0%, #242526 100%);
-  --card-bg: #242526;
+  --bg-1: url('../../images/office.png') no-repeat center center fixed;
+  --card-bg: rgba(36, 37, 38, 0.75);
   --text-color: #e4e6eb;
   --accent: #4b5d75;
   --accent-2: #60738f;
@@ -37,6 +37,7 @@
   justify-content:center;
   align-items:center;
   background: var(--bg-1);
+  background-size: cover;
   min-height: calc(100vh - 100px);
   padding: 24px;
 }
@@ -51,6 +52,8 @@
   text-align:center;
   transition: transform 220ms ease, box-shadow 220ms ease;
   color: var(--text-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .login-card:hover{
