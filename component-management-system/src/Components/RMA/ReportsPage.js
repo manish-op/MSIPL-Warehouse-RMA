@@ -210,46 +210,57 @@ const ReportsPage = () => {
     return (
         <RmaLayout>
             <div className="reports-page">
-                <div className="reports-header">
-                    <Title level={2}>
-                        <FileTextOutlined /> RMA Reports
-                    </Title>
-                    <Text type="secondary">
-                        Generate comprehensive PDF reports on various RMA aspects
-                    </Text>
+                {/* Standard Header */}
+                <div className="reports-header-container">
+                    <div className="header-content">
+                        <div className="header-title">
+                            <FileTextOutlined className="header-icon" />
+                            <div>
+                                <Title level={2} style={{ margin: 0 }}>
+                                    RMA Reports
+                                </Title>
+                                <Text type="secondary">
+                                    Generate comprehensive PDF reports on various RMA aspects
+                                </Text>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Report Type Selection Glass Container */}
-                <div className="glass-container reports-section">
-                    <Title level={4}>Select Report Type</Title>
-                    <Row gutter={[16, 16]}>
-                        {REPORT_TYPES.map((report) => (
-                            <Col xs={24} sm={12} md={8} lg={6} key={report.key}>
-                                <Card
-                                    hoverable
-                                    className={`report-card ${selectedReport === report.key ? "selected" : ""}`}
-                                    onClick={() => handleReportCardClick(report.key)}
-                                // Removed inline border color to let CSS handle themes
-                                >
-                                    <div className="report-card-icon" style={{ color: report.color }}>
-                                        {report.icon}
-                                    </div>
-                                    <div className="report-card-content">
-                                        <Text strong>{report.label}</Text>
-                                        <Text type="secondary" className="report-description">
-                                            {report.description}
-                                        </Text>
-                                    </div>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                </div>
+                <div className="reports-content">
+                    {/* Report Type Selection */}
+                    <div className="reports-section-container">
+                        <Title level={4}>Select Report Type</Title>
+                        <Row gutter={[16, 16]}>
+                            {REPORT_TYPES.map((report) => (
+                                <Col xs={24} sm={12} md={8} lg={6} key={report.key}>
+                                    <Card
+                                        hoverable
+                                        className={`report-card ${selectedReport === report.key ? "selected" : ""}`}
+                                        onClick={() => handleReportCardClick(report.key)}
+                                        bordered={false} // Handled by CSS
+                                    >
+                                        <div className="report-card-icon" style={{ color: selectedReport === report.key ? undefined : report.color }}>
+                                            {report.icon}
+                                        </div>
+                                        <div className="report-card-content">
+                                            <Text strong>{report.label}</Text>
+                                            <div style={{ marginTop: 8 }}>
+                                                <Text type="secondary" className="report-description">
+                                                    {report.description}
+                                                </Text>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                    </div>
 
-                {/* Filters and Controls Glass Container */}
-                <div className="glass-container controls-container">
-                    <Title level={4} style={{ marginBottom: 16 }}>Configuration & Actions</Title>
-                    <Row gutter={[24, 16]} align="bottom">
+                    {/* Filters and Controls */}
+                    <div className="reports-section-container controls-container">
+                        <Title level={4} style={{ marginBottom: 16 }}>Configuration & Actions</Title>
+                        <Row gutter={[24, 16]} align="bottom">
                         <Col xs={24} md={8} lg={8}>
                             <div className="filter-group">
                                 <Text strong>Report Type:</Text>
@@ -348,6 +359,7 @@ const ReportsPage = () => {
                         />
                     )}
                 </Modal>
+            </div>
             </div>
         </RmaLayout>
     );

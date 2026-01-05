@@ -25,7 +25,7 @@
 .companyName {
   font-size: 18px;
   font-weight: bold;
-  color: var(--header-text);
+  color: #ffffff; /* Compel white text against dark header */
   transition: color 0.2s linear;
 }
 
