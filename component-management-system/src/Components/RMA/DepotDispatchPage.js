@@ -620,7 +620,7 @@ export default function DepotDispatchPage() {
                                     style={{ width: "100%" }}
                                   >
                                     {/* Column 1: RMA Identity */}
-                                    <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                                    <Col xs={24} sm={12} md={8} lg={7} xl={6}>
                                       <div
                                         style={{
                                           display: "flex",
@@ -638,8 +638,7 @@ export default function DepotDispatchPage() {
                                             level={5}
                                             style={{
                                               margin: 0,
-                                              color: "#1890ff",
-                                              whiteSpace: "nowrap",
+                                              color: "var(--primary-color)",
                                             }}
                                           >
                                             {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
@@ -670,7 +669,7 @@ export default function DepotDispatchPage() {
                                         >
                                           <Badge
                                             count={rmaItems.length}
-                                            style={{ backgroundColor: "#52c41a" }}
+                                            style={{ backgroundColor: "var(--status-success)" }}
                                             showZero
                                           />{" "}
                                           Items
@@ -679,7 +678,7 @@ export default function DepotDispatchPage() {
                                     </Col>
 
                                     {/* Column 2: Status/Info placeholder */}
-                                    <Col xs={12} sm={12} md={8} lg={8} xl={8}>
+                                    <Col xs={12} sm={12} md={5} lg={5} xl={4}>
                                       <div
                                         style={{
                                           display: "flex",
@@ -698,10 +697,10 @@ export default function DepotDispatchPage() {
                                     <Col
                                       xs={24}
                                       sm={24}
-                                      md={10}
-                                      lg={10}
-                                      xl={10}
-                                      style={{ display: "flex", justifyContent: "flex-end" }}
+                                      md={11}
+                                      lg={12}
+                                      xl={14}
+                                      style={{ display: "flex", justifyContent: "flex-end", paddingRight: "24px" }}
                                     >
                                       <div
                                         className="header-actions"
@@ -866,7 +865,7 @@ export default function DepotDispatchPage() {
                                   style={{ width: "100%" }}
                                 >
                                   {/* Column 1: RMA Identity */}
-                                  <Col xs={24} sm={12} md={6} lg={6} xl={4}>
+                                  <Col xs={24} sm={12} md={8} lg={7} xl={6}>
                                     <div
                                       style={{
                                         display: "flex",
@@ -884,8 +883,7 @@ export default function DepotDispatchPage() {
                                           level={5}
                                           style={{
                                             margin: 0,
-                                            color: "#1890ff",
-                                            whiteSpace: "nowrap",
+                                            color: "var(--primary-color)",
                                           }}
                                         >
                                           {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
@@ -916,7 +914,7 @@ export default function DepotDispatchPage() {
                                       >
                                         <Badge
                                           count={rmaItems.length}
-                                          style={{ backgroundColor: "#52c41a" }}
+                                          style={{ backgroundColor: "var(--status-success)" }}
                                           showZero
                                         />{" "}
                                         Items
@@ -925,7 +923,7 @@ export default function DepotDispatchPage() {
                                   </Col>
 
                                   {/* Column 2: DC Info */}
-                                  <Col xs={12} sm={12} md={6} lg={6} xl={5}>
+                                  <Col xs={12} sm={12} md={5} lg={5} xl={4}>
                                     <div
                                       style={{
                                         display: "flex",
@@ -944,7 +942,7 @@ export default function DepotDispatchPage() {
                                   </Col>
 
                                   {/* Column 3: Transit Status */}
-                                  <Col xs={12} sm={8} md={6} lg={6} xl={5}>
+                                  <Col xs={12} sm={8} md={3} lg={3} xl={2}>
                                     <div
                                       style={{
                                         display: "flex",
@@ -967,10 +965,10 @@ export default function DepotDispatchPage() {
                                   <Col
                                     xs={24}
                                     sm={24}
-                                    md={6}
-                                    lg={6}
-                                    xl={10}
-                                    style={{ display: "flex", justifyContent: "flex-end" }}
+                                    md={8}
+                                    lg={9}
+                                    xl={12}
+                                    style={{ display: "flex", justifyContent: "flex-end", paddingRight: "24px" }}
                                   >
                                     <div
                                       className="header-actions"

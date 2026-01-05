@@ -1,7 +1,7 @@
 /* Depot Dispatch Page Styles - Lighter Pink/Lilac Theme */
 .depot-page {
   min-height: 100%;
-  background: #f0f2f5;
+  background: var(--background-color);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
@@ -10,11 +10,11 @@
 /* Was #b37feb 0%, #722ed1 100% */
 /* Now #d3adf7 0%, #9254de 100% (Two grades lighter in Ant Design palette approx) */
 .depot-header {
-  background: linear-gradient(135deg, #d3adf7 0%, #9254de 100%);
+  background: var(--header-depot-grad);
   padding: 24px 32px;
   border-radius: 0 0 24px 24px;
-  box-shadow: 0 4px 20px rgba(114, 46, 209, 0.2);
-  /* Softer shadow */
+  box-shadow: var(--card-shadow);
+  margin-bottom: 24px;
 }
 
 .header-content {
@@ -105,13 +105,12 @@
 }
 
 .depot-content .ant-tabs-tab-active {
-  color: #9254de !important;
-  /* Lighter Violet */
+  color: var(--primary-color) !important;
   font-weight: 600;
 }
 
 .depot-content .ant-tabs-ink-bar {
-  background: #9254de !important;
+  background: var(--primary-color) !important;
 }
 
 /* RMA Groups */
@@ -124,14 +123,14 @@
 .rma-group-card {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(146, 84, 222, 0.08);
-  /* Lighter shadow */
-  border: none;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  background: var(--component-background);
 }
 
 .rma-group-card .ant-card-head {
-  background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%);
-  border-bottom: 1px solid #e9d8fd;
+  background: var(--secondary-bg);
+  border-bottom: 1px solid var(--border-color);
   padding: 16px 24px;
 }
 
@@ -141,46 +140,125 @@
   gap: 12px;
 }
 
+.rma-panel {
+  background: var(--card-bg) !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--card-head-border) !important;
+  overflow: hidden !important;
+  margin-bottom: 16px !important;
+}
+
+[data-theme='dark'] .rma-panel {
+  background: var(--component-background) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .rma-panel .ant-collapse-content {
+  background-color: var(--component-background) !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.rma-collapse-header {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding-right: 24px !important; /* Space for the expand icon */
+}
+
 /* Item Cards */
-.item-card {
+.item-card, .rma-item-card-modern {
   border-radius: 12px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
   height: 100%;
-}
-
-.item-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(146, 84, 222, 0.12);
-  border-color: #d3adf7;
-}
-
-.item-card .ant-card-head {
-  min-height: 48px;
-  padding: 0 16px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.item-card .ant-card-head-title {
-  padding: 12px 0;
-  font-size: 14px;
-}
-
-.item-content {
+  background: var(--component-background);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 4px 0;
 }
 
-.item-row {
+.item-card:hover, .rma-item-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(146, 84, 222, 0.12);
+  border-color: var(--primary-color);
+}
+
+[data-theme='dark'] .item-card, [data-theme='dark'] .rma-item-card-modern {
+  background: #1f1f1f !important;
+  border-color: #303030 !important;
+}
+
+.item-card .ant-card-head, .rma-item-card-modern .item-header {
+  min-height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--secondary-bg);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
-.item-row .ant-typography-secondary {
-  font-size: 12px;
+.item-product, .item-card .ant-card-head-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--primary-color);
+}
+
+.item-content, .item-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+}
+
+.item-row, .detail-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-row .ant-typography-secondary, .detail-box .label {
+  font-size: 11px;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.item-row span, .detail-box .value {
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.value.monospace {
+  font-family: 'Consolas', monospace;
+  background: var(--hover-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.fault-box {
+  margin: 0 16px 16px 16px;
+  padding: 12px;
+  background: var(--hover-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.fault-box .label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.item-footer {
+  padding: 12px 16px;
+  background: var(--secondary-bg);
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
 }
 
 /* Custom Buttons */
@@ -210,8 +288,8 @@
 .in-transit-box {
   margin-bottom: 20px;
   padding: 16px;
-  background: #f9f0ff;
-  border: 1px solid #d3adf7;
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -221,7 +299,7 @@
 .loading-container {
   padding: 80px 0;
   text-align: center;
-  background: #fff;
+  background: var(--component-background);
   border-radius: 16px;
 }
 
@@ -247,8 +325,8 @@
   border: 1px solid #303030;
 }
 
-[data-theme="dark"] .rma-group-card .ant-card-head {
-  background: linear-gradient(135deg, #003a8c 0%, #002766 100%) !important;
+[data-theme='dark'] .rma-group-card .ant-card-head {
+  background: var(--secondary-bg) !important;
 }
 
 /* Fix Tabs Visibility */

@@ -12,7 +12,10 @@ import {
     Divider,
     Button,
     Modal,
-    Select
+    Select,
+    Tabs,
+    Collapse,
+    Tooltip
 } from "antd";
 import {
     WarningOutlined,
@@ -21,7 +24,11 @@ import {
     ReloadOutlined,
     SafetyCertificateOutlined,
     BarcodeOutlined,
-    InfoCircleOutlined
+    InfoCircleOutlined,
+    CheckCircleOutlined,
+    HistoryOutlined,
+    UserOutlined,
+    CalendarOutlined
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA";
 import RmaLayout from "../RMA/RmaLayout";
@@ -31,9 +38,12 @@ import { URL } from "../API/URL";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
+const { Panel } = Collapse;
 
 export default function CantBeRepairedPage() {
-    const [items, setItems] = useState([]);
+    const [pendingItems, setPendingItems] = useState([]);
+    const [replacedItems, setReplacedItems] = useState([]);
+    const [activeTab, setActiveTab] = useState("1");
     const [loading, setLoading] = useState(false);
 
     // --- NEW STATE FOR POPUPS ---
@@ -55,15 +65,44 @@ export default function CantBeRepairedPage() {
 
     const loadItems = async () => {
         setLoading(true);
-        const result = await RmaApi.getCantBeRepairedItems();
-        if (result.success) {
-            // Filter out BER items (they are now moved to Local Repaired / Local Dispatch)
-            const filteredItems = (result.data || []).filter(item => item.repairStatus !== "BER");
-            setItems(filteredItems);
-        } else {
+        try {
+            const result = await RmaApi.getCantBeRepairedItems();
+            if (result.success) {
+                const allItems = result.data || [];
+                // Pending: repairStatus !== 'REPLACED' (and usually BER in this context, but API might return others)
+                // Filter out BER if they are handled elsewhere? No, CantBeRepaired page is specifically for BER/Replacement flow.
+                // However, previous code filtered OUT "BER" items? 
+                // Line 61: const filteredItems = (result.data || []).filter(item => item.repairStatus !== "BER");
+                // Wait, if BER items are moved to RepairedPage, then what is left here?
+                // Let's re-read line 61 of original file: "const filteredItems = (result.data || []).filter(item => item.repairStatus !== "BER");"
+                // This is confusing. If I filter out BER, and the page is "Can't Be Repaired"...
+                // Ah, maybe they are "UNREPAIRED" or something?
+                // Let's look at RepairedPage.js loadItems:
+                /* 
+                if (cantRepairedResult.success) {
+                    const berItems = (cantRepairedResult.data || []).filter(item =>
+                        item.repairStatus === "BER" && item.isDispatched !== true
+                    );
+                    allLocalItems = [...allLocalItems, ...berItems];
+                }
+                */
+                // So "BER" items ARE in RepairedPage too.
+                // In CantBeRepairedPage, we process them. Once processed, they might become "REPLACED".
+                
+                const pending = allItems.filter(item => item.repairStatus !== 'REPLACED');
+                const replaced = allItems.filter(item => item.repairStatus === 'REPLACED');
+                
+                setPendingItems(pending);
+                setReplacedItems(replaced);
+            } else {
+                message.error("Failed to load items");
+            }
+        } catch (error) {
+            console.error("Load items error:", error);
             message.error("Failed to load items");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     useEffect(() => {
@@ -174,39 +213,176 @@ export default function CantBeRepairedPage() {
         }
     };
 
-    // Group items
-    const groupedItems = items.reduce((acc, item) => {
-        const rmaNo = item.rmaNo || "Unknown";
-        if (!acc[rmaNo]) {
-            acc[rmaNo] = [];
-        }
-        acc[rmaNo].push(item);
-        return acc;
-    }, {});
+    // Grouping logic
+    const groupItemsByRma = (itemsList) => {
+        return itemsList.reduce((acc, item) => {
+            const rmaNo = item.rmaNo || "Unknown";
+            if (!acc[rmaNo]) acc[rmaNo] = [];
+            acc[rmaNo].push(item);
+            return acc;
+        }, {});
+    };
 
-    const totalRmaRequests = Object.keys(groupedItems).length;
-    const totalItems = items.length;
+    const groupedPending = groupItemsByRma(pendingItems);
+    const groupedReplaced = groupItemsByRma(replacedItems);
+
+    const totalPendingRma = Object.keys(groupedPending).length;
+    const totalPendingItems = pendingItems.length;
+    const totalReplacedItems = replacedItems.length;
+
+    const renderRmaCollapse = (groupedData, isHistory = false) => {
+        if (Object.keys(groupedData).length === 0) {
+            return <Empty description={isHistory ? "No replacement history found" : "No pending replacements found"} />;
+        }
+
+        return (
+            <Collapse
+                className="rma-collapse"
+                defaultActiveKey={[]}
+                expandIconPosition="end"
+                ghost
+            >
+                {Object.entries(groupedData).map(([rmaNo, rmaItems]) => {
+                    const firstItem = rmaItems[0];
+                    const createdDate = firstItem.receivedDate ? new Date(firstItem.receivedDate).toLocaleDateString() : "N/A";
+                    const itemCount = rmaItems.length;
+
+                    const headerContent = (
+                        <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
+                            <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
+                                <Col xs={12} sm={12} md={8} lg={7} xl={6}>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Title level={5} style={{ margin: 0, color: 'var(--color-error)' }}>
+                                            {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
+                                        </Title>
+                                        <Text type="secondary" style={{ fontSize: '12px' }}>
+                                            <span role="img" aria-label="user">👤</span> {firstItem.userName || "User"}
+                                        </Text>
+                                    </div>
+                                </Col>
+                                <Col xs={12} sm={12} md={5} lg={5} xl={4}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                        <Text type="secondary" style={{ fontSize: '11px' }}>Received Date</Text>
+                                        <Text strong>{createdDate}</Text>
+                                    </div>
+                                </Col>
+                                <Col xs={12} sm={8} md={3} lg={3} xl={2}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                        <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
+                                        <Badge count={itemCount} style={{ backgroundColor: isHistory ? 'var(--status-success)' : 'var(--status-error)' }} showZero />
+                                    </div>
+                                </Col>
+                                {!isHistory && (
+                                    <Col xs={24} sm={24} md={8} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '24px' }}>
+                                        <Tag color="error" icon={<WarningOutlined />}>REPLACEMENT REQUIRED</Tag>
+                                    </Col>
+                                )}
+                                {isHistory && (
+                                    <Col xs={24} sm={24} md={8} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '24px' }}>
+                                        <Tag color="success" icon={<CheckCircleOutlined />}>HISTORY</Tag>
+                                    </Col>
+                                )}
+                            </Row>
+                        </div>
+                    );
+
+                    return (
+                        <Panel
+                            key={rmaNo}
+                            header={headerContent}
+                            className="rma-panel"
+                        >
+                            <div className="rma-items-grid">
+                                {rmaItems.map((item) => (
+                                    <div key={item.id} className="rma-item-card-modern">
+                                        <div className="item-header">
+                                            <span className="item-product">{item.product || "Product"}</span>
+                                            {isHistory ? (
+                                                <Tag color="cyan" icon={<ReloadOutlined />}>REPLACED</Tag>
+                                            ) : (
+                                                <Tag color="red" icon={<WarningOutlined />}>BER</Tag>
+                                            )}
+                                        </div>
+
+                                        <div className="item-details-grid">
+                                            <div className="detail-box">
+                                                <span className="label"><BarcodeOutlined /> Serial No</span>
+                                                <span className="value monospace">{item.serialNo}</span>
+                                            </div>
+                                            <div className="detail-box">
+                                                <span className="label">Model</span>
+                                                <span className="value">{item.model}</span>
+                                            </div>
+                                            <div className="detail-box">
+                                                <span className="label"><UserOutlined /> Technician</span>
+                                                <span className="value">{item.repairedByName || item.assignedToName || "N/A"}</span>
+                                            </div>
+                                            <div className="detail-box">
+                                                <span className="label"><CalendarOutlined /> Date</span>
+                                                <span className="value">{item.repairedDate ? new Date(item.repairedDate).toLocaleDateString() : "N/A"}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="fault-box">
+                                            <span className="label">BER Remarks</span>
+                                            <p className="fault-desc">{item.repairRemarks || "No remarks provided."}</p>
+                                        </div>
+
+                                        {isHistory && (item.replacementSerial || (item.repairRemarks && item.repairRemarks.includes("| Replaced with unit:"))) && (
+                                            <div className="fault-box" style={{ borderTop: 'none', background: '#f6ffed', borderColor: '#b7eb8f' }}>
+                                                <span className="label" style={{ color: '#52c41a' }}><SwapOutlined /> Replacement Serial</span>
+                                                <p className="fault-desc" style={{ fontWeight: 'bold', color: '#389e0d' }}>
+                                                    {item.replacementSerial || (item.repairRemarks ? item.repairRemarks.split("| Replaced with unit:")[1]?.trim() : "")}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        <div className="item-footer">
+                                            {!isHistory ? (
+                                                <Tooltip title="Match this item with a new unit from inventory">
+                                                    <Button
+                                                        type="primary"
+                                                        danger
+                                                        block
+                                                        icon={<SwapOutlined />}
+                                                        onClick={() => handleProcessClick(item)}
+                                                    >
+                                                        Process Replacement
+                                                    </Button>
+                                                </Tooltip>
+                                            ) : (
+                                                <Tooltip title="RMA Number for this replacement">
+                                                    <div style={{ textAlign: 'center' }}>
+                                                        <span style={{ fontSize: '11px', color: '#8c8c8c', textTransform: 'uppercase' }}>RMA #: </span>
+                                                        <Tag color="blue">{item.itemRmaNo || item.rmaNo || "N/A"}</Tag>
+                                                    </div>
+                                                </Tooltip>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </Panel>
+                    );
+                })}
+            </Collapse>
+        );
+    };
 
     return (
         <RmaLayout>
             <div className="unrepaired-page">
-                {/* Header Section - Red Theme for Critical/Replacement */}
+                {/* Header Section */}
                 <div className="unrepaired-header header-cant-repair">
                     <div className="header-content">
                         <div className="header-title">
                             <WarningOutlined className="header-icon" />
                             <div>
-                                <Title level={2} style={{ margin: 0 }}>
-                                    Can't Be Repaired
-                                </Title>
-                                <Text type="secondary">
-                                    Items requiring replacement
-                                </Text>
+                                <Title level={2} style={{ margin: 0 }}>Can't Be Repaired</Title>
+                                <Text type="secondary">Process replacements for Beyond Economic Repair (BER) items</Text>
                             </div>
                         </div>
-                        <Button icon={<ReloadOutlined />} onClick={loadItems} loading={loading} className="refresh-btn">
-                            Refresh
-                        </Button>
+                        <Button icon={<ReloadOutlined />} onClick={loadItems} loading={loading} className="refresh-btn">Refresh</Button>
                     </div>
 
                     <Row gutter={16} className="stats-row">
@@ -214,7 +390,7 @@ export default function CantBeRepairedPage() {
                             <div className="stat-box">
                                 <ExclamationCircleOutlined />
                                 <div>
-                                    <div className="stat-value">{totalRmaRequests}</div>
+                                    <div className="stat-value">{totalPendingRma}</div>
                                     <div className="stat-label">Affected RMAs</div>
                                 </div>
                             </div>
@@ -223,89 +399,54 @@ export default function CantBeRepairedPage() {
                             <div className="stat-box">
                                 <SwapOutlined />
                                 <div>
-                                    <div className="stat-value">{totalItems}</div>
-                                    <div className="stat-label">Need Replacement</div>
+                                    <div className="stat-value">{totalPendingItems}</div>
+                                    <div className="stat-label">Pending Replacement</div>
                                 </div>
                             </div>
                         </Col>
+                        {totalReplacedItems > 0 && (
+                            <Col xs={12} sm={8}>
+                                <div className="stat-box">
+                                    <HistoryOutlined />
+                                    <div>
+                                        <div className="stat-value">{totalReplacedItems}</div>
+                                        <div className="stat-label">Total Replaced</div>
+                                    </div>
+                                </div>
+                            </Col>
+                        )}
                     </Row>
                 </div>
 
-
-                {/* Content Section */}
                 <div className="unrepaired-content">
-                    {loading ? (
-                        <div className="loading-container"><Spin size="large" /><Text style={{ marginTop: 16 }}>Loading items...</Text></div>
-                    ) : totalRmaRequests === 0 ? (
-                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No items requiring replacement" className="empty-state" />
-                    ) : (
-                        <div className="rma-groups">
-                            {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
-                                <Card key={rmaNo} className="rma-group-card"
-                                    title={
-                                        <div className="rma-card-header-flex">
-                                            <div className="rma-identity">
-                                                <div className="rma-id-box">
-                                                    <span className="rma-label">RMA Request</span>
-                                                    <span className="rma-value">{rmaNo}</span>
-                                                </div>
-                                                <Badge count={rmaItems.length} />
-                                            </div>
-                                        </div>
-                                    }
-                                >
-
-                                    {/* MODERN CARD GRID LAYOUT */}
-                                    <div className="rma-items-grid">
-                                        {rmaItems.map((item) => (
-                                            <div key={item.id} className="rma-item-card-modern">
-                                                {/* Header Strip */}
-                                                <div className="item-header">
-                                                    <span className="item-product">{item.product || "Product"}</span>
-                                                    <Tag color="red" icon={<WarningOutlined />}>REPLACE</Tag>
-                                                </div>
-
-                                                {/* Details Grid */}
-                                                <div className="item-details-grid">
-                                                    <div className="detail-box">
-                                                        <span className="label"><BarcodeOutlined /> Serial No</span>
-                                                        <span className="value monospace">{item.serialNo || "N/A"}</span>
-                                                    </div>
-                                                    <div className="detail-box">
-                                                        <span className="label">Model</span>
-                                                        <span className="value">{item.model || "N/A"}</span>
-                                                    </div>
-                                                    <div className="detail-box">
-                                                        <span className="label">RMA No</span>
-                                                        <Tag color="red">{item.itemRmaNo || "N/A"}</Tag>
-                                                    </div>
-                                                </div>
-
-                                                {/* Fault/Remarks Box */}
-                                                <div className="fault-box">
-                                                    <span className="label">Remarks</span>
-                                                    <p className="fault-desc">{item.repairRemarks || "No remarks provided"}</p>
-                                                </div>
-
-                                                {/* Footer Actions */}
-                                                <div className="item-footer">
-                                                    <Button
-                                                        type="primary"
-                                                        block
-                                                        icon={<SwapOutlined />}
-                                                        onClick={() => handleProcessClick(item)}
-                                                    >
-                                                        Process Replacement
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {/* END MODERN CARD GRID */}
-                                </Card>
-                            ))}
-                        </div>
-                    )}
+                    <Tabs
+                        activeKey={activeTab}
+                        onChange={setActiveTab}
+                        items={[
+                            {
+                                key: "1",
+                                label: (
+                                    <span>
+                                        <WarningOutlined /> Pending Replacement ({totalPendingItems})
+                                    </span>
+                                ),
+                                children: loading ? (
+                                    <div className="loading-container"><Spin size="large" /></div>
+                                ) : renderRmaCollapse(groupedPending)
+                            },
+                            {
+                                key: "2",
+                                label: (
+                                    <span>
+                                        <HistoryOutlined /> Process History ({totalReplacedItems})
+                                    </span>
+                                ),
+                                children: loading ? (
+                                    <div className="loading-container"><Spin size="large" /></div>
+                                ) : renderRmaCollapse(groupedReplaced, true)
+                            }
+                        ]}
+                    />
                 </div>
 
                 {/* --- MODAL 1: CONFIRM REPLACEMENT --- */}
@@ -317,17 +458,17 @@ export default function CantBeRepairedPage() {
                     confirmLoading={confirmLoading}
                     okText="Assign Replacement"
                     okButtonProps={{ style: { backgroundColor: '#722ed1' } }}
-                    width={700} // Wider for logic table
+                    width={700}
                 >
                     <div style={{ padding: '10px 0' }}>
                         <div className="fault-box" style={{ margin: '0 0 24px 0' }}>
-                            <Text strong>Action: Replacement</Text><br />
-                            <Text type="secondary">Original Item from RMA <strong>{selectedItem.rmaNo}</strong> (Model: {selectedItem.modelNo}) will be marked as REPLACED.</Text>
+                            <Text strong style={{ color: 'var(--color-warning)' }}>Action: Replacement</Text><br />
+                            <Text>Original Item from RMA <strong>{selectedItem.rmaNo}</strong> (Model: {selectedItem.modelNo}) will be marked as REPLACED.</Text>
                         </div>
 
-                        <div>
-                            <Text strong>Search Replacement Item:</Text>
-                            <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
+                        <div style={{ marginBottom: 24 }}>
+                            <Text strong style={{ fontSize: 16 }}>Search Replacement Item:</Text>
+                            <Text style={{ display: 'block', marginBottom: 8, fontSize: 13, color: 'var(--text-color-secondary)' }}>
                                 Search by Model No, Part No, or Serial No. Select an item with 'AVAILABLE' status.
                             </Text>
 
@@ -348,8 +489,7 @@ export default function CantBeRepairedPage() {
                             >
                                 {searchOptions.map((d) => (
                                     <Option key={d.serial_No} value={d.serial_No} disabled={d.availableStatusId?.itemAvailableOption?.toLowerCase() !== 'available'}>
-                                        <div style={{ padding: '8px 0', borderBottom: '1px solid #f0f0f0' }}>
-                                            {/* Row 1: Product & Status */}
+                                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-color)' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                                                 <Text strong style={{ fontSize: 14 }}>
                                                     {d.keywordEntity?.keywordName || 'Unknown Product'}
@@ -358,12 +498,10 @@ export default function CantBeRepairedPage() {
                                                     {d.availableStatusId?.itemAvailableOption || 'Unknown'}
                                                 </Tag>
                                             </div>
-                                            {/* Row 2: Serial No & Model */}
                                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#666', marginBottom: 2 }}>
                                                 <span><strong>SN:</strong> {d.serial_No || 'N/A'}</span>
                                                 <span><strong>Model:</strong> {d.modelNo || 'N/A'}</span>
                                             </div>
-                                            {/* Row 3: Region */}
                                             <div style={{ fontSize: 11, color: '#888' }}>
                                                 <strong>Region:</strong> {d.region?.city || 'N/A'}
                                             </div>
@@ -391,7 +529,6 @@ export default function CantBeRepairedPage() {
                         <Paragraph type="secondary">You need to order a new unit before this replacement can be processed.</Paragraph>
                     </div>
                 </Modal>
-
             </div>
         </RmaLayout>
     );

@@ -2,16 +2,16 @@
 
 .audit-trail-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    background: var(--background-color);
 }
 
 .audit-trail-header {
-    background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+    background: var(--header-audit-grad);
     padding: 32px 40px;
     display: flex;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 4px 12px rgba(114, 46, 209, 0.3);
+    box-shadow: var(--card-shadow);
 }
 
 .audit-trail-header .header-icon {
@@ -22,10 +22,20 @@
     border-radius: 12px;
 }
 
+.audit-trail-header .header-subtext {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+[data-theme='dark'] .audit-trail-header .header-subtext {
+    color: var(--text-color-secondary) !important;
+}
+
 .stat-mini-card {
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--card-shadow);
     transition: all 0.3s ease;
+    background: var(--component-background);
+    border: 1px solid var(--border-color);
 }
 
 .stat-mini-card:hover {
@@ -35,7 +45,7 @@
 
 .stat-mini-card .ant-statistic-title {
     font-size: 12px;
-    color: #8c8c8c;
+    color: var(--text-color-secondary);
 }
 
 .stat-mini-card .ant-statistic-content {
@@ -44,23 +54,28 @@
 
 .filter-card {
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--card-shadow);
+    background: var(--component-background);
+    border: 1px solid var(--border-color);
 }
 
 .table-card {
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--card-shadow);
+    background: var(--component-background);
+    border: 1px solid var(--border-color);
 }
 
 .table-card .ant-table-thead>tr>th {
-    background: #fafafa;
+    background: var(--secondary-bg);
     font-weight: 600;
     font-size: 13px;
-    color: #333;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color) !important;
 }
 
 .table-card .ant-table-tbody>tr:hover>td {
-    background: #f0f5ff;
+    background: var(--hover-color);
 }
 
 .changes-cell {

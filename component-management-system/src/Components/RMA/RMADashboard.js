@@ -478,7 +478,7 @@ function RmaDashboard() {
                       <XAxis dataKey="name" axisLine={false} tickLine={false} />
                       <YAxis axisLine={false} tickLine={false} />
                       <RechartsTooltip
-                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--card-shadow)', backgroundColor: 'var(--component-background)', color: 'var(--text-color)' }}
                       />
                       <Line
                         type="monotone"
@@ -543,7 +543,6 @@ function RmaDashboard() {
                             {stats?.complianceRate?.toFixed(1) || 0}%
                           </Title>
                           <Text className="compliance-label" style={{
-                            color: isDarkMode ? 'rgba(255, 255, 255, 0.65)' : '#666',
                             display: 'block',
                             marginTop: 8
                           }}>

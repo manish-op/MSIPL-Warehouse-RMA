@@ -158,6 +158,62 @@ function RmaRequestForm() {
 
   // Save form data to localStorage whenever it changes
   const handleFormChange = (changedValues, allValues) => {
+    // List of return address field names
+    const returnAddressFields = [
+      "companyName",
+      "email",
+      "contactName",
+      "telephone",
+      "mobile",
+      "returnAddress"
+    ];
+
+    // List of invoice address field names and their corresponding return fields
+    const invoiceToReturnMap = {
+      invoiceCompanyName: "companyName",
+      invoiceEmail: "email",
+      invoiceContactName: "contactName",
+      invoiceTelephone: "telephone",
+      invoiceMobile: "mobile",
+      invoiceAddress: "returnAddress"
+    };
+
+    const updatedValues = { ...changedValues };
+
+    // If sameAsReturn is active and one of the return fields changed, update the invoice fields
+    if (sameAsReturn) {
+      let syncNeeded = false;
+      const newInvoiceValues = {};
+
+      returnAddressFields.forEach(field => {
+        if (changedValues[field] !== undefined) {
+          syncNeeded = true;
+          // Map return field to invoice field
+          const invoiceField = Object.keys(invoiceToReturnMap).find(
+            key => invoiceToReturnMap[key] === field
+          );
+          if (invoiceField) {
+            newInvoiceValues[invoiceField] = changedValues[field];
+          }
+        }
+      });
+
+      if (syncNeeded) {
+        form.setFieldsValue(newInvoiceValues);
+      }
+    }
+
+    // If one of the invoice fields was changed manually, disable sameAsReturn
+    const changedFields = Object.keys(changedValues);
+    const manualInvoiceEdit = changedFields.some(field =>
+      Object.keys(invoiceToReturnMap).includes(field)
+    );
+
+    if (manualInvoiceEdit && sameAsReturn) {
+      setSameAsReturn(false);
+      message.info("Synchronization disabled because invoice address was manually edited");
+    }
+
     localStorage.setItem("rmaFormData", JSON.stringify({ ...allValues, sameAsReturn }));
   };
 
@@ -200,7 +256,7 @@ function RmaRequestForm() {
             <div>
               <strong>{customer.companyName}</strong>
               <br />
-              <span style={{ color: '#666', fontSize: '12px' }}>
+              <span className="customer-info-secondary">
                 {customer.email} | {customer.contactName}
               </span>
             </div>
@@ -634,11 +690,12 @@ function RmaRequestForm() {
                 <div className="invoice-header">
                   <Title level={5} style={{ margin: 0 }}>Invoice Address</Title>
                   <Button
-                    type="link"
+                    type={sameAsReturn ? "primary" : "link"}
                     icon={<CopyOutlined />}
                     onClick={copyToInvoice}
+                    className={sameAsReturn ? "sync-active-btn" : ""}
                   >
-                    Same as Return Address
+                    {sameAsReturn ? "✓ Syncing with Return Address" : "Same as Return Address"}
                   </Button>
                 </div>
 
@@ -1147,7 +1204,7 @@ function RmaRequestForm() {
         
         {serialHistory.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <InboxOutlined style={{ fontSize: 32, color: '#d9d9d9', marginBottom: 8 }} />
+            <InboxOutlined style={{ fontSize: 32, marginBottom: 8 }} />
             <Text type="secondary">No previous records found for this serial number.</Text>
           </div>
         ) : (
@@ -1160,7 +1217,7 @@ function RmaRequestForm() {
                 title={
                   <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                     <Col>
-                      <Text strong style={{ color: '#003a8c' }}>{h.rmaNo}</Text>
+                      <Text strong>{h.rmaNo}</Text>
                       <Text type="secondary" style={{ fontSize: 10, marginLeft: 8 }}>
                         Record ID: #{h.itemId || "MISSING"}
                       </Text>
@@ -1226,7 +1283,7 @@ function RmaRequestForm() {
 
                   {h.issueFixed && h.issueFixed !== "N/A" && (
                     <div className="issue-fixed-box">
-                      <Text strong style={{ color: '#389e0d', fontSize: 11 }}>ISSUE FIXED / ACTION TAKEN</Text>
+                      <Text strong className="text-success-themed">ISSUE FIXED / ACTION TAKEN</Text>
                       <Paragraph style={{ margin: 0, fontSize: 13 }}>{h.issueFixed}</Paragraph>
                     </div>
                   )}
@@ -1238,7 +1295,7 @@ function RmaRequestForm() {
                     borderRadius: 4,
                     borderLeft: '3px solid #faad14'
                   }}>
-                    <Text strong style={{ fontSize: 11, color: '#d46b08' }}>TECHNICIAN REMARKS</Text>
+                    <Text strong className="text-warning-themed">TECHNICIAN REMARKS</Text>
                     <Paragraph style={{ marginBottom: 0, marginTop: 4, fontSize: 13, fontStyle: 'italic' }}>
                       {h.repairRemarks || "No remarks provided."}
                     </Paragraph>

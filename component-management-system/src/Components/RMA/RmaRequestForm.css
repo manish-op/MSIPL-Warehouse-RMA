@@ -323,7 +323,7 @@
    ========================================================================== */
 
 [data-theme='dark'] .rma-wizard-container {
-  background: #000000;
+  background: var(--background-color);
 }
 
 /* CARDS BACKGROUND */
@@ -332,12 +332,12 @@
 [data-theme='dark'] .item-card,
 [data-theme='dark'] .review-card,
 [data-theme='dark'] .success-card {
-  background: #141414 !important;
-  border-color: #303030 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  background: var(--component-background) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--card-shadow);
 }
 
-/* HEADERS & TEXT (High Specificity to override App.css) */
+/* HEADERS & TEXT */
 [data-theme='dark'] .rma-wizard-container .step-title,
 [data-theme='dark'] .rma-wizard-container .ant-typography,
 [data-theme='dark'] .rma-wizard-container h1,
@@ -345,53 +345,53 @@
 [data-theme='dark'] .rma-wizard-container h3,
 [data-theme='dark'] .rma-wizard-container h4,
 [data-theme='dark'] .rma-wizard-container h5 {
-  color: #ffffff !important;
+  color: var(--text-color) !important;
 }
 
 [data-theme='dark'] .step-description {
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-color-secondary);
 }
 
 [data-theme='dark'] .ant-form-item-label > label {
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: var(--text-color) !important;
 }
 
 /* STEPS COMPONENT */
 [data-theme='dark'] .wizard-steps .ant-steps-item-title {
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: var(--text-color) !important;
 }
 
 [data-theme='dark'] .wizard-steps .ant-steps-item-process .ant-steps-item-title {
-  color: #1890ff !important;
+  color: var(--primary-color) !important;
   font-weight: 600;
 }
 
 [data-theme='dark'] .wizard-steps .ant-steps-item-wait .ant-steps-item-icon {
   background-color: transparent;
-  border-color: #434343;
+  border-color: var(--border-color);
 }
 
 [data-theme='dark'] .wizard-steps .ant-steps-item-wait .ant-steps-item-icon > .step-icon {
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-color-secondary);
 }
 
 /* INVOICE SECTION */
 [data-theme='dark'] .invoice-section {
-  background: #1f1f1f;
-  border-color: #303030;
+  background: var(--secondary-bg);
+  border-color: var(--border-color);
 }
 
 /* ITEM CARD HEADER */
 [data-theme='dark'] .item-card .ant-card-head,
 [data-theme='dark'] .review-card .ant-card-head {
-  background: #1f1f1f !important;
-  border-bottom: 1px solid #303030 !important;
-  color: #fff !important;
+  background: var(--secondary-bg) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
 }
 
 [data-theme='dark'] .item-card .ant-card-head-title,
 [data-theme='dark'] .review-card .ant-card-head-title {
-  color: #fff !important;
+  color: var(--text-color) !important;
 }
 
 /* INPUTS & SELECTS override */
@@ -399,187 +399,120 @@
 [data-theme='dark'] .ant-select-selector,
 [data-theme='dark'] .ant-input-number,
 [data-theme='dark'] .ant-picker {
-  background-color: #1f1f1f !important;
-  border-color: #434343 !important;
-  color: #fff !important;
+  background-color: var(--component-background) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color) !important;
 }
 
 [data-theme='dark'] .ant-input::placeholder {
   color: rgba(255, 255, 255, 0.3);
 }
 
-[data-theme='dark'] .ant-select-arrow {
-  color: rgba(255, 255, 255, 0.45);
-}
-
 /* REVIEW ITEMS */
 [data-theme='dark'] .review-item {
-  border-bottom-color: #303030;
+  border-bottom-color: var(--border-color);
 }
 
 /* ICONS */
 [data-theme='dark'] .step-icon-inline {
   background: rgba(24, 144, 255, 0.15);
-  color: #177ddc;
+  color: var(--primary-color);
 }
 
-/* VALIDATION ERRORS (High Specificity) */
-html[data-theme='dark'] .rma-wizard-container .ant-form-item-explain-error,
+/* VALIDATION ERRORS */
 [data-theme='dark'] .ant-form-item-explain-error {
-  color: #ff4d4f !important;
+  color: var(--color-error) !important;
 }
 
 /* BUTTONS IN DARK MODE */
 [data-theme='dark'] .wizard-navigation .ant-btn:not(.ant-btn-primary) {
   background-color: transparent !important;
-  border-color: #434343 !important;
-  color: #ffffff !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color) !important;
 }
 
 [data-theme='dark'] .wizard-navigation .ant-btn:not(.ant-btn-primary):hover {
-  border-color: #1890ff !important;
-  color: #1890ff !important;
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
 }
 
-/* ==========================================================================
-   MODAL & SUCCESS SCREEN FIXES
-   ========================================================================== */
-
-/* PREVIEW BOX (Replaces inline style) */
-.request-preview-box {
-  background: #f5f5f5;
-  padding: 15px;
-  border-radius: 8px;
-}
-
+/* PREVIEW BOX */
 [data-theme='dark'] .request-preview-box {
-  background: #1f1f1f !important;
-  border: 1px solid #303030;
-  color: #fff;
+  background: var(--secondary-bg) !important;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
 }
 
 /* MODAL CONTENT */
 [data-theme='dark'] .ant-modal-content,
 [data-theme='dark'] .ant-modal-header {
-  background-color: #1f1f1f !important;
-  color: #fff !important;
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
 }
 
-[data-theme='dark'] .ant-modal-title {
-  color: #fff !important;
-}
-
-[data-theme='dark'] .ant-modal-close-x {
-  color: #fff !important;
-}
-
+[data-theme='dark'] .ant-modal-title,
+[data-theme='dark'] .ant-modal-close-x,
 [data-theme='dark'] .ant-radio-wrapper {
-  color: #fff !important;
+  color: var(--text-color) !important;
 }
 
-/* SUCCESS SCREEN & GENERAL BUTTONS */
+/* SUCCESS SCREEN */
 [data-theme='dark'] .success-card .ant-result-title,
 [data-theme='dark'] .success-card .ant-result-subtitle {
-  color: #fff !important;
-}
-
-/* Fix "Create New Request" & "Dashboard" Buttons (Default Buttons) */
-[data-theme='dark'] .success-card .ant-btn:not(.ant-btn-primary),
-[data-theme='dark'] .rma-wizard-container .ant-btn:not(.ant-btn-primary) {
-  background-color: transparent !important;
-  border-color: #434343 !important;
-  color: #ffffff !important;
-}
-
-[data-theme='dark'] .success-card .ant-btn:not(.ant-btn-primary):hover,
-[data-theme='dark'] .rma-wizard-container .ant-btn:not(.ant-btn-primary):hover {
-  border-color: #1890ff !important;
-  color: #1890ff !important;
+  color: var(--text-color) !important;
 }
 
 /* FIX PREVIEW BOX TEXT VISIBILITY */
 [data-theme='dark'] .request-preview-box .ant-typography,
 [data-theme='dark'] .request-preview-box strong,
 [data-theme='dark'] .request-preview-box span {
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: var(--text-color) !important;
 }
 
 [data-theme='dark'] .request-preview-box .ant-typography-secondary {
-  color: rgba(255, 255, 255, 0.55) !important;
-}
-
-/* FIX RMA NUMBER DISPLAY TAG */
-[data-theme='dark'] .rma-wizard-container .ant-tag {
-  background-color: #162234 !important;
-  /* Dark blue background */
-  border-color: #1f3b57 !important;
-  color: #fff !important;
-  /* White text */
-}
-
-/* Fix "Items Submitted" card text */
-[data-theme='dark'] .rma-number-card .ant-typography,
-[data-theme='dark'] .rma-number-card .ant-typography strong {
-  color: #fff !important;
+  color: var(--text-color-secondary) !important;
 }
 
 /* SERIAL HISTORY POPUP STYLES */
-.history-box {
-  background: #f9f9f9;
-  padding: 16px;
-  border-radius: 8px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.history-card {
-  margin-bottom: 12px;
-  border-radius: 8px;
-  border: 1px solid #f0f0f0;
-  transition: all 0.3s;
-  overflow: hidden;
-}
-
-.history-card .ant-card-head {
-  background: #e6f7ff;
-  border-bottom: 1px solid #d9d9d9;
-  min-height: 40px;
-}
-
-.history-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border-color: #1890ff;
-}
-
-.issue-fixed-box {
-  margin-top: 8px;
-  padding: 10px;
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
-  border-radius: 6px;
-}
-
 [data-theme='dark'] .history-box {
-  background: #1f1f1f !important;
-  border: 1px solid #303030;
+  background: var(--component-background) !important;
+  border: 1px solid var(--border-color);
 }
 
 [data-theme='dark'] .history-card {
-  background: #141414 !important;
-  border-color: #303030 !important;
+  background: var(--component-background) !important;
+  border-color: var(--border-color) !important;
 }
 
 [data-theme='dark'] .history-card .ant-card-head {
-  background: #1f1f1f !important;
-  border-bottom-color: #303030 !important;
+  background: var(--secondary-bg) !important;
+  border-bottom-color: var(--border-color) !important;
 }
 
 [data-theme='dark'] .history-card:hover {
-  border-color: #177ddc !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  border-color: var(--primary-color) !important;
+  box-shadow: var(--card-shadow);
 }
 
 [data-theme='dark'] .issue-fixed-box {
-  background: #132313 !important;
-  border-color: #237804 !important;
+  background: rgba(82, 196, 26, 0.1) !important;
+  border-color: var(--color-success) !important;
+}
+
+.history-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--text-color-secondary);
+  font-size: 13px;
+}
+
+.history-user-info .anticon {
+  color: var(--primary-color);
+}
+
+.customer-info-secondary {
+  color: var(--text-color-secondary);
+  font-size: 12px;
 }

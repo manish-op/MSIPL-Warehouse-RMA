@@ -451,10 +451,10 @@ export default function RepairedPage() {
                                                 <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
                                                     <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
                                                         {/* Col 1: Identity */}
-                                                        <Col xs={24} sm={12} md={6} lg={5} xl={4}>
+                                                        <Col xs={24} sm={12} md={8} lg={7} xl={6}>
                                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                    <Title level={5} style={{ margin: 0, color: '#1890ff', whiteSpace: 'nowrap' }}>
+                                                                    <Title level={5} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                                                         {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
                                                                     </Title>
                                                                 </div>
@@ -465,7 +465,7 @@ export default function RepairedPage() {
                                                         </Col>
 
                                                         {/* Col 2: Date */}
-                                                        <Col xs={12} sm={12} md={6} lg={5} xl={4}>
+                                                        <Col xs={12} sm={12} md={5} lg={5} xl={4}>
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                                 <Text type="secondary" style={{ fontSize: '11px' }}>Created Date</Text>
                                                                 <Text strong>{createdDate}</Text>
@@ -473,21 +473,21 @@ export default function RepairedPage() {
                                                         </Col>
 
                                                         {/* Col 3: Items */}
-                                                        <Col xs={12} sm={8} md={6} lg={5} xl={4}>
+                                                        <Col xs={12} sm={8} md={3} lg={3} xl={2}>
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                                 <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
                                                                 <div>
-                                                                    <Badge count={itemCount} style={{ backgroundColor: '#52c41a' }} showZero />
+                                                                    <Badge count={itemCount} style={{ backgroundColor: 'var(--status-success)' }} showZero />
                                                                 </div>
                                                             </div>
                                                         </Col>
 
                                                         {/* Col 4: Actions */}
-                                                        <Col xs={24} sm={24} md={24} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                        <Col xs={24} sm={24} md={8} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                                             <div
                                                                 className="header-actions"
                                                                 onClick={e => e.stopPropagation()}
-                                                                style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}
+                                                                style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%', paddingRight: '24px' }}
                                                             >
                                                                 <Tooltip title="View Outpass Item List">
                                                                     <Button icon={<EyeOutlined />} onClick={() => openPreview(rmaItems, rmaNo)}>Outpass</Button>
@@ -507,7 +507,6 @@ export default function RepairedPage() {
                                                     key={rmaNo}
                                                     header={headerContent}
                                                     className="rma-panel"
-                                                    style={{ marginBottom: 16, background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden' }}
                                                 >
                                                     <div className="rma-items-grid">
                                                         {rmaItems.map((item) => (
@@ -582,10 +581,10 @@ export default function RepairedPage() {
                                                 <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
                                                     <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
                                                         {/* Col 1 */}
-                                                        <Col xs={24} sm={12} md={6} lg={5} xl={4}>
+                                                        <Col xs={24} sm={12} md={8} lg={7} xl={6}>
                                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                    <Title level={5} style={{ margin: 0, color: '#1890ff', whiteSpace: 'nowrap' }}>
+                                                                    <Title level={5} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                                                         {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
                                                                     </Title>
                                                                 </div>
@@ -596,7 +595,7 @@ export default function RepairedPage() {
                                                         </Col>
 
                                                         {/* Col 2 */}
-                                                        <Col xs={12} sm={12} md={6} lg={5} xl={4}>
+                                                        <Col xs={12} sm={12} md={5} lg={5} xl={4}>
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                                 <Text type="secondary" style={{ fontSize: '11px' }}>Dispatch Date</Text>
                                                                 <Text strong>{dispatchedDate}</Text>
@@ -604,21 +603,21 @@ export default function RepairedPage() {
                                                         </Col>
 
                                                         {/* Col 3 */}
-                                                        <Col xs={12} sm={8} md={6} lg={5} xl={4}>
+                                                        <Col xs={12} sm={8} md={3} lg={3} xl={2}>
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                                 <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
                                                                 <div>
-                                                                    <Badge count={itemCount} style={{ backgroundColor: '#1890ff' }} showZero />
+                                                                    <Badge count={itemCount} style={{ backgroundColor: 'var(--primary-color)' }} showZero />
                                                                 </div>
                                                             </div>
                                                         </Col>
 
                                                         {/* Col 4: Actions */}
-                                                        <Col xs={24} sm={24} md={24} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                        <Col xs={24} sm={24} md={8} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                                             <div
                                                                 className="header-actions"
                                                                 onClick={e => e.stopPropagation()}
-                                                                style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}
+                                                                style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%', paddingRight: '24px' }}
                                                             >
                                                                 <Tag color="blue" icon={<SendOutlined />}>DISPATCHED</Tag>
                                                                 {rmaItems.some(item => !item.isDelivered) && (
@@ -637,7 +636,6 @@ export default function RepairedPage() {
                                                     key={rmaNo}
                                                     header={headerContent}
                                                     className="rma-panel"
-                                                    style={{ marginBottom: 16, background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0', overflow: 'hidden' }}
                                                 >
                                                     <div className="rma-items-grid">
                                                         {rmaItems.map((item) => (

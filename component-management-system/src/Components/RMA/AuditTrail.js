@@ -105,7 +105,7 @@ const AuditTrail = () => {
             width: 160,
             render: (text) => (
                 <Space>
-                    <ClockCircleOutlined style={{ color: "#8c8c8c" }} />
+                    <ClockCircleOutlined />
                     <Text style={{ fontSize: 12 }}>{formatDate(text)}</Text>
                 </Space>
             ),
@@ -152,7 +152,7 @@ const AuditTrail = () => {
                         <Text type="secondary" style={{ fontSize: 11 }}>
                             To:
                         </Text>{" "}
-                        <Text strong style={{ fontSize: 12, color: "#52c41a" }}>
+                        <Text strong style={{ fontSize: 12 }}>
                             {record.newValue || "-"}
                         </Text>
                     </div>
@@ -166,7 +166,7 @@ const AuditTrail = () => {
             render: (_, record) => (
                 <Tooltip title={record.performedByEmail}>
                     <Space>
-                        <UserOutlined style={{ color: "#1890ff" }} />
+                        <UserOutlined />
                         <Text>{record.performedByName || record.performedByEmail || "-"}</Text>
                     </Space>
                 </Tooltip>
@@ -207,10 +207,10 @@ const AuditTrail = () => {
                 <div className="audit-trail-header">
                     <HistoryOutlined className="header-icon" />
                     <div>
-                        <Title level={2} style={{ margin: 0, color: "#fff" }}>
+                        <Title level={2} style={{ margin: 0 }}>
                             Audit Trail
                         </Title>
-                        <Text style={{ color: "rgba(255,255,255,0.8)" }}>
+                        <Text className="header-subtext">
                             Track all RMA item status changes and assignments
                         </Text>
                     </div>

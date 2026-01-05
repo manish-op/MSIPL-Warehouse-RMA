@@ -9,30 +9,38 @@
 
   --background-color: #f0f2f5;
   --component-background: #ffffff;
+  --secondary-bg: #f9f9f9;
   --text-color: #1c1e21;
   --text-color-secondary: #65676b;
   --border-color: #d9d9d9;
   --hover-color: #f5f5f5;
 
-
   --sidebar-bg: #ffffff;
   --sidebar-border: rgba(5, 5, 5, 0.06);
-  /* Semantic Colors */
+
   --primary-color: #1677ff;
   --color-error: #ff4d4f;
   --color-warning: #faad14;
   --color-success: #52c41a;
 
-  /* Imported from index.css for consistency */
   --header-bg: #1f3b57;
   --header-text: #ffffff;
   --button-bg: #316a9c;
   --button-hover-bg: #468ac0;
   --card-bg: #ffffff;
   --card-border: #ddd;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   --status-success: #52c41a;
   --status-warning: #faad14;
   --status-error: #f5222d;
+
+  /* Header Gradients */
+  --header-unrepaired-grad: linear-gradient(135deg, #1890ff 0%, #001529 100%);
+  --header-assigned-grad: linear-gradient(135deg, #722ed1 0%, #391085 100%);
+  --header-repaired-grad: linear-gradient(135deg, #52c41a 0%, #135200 100%);
+  --header-cant-repair-grad: linear-gradient(135deg, #f5222d 0%, #820014 100%);
+  --header-depot-grad: linear-gradient(135deg, #d3adf7 0%, #9254de 100%);
+  --header-audit-grad: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
 }
 
 /* Dark Theme */
@@ -40,31 +48,38 @@
 
   --background-color: #141414;
   --component-background: #1d1d1d;
+  --secondary-bg: #1f1f1f;
   --text-color: #e8e6e3;
   --text-color-secondary: #8c8c8c;
   --border-color: #434343;
   --hover-color: #333333;
 
-  /* Sidebar Specific */
   --sidebar-bg: #242526;
   --sidebar-border: #3a3b3c;
 
-  /* Semantic Colors */
   --primary-color: #1677ff;
   --color-error: #a61d24;
   --color-warning: #d89614;
   --color-success: #49aa19;
 
-  /* Imported from index.css */
   --header-bg: #242526;
   --header-text: #e4e6eb;
   --button-bg: #4b5d75;
   --button-hover-bg: #60738f;
-  --card-bg: #242526;
-  --card-border: #3a3b3c;
+  --card-bg: #1f1f1f;
+  --card-border: #303030;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   --status-success: #95de64;
   --status-warning: #ffd666;
   --status-error: #ff7875;
+
+  /* Header Gradients (Darker for dark mode) */
+  --header-unrepaired-grad: linear-gradient(135deg, #002140 0%, #000000 100%);
+  --header-assigned-grad: linear-gradient(135deg, #120338 0%, #000000 100%);
+  --header-repaired-grad: linear-gradient(135deg, #135200 0%, #000000 100%);
+  --header-cant-repair-grad: linear-gradient(135deg, #5c0011 0%, #000000 100%);
+  --header-depot-grad: linear-gradient(135deg, #22075e 0%, #391085 100%);
+  --header-audit-grad: linear-gradient(135deg, #120338 0%, #22075e 100%);
 }
 
 
@@ -94,6 +109,14 @@ code {
 
 
 
+
+.text-success-themed {
+  color: var(--color-success) !important;
+}
+
+.text-warning-themed {
+  color: var(--color-warning) !important;
+}
 
 .App {
   display: flex;
@@ -322,6 +345,84 @@ footer {
 
 .ant-divider {
   border-top-color: var(--border-color) !important;
+}
+
+/* Modals & Portal Components (Dropdowns, Pickers, Selects, etc.) */
+.ant-modal-content,
+.ant-modal-header,
+.ant-select-dropdown,
+.ant-picker-dropdown,
+.ant-dropdown,
+.ant-popover-inner,
+.ant-tooltip-inner {
+  background-color: #ffffff !important; /* Explicit white for light mode fallback */
+  background-color: var(--component-background, #ffffff) !important;
+  color: var(--text-color, #1c1e21) !important;
+  opacity: 1 !important;
+}
+
+/* Specific Dark Mode Overrides (Handles HTML/Body attribute propagation) */
+html[data-theme='dark'] .ant-modal-content,
+html[data-theme='dark'] .ant-modal-header,
+html[data-theme='dark'] .ant-select-dropdown,
+html[data-theme='dark'] .ant-picker-dropdown,
+html[data-theme='dark'] .ant-dropdown,
+html[data-theme='dark'] .ant-popover-inner,
+html[data-theme='dark'] .ant-tooltip-inner,
+[data-theme='dark'] .ant-modal-content,
+[data-theme='dark'] .ant-modal-header,
+[data-theme='dark'] .ant-select-dropdown,
+[data-theme='dark'] .ant-picker-dropdown,
+[data-theme='dark'] .ant-dropdown,
+[data-theme='dark'] .ant-popover-inner {
+  background-color: #1f1f1f !important; /* Solid dark background */
+  color: #e8e6e3 !important;
+  border: 1px solid #303030 !important;
+}
+
+.ant-modal-mask {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid var(--border-color, #d9d9d9) !important;
+  padding: 16px 24px !important;
+}
+
+.ant-modal-title,
+.ant-select-item {
+  color: var(--text-color, #1c1e21) !important;
+}
+
+[data-theme='dark'] .ant-modal-title,
+[data-theme='dark'] .ant-select-item {
+  color: #e8e6e3 !important;
+}
+
+.ant-modal-footer {
+  border-top: 1px solid var(--border-color, #d9d9d9) !important;
+  background-color: var(--secondary-bg, #f9f9f9) !important;
+}
+
+[data-theme='dark'] .ant-modal-footer {
+  background-color: #1d1d1d !important;
+  border-top-color: #303030 !important;
+}
+
+/* Active Item Hovers */
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: var(--hover-color, #f5f5f5) !important;
+}
+
+[data-theme='dark'] .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: #333333 !important;
+}
+
+/* Force backgrounds for any portal rendered directly under body */
+body .ant-modal-content,
+body .ant-select-dropdown,
+body .ant-picker-dropdown {
+  opacity: 1 !important;
 }
 
 

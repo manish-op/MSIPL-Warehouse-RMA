@@ -592,7 +592,7 @@ export default function UnrepairedPage() {
                                     <div className="rma-collapse-header">
                                         <div className="header-main-info">
                                             <div className="info-block">
-                                                <Title level={5} style={{ margin: 0, color: '#1890ff' }}>{rmaNo !== "Unknown" ? rmaNo : "No RMA Number"}</Title>
+                                                <Title level={5} style={{ margin: 0, color: 'var(--primary-color)' }}>{rmaNo !== "Unknown" ? rmaNo : "No RMA Number"}</Title>
                                                 <Text type="secondary" style={{ fontSize: '12px' }}>
                                                     {firstItem.userName || "Unknown User"}
                                                 </Text>
@@ -618,7 +618,7 @@ export default function UnrepairedPage() {
 
                                             <div className="info-block">
                                                 <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
-                                                <Badge count={itemCount} style={{ backgroundColor: '#52c41a' }} />
+                                                <Badge count={itemCount} />
                                             </div>
 
                                             <Divider type="vertical" />
@@ -665,10 +665,10 @@ export default function UnrepairedPage() {
                                     <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
                                         <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
                                             {/* Column 1: RMA Identity */}
-                                            <Col xs={24} sm={12} md={6} lg={5} xl={4}>
+                                            <Col xs={24} sm={12} md={7} lg={6} xl={5}>
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <Title level={5} style={{ margin: 0, color: '#1890ff', whiteSpace: 'nowrap' }}>
+                                                        <Title level={5} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                                             {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
                                                         </Title>
                                                         {isDepot && <Tag color="orange">Depot</Tag>}
@@ -680,51 +680,50 @@ export default function UnrepairedPage() {
                                             </Col>
 
                                             {/* Column 2: Key Stats (Date, TAT) */}
-                                            <Col xs={12} sm={12} md={6} lg={5} xl={4}>
+                                            <Col xs={12} sm={12} md={5} lg={4} xl={4}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                     <Text type="secondary" style={{ fontSize: '11px' }}>Created Date</Text>
-                                                    <Text strong>{createdDate}</Text>
+                                                    <Text strong style={{ fontSize: '13px' }}>{createdDate}</Text>
                                                 </div>
                                             </Col>
 
-                                            <Col xs={12} sm={8} md={4} lg={3} xl={3}>
+                                            <Col xs={12} sm={8} md={3} lg={3} xl={2}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                     <Text type="secondary" style={{ fontSize: '11px' }}>TAT</Text>
-                                                    <Tag color={tatDays !== "N/A" ? (tatDays > 7 ? "red" : "blue") : "default"}>
+                                                    <Tag color={tatDays !== "N/A" ? (tatDays > 7 ? "red" : "blue") : "default"} style={{ margin: 0, width: 'fit-content' }}>
                                                         {tatDays !== "N/A" ? `${tatDays} Days` : "N/A"}
                                                     </Tag>
                                                 </div>
                                             </Col>
 
                                             {/* Column 3: Items & Type */}
-                                            <Col xs={12} sm={8} md={4} lg={3} xl={3}>
+                                            <Col xs={8} sm={8} md={2} lg={2} xl={2}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                     <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
                                                     <div>
                                                         <Badge
                                                             count={itemCount}
-                                                            style={{ backgroundColor: '#52c41a' }}
                                                             showZero
                                                         />
                                                     </div>
                                                 </div>
                                             </Col>
 
-                                            <Col xs={12} sm={8} md={4} lg={3} xl={3}>
+                                            <Col xs={16} sm={8} md={3} lg={3} xl={3}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                     <Text type="secondary" style={{ fontSize: '11px' }}>Type</Text>
-                                                    <Tag color={firstItem.repairType === "Local Repair" ? "purple" : "cyan"}>
+                                                    <Tag color={firstItem.repairType === "Local Repair" ? "purple" : "cyan"} style={{ margin: 0, width: 'fit-content' }}>
                                                         {firstItem.repairType === "Local Repair" ? "Local" : "Local"}
                                                     </Tag>
                                                 </div>
                                             </Col>
 
-                                            {/* Column 4: Actions (Right Aligned on desktop, full width/wrap on mobile) */}
-                                            <Col xs={24} sm={24} md={24} lg={5} xl={7} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                            {/* Column 4: Actions */}
+                                            <Col xs={24} sm={24} md={4} lg={6} xl={8} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                                 <div
                                                     className="header-actions"
                                                     onClick={e => e.stopPropagation()}
-                                                    style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}
+                                                    style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%', paddingRight: '10px' }}
                                                 >
                                                     {!isDepot && (
                                                         <>
@@ -766,9 +765,6 @@ export default function UnrepairedPage() {
                                         className="rma-panel"
                                         style={{
                                             marginBottom: 16,
-                                            background: '#fff',
-                                            borderRadius: 8,
-                                            border: '1px solid #f0f0f0',
                                             overflow: 'hidden'
                                         }}
                                     >

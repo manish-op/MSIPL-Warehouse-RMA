@@ -291,10 +291,10 @@ export default function AssignedPage() {
                                     <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
                                         <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
                                             {/* Column 1: RMA Identity */}
-                                            <Col xs={24} sm={12} md={6} lg={6} xl={5}>
+                                            <Col xs={24} sm={12} md={8} lg={7} xl={6}>
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <Title level={5} style={{ margin: 0, color: '#1890ff', whiteSpace: 'nowrap' }}>
+                                                        <Title level={5} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                                             {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
                                                         </Title>
                                                     </div>
@@ -305,7 +305,7 @@ export default function AssignedPage() {
                                             </Col>
 
                                             {/* Column 2: Date */}
-                                            <Col xs={12} sm={12} md={6} lg={6} xl={5}>
+                                            <Col xs={12} sm={12} md={5} lg={5} xl={4}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                     <Text type="secondary" style={{ fontSize: '11px' }}>Created Date</Text>
                                                     <Text strong>{createdDate}</Text>
@@ -313,13 +313,13 @@ export default function AssignedPage() {
                                             </Col>
 
                                             {/* Column 3: Stats */}
-                                            <Col xs={12} sm={8} md={6} lg={6} xl={5}>
+                                            <Col xs={12} sm={8} md={3} lg={3} xl={2}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                     <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
                                                     <div>
                                                         <Badge
                                                             count={itemCount}
-                                                            style={{ backgroundColor: '#52c41a' }}
+                                                            style={{ backgroundColor: 'var(--status-success)' }}
                                                             showZero
                                                         />
                                                     </div>
@@ -327,7 +327,7 @@ export default function AssignedPage() {
                                             </Col>
 
                                             {/* Column 4: Types/Status Summary (optional) */}
-                                            <Col xs={12} sm={16} md={6} lg={6} xl={9} style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                            <Col xs={24} sm={24} md={8} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '24px' }}>
                                                 {/* Placeholder for future group actions */}
                                             </Col>
                                         </Row>
@@ -339,13 +339,6 @@ export default function AssignedPage() {
                                         key={rmaNo}
                                         header={headerContent}
                                         className="rma-panel"
-                                        style={{
-                                            marginBottom: 16,
-                                            background: '#fff',
-                                            borderRadius: 8,
-                                            border: '1px solid #f0f0f0',
-                                            overflow: 'hidden'
-                                        }}
                                     >
                                         {/* MODERN CARD GRID */}
                                         <div className="rma-items-grid">
