@@ -365,7 +365,8 @@ public class RmaInwardGatepassService {
         contentStream.beginText();
         contentStream.setFont(font, fontSize);
         contentStream.setNonStrokingColor(Color.BLACK);
-        float textWidth = font.getStringWidth(text) / 1000 * fontSize;
+        String sanitized = sanitizeText(text);
+        float textWidth = font.getStringWidth(sanitized) / 1000 * fontSize;
         float startX;
         if (alignment == TextAlignment.TA_LEFT) {
             startX = x;
@@ -375,8 +376,20 @@ public class RmaInwardGatepassService {
             startX = x - (textWidth / 2);
         }
         contentStream.newLineAtOffset(startX, y);
-        contentStream.showText(text);
+        contentStream.showText(sanitized);
         contentStream.endText();
+    }
+
+    private String sanitizeText(String text) {
+        if (text == null)
+            return "";
+        // Replace all control characters (including newlines, tabs) with space to avoid
+        // PDFBox encoding errors
+        return text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", " ")
+                .replace("\n", " ")
+                .replace("\r", " ")
+                .replace("\t", " ")
+                .trim();
     }
 
     private void drawTableHeader(PDPageContentStream contentStream, PDFont font, float fontSize,
@@ -442,20 +455,32 @@ public class RmaInwardGatepassService {
             lines.add("");
             return lines;
         }
-        String[] words = text.split(" ");
-        StringBuilder currentLine = new StringBuilder();
-        for (String word : words) {
-            if (font.getStringWidth(currentLine + " " + word) / 1000 * fontSize < maxWidth) {
-                if (currentLine.length() > 0)
-                    currentLine.append(" ");
-                currentLine.append(word);
-            } else {
-                lines.add(currentLine.toString());
-                currentLine = new StringBuilder(word);
+
+        // First split by actual newline characters
+        String[] manualLines = text.split("\\r?\\n");
+
+        for (String manualLine : manualLines) {
+            String[] words = manualLine.split(" ");
+            StringBuilder currentLine = new StringBuilder();
+            for (String word : words) {
+                if (font.getStringWidth(currentLine + " " + word) / 1000 * fontSize < maxWidth) {
+                    if (currentLine.length() > 0)
+                        currentLine.append(" ");
+                    currentLine.append(word);
+                } else {
+                    if (currentLine.length() > 0) {
+                        lines.add(currentLine.toString());
+                        currentLine = new StringBuilder(word);
+                    } else {
+                        // Word itself is longer than maxWidth, force split
+                        lines.add(word);
+                        currentLine = new StringBuilder();
+                    }
+                }
             }
+            if (currentLine.length() > 0)
+                lines.add(currentLine.toString());
         }
-        if (currentLine.length() > 0)
-            lines.add(currentLine.toString());
         return lines;
     }
 }

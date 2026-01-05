@@ -492,16 +492,26 @@ public class RmaPdfService {
 
     private void drawText(PDPageContentStream contentStream, String text, float x, float y, boolean bold)
             throws IOException {
-        if (text == null) {
-            text = "";
-        }
+        String sanitized = sanitizeText(text);
         contentStream.beginText();
         contentStream.setFont(
                 new PDType1Font(bold ? Standard14Fonts.FontName.HELVETICA_BOLD : Standard14Fonts.FontName.HELVETICA),
                 10);
         contentStream.newLineAtOffset(x, y);
-        contentStream.showText(text);
+        contentStream.showText(sanitized);
         contentStream.endText();
+    }
+
+    private String sanitizeText(String text) {
+        if (text == null)
+            return "";
+        // Replace all control characters (including newlines, tabs) with space to avoid
+        // PDFBox encoding errors
+        return text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", " ")
+                .replace("\n", " ")
+                .replace("\r", " ")
+                .replace("\t", " ")
+                .trim();
     }
 
     private void drawTableScanline(PDPageContentStream contentStream, float x, float y, float width)

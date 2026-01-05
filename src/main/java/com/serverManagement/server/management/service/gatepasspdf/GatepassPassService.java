@@ -59,12 +59,16 @@ public class GatepassPassService {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
             // === FONT LOADING ===
-            try (InputStream fontRegularStream = getClass().getClassLoader().getResourceAsStream("font/Roboto/Roboto-Regular.ttf");
-                 InputStream fontBoldStream = getClass().getClassLoader().getResourceAsStream("font/Roboto/Roboto-Bold.ttf")) {
+            try (InputStream fontRegularStream = getClass().getClassLoader()
+                    .getResourceAsStream("font/Roboto/Roboto-Regular.ttf");
+                    InputStream fontBoldStream = getClass().getClassLoader()
+                            .getResourceAsStream("font/Roboto/Roboto-Bold.ttf")) {
 
                 if (fontRegularStream == null || fontBoldStream == null) {
-                    fontRegular = PDType0Font.load(document, getClass().getClassLoader().getResourceAsStream("font/Helvetica.ttf"), true);
-                    fontBold = PDType0Font.load(document, getClass().getClassLoader().getResourceAsStream("font/Helvetica-Bold.ttf"), true);
+                    fontRegular = PDType0Font.load(document,
+                            getClass().getClassLoader().getResourceAsStream("font/Helvetica.ttf"), true);
+                    fontBold = PDType0Font.load(document,
+                            getClass().getClassLoader().getResourceAsStream("font/Helvetica-Bold.ttf"), true);
                 } else {
                     fontRegular = PDType0Font.load(document, fontRegularStream, true);
                     fontBold = PDType0Font.load(document, fontBoldStream, true);
@@ -76,7 +80,6 @@ public class GatepassPassService {
             // --- Page 1: Paper Form Layout ---
             generateInvoicePage(document, inwardGatepass);
 
-
             if (fruList != null && !fruList.isEmpty()) {
                 generateGatePassStickersPage(document, fruList);
             }
@@ -85,7 +88,8 @@ public class GatepassPassService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            String filename = "Gatepass_" + inwardGatepass.getRegionDetails().getCity() + "-" + inwardGatepass.getId() + ".pdf";
+            String filename = "Gatepass_" + inwardGatepass.getRegionDetails().getCity() + "-" + inwardGatepass.getId()
+                    + ".pdf";
             ContentDisposition contentDisposition = ContentDisposition.builder("inline").filename(filename).build();
             headers.setContentDisposition(contentDisposition);
 
@@ -111,7 +115,8 @@ public class GatepassPassService {
         }
     }
 
-    private float drawHeader(PDDocument document, PDPageContentStream contentStream, InwardGatePassEntity inwardGatepass, float y) throws IOException {
+    private float drawHeader(PDDocument document, PDPageContentStream contentStream,
+            InwardGatePassEntity inwardGatepass, float y) throws IOException {
         float startY = y;
         final float LINE_HEIGHT = 18;
         final float TITLE_Y = startY;
@@ -137,7 +142,8 @@ public class GatepassPassService {
         float addressMaxWidth = 150; // Limit address width to 200 points
 
         // Draw wrapped address and capture its height
-        float addressHeight = drawWrappedText(contentStream, fontRegular, 7, address, addressStartX, addressStartY, addressMaxWidth, COLOR_TEXT_BODY);
+        float addressHeight = drawWrappedText(contentStream, fontRegular, 7, address, addressStartX, addressStartY,
+                addressMaxWidth, COLOR_TEXT_BODY);
 
         // Calculate the adjusted start Y for the details box, based on address height
         float verticalSpaceBelowAddress = 10;
@@ -160,7 +166,6 @@ public class GatepassPassService {
         contentStream.setLineWidth(1f);
         contentStream.addRect(MARGIN, detailBoxBottomY, CONTENT_WIDTH, detailBoxHeight);
         contentStream.stroke();
-
 
         // Vertical Divider
         float splitX = PAGE_WIDTH / 2 - 20;
@@ -185,10 +190,12 @@ public class GatepassPassService {
         final float VERTICAL_OFFSET = 11;
 
         // Row 1
-        drawDetailField(contentStream, fontBold, fontRegular, "CUSTOMER NAME", capitalizeFirstLetter(inwardGatepass.getPartyName()),
+        drawDetailField(contentStream, fontBold, fontRegular, "CUSTOMER NAME",
+                capitalizeFirstLetter(inwardGatepass.getPartyName()),
                 MARGIN + 5, detailBoxTopY - LINE_HEIGHT + VERTICAL_OFFSET, splitX - MARGIN - 5);
 
-        drawDetailField(contentStream, fontBold, fontRegular, "DATE", inwardGatepass.getCreatedDate().format(DateTimeFormatter.ofPattern("dd / MM / yyyy")),
+        drawDetailField(contentStream, fontBold, fontRegular, "DATE",
+                inwardGatepass.getCreatedDate().format(DateTimeFormatter.ofPattern("dd / MM / yyyy")),
                 splitX + 5, detailBoxTopY - LINE_HEIGHT + VERTICAL_OFFSET, PAGE_WIDTH - MARGIN - splitX - 5);
 
         // Row 2
@@ -208,7 +215,8 @@ public class GatepassPassService {
     /**
      * Helper to draw the label and the value in the details box.
      */
-    private void drawDetailField(PDPageContentStream cs, PDType0Font labelFont, PDType0Font valueFont, String label, String value, float x, float y, float width) throws IOException {
+    private void drawDetailField(PDPageContentStream cs, PDType0Font labelFont, PDType0Font valueFont, String label,
+            String value, float x, float y, float width) throws IOException {
         // Draw Label
         drawText(cs, labelFont, 8, label, x, y, COLOR_TITLE);
 
@@ -223,10 +231,11 @@ public class GatepassPassService {
     }
 
     // --- drawItemsTable (UPDATED) ---
-    private float drawItemsTable(PDDocument document, PDPage currentPage, PDPageContentStream currentContentStream, List<ItemListViaGatePassInward> items, float y) throws IOException {
+    private float drawItemsTable(PDDocument document, PDPage currentPage, PDPageContentStream currentContentStream,
+            List<ItemListViaGatePassInward> items, float y) throws IOException {
         // Adjusted column widths and headers (Unit column removed)
-        final float[] columnWidths = {40, 320, 60, 100}; // Sl. No., Description (Increased width), Quantity, Remarks
-        final String[] headers = {"Sl. No.", "Description of Items", "Quantity", "Remarks"};
+        final float[] columnWidths = { 40, 320, 60, 100 }; // Sl. No., Description (Increased width), Quantity, Remarks
+        final String[] headers = { "Sl. No.", "Description of Items", "Quantity", "Remarks" };
         final float tableTopY = y;
         float headerHeight = 20;
 
@@ -243,9 +252,11 @@ public class GatepassPassService {
 
             // Column indices for wrapped text calculation: Description (1), Remark (3)
             float requiredHeight = calculateRowHeight(description, remark, columnWidths[1], columnWidths[3], 10f);
-            if (requiredHeight < 20) requiredHeight = 20;
+            if (requiredHeight < 20)
+                requiredHeight = 20;
 
-            // CHECK: If space is left for row AND the entire footer section (approx 100 points)
+            // CHECK: If space is left for row AND the entire footer section (approx 100
+            // points)
             if (y - requiredHeight < MARGIN + 100) {
                 currentContentStream.close();
                 currentPage = new PDPage(PDRectangle.A4);
@@ -270,13 +281,15 @@ public class GatepassPassService {
 
         int maxVisibleRows = 5;
         int drawnRows = items.size();
-        for(int i = drawnRows; i < maxVisibleRows; i++){
+        for (int i = drawnRows; i < maxVisibleRows; i++) {
             float rowHeight = 20;
-            // CHECK: If space is left for row AND the entire footer section (approx 100 points)
-            if (y - rowHeight < MARGIN + 100) break;
+            // CHECK: If space is left for row AND the entire footer section (approx 100
+            // points)
+            if (y - rowHeight < MARGIN + 100)
+                break;
 
             // Empty data array (4 elements)
-            String[] emptyRowData = {"", "", "", ""};
+            String[] emptyRowData = { "", "", "", "" };
             drawTableRow(currentContentStream, emptyRowData, columnWidths, y, rowHeight, false);
             y -= rowHeight;
         }
@@ -298,7 +311,8 @@ public class GatepassPassService {
     }
 
     // --- drawTableHeader (UPDATED) ---
-    private void drawTableHeader(PDPageContentStream stream, String[] headers, float[] colWidths, float y, float height) throws IOException {
+    private void drawTableHeader(PDPageContentStream stream, String[] headers, float[] colWidths, float y, float height)
+            throws IOException {
         stream.setNonStrokingColor(Color.WHITE);
         stream.addRect(MARGIN, y - height, CONTENT_WIDTH, height);
         stream.fill();
@@ -323,7 +337,8 @@ public class GatepassPassService {
     }
 
     // --- drawTableRow (UPDATED) ---
-    private void drawTableRow(PDPageContentStream stream, String[] data, float[] colWidths, float y, float height, boolean isOddRow) throws IOException {
+    private void drawTableRow(PDPageContentStream stream, String[] data, float[] colWidths, float y, float height,
+            boolean isOddRow) throws IOException {
         stream.setNonStrokingColor(Color.WHITE);
         stream.addRect(MARGIN, y - height, CONTENT_WIDTH, height);
         stream.fill();
@@ -348,17 +363,18 @@ public class GatepassPassService {
         }
     }
 
-    private float calculateRowHeight(String details, String remark, float detailsWidth, float remarkWidth, float fontSize) throws IOException {
+    private float calculateRowHeight(String details, String remark, float detailsWidth, float remarkWidth,
+            float fontSize) throws IOException {
         List<String> detailsLines = splitTextIntoLines(details, detailsWidth - 10, fontSize);
         List<String> remarkLines = splitTextIntoLines(remark, remarkWidth - 10, fontSize);
 
         int maxLines = Math.max(detailsLines.size(), remarkLines.size());
-        if (maxLines == 0) maxLines = 1;
+        if (maxLines == 0)
+            maxLines = 1;
 
         float lineHeight = fontRegular.getFontDescriptor().getCapHeight() / 1000 * fontSize + 6;
         return Math.max(20, maxLines * lineHeight + 10);
     }
-
 
     private void drawFooter(PDPageContentStream contentStream, float bottomMargin) throws IOException {
 
@@ -395,16 +411,19 @@ public class GatepassPassService {
         float signatureY = startY - 10;
 
         // Text alignment to the right edge of the content area
-        drawText(contentStream, fontBold, 10, "SECURITY SEAL & SIGNATURE", PAGE_WIDTH - MARGIN, signatureY, COLOR_TITLE, "RIGHT");
+        drawText(contentStream, fontBold, 10, "SECURITY SEAL & SIGNATURE", PAGE_WIDTH - MARGIN, signatureY, COLOR_TITLE,
+                "RIGHT");
         // Underline alignment to the right edge of the content area
-        drawText(contentStream, fontRegular, 10, "________________________", PAGE_WIDTH - MARGIN, signatureY - 5, COLOR_TEXT_BODY, "RIGHT");
+        drawText(contentStream, fontRegular, 10, "________________________", PAGE_WIDTH - MARGIN, signatureY - 5,
+                COLOR_TEXT_BODY, "RIGHT");
     }
 
     // --- UTILITY & HELPER METHODS (KEPT AS IS) ---
 
-    private void drawText(PDPageContentStream cs, PDType0Font font, float fontSize, String text, float x, float y, Color color, String align) throws IOException {
-        if (text == null) text = "";
-        float textWidth = font.getStringWidth(text) / 1000 * fontSize;
+    private void drawText(PDPageContentStream cs, PDType0Font font, float fontSize, String text, float x, float y,
+            Color color, String align) throws IOException {
+        String sanitized = sanitizeText(text);
+        float textWidth = font.getStringWidth(sanitized) / 1000 * fontSize;
         float startX = x;
         if ("RIGHT".equals(align)) {
             startX = x - textWidth;
@@ -416,17 +435,31 @@ public class GatepassPassService {
         cs.setFont(font, fontSize);
         cs.setNonStrokingColor(color);
         cs.newLineAtOffset(startX, y);
-        cs.showText(text);
+        cs.showText(sanitized);
         cs.endText();
     }
 
-    private void drawText(PDPageContentStream cs, PDType0Font font, float fontSize, String text, float x, float y, Color color) throws IOException {
+    private String sanitizeText(String text) {
+        if (text == null)
+            return "";
+        // Replace all control characters (including newlines, tabs) with space to avoid
+        // PDFBox encoding errors
+        return text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", " ")
+                .replace("\n", " ")
+                .replace("\r", " ")
+                .replace("\t", " ")
+                .trim();
+    }
+
+    private void drawText(PDPageContentStream cs, PDType0Font font, float fontSize, String text, float x, float y,
+            Color color) throws IOException {
         drawText(cs, font, fontSize, text, x, y, color, "LEFT");
     }
 
-
-    private float drawWrappedText(PDPageContentStream cs, PDType0Font font, float fontSize, String text, float x, float y, float maxWidth, Color color) throws IOException {
-        if (text == null) text = "";
+    private float drawWrappedText(PDPageContentStream cs, PDType0Font font, float fontSize, String text, float x,
+            float y, float maxWidth, Color color) throws IOException {
+        if (text == null)
+            text = "";
         // Use the regular font for splitting and wrapping
         List<String> lines = splitTextIntoLines(text, maxWidth, fontSize);
         // Calculate line height based on font metrics and desired spacing
@@ -446,29 +479,40 @@ public class GatepassPassService {
             lines.add("");
             return lines;
         }
-        String[] words = text.split(" ");
-        StringBuilder currentLine = new StringBuilder();
-        // Since this utility is used for address wrapping, ensure fontRegular is used for measurement
+
+        // First split by actual newline characters
+        String[] manualLines = text.split("\\r?\\n");
+
+        // Since this utility is used for address wrapping, ensure fontRegular is used
+        // for measurement
         PDType0Font measurementFont = fontRegular;
 
-        for (String word : words) {
-            float width = measurementFont.getStringWidth(currentLine + (currentLine.length() > 0 ? " " : "") + word) / 1000 * fontSize;
-            if (width < maxWidth) {
-                if (currentLine.length() > 0) currentLine.append(" ");
-                currentLine.append(word);
-            } else {
-                if (currentLine.length() > 0) {
-                    lines.add(currentLine.toString());
+        for (String manualLine : manualLines) {
+            String[] words = manualLine.split(" ");
+            StringBuilder currentLine = new StringBuilder();
+
+            for (String word : words) {
+                float width = measurementFont.getStringWidth(currentLine + (currentLine.length() > 0 ? " " : "") + word)
+                        / 1000 * fontSize;
+                if (width < maxWidth) {
+                    if (currentLine.length() > 0)
+                        currentLine.append(" ");
+                    currentLine.append(word);
                 } else {
-                    // Handle case where a single word is wider than maxWidth
-                    // For simplicity in a beginner context, we just add the word and rely on the viewer to clip/handle it,
-                    // or implement more complex character-level splitting (which is avoided here).
+                    if (currentLine.length() > 0) {
+                        lines.add(currentLine.toString());
+                        currentLine = new StringBuilder(word);
+                    } else {
+                        // Word itself is longer than maxWidth, just add it (or could force character
+                        // split)
+                        lines.add(word);
+                        currentLine = new StringBuilder();
+                    }
                 }
-                currentLine = new StringBuilder(word);
             }
-        }
-        if (currentLine.length() > 0) {
-            lines.add(currentLine.toString());
+            if (currentLine.length() > 0) {
+                lines.add(currentLine.toString());
+            }
         }
         return lines;
     }
@@ -487,6 +531,7 @@ public class GatepassPassService {
             return null;
         }
     }
+
     public static String capitalizeFirstLetter(String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -529,8 +574,8 @@ public class GatepassPassService {
         }
     }
 
-
-    private void drawSingleSticker(PDDocument document, PDPageContentStream contentStream, FruEntity fru, float x, float y, float width, float height, float padding) throws IOException {
+    private void drawSingleSticker(PDDocument document, PDPageContentStream contentStream, FruEntity fru, float x,
+            float y, float width, float height, float padding) throws IOException {
         // Sticker Border
         contentStream.setStrokingColor(Color.BLACK);
         contentStream.setLineWidth(1);
@@ -550,30 +595,38 @@ public class GatepassPassService {
         currentY -= 25;
 
         // Content
-        String serialNo = fru.getRepairingIdList().getSerialNo() != null ? fru.getRepairingIdList().getSerialNo() : "N/A";
-        String ticketNo = fru.getRepairingIdList().getId() != null ? fru.getRepairingIdList().getId().toString() : "N/A";
+        String serialNo = fru.getRepairingIdList().getSerialNo() != null ? fru.getRepairingIdList().getSerialNo()
+                : "N/A";
+        String ticketNo = fru.getRepairingIdList().getId() != null ? fru.getRepairingIdList().getId().toString()
+                : "N/A";
 
         drawText(contentStream, fontBold, 8, "S.No: " + serialNo, innerX, currentY, COLOR_TEXT_BODY);
-        drawText(contentStream, fontRegular, 8, "Ticket: " + ticketNo, x + width - padding, currentY, COLOR_TEXT_BODY, "RIGHT");
+        drawText(contentStream, fontRegular, 8, "Ticket: " + ticketNo, x + width - padding, currentY, COLOR_TEXT_BODY,
+                "RIGHT");
         currentY -= 12;
 
         String rmaNo = fru.getRmaNo() != null ? fru.getRmaNo() : "N/A";
         drawText(contentStream, fontRegular, 8, "RMA No: " + rmaNo, innerX, currentY, COLOR_TEXT_BODY);
         currentY -= 12;
 
-        String customer = fru.getInGatepassID().getPartyName() != null ? capitalizeFirstLetter(fru.getInGatepassID().getPartyName()) : "N/A";
+        String customer = fru.getInGatepassID().getPartyName() != null
+                ? capitalizeFirstLetter(fru.getInGatepassID().getPartyName())
+                : "N/A";
         drawText(contentStream, fontRegular, 8, "Customer: " + customer, innerX, currentY, COLOR_TEXT_BODY);
         currentY -= 12;
 
-        String fault = fru.getRepairingIdList().getFaultDetails() != null ? fru.getRepairingIdList().getFaultDetails() : "N/A";
-        currentY -= drawWrappedText(contentStream, fontRegular, 8, "Fault: " + fault, innerX, currentY, innerWidth, COLOR_TEXT_BODY);
+        String fault = fru.getRepairingIdList().getFaultDetails() != null ? fru.getRepairingIdList().getFaultDetails()
+                : "N/A";
+        currentY -= drawWrappedText(contentStream, fontRegular, 8, "Fault: " + fault, innerX, currentY, innerWidth,
+                COLOR_TEXT_BODY);
         currentY -= 10;
 
         String date = fru.getCreatedDate().format(DateTimeFormatter.ofPattern("dd/MM/yy"));
         drawText(contentStream, fontRegular, 8, "Date: " + date, innerX, currentY, COLOR_TEXT_BODY);
 
         // QR Code
-        String qrData = String.format("TicketNo:%s|SerialNo:%s|RmaNo:%s|Customer:%s", ticketNo, serialNo, rmaNo, customer);
+        String qrData = String.format("TicketNo:%s|SerialNo:%s|RmaNo:%s|Customer:%s", ticketNo, serialNo, rmaNo,
+                customer);
         BufferedImage qrImage = generateQRCodeImage(qrData);
         if (qrImage != null) {
             PDImageXObject pdQrImage = LosslessFactory.createFromImage(document, qrImage);

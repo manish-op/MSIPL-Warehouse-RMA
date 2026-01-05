@@ -10,7 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -19,10 +18,8 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
 import com.serverManagement.server.management.dao.rma.request.RmaRequestDAO;
-
 import com.serverManagement.server.management.entity.rma.request.RmaItemEntity;
 import com.serverManagement.server.management.entity.rma.request.RmaRequestEntity;
 
@@ -508,8 +505,8 @@ public class RmaReportService {
                 yPosition -= 30;
 
                 // 4. Performance Metrics
-                // drawSectionHeader(contentStream, yPosition, "Performance Metrics");
-                // yPosition -= 25;
+                drawSectionHeader(contentStream, yPosition, "Performance Metrics");
+                yPosition -= 25;
 
                 // Calculate approximate completion from status keys
                 long completedCount = statusCounts.entrySet().stream()
@@ -543,7 +540,7 @@ public class RmaReportService {
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 24);
         contentStream.setNonStrokingColor(new Color(41, 128, 185)); // Professional Blue
         contentStream.newLineAtOffset(MARGIN, y);
-        contentStream.showText(title);
+        contentStream.showText(sanitizeText(title));
         contentStream.endText();
 
         y -= 25;
@@ -554,12 +551,12 @@ public class RmaReportService {
         contentStream.newLineAtOffset(MARGIN, y);
         String dateRange = "Period: " + (start != null ? start.format(DATE_FORMATTER) : "Start") + " to "
                 + (end != null ? end.format(DATE_FORMATTER) : "Present");
-        contentStream.showText(dateRange);
+        contentStream.showText(sanitizeText(dateRange));
         contentStream.endText();
 
         contentStream.beginText();
         contentStream.newLineAtOffset(400, y);
-        contentStream.showText("Generated: " + ZonedDateTime.now().format(DATETIME_FORMATTER));
+        contentStream.showText(sanitizeText("Generated: " + ZonedDateTime.now().format(DATETIME_FORMATTER)));
         contentStream.endText();
 
         y -= 20;
@@ -592,14 +589,14 @@ public class RmaReportService {
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 12);
         contentStream.setNonStrokingColor(new Color(41, 128, 185));
         contentStream.newLineAtOffset(MARGIN + 10, y - 15);
-        contentStream.showText(title);
+        contentStream.showText(sanitizeText(title));
         contentStream.endText();
 
         contentStream.beginText();
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
         contentStream.setNonStrokingColor(Color.BLACK);
         contentStream.newLineAtOffset(MARGIN + 10, y - 30);
-        contentStream.showText(content);
+        contentStream.showText(sanitizeText(content));
         contentStream.endText();
 
         return y - 60;
@@ -610,7 +607,7 @@ public class RmaReportService {
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);
         contentStream.setNonStrokingColor(new Color(44, 62, 80)); // Dark Navy
         contentStream.newLineAtOffset(MARGIN, y);
-        contentStream.showText(text);
+        contentStream.showText(sanitizeText(text));
         contentStream.endText();
     }
 
@@ -650,7 +647,7 @@ public class RmaReportService {
         for (int i = 0; i < headers.length; i++) {
             contentStream.beginText();
             contentStream.newLineAtOffset(textX, textY);
-            contentStream.showText(headers[i]);
+            contentStream.showText(sanitizeText(headers[i]));
             contentStream.endText();
             textX += colWidths[i];
         }
@@ -697,7 +694,7 @@ public class RmaReportService {
 
             contentStream.beginText();
             contentStream.newLineAtOffset(textX, textY);
-            contentStream.showText(val);
+            contentStream.showText(sanitizeText(val));
             contentStream.endText();
             textX += colWidths[i];
         }
@@ -719,15 +716,27 @@ public class RmaReportService {
         contentStream.beginText();
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
         contentStream.newLineAtOffset(x + 10, y - 20);
-        contentStream.showText(label);
+        contentStream.showText(sanitizeText(label));
         contentStream.endText();
 
         contentStream.setNonStrokingColor(new Color(41, 128, 185));
         contentStream.beginText();
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 16);
         contentStream.newLineAtOffset(x + 10, y - 40);
-        contentStream.showText(value);
+        contentStream.showText(sanitizeText(value));
         contentStream.endText();
+    }
+
+    private String sanitizeText(String text) {
+        if (text == null)
+            return "";
+        // Replace all control characters (including newlines, tabs) with space to avoid
+        // PDFBox encoding errors
+        return text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", " ")
+                .replace("\n", " ")
+                .replace("\r", " ")
+                .replace("\t", " ")
+                .trim();
     }
 
     private void drawFooter(PDPageContentStream contentStream, float pageWidth) throws IOException {
@@ -740,7 +749,7 @@ public class RmaReportService {
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE), 8);
         contentStream.setNonStrokingColor(Color.GRAY);
         contentStream.newLineAtOffset(MARGIN, 20);
-        contentStream.showText("Motorola Solutions India Pvt. Ltd. | Confidential");
+        contentStream.showText(sanitizeText("Motorola Solutions India Pvt. Ltd. | Confidential"));
         contentStream.endText();
     }
 
@@ -758,7 +767,7 @@ public class RmaReportService {
                 // Center text
                 float textSize = (new PDType1Font(Standard14Fonts.FontName.HELVETICA)).getStringWidth(text) / 1000 * 9;
                 contentStream.newLineAtOffset(width - MARGIN - textSize, 20);
-                contentStream.showText(text);
+                contentStream.showText(sanitizeText(text));
                 contentStream.endText();
             }
         }
