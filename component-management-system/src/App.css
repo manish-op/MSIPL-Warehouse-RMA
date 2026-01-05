@@ -334,8 +334,9 @@ footer {
 
 /* Other Components */
 .ant-message-notice-content {
-  background-color: var(--component-background) !important;
-  color: var(--text-color) !important;
+  background-color: var(--component-background, #ffffff) !important;
+  color: var(--text-color, #1c1e21) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .ant-typography,
