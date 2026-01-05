@@ -16,6 +16,7 @@ import {
   SwapOutlined,
   CarOutlined,
   CloseCircleOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../Header/Header"; // Import Global Header
@@ -90,6 +91,7 @@ const RmaLayout = ({ children }) => {
   if (location.pathname.includes("cant-be-repaired")) selectedKey = "cant-be-repaired";
   if (location.pathname.includes("depot-dispatch")) selectedKey = "depot-dispatch";
   if (location.pathname.includes("audit-trail")) selectedKey = "audit-trail";
+  if (location.pathname.includes("rma-reports")) selectedKey = "rma-reports";
 
   const handleMenuClick = ({ key }) => {
     if (key === "rma-dashboard") navigate("/rma-dashboard");
@@ -100,6 +102,7 @@ const RmaLayout = ({ children }) => {
     if (key === "cant-be-repaired") navigate("/cant-be-repaired");
     if (key === "depot-dispatch") navigate("/depot-dispatch");
     if (key === "audit-trail") navigate("/audit-trail");
+    if (key === "rma-reports") navigate("/rma-reports");
     if (key === "logout") showLogoutConfirm();
 
     // Auto-close sidebar on mobile after navigation
@@ -112,7 +115,7 @@ const RmaLayout = ({ children }) => {
   const getSidebarTheme = () => {
     if (selectedKey === "repaired") return "theme-green";
     if (selectedKey === "cant-be-repaired") return "theme-red";
-    if (selectedKey === "audit-trail" || selectedKey === "depot-dispatch") return "theme-purple";
+    if (selectedKey === "audit-trail" || selectedKey === "depot-dispatch" || selectedKey === "rma-reports") return "theme-purple";
     return "theme-blue"; // default for dashboard, unrepaired, assigned, rma-request
   };
 
@@ -237,6 +240,11 @@ const RmaLayout = ({ children }) => {
                 key: "cant-be-repaired",
                 icon: <WarningOutlined />,
                 label: "Can't Be Repaired",
+              },
+              {
+                key: "rma-reports",
+                icon: <BarChartOutlined />,
+                label: "Reports",
               },
               {
                 key: "audit-trail",
