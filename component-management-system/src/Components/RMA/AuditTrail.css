@@ -258,3 +258,7 @@
     border: 1px solid #434343 !important;
     color: #bfbfbf !important;
 }
+
+[data-theme='dark'] .audit-trail-header h2.ant-typography {
+    color: #ffffff !important;
+}
