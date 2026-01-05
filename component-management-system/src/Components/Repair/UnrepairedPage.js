@@ -31,7 +31,6 @@ import {
     DownloadOutlined,
 } from "@ant-design/icons";
 import { RmaApi } from "../API/RMA"; // Ensure this path is correct
-import { URL as API_URL } from "../API/URL"; // Ensure this path is correct
 import RmaLayout from "../RMA/RmaLayout"; // Ensure this path is correct
 import "./UnrepairedPage.css";
 

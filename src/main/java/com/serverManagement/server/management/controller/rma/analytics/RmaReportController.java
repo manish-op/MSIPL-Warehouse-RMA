@@ -1,4 +1,4 @@
-package com.serverManagement.server.management.controller.rma;
+package com.serverManagement.server.management.controller.rma.analytics;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.serverManagement.server.management.service.rma.RmaReportService;
+import com.serverManagement.server.management.service.rma.analytics.RmaReportService;
 
 @RestController
 @RequestMapping("/api/rma/reports")
@@ -25,10 +25,6 @@ public class RmaReportController {
 
     private static final DateTimeFormatter ISO_DATE_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
-    /**
-     * Generate RMA Report by Creator
-     * GET /api/rma/reports/by-creator?startDate=...&endDate=...
-     */
     @GetMapping("/by-creator")
     public ResponseEntity<byte[]> getReportByCreator(
             @RequestParam(required = false) String startDate,

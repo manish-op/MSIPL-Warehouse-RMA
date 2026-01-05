@@ -10,7 +10,7 @@ import {
     Spin,
     message,
     Space,
-    Divider,
+    Modal,
 } from "antd";
 import {
     DownloadOutlined,
@@ -21,6 +21,7 @@ import {
     ClockCircleOutlined,
     CalendarOutlined,
     FileTextOutlined,
+    EyeOutlined,
 } from "@ant-design/icons";
 import RmaLayout from "./RmaLayout";
 import Cookies from "js-cookie";
@@ -103,50 +104,58 @@ const ReportsPage = () => {
     const [selectedReport, setSelectedReport] = useState(null);
     const [dateRange, setDateRange] = useState([null, null]);
     const [loading, setLoading] = useState(false);
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
 
-    const handleGenerateReport = async () => {
+    const fetchReportBlob = async () => {
         if (!selectedReport) {
             message.warning("Please select a report type");
-            return;
+            return null;
         }
 
+        const token = getToken();
+        if (!token) {
+            message.error("Authentication token not found. Please login again.");
+            return null;
+        }
+
+        // Build query parameters
+        let url = `${API_URL}/rma/reports/${selectedReport}`;
+        const params = new URLSearchParams();
+
+        if (dateRange[0]) {
+            params.append("startDate", dateRange[0].toISOString());
+        }
+        if (dateRange[1]) {
+            params.append("endDate", dateRange[1].toISOString());
+        }
+
+        if (params.toString()) {
+            url += `?${params.toString()}`;
+        }
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to generate report");
+        }
+
+        return await response.blob();
+    };
+
+    const handleGenerateReport = async () => {
         setLoading(true);
         try {
-            const token = getToken();
-            if (!token) {
-                message.error("Authentication token not found. Please login again.");
-                setLoading(false);
-                return;
-            }
-
-            // Build query parameters
-            let url = `${API_URL}/rma/reports/${selectedReport}`;
-            const params = new URLSearchParams();
-
-            if (dateRange[0]) {
-                params.append("startDate", dateRange[0].toISOString());
-            }
-            if (dateRange[1]) {
-                params.append("endDate", dateRange[1].toISOString());
-            }
-
-            if (params.toString()) {
-                url += `?${params.toString()}`;
-            }
-
-            const response = await fetch(url, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to generate report");
-            }
+            const blob = await fetchReportBlob();
+            if (!blob) return;
 
             // Download the PDF
-            const blob = await response.blob();
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = downloadUrl;
@@ -170,6 +179,30 @@ const ReportsPage = () => {
         }
     };
 
+    const handlePreviewReport = async () => {
+        if (!selectedReport) {
+            message.warning("Please select a report type");
+            return;
+        }
+        setPreviewLoading(true);
+        setPreviewVisible(true);
+        try {
+            const blob = await fetchReportBlob();
+            if (!blob) {
+                setPreviewVisible(false);
+                return;
+            }
+            const url = window.URL.createObjectURL(blob);
+            setPreviewUrl(url);
+        } catch (error) {
+            console.error("Error previewing report:", error);
+            message.error("Failed to load preview.");
+            setPreviewVisible(false);
+        } finally {
+            setPreviewLoading(false);
+        }
+    };
+
     const handleReportCardClick = (reportKey) => {
         setSelectedReport(reportKey);
     };
@@ -186,10 +219,8 @@ const ReportsPage = () => {
                     </Text>
                 </div>
 
-                <Divider />
-
-                {/* Report Type Selection */}
-                <div className="reports-section">
+                {/* Report Type Selection Glass Container */}
+                <div className="glass-container reports-section">
                     <Title level={4}>Select Report Type</Title>
                     <Row gutter={[16, 16]}>
                         {REPORT_TYPES.map((report) => (
@@ -198,7 +229,7 @@ const ReportsPage = () => {
                                     hoverable
                                     className={`report-card ${selectedReport === report.key ? "selected" : ""}`}
                                     onClick={() => handleReportCardClick(report.key)}
-                                    style={{ borderColor: selectedReport === report.key ? report.color : undefined }}
+                                // Removed inline border color to let CSS handle themes
                                 >
                                     <div className="report-card-icon" style={{ color: report.color }}>
                                         {report.icon}
@@ -215,13 +246,11 @@ const ReportsPage = () => {
                     </Row>
                 </div>
 
-                <Divider />
-
-                {/* Filters and Generate */}
-                <div className="reports-section">
-                    <Title level={4}>Filter Options</Title>
-                    <Row gutter={[24, 16]} align="middle">
-                        <Col xs={24} md={12} lg={8}>
+                {/* Filters and Controls Glass Container */}
+                <div className="glass-container controls-container">
+                    <Title level={4} style={{ marginBottom: 16 }}>Configuration & Actions</Title>
+                    <Row gutter={[24, 16]} align="bottom">
+                        <Col xs={24} md={8} lg={8}>
                             <div className="filter-group">
                                 <Text strong>Report Type:</Text>
                                 <Select
@@ -230,6 +259,7 @@ const ReportsPage = () => {
                                     value={selectedReport}
                                     onChange={setSelectedReport}
                                     size="large"
+                                    popupClassName="glass-dropdown"
                                 >
                                     {REPORT_TYPES.map((report) => (
                                         <Option key={report.key} value={report.key}>
@@ -239,7 +269,7 @@ const ReportsPage = () => {
                                 </Select>
                             </div>
                         </Col>
-                        <Col xs={24} md={12} lg={8}>
+                        <Col xs={24} md={8} lg={8}>
                             <div className="filter-group">
                                 <Text strong>Date Range (Optional):</Text>
                                 <RangePicker
@@ -252,7 +282,17 @@ const ReportsPage = () => {
                             </div>
                         </Col>
                         <Col xs={24} lg={8}>
-                            <div className="filter-group generate-btn-container">
+                            <div className="action-buttons-container">
+                                <Button
+                                    className="preview-btn"
+                                    size="large"
+                                    icon={<EyeOutlined />}
+                                    onClick={handlePreviewReport}
+                                    loading={previewLoading}
+                                    disabled={!selectedReport}
+                                >
+                                    Preview
+                                </Button>
                                 <Button
                                     type="primary"
                                     size="large"
@@ -262,19 +302,52 @@ const ReportsPage = () => {
                                     disabled={!selectedReport}
                                     className="generate-btn"
                                 >
-                                    {loading ? "Generating..." : "Generate PDF Report"}
+                                    {loading ? "Generating..." : "Download PDF"}
                                 </Button>
                             </div>
                         </Col>
                     </Row>
                 </div>
 
-                {/* Loading Overlay */}
-                {loading && (
+                {/* Loading Grid Overlay */}
+                {(loading || previewLoading) && (
                     <div className="loading-overlay">
-                        <Spin size="large" tip="Generating your report..." />
+                        <Spin size="large" tip={loading ? "Generating PDF..." : "Loading Preview..."} />
                     </div>
                 )}
+
+                {/* Preview Modal */}
+                <Modal
+                    title={`Preview: ${REPORT_TYPES.find(r => r.key === selectedReport)?.label || 'Report'}`}
+                    open={previewVisible}
+                    onCancel={() => setPreviewVisible(false)}
+                    width={1000}
+                    centered
+                    footer={[
+                        <Button key="close" onClick={() => setPreviewVisible(false)}>
+                            Close
+                        </Button>,
+                        <Button
+                            key="download"
+                            type="primary"
+                            icon={<DownloadOutlined />}
+                            onClick={handleGenerateReport}
+                        >
+                            Download PDF
+                        </Button>,
+                    ]}
+                    bodyStyle={{ padding: 0, height: '70vh' }}
+                >
+                    {previewUrl && (
+                        <iframe
+                            src={previewUrl}
+                            width="100%"
+                            height="100%"
+                            style={{ border: "none" }}
+                            title="PDF Preview"
+                        />
+                    )}
+                </Modal>
             </div>
         </RmaLayout>
     );

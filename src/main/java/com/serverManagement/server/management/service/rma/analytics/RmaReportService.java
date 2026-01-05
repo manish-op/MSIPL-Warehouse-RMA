@@ -1,4 +1,4 @@
-package com.serverManagement.server.management.service.rma;
+package com.serverManagement.server.management.service.rma.analytics;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
@@ -20,10 +20,11 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.serverManagement.server.management.dao.rma.RmaItemDAO;
-import com.serverManagement.server.management.dao.rma.RmaRequestDAO;
-import com.serverManagement.server.management.entity.rma.RmaItemEntity;
-import com.serverManagement.server.management.entity.rma.RmaRequestEntity;
+import com.serverManagement.server.management.dao.rma.request.RmaItemDAO;
+import com.serverManagement.server.management.dao.rma.request.RmaRequestDAO;
+
+import com.serverManagement.server.management.entity.rma.request.RmaItemEntity;
+import com.serverManagement.server.management.entity.rma.request.RmaRequestEntity;
 
 @Service
 public class RmaReportService {
@@ -92,7 +93,8 @@ public class RmaReportService {
         // Group by status
         Map<String, List<RmaItemEntity>> groupedByStatus = new LinkedHashMap<>();
         for (RmaItemEntity i : items) {
-            String status = i.getRepairStatus() != null ? i.getRepairStatus() : "Unknown";
+            String status = (i.getRepairStatus() != null && !i.getRepairStatus().trim().isEmpty()) ? i.getRepairStatus()
+                    : "UNASSIGNED";
             groupedByStatus.computeIfAbsent(status, k -> new ArrayList<>()).add(i);
         }
 
@@ -186,17 +188,19 @@ public class RmaReportService {
         int totalRequests = requests.size();
         int totalItems = items.size();
 
-        long unrepaired = items.stream().filter(i -> "UNREPAIRED".equalsIgnoreCase(i.getRepairStatus())).count();
-        long assigned = items.stream().filter(i -> "ASSIGNED".equalsIgnoreCase(i.getRepairStatus())).count();
-        long repaired = items.stream().filter(i -> "REPAIRED".equalsIgnoreCase(i.getRepairStatus())).count();
-        long cantBeRepaired = items.stream().filter(i -> "CANT_BE_REPAIRED".equalsIgnoreCase(i.getRepairStatus()))
-                .count();
+        // Group by status dynamically matching "RMA Report by Status"
+        Map<String, Long> statusCounts = items.stream()
+                .collect(Collectors.groupingBy(
+                        i -> (i.getRepairStatus() != null && !i.getRepairStatus().trim().isEmpty())
+                                ? i.getRepairStatus()
+                                : "UNASSIGNED",
+                        Collectors.counting()));
 
         long localRepair = items.stream().filter(i -> "LOCAL".equalsIgnoreCase(i.getRepairType())).count();
         long depotRepair = items.stream().filter(i -> "DEPOT".equalsIgnoreCase(i.getRepairType())).count();
 
         return generateSummaryReport(startDate, endDate, totalRequests, totalItems,
-                unrepaired, assigned, repaired, cantBeRepaired, localRepair, depotRepair);
+                statusCounts, localRepair, depotRepair);
     }
 
     // ==================== Helper Methods (Data Fetching) ====================
@@ -283,7 +287,7 @@ public class RmaReportService {
 
             // Table Columns Definition
             float[] colWidths = { 100, 100, 80, 100, 135 }; // Total 515 (A4 width 595 - 80 margin = 515)
-            String[] headers = { "RMA No", "Date", "Items", "Type", "Status" };
+            String[] headers = { "RMA Req. No", "Date", "Items", "Type", "Status" };
 
             // Iterate through groups
             for (Map.Entry<String, List<RmaRequestEntity>> entry : groupedData.entrySet()) {
@@ -366,7 +370,7 @@ public class RmaReportService {
 
             // Table Columns
             float[] colWidths = { 100, 120, 100, 80, 115 };
-            String[] headers = { "RMA No", "Product", "Serial No", "Type", "Status" };
+            String[] headers = { "RMA  No", "Product", "Serial No", "Type", "Status" };
 
             // Draw groups
             for (Map.Entry<String, List<RmaItemEntity>> entry : groupedData.entrySet()) {
@@ -403,12 +407,19 @@ public class RmaReportService {
                     if (product.length() > 20)
                         product = product.substring(0, 18) + "...";
 
+                    String serialNo = item.getSerialNo() != null ? item.getSerialNo() : "N/A";
+                    if (serialNo.startsWith("NA-")) {
+                        serialNo = "N/A";
+                    }
+
                     String[] rowData = {
                             rmaNo,
                             product,
-                            item.getSerialNo() != null ? item.getSerialNo() : "N/A",
+                            serialNo,
                             item.getRepairType() != null ? item.getRepairType() : "-",
-                            item.getRepairStatus() != null ? item.getRepairStatus() : "-"
+                            (item.getRepairStatus() != null && !item.getRepairStatus().trim().isEmpty())
+                                    ? item.getRepairStatus()
+                                    : "UNASSIGNED"
                     };
 
                     drawTableRow(contentStream, yPosition, rowData, colWidths);
@@ -427,8 +438,8 @@ public class RmaReportService {
     }
 
     private byte[] generateSummaryReport(ZonedDateTime startDate, ZonedDateTime endDate,
-            int totalRequests, int totalItems, long unrepaired, long assigned,
-            long repaired, long cantBeRepaired, long localRepair, long depotRepair) throws IOException {
+            int totalRequests, int totalItems, Map<String, Long> statusCounts, long localRepair, long depotRepair)
+            throws IOException {
 
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
@@ -458,18 +469,19 @@ public class RmaReportService {
                 drawSectionHeader(contentStream, yPosition, "Status Breakdown");
                 yPosition -= 25;
 
-                float[] colWidths = { 200, 100 };
+                float[] colWidths = { 350, 100 };
                 String[] statusHeaders = { "Status Category", "Count" };
 
                 drawTableHeaderRow(contentStream, yPosition, statusHeaders, colWidths);
                 yPosition -= HEADER_HEIGHT;
 
-                String[][] statusData = {
-                        { "Unrepaired / Pending", String.valueOf(unrepaired) },
-                        { "Assigned to Technician", String.valueOf(assigned) },
-                        { "Successfully Repaired", String.valueOf(repaired) },
-                        { "Can't Be Repaired", String.valueOf(cantBeRepaired) }
-                };
+                String[][] statusData = new String[statusCounts.size()][2];
+                int i = 0;
+                for (Map.Entry<String, Long> entry : statusCounts.entrySet()) {
+                    statusData[i][0] = entry.getKey();
+                    statusData[i][1] = String.valueOf(entry.getValue());
+                    i++;
+                }
 
                 for (String[] row : statusData) {
                     drawTableRow(contentStream, yPosition, row, colWidths);
@@ -496,10 +508,19 @@ public class RmaReportService {
                 yPosition -= 30;
 
                 // 4. Performance Metrics
-                drawSectionHeader(contentStream, yPosition, "Performance Metrics");
-                yPosition -= 25;
+                // drawSectionHeader(contentStream, yPosition, "Performance Metrics");
+                // yPosition -= 25;
 
-                double completionRate = totalItems > 0 ? ((double) (repaired + cantBeRepaired) / totalItems * 100) : 0;
+                // Calculate approximate completion from status keys
+                long completedCount = statusCounts.entrySet().stream()
+                        .filter(e -> {
+                            String k = e.getKey().toUpperCase();
+                            return k.contains("REPAIRED") || k.contains("CLOSED") || k.contains("FAULTY");
+                        })
+                        .mapToLong(Map.Entry::getValue)
+                        .sum();
+
+                double completionRate = totalItems > 0 ? ((double) completedCount / totalItems * 100) : 0;
                 drawStatBox(contentStream, MARGIN, yPosition, pageWidth - 2 * MARGIN, "Completion Rate",
                         String.format("%.1f %%", completionRate));
 
@@ -664,8 +685,15 @@ public class RmaReportService {
 
         for (int i = 0; i < values.length; i++) {
             String val = values[i] != null ? values[i] : "";
-            // clip text if too long (simple char limit check for now)
-            // Ideally we check string width matches colWidths[i]
+
+            // Improve text clipping using actual string width
+            PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+            float fontSize = 9;
+            float cellWidth = colWidths[i] - 10; // Margin padding (5 left + 5 right)
+
+            if (val.length() > 0) {
+                val = truncateText(val, cellWidth, font, fontSize);
+            }
 
             contentStream.beginText();
             contentStream.newLineAtOffset(textX, textY);
@@ -734,5 +762,27 @@ public class RmaReportService {
                 contentStream.endText();
             }
         }
+    }
+
+    private String truncateText(String text, float maxWidth, PDType1Font font, float fontSize) throws IOException {
+        if (text == null)
+            return "";
+        float width = font.getStringWidth(text) / 1000 * fontSize;
+        if (width <= maxWidth)
+            return text;
+
+        int len = text.length();
+        int newLen = (int) (len * (maxWidth / width)) - 3;
+        if (newLen < 1)
+            newLen = 1;
+
+        while (newLen > 0) {
+            String candidate = text.substring(0, newLen) + "...";
+            if (font.getStringWidth(candidate) / 1000 * fontSize <= maxWidth) {
+                return candidate;
+            }
+            newLen--;
+        }
+        return "...";
     }
 }

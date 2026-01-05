@@ -262,7 +262,7 @@ function RmaDashboard() {
   const requestColumns = [
     { title: "Request No", dataIndex: "requestNumber", key: "requestNumber" },
     { title: "Company", dataIndex: "companyName", key: "companyName" },
-    { title: "Date", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
+    { title: "Date  & Time", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
     {
       title: "Items", dataIndex: "itemsCount", key: "itemsCount", align: "center", render: (val, record) =>
         typeof val === "number"
@@ -279,7 +279,12 @@ function RmaDashboard() {
         <TatIconIndicator dueDate={record.dueDate} tat={record.tat} size={20} />
       )
     },
-    { title: "Status", key: "status", render: () => <Tag color="blue">Submitted</Tag> }
+    {
+      title: "Created By",
+      dataIndex: "createdByEmail",
+      key: "createdByEmail",
+      render: (email) => email ? <span style={{ color: '#666' }}>{email}</span> : <span style={{ color: '#ccc' }}>-</span>
+    }
   ];
 
   const itemColumns = [
