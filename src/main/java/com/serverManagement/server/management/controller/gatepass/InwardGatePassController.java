@@ -13,7 +13,6 @@ import com.serverManagement.server.management.request.gatepass.InwardGatepassReq
 import com.serverManagement.server.management.request.gatepass.OutwardGatepassRequest;
 import com.serverManagement.server.management.service.gatepass.FruMakingAfterGatePassService;
 import com.serverManagement.server.management.service.gatepass.InwardGatePassService;
-
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -31,25 +30,27 @@ public class InwardGatePassController {
 	}
 
 	@PostMapping("/inwardGatepass")
-	public ResponseEntity<?> generateInwardGatePass(HttpServletRequest httpRequest, @RequestBody InwardGatepassRequest passRequest) {
-		
+	public ResponseEntity<?> generateInwardGatePass(HttpServletRequest httpRequest,
+			@RequestBody InwardGatepassRequest passRequest) {
+
 		return inwardGatePassService.generateInwardGatePass(httpRequest, passRequest);
 	}
-	
+
 	@PostMapping("/outwardGatepass")
-	public ResponseEntity<?> generatedOutwardGatepass(HttpServletRequest httpRequest, @RequestBody OutwardGatepassRequest outPassRequest){
+	public ResponseEntity<?> generatedOutwardGatepass(HttpServletRequest httpRequest,
+			@RequestBody OutwardGatepassRequest outPassRequest) {
 
 		return inwardGatePassService.generatedOutwardGatepass(httpRequest, outPassRequest);
 	}
-	
-	
+
 	@PostMapping("/generate/ticket/after/inwardpass")
-	public ResponseEntity<?> createTicketAfterGatepass(HttpServletRequest httpRequest, @RequestBody AfterGatePassFruMakingRequest fruRequest){
-		return fruMakingAfterGatePassService.createTicketAfterGatepass(httpRequest,  fruRequest);
+	public ResponseEntity<?> createTicketAfterGatepass(HttpServletRequest httpRequest,
+			@RequestBody AfterGatePassFruMakingRequest fruRequest) {
+		return fruMakingAfterGatePassService.createTicketAfterGatepass(httpRequest, fruRequest);
 	}
-	
+
 	@PostMapping("/pdf")
-	public ResponseEntity<?> testPdf(@RequestParam Long id) throws Exception{
+	public ResponseEntity<?> testPdf(@RequestParam Long id) throws Exception {
 
 		return inwardGatePassService.testPdf(id);
 	}

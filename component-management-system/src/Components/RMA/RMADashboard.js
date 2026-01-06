@@ -8,15 +8,12 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   InboxOutlined,
-  UserOutlined,
   RiseOutlined,
-  FilterOutlined,
   SearchOutlined,
   WarningOutlined,
   CloseCircleOutlined,
   SafetyCertificateOutlined,
-  BarChartOutlined,
-  DownloadOutlined,
+  BarChartOutlined
 } from "@ant-design/icons";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,

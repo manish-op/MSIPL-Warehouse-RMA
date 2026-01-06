@@ -36,13 +36,10 @@ import "./UnrepairedPage.css";
 
 import companyLogo from "../../images/image.png";
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { Panel } = Collapse;
 
-const PREDEFINED_TRANSPORTERS = {
-    "Blue Dart Express": "27AAACB0446L1ZS",
-    "Safe Express": "27AAECS4363H2Z7"
-};
+
 
 export default function UnrepairedPage() {
     const [items, setItems] = useState([]);
@@ -436,10 +433,24 @@ export default function UnrepairedPage() {
                                 <span class="label">Serial No:</span> 
                                 <span class="value bold">${item.serialNo || 'N/A'}</span>
                             </div>
+
+
                             <div class="row">
                                 <span class="label">Model:</span> 
                                 <span class="value">${item.model || 'N/A'}</span>
                             </div>
+                            
+
+                            <div class="row">
+                                <span class="label">RMA No:</span> 
+                                <span class="value">${item.itemRmaNo || 'N/A'}</span>
+                            </div>
+
+                            <div class="row">
+                                <span class="label">Customer:</span>
+                                <span class="value"> ${item.companyName || 'N/A'}</span>
+                            </div>
+
                             <div class="row">
                                 <span class="label">Fault:</span> 
                                 <span class="value">${item.faultDescription ? item.faultDescription.substring(0, 50) + (item.faultDescription.length > 50 ? '...' : '') : 'N/A'}</span>
