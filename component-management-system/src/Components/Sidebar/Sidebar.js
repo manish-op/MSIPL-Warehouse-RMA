@@ -190,7 +190,7 @@ function Sidebar({ collapsed, setCollapsed, isMobile }) {
         trigger={null}
         collapsedWidth={isMobile ? 0 : 80}
         style={{
-          height: '100vh',
+          minHeight: '100vh',
           position: isMobile ? 'fixed' : 'sticky',
           top: 0,
           left: 0,

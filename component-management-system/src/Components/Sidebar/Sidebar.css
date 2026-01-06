@@ -13,6 +13,7 @@
   background: var(--sidebar-bg) !important;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   transition: all 0.3s cubic-bezier(0.2, 0, 0, 1) 0s;
+  z-index: 2100;
 }
 
 /* --- Header Section (Logo + Toggle) --- */

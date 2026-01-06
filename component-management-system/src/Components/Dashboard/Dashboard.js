@@ -45,11 +45,14 @@ function Dashboard() {
               setCollapsed={setCollapsed}
               isMobile={isMobile}
             />
-            <div className="content">
-              <Outlet />
+            {/* Right side wrapper: Content + Footer */}
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
+              <div className="content">
+                <Outlet />
+              </div>
+              <Footer />
             </div>
           </div>
-          <Footer />
         </div>
 
       </ItemProvider>

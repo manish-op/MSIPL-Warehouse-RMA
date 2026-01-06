@@ -23,6 +23,7 @@ import Header from "../Header/Header"; // Import Global Header
 import useNavigationGuard from "../../hooks/useNavigationGuard"; // Import navigation guard
 import Cookies from "js-cookie"; // Import Cookies
 import "./RmaDashboard.css";
+import GlobalFooter from "../Footer/Footer";
 
 const { Sider, Footer, Content } = Layout;
 const { confirm } = Modal;
@@ -146,7 +147,7 @@ const RmaLayout = ({ children }) => {
           style={{
             height: isMobile ? (collapsed ? 0 : "100vh") : "auto",
             position: isMobile && !collapsed ? "fixed" : "relative",
-            zIndex: 100,
+            zIndex: 2100,
             left: 0,
             top: isMobile ? 0 : 0,
             display: isMobile && collapsed ? "none" : "block",
@@ -265,13 +266,7 @@ const RmaLayout = ({ children }) => {
         <Layout>
           <Content className="msipl-content">{children}</Content>
 
-          <Footer className="msipl-footer">
-            <span>Motorola Solutions India Pvt Ltd</span>
-            <span>📍 Address: Gurgaon, Haryana, India</span>
-            <span>📞 Contact: 01244192000</span>
-            <span>About</span>
-            <span>Help</span>
-          </Footer>
+          <GlobalFooter />
         </Layout>
       </Layout>
     </Layout>
