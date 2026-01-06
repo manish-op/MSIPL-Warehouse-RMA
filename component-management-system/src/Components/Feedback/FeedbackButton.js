@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button, Tooltip, Modal } from 'antd';
 import { MessageOutlined, CloseOutlined } from '@ant-design/icons';
 import './FeedbackButton.css';
@@ -10,6 +11,7 @@ const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc2dCKkebMCLBZ
 const FeedbackButton = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
+    const location = useLocation();
 
     const handleOpenFeedback = () => {
         // If no form URL configured, open in new tab as fallback
@@ -28,7 +30,7 @@ const FeedbackButton = () => {
     };
 
     // Don't show on login page
-    if (window.location.pathname === '/login' || window.location.pathname === '/') {
+    if (location.pathname === '/login' || location.pathname === '/') {
         return null;
     }
 
