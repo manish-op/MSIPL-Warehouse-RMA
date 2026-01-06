@@ -566,8 +566,7 @@ function RmaRequestForm() {
               <Steps.Step
                 key={index}
                 title={step.title}
-                icon={<span className="step-icon">{step.icon}</span>}
-              />
+                icon={<span className="step-icon">{step.icon}</span>} />
             ))}
           </Steps>
         </Card>
@@ -602,8 +601,7 @@ function RmaRequestForm() {
                       options={customerOptions}
                       onSearch={handleCustomerSearch}
                       onSelect={handleCustomerSelect}
-                      notFoundContent={searchingCustomers ? "Searching..." : null}
-                    />
+                      notFoundContent={searchingCustomers ? "Searching..." : null} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
@@ -678,8 +676,7 @@ function RmaRequestForm() {
                       size="large"
                       min={1}
                       max={365}
-                      suffix="days"
-                    />
+                      suffix="days" />
                   </Form.Item>
                 </Col>
               </Row>
@@ -759,7 +756,6 @@ function RmaRequestForm() {
                     <Select placeholder="Select transport mode" size="large">
                       <Option value="Air">Air</Option>
                       <Option value="Road">Road</Option>
-                      <Option value="Courier">Courier</Option>
                     </Select>
                   </Form.Item>
                 </Col>
@@ -792,416 +788,411 @@ function RmaRequestForm() {
                           message: "Required when using other courier",
                         }]}
                       >
-                        <Input
-                          placeholder="Enter courier company name"
+                        <Select
+                          placeholder="Select courier company"
                           size="large"
                           disabled={getFieldValue("shippingMethod") !== "Other Courier Service"}
-                        />
+                        >
+                          <Option value="Blue Dart">Blue Dart</Option>
+                          <Option value="Safe Express">Safe Express</Option>
+                        </Select>
                       </Form.Item>
                     )}
-                  </Form.Item>
-                </Col>
-              </Row>
-            </div>
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
 
-            {/* Step 3: Items */}
-            <div className={`step-content ${currentStep === 2 ? 'active' : 'hidden'}`}>
-              <Title level={4} className="step-title">
-                <InboxOutlined className="step-icon-inline" /> Items for Repair
-              </Title>
-              <Text type="secondary" className="step-description">
-                Add products that need to be repaired
-              </Text>
+          {/* Step 3: Items */}
+          <div className={`step-content ${currentStep === 2 ? 'active' : 'hidden'}`}>
+            <Title level={4} className="step-title">
+              <InboxOutlined className="step-icon-inline" /> Items for Repair
+            </Title>
+            <Text type="secondary" className="step-description">
+              Add products that need to be repaired
+            </Text>
 
-              <Form.List name="items" initialValue={[{}]}>
-                {(fields, { add, remove }) => (
-                  <>
-                    {fields.map(({ key, name, ...restField }, index) => (
-                      <Card
-                        key={key}
-                        className="item-card"
-                        title={
-                          <div className="item-card-header">
-                            <Tag color="blue">Item {index + 1}</Tag>
-                            {fields.length > 1 && (
-                              <Button
-                                type="text"
-                                danger
-                                icon={<MinusCircleOutlined />}
-                                onClick={() => remove(name)}
-                              >
-                                Remove
-                              </Button>
-                            )}
-                          </div>
-                        }
-                      >
-                        <Row gutter={[16, 0]}>
-                          <Col xs={24} md={8}>
-                            <Form.Item
-                              {...restField}
-                              label="Product"
-                              name={[name, "product"]}
-                              rules={[{ required: true, message: "Product is required" }]}
+            <Form.List name="items" initialValue={[{}]}>
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }, index) => (
+                    <Card
+                      key={key}
+                      className="item-card"
+                      title={<div className="item-card-header">
+                        <Tag color="blue">Item {index + 1}</Tag>
+                        {fields.length > 1 && (
+                          <Button
+                            type="text"
+                            danger
+                            icon={<MinusCircleOutlined />}
+                            onClick={() => remove(name)}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>}
+                    >
+                      <Row gutter={[16, 0]}>
+                        <Col xs={24} md={8}>
+                          <Form.Item
+                            {...restField}
+                            label="Product"
+                            name={[name, "product"]}
+                            rules={[{ required: true, message: "Product is required" }]}
+                          >
+                            <Select
+                              placeholder={loadingProducts ? "Loading products..." : "Select or type product name"}
+                              size="large"
+                              mode="tags"
+                              maxCount={1}
+                              showSearch
+                              loading={loadingProducts}
+                              onChange={(val) => handleProductSelect(val, name)}
+                              filterOption={(input, option) => {
+                                const label = option.children?.[0] || option.value || "";
+                                return label.toString().toLowerCase().includes(input.toLowerCase());
+                              } }
                             >
-                              <Select
-                                placeholder={loadingProducts ? "Loading products..." : "Select or type product name"}
-                                size="large"
-                                mode="tags"
-                                maxCount={1}
-                                showSearch
-                                loading={loadingProducts}
-                                onChange={(val) => handleProductSelect(val, name)}
-                                filterOption={(input, option) => {
-                                  const label = option.children?.[0] || option.value || "";
-                                  return label.toString().toLowerCase().includes(input.toLowerCase());
-                                }}
-                              >
-                                {productCatalog.map(p => (
-                                  <Option key={p.name} value={p.name}>
-                                    {p.name}{p.model ? ` - ${p.model}` : ""}
-                                  </Option>
-                                ))}
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} md={8}>
-                            <Form.Item
-                              {...restField}
-                              label="Model / Part No."
-                              name={[name, "partNo"]}
-                              rules={[{ required: true, message: "Required" }]}
-                            >
-                              <Input placeholder="Model number" size="large" />
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} md={8}>
-                            <Form.Item
-                              {...restField}
-                              label="Serial Number"
-                              name={[name, "serialNo"]}
-                              tooltip="Optional - leave blank for accessories without serial numbers"
-                            >
-                              <Input placeholder="Enter serial number " 
-                              size="large" 
-                              onBlur={()=>{
+                              {productCatalog.map(p => (
+                                <Option key={p.name} value={p.name}>
+                                  {p.name}{p.model ? ` - ${p.model}` : ""}
+                                </Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <Form.Item
+                            {...restField}
+                            label="Model / Part No."
+                            name={[name, "partNo"]}
+                            rules={[{ required: true, message: "Required" }]}
+                          >
+                            <Input placeholder="Model number" size="large" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <Form.Item
+                            {...restField}
+                            label="Serial Number"
+                            name={[name, "serialNo"]}
+                            tooltip="Optional - leave blank for accessories without serial numbers"
+                          >
+                            <Input placeholder="Enter serial number "
+                              size="large"
+                              onBlur={() => {
                                 console.log("onBlur event fired for serial number at name:", name);
                                 handleSerialBlur(name);
-                              }}
-                              suffix={serialChecking ? "..." : null}
-                              />
-                            </Form.Item>
-                          </Col>
-                        </Row>
-
-                        <Form.Item
-                          {...restField}
-                          label="Fault Description"
-                          name={[name, "faultDescription"]}
-                          rules={[{ required: true, message: "Please describe the fault" }]}
-                        >
-                          <TextArea
-                            rows={2}
-                            placeholder="Describe the issue or fault clearly"
-                            size="large"
-                          />
-                        </Form.Item>
-
-                        <Row gutter={[16, 0]}>
-                          <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="Codeplug" name={[name, "codeplugProgramming"]}>
-                              <Select placeholder="Select">
-                                <Option value="Default">Default</Option>
-                                <Option value="Customer Codeplug">Customer Codeplug</Option>
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="Warranty Status" name={[name, "status"]}>
-                              <Select placeholder="Select warranty status">
-                                <Option value="WARR">Warranty</Option>
-                                <Option value="OOW">Out of Warranty</Option>
-                                <Option value="AMC">AMC</Option>
-                                <Option value="SFS">SFS</Option>
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} md={8}>
-                            <Form.Item
-                              {...restField}
-                              label="FM/UL/ATEX"
-                              name={[name, "fmUlAtex"]}
-                              rules={[{ required: true, message: "Required" }]}
-                            >
-                              <Select placeholder="Select">
-                                <Option value="N">Non FM/UL/ATEX</Option>
-                                <Option value="Y-FM">FM Certified</Option>
-                                <Option value="Y-UL">UL Certified</Option>
-                                <Option value="Y-ATEX">ATEX Certified</Option>
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                        </Row>
-                        <Row gutter={[16, 0]}>
-                          <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="Encryption" name={[name, "encryption"]}>
-                              <Select placeholder="Select">
-                                <Option value="TETRA">Tetra</Option>
-                                <Option value="ASTRO">Astro</Option>
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="Firmware Version" name={[name, "firmwareVersion"]}>
-                              <Select placeholder="Select">
-                                <Option value="TETRA">Tetra</Option>
-                                <Option value="ASTRO">Astro</Option>
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="Invoice No." name={[name, "invoiceNo"]}>
-                              <Input placeholder="For accessories" />
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="Lower Firmaware Version" name={[name, "lowerFirmwareVersion"]}>
-                              <Select placeholder="Select">
-                                <Option value="Follow Depot Mainboard Inventory Version">Follow Depot Mainboard Inventory Version</Option>
-                                <Option value="Return Unrepaired">Return Unrepaired</Option>
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                          <Col xs={12} md={8}>
-                            <Form.Item {...restField} label="Partial Shipment" name={[name, "partialshipment"]}>
-                              <Select placeholder="Select">
-                                <Option value="Y">Yes</Option>
-                                <Option value="N">No</Option>
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                        </Row>
-                        <Form.Item {...restField} label="Remarks" name={[name, "remarks"]}>
-                          <TextArea rows={2} placeholder="Additional remarks" />
-                        </Form.Item>
-                      </Card>
-                    ))}
-
-                    <Button
-                      type="dashed"
-                      onClick={() => add()}
-                      block
-                      icon={<PlusOutlined />}
-                      className="add-item-btn"
-                    >
-                      Add Another Item
-                    </Button>
-                  </>
-                )}
-              </Form.List>
-            </div>
-
-            {/* Step 4: Review */}
-            <div className={`step-content ${currentStep === 3 ? 'active' : 'hidden'}`}>
-              <Title level={4} className="step-title">
-                <FileSearchOutlined className="step-icon-inline" /> Review & Submit
-              </Title>
-              <Text type="secondary" className="step-description">
-                Please review your request before submitting
-              </Text>
-
-              <div className="review-section">
-                <Card size="small" title="Contact Information" className="review-card">
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Text type="secondary">Company:</Text>
-                      <br />
-                      <Text strong>{form.getFieldValue("companyName")}</Text>
-                    </Col>
-                    <Col span={12}>
-                      <Text type="secondary">Email:</Text>
-                      <br />
-                      <Text strong>{form.getFieldValue("email")}</Text>
-                    </Col>
-                  </Row>
-                  <Row gutter={16} style={{ marginTop: 12 }}>
-                    <Col span={12}>
-                      <Text type="secondary">Contact:</Text>
-                      <br />
-                      <Text strong>{form.getFieldValue("contactName")}</Text>
-                    </Col>
-                    <Col span={12}>
-                      <Text type="secondary">Phone:</Text>
-                      <br />
-                      <Text>{form.getFieldValue("telephone")} / {form.getFieldValue("mobile")}</Text>
-                    </Col>
-                  </Row>
-                </Card>
-
-                <Card size="small" title="Shipment" className="review-card">
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Text type="secondary">Transport:</Text>
-                      <br />
-                      <Text strong>{form.getFieldValue("modeOfTransport")}</Text>
-                    </Col>
-                    <Col span={12}>
-                      <Text type="secondary">Method:</Text>
-                      <br />
-                      <Text strong>{form.getFieldValue("shippingMethod")}</Text>
-                    </Col>
-                  </Row>
-                </Card>
-
-                <Card size="small" title={`Items (${form.getFieldValue("items")?.length || 0})`} className="review-card">
-                  {(form.getFieldValue("items") || []).map((item, idx) => (
-                    <div key={idx} className="review-item">
-                      <Row justify="space-between" align="middle">
-                        <Col>
-                          <Tag color="blue">{idx + 1}</Tag>
-                          <Text strong>{item?.product}</Text>
-                          <Text type="secondary"> ({item?.serialNo})</Text>
+                              } }
+                              suffix={serialChecking ? "..." : null} />
+                          </Form.Item>
                         </Col>
                       </Row>
-                      <Paragraph type="secondary" style={{ margin: "4px 0 0 28px", fontSize: 12 }}>
-                        {item?.faultDescription}
-                      </Paragraph>
-                    </div>
+
+                      <Form.Item
+                        {...restField}
+                        label="Fault Description"
+                        name={[name, "faultDescription"]}
+                        rules={[{ required: true, message: "Please describe the fault" }]}
+                      >
+                        <TextArea
+                          rows={2}
+                          placeholder="Describe the issue or fault clearly"
+                          size="large" />
+                      </Form.Item>
+
+                      <Row gutter={[16, 0]}>
+                        <Col xs={24} md={8}>
+                          <Form.Item {...restField} label="Codeplug" name={[name, "codeplugProgramming"]}>
+                            <Select placeholder="Select">
+                              <Option value="Default">Default</Option>
+                              <Option value="Customer Codeplug">Customer Codeplug</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <Form.Item {...restField} label="Warranty Status" name={[name, "status"]}>
+                            <Select placeholder="Select warranty status">
+                              <Option value="WARR">Warranty</Option>
+                              <Option value="OOW">Out of Warranty</Option>
+                              <Option value="AMC">AMC</Option>
+                              <Option value="SFS">SFS</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <Form.Item
+                            {...restField}
+                            label="FM/UL/ATEX"
+                            name={[name, "fmUlAtex"]}
+                            rules={[{ required: true, message: "Required" }]}
+                          >
+                            <Select placeholder="Select">
+                              <Option value="N">Non FM/UL/ATEX</Option>
+                              <Option value="Y-FM">FM Certified</Option>
+                              <Option value="Y-UL">UL Certified</Option>
+                              <Option value="Y-ATEX">ATEX Certified</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Row gutter={[16, 0]}>
+                        <Col xs={24} md={8}>
+                          <Form.Item {...restField} label="Encryption" name={[name, "encryption"]}>
+                            <Select placeholder="Select">
+                              <Option value="TETRA">Tetra</Option>
+                              <Option value="ASTRO">Astro</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <Form.Item {...restField} label="Firmware Version" name={[name, "firmwareVersion"]}>
+                            <Select placeholder="Select">
+                              <Option value="TETRA">Tetra</Option>
+                              <Option value="ASTRO">Astro</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <Form.Item {...restField} label="Invoice No." name={[name, "invoiceNo"]}>
+                            <Input placeholder="For accessories" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <Form.Item {...restField} label="Lower Firmaware Version" name={[name, "lowerFirmwareVersion"]}>
+                            <Select placeholder="Select">
+                              <Option value="Follow Depot Mainboard Inventory Version">Follow Depot Mainboard Inventory Version</Option>
+                              <Option value="Return Unrepaired">Return Unrepaired</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col xs={12} md={8}>
+                          <Form.Item {...restField} label="Partial Shipment" name={[name, "partialshipment"]}>
+                            <Select placeholder="Select">
+                              <Option value="Y">Yes</Option>
+                              <Option value="N">No</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Form.Item {...restField} label="Remarks" name={[name, "remarks"]}>
+                        <TextArea rows={2} placeholder="Additional remarks" />
+                      </Form.Item>
+                    </Card>
                   ))}
-                </Card>
 
-                <Form.Item
-                  label="Authorized Signature (Print Name)"
-                  name="signature"
-                  style={{ marginTop: 24 }}
-                >
-                  <Input
-                    placeholder="Enter your name"
-                    size="large"
-                  />
-                </Form.Item>
-              </div>
-            </div>
-          </Form>
-
-          {/* Navigation Buttons */}
-          <div className="wizard-navigation">
-            <Button onClick={handleReset}>Reset</Button>
-
-            <Space>
-              {currentStep > 0 && (
-                <Button icon={<ArrowLeftOutlined />} onClick={prevStep}>
-                  Previous
-                </Button>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                    className="add-item-btn"
+                  >
+                    Add Another Item
+                  </Button>
+                </>
               )}
-              {currentStep < 3 ? (
-                <Button type="primary" onClick={nextStep}>
-                  Next <ArrowRightOutlined />
-                </Button>
-              ) : (
-                <Button
-                  type="primary"
-                  icon={<SendOutlined />}
-                  loading={loading}
-                  onClick={handleSubmit}
-                  className="submit-btn"
-                >
-                  Submit RMA Request
-                </Button>
-              )}
-            </Space>
+            </Form.List>
           </div>
-        </Card>
 
-        <Modal
-          title="Confirm RMA Submission"
-          open={conformVisible}
-          onCancel={() => setConfrimVisible(false)}
-          footer={[
-            <Button key="back" onClick={() => setConfrimVisible(false)}>
-              Cancel
-            </Button>,
-            <Button
-              key="submit"
-              type="primary"
-              loading={finalSubmitting}
-              onClick={finalSubmit}
-            >
-              Confirm Submit
-            </Button>,
-          ]}
-          width={700}
-        >
-          <div style={{ padding: "10px 0" }}>
-            <Title level={5}>Select Repair Type</Title>
-            <Radio.Group
-              onChange={(e) => setRepairType(e.target.value)}
-              value={repairType}
-              style={{ marginBottom: 20 }}
-            >
-              <Radio value="Local Repair">Local Repair</Radio>
-              <Radio value="Depot Repair">Depot Repair</Radio>
-            </Radio.Group>
+          {/* Step 4: Review */}
+          <div className={`step-content ${currentStep === 3 ? 'active' : 'hidden'}`}>
+            <Title level={4} className="step-title">
+              <FileSearchOutlined className="step-icon-inline" /> Review & Submit
+            </Title>
+            <Text type="secondary" className="step-description">
+              Please review your request before submitting
+            </Text>
 
-            {previewData && (
-              <div className="request-preview-box">
-                <Title level={5}>Request Preview</Title>
-                <Row gutter={[16, 8]}>
+            <div className="review-section">
+              <Card size="small" title="Contact Information" className="review-card">
+                <Row gutter={16}>
                   <Col span={12}>
-                    <Text type="secondary">Company:</Text> <Text strong>{previewData.companyName}</Text>
+                    <Text type="secondary">Company:</Text>
+                    <br />
+                    <Text strong>{form.getFieldValue("companyName")}</Text>
                   </Col>
                   <Col span={12}>
-                    <Text type="secondary">Contact:</Text> <Text strong>{previewData.contactName}</Text>
-                  </Col>
-                  <Col span={12}>
-                    <Text type="secondary">Transport:</Text> <Text strong>{previewData.modeOfTransport}</Text>
-                  </Col>
-                  <Col span={12}>
-                    <Text type="secondary">Total Items:</Text> <Text strong>{previewData.items?.length || 0}</Text>
+                    <Text type="secondary">Email:</Text>
+                    <br />
+                    <Text strong>{form.getFieldValue("email")}</Text>
                   </Col>
                 </Row>
+                <Row gutter={16} style={{ marginTop: 12 }}>
+                  <Col span={12}>
+                    <Text type="secondary">Contact:</Text>
+                    <br />
+                    <Text strong>{form.getFieldValue("contactName")}</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Phone:</Text>
+                    <br />
+                    <Text>{form.getFieldValue("telephone")} / {form.getFieldValue("mobile")}</Text>
+                  </Col>
+                </Row>
+              </Card>
 
-                <Divider style={{ margin: "12px 0" }} />
+              <Card size="small" title="Shipment" className="review-card">
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Text type="secondary">Transport:</Text>
+                    <br />
+                    <Text strong>{form.getFieldValue("modeOfTransport")}</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Method:</Text>
+                    <br />
+                    <Text strong>{form.getFieldValue("shippingMethod")}</Text>
+                  </Col>
+                </Row>
+              </Card>
 
-                <div style={{ maxHeight: 200, overflowY: "auto" }}>
-                  <Text strong>Items:</Text>
-                  <ul style={{ paddingLeft: 20, margin: "5px 0" }}>
-                    {previewData.items?.map((item, idx) => (
-                      <li key={idx}>
-                        <Text>{item.product} ({item.serialNo})</Text>
-                        <br />
-                        <Text type="secondary" style={{ fontSize: 12 }}>{item.faultDescription}</Text>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
+              <Card size="small" title={`Items (${form.getFieldValue("items")?.length || 0})`} className="review-card">
+                {(form.getFieldValue("items") || []).map((item, idx) => (
+                  <div key={idx} className="review-item">
+                    <Row justify="space-between" align="middle">
+                      <Col>
+                        <Tag color="blue">{idx + 1}</Tag>
+                        <Text strong>{item?.product}</Text>
+                        <Text type="secondary"> ({item?.serialNo})</Text>
+                      </Col>
+                    </Row>
+                    <Paragraph type="secondary" style={{ margin: "4px 0 0 28px", fontSize: 12 }}>
+                      {item?.faultDescription}
+                    </Paragraph>
+                  </div>
+                ))}
+              </Card>
+
+              <Form.Item
+                label="Authorized Signature (Print Name)"
+                name="signature"
+                style={{ marginTop: 24 }}
+              >
+                <Input
+                  placeholder="Enter your name"
+                  size="large" />
+              </Form.Item>
+            </div>
           </div>
-        </Modal>
-      </div>
-      <Modal
-        title={
+        </Form>
+
+        {/* Navigation Buttons */}
+        <div className="wizard-navigation">
+          <Button onClick={handleReset}>Reset</Button>
+
           <Space>
-            <FileSearchOutlined style={{ color: '#1890ff' }} />
-            <span>Serial Number History</span>
+            {currentStep > 0 && (
+              <Button icon={<ArrowLeftOutlined />} onClick={prevStep}>
+                Previous
+              </Button>
+            )}
+            {currentStep < 3 ? (
+              <Button type="primary" onClick={nextStep}>
+                Next <ArrowRightOutlined />
+              </Button>
+            ) : (
+              <Button
+                type="primary"
+                icon={<SendOutlined />}
+                loading={loading}
+                onClick={handleSubmit}
+                className="submit-btn"
+              >
+                Submit RMA Request
+              </Button>
+            )}
           </Space>
-        }
-        open={serialHistoryVisible}
-        onCancel={() => setSerialHistoryVisible(false)}
+        </div>
+      </Card>
+
+      <Modal
+        title="Confirm RMA Submission"
+        open={conformVisible}
+        onCancel={() => setConfrimVisible(false)}
         footer={[
-          <Button key="close" type="primary" onClick={() => setSerialHistoryVisible(false)}>
-            Got it
-          </Button>
+          <Button key="back" onClick={() => setConfrimVisible(false)}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={finalSubmitting}
+            onClick={finalSubmit}
+          >
+            Confirm Submit
+          </Button>,
         ]}
         width={700}
-        centered
-        className="serial-history-modal"
       >
+        <div style={{ padding: "10px 0" }}>
+          <Title level={5}>Select Repair Type</Title>
+          <Radio.Group
+            onChange={(e) => setRepairType(e.target.value)}
+            value={repairType}
+            style={{ marginBottom: 20 }}
+          >
+            <Radio value="Local Repair">Local Repair</Radio>
+            <Radio value="Depot Repair">Depot Repair</Radio>
+          </Radio.Group>
+
+          {previewData && (
+            <div className="request-preview-box">
+              <Title level={5}>Request Preview</Title>
+              <Row gutter={[16, 8]}>
+                <Col span={12}>
+                  <Text type="secondary">Company:</Text> <Text strong>{previewData.companyName}</Text>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Contact:</Text> <Text strong>{previewData.contactName}</Text>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Transport:</Text> <Text strong>{previewData.modeOfTransport}</Text>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Total Items:</Text> <Text strong>{previewData.items?.length || 0}</Text>
+                </Col>
+              </Row>
+
+              <Divider style={{ margin: "12px 0" }} />
+
+              <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                <Text strong>Items:</Text>
+                <ul style={{ paddingLeft: 20, margin: "5px 0" }}>
+                  {previewData.items?.map((item, idx) => (
+                    <li key={idx}>
+                      <Text>{item.product} ({item.serialNo})</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>{item.faultDescription}</Text>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+    </div><Modal
+      title={<Space>
+        <FileSearchOutlined style={{ color: '#1890ff' }} />
+        <span>Serial Number History</span>
+      </Space>}
+      open={serialHistoryVisible}
+      onCancel={() => setSerialHistoryVisible(false)}
+      footer={[
+        <Button key="close" type="primary" onClick={() => setSerialHistoryVisible(false)}>
+          Got it
+        </Button>
+      ]}
+      width={700}
+      centered
+      className="serial-history-modal"
+    >
         <Paragraph type="secondary" style={{ marginBottom: 16 }}>
           Historical records found for this serial number in the system.
         </Paragraph>
-        
+
         {serialHistory.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <InboxOutlined style={{ fontSize: 32, marginBottom: 8 }} />
@@ -1210,23 +1201,21 @@ function RmaRequestForm() {
         ) : (
           <div className="history-box">
             {serialHistory.map((h, idx) => (
-              <Card 
-                key={idx} 
-                size="small" 
+              <Card
+                key={idx}
+                size="small"
                 className="history-card"
-                title={
-                  <Row justify="space-between" align="middle" style={{ width: '100%' }}>
-                    <Col>
-                      <Text strong>{h.rmaNo}</Text>
-                      <Text type="secondary" style={{ fontSize: 10, marginLeft: 8 }}>
-                        Record ID: #{h.itemId || "MISSING"}
-                      </Text>
-                    </Col>
-                    <Col>
-                      <Text type="secondary" style={{ fontSize: '12px' }}>{h.createdDate}</Text>
-                    </Col>
-                  </Row>
-                }
+                title={<Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                  <Col>
+                    <Text strong>{h.rmaNo}</Text>
+                    <Text type="secondary" style={{ fontSize: 10, marginLeft: 8 }}>
+                      Record ID: #{h.itemId || "MISSING"}
+                    </Text>
+                  </Col>
+                  <Col>
+                    <Text type="secondary" style={{ fontSize: '12px' }}>{h.createdDate}</Text>
+                  </Col>
+                </Row>}
               >
                 <Space direction="vertical" style={{ width: "100%" }} size={4}>
                   <Row align="middle" gutter={8}>
@@ -1288,10 +1277,10 @@ function RmaRequestForm() {
                     </div>
                   )}
 
-                  <div style={{ 
-                    marginTop: 8, 
-                    backgroundColor: 'rgba(0,0,0,0.02)', 
-                    padding: '8px', 
+                  <div style={{
+                    marginTop: 8,
+                    backgroundColor: 'rgba(0,0,0,0.02)',
+                    padding: '8px',
                     borderRadius: 4,
                     borderLeft: '3px solid #faad14'
                   }}>
