@@ -291,7 +291,7 @@ function ItemSearch() {
             if (!response.ok) throw new Error(await response.text());
             const data = await response.json();
             setItemDetails(data);
-            navigate("/dashboard/updateItem");
+            navigate("/dashboard/updateItem", { state: { serialNo } });
         } catch (error) {
             message.error(`Error: ${error.message}`);
         }
