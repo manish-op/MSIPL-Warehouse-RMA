@@ -194,7 +194,7 @@ function Sidebar({ collapsed, setCollapsed, isMobile }) {
           position: isMobile ? 'fixed' : 'sticky',
           top: 0,
           left: 0,
-          zIndex: 1001
+          zIndex: isMobile ? 1005 : 10
         }}
       >
         <div className="sidebar-header">

@@ -496,15 +496,20 @@ public class RmaRequestService {
                 RmaRequestEntity req = item.getRmaRequest();
 
                 if (req == null) {
-                    System.out.println("DEBUG: Skipping item ID " + item.getId() + " because RmaRequest is null");
-                    continue;
-                }
-
-                String rmaNum = req.getRmaNo() != null ? req.getRmaNo() : req.getRequestNumber();
-                if (rmaNum != null && rmaNum.toUpperCase().startsWith("RMA")) {
-                    h.put("rmaNo", rmaNum);
+                    // Handle items without parent request
+                    String rmaNum = item.getRmaNo();
+                    h.put("rmaNo", rmaNum != null ? rmaNum : "N/A");
+                    h.put("createdDate", "N/A");
+                    h.put("customerName", "N/A");
                 } else {
-                    h.put("rmaNo", "RMA " + rmaNum);
+                    String rmaNum = req.getRmaNo() != null ? req.getRmaNo() : req.getRequestNumber();
+                    if (rmaNum != null && rmaNum.toUpperCase().startsWith("RMA")) {
+                        h.put("rmaNo", rmaNum);
+                    } else {
+                        h.put("rmaNo", "RMA " + rmaNum);
+                    }
+                    h.put("createdDate", req.getCreatedDate() != null ? req.getCreatedDate().format(formatter) : "N/A");
+                    h.put("customerName", req.getCompanyName());
                 }
 
                 h.put("itemId", item.getId());
@@ -514,9 +519,7 @@ public class RmaRequestService {
                 h.put("product", item.getProduct());
                 h.put("model", item.getModel());
                 h.put("serialNo", item.getSerialNo());
-                h.put("createdDate", req.getCreatedDate() != null ? req.getCreatedDate().format(formatter) : "N/A");
                 h.put("repairedDate", item.getRepairedDate() != null ? item.getRepairedDate().format(formatter) : null);
-                h.put("customerName", req.getCompanyName());
                 h.put("faultDescription", item.getFaultDescription());
                 h.put("issueFixed", item.getIssueFixed() != null ? item.getIssueFixed() : "N/A");
 

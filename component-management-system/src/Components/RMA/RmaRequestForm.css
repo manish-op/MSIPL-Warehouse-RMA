@@ -477,6 +477,9 @@
 [data-theme='dark'] .history-box {
   background: var(--component-background) !important;
   border: 1px solid var(--border-color);
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 5px;
 }
 
 [data-theme='dark'] .history-card {

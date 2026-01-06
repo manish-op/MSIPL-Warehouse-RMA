@@ -610,7 +610,7 @@ function RmaDashboard() {
           footer={null}
           width={1000}
           className="rma-detail-modal"
-          zIndex={1100}
+          zIndex={1200}
         >
           {modalType === 'requests' && (
             <div style={{ marginBottom: 16, textAlign: 'right' }}>
@@ -648,7 +648,7 @@ function RmaDashboard() {
           footer={null}
           width={1200}
           className="rma-detail-modal"
-          zIndex={1100}
+          zIndex={1200}
         >
           <Table
             columns={reportColumns}

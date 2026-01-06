@@ -100,8 +100,8 @@ function RmaRequestForm() {
     
     console.log("DEBUG: Retrieved serialNo:", serialNo);
     
-    // Increased minimum length to 3 to avoid premature checks on short inputs
-    if(!serialNo || serialNo.length < 3) {
+    // Check for empty only, allow short serial numbers like "5" or "76"
+    if(!serialNo || serialNo.length < 1) {
       console.log("DEBUG: serialNo is empty or too short, skipping check");
       return;
     }
@@ -1162,6 +1162,7 @@ function RmaRequestForm() {
           </Button>,
         ]}
         width={700}
+        zIndex={1200}
       >
         <div style={{ padding: "10px 0" }}>
           <Title level={5}>Select Repair Type</Title>
@@ -1223,7 +1224,7 @@ function RmaRequestForm() {
         </Button>
       ]}
       width={700}
-      centered
+      zIndex={1200}
       className="serial-history-modal"
     >
         <Paragraph type="secondary" style={{ marginBottom: 16 }}>
@@ -1257,20 +1258,35 @@ function RmaRequestForm() {
                 <Space direction="vertical" style={{ width: "100%" }} size={4}>
                   <Row align="middle" gutter={8}>
                     <Col>
-                      <Tag color="cyan">{h.currentStatus || "NO_STATUS"}</Tag>
-                    </Col>
-                    {h.repairStatus && (
-                      <Col>
-                        <Tag color="green" style={{ fontWeight: 600 }}>{h.repairStatus}</Tag>
-                      </Col>
-                    )}
-                    {h.depotStage && (
-                      <Col>
-                        <Tag color="purple">{h.depotStage}</Tag>
-                      </Col>
-                    )}
-                    <Col>
-                      <Tag color="orange" style={{ fontSize: 10 }}>DEBUG: {h.serialNo}</Tag>
+                      {(() => {
+                        // STRICT ALIGNMENT: Use ONLY repairStatus, matching Dashboard "Total Items" logic.
+                        const statusStr = h.repairStatus || "UNASSIGNED";
+                        const s = statusStr.toUpperCase();
+                        let color = 'default';
+
+                        // Color Logic from RMADashboard.js
+                        if (['REPAIRED', 'REPLACED', 'REPAIRED_AT_DEPOT', 'DELIVERED', 'DELIVERED_TO_CUSTOMER', 'CLOSED'].includes(s)) {
+                          color = 'green';
+                        } else if (s === 'UNASSIGNED') {
+                          color = 'orange';
+                        } else if (s === 'ASSIGNED') {
+                          color = 'blue';
+                        } else if (s === 'REPAIRING') {
+                          color = 'geekblue';
+                        } else if (['DISPATCHED', 'DISPATCHED_TO_CUSTOMER', 'DISPATCHED_TO_DEPOT'].includes(s)) {
+                          color = 'cyan';
+                        } else if (['BER', 'BER_AT_DEPOT', 'CANT_BE_REPAIRED'].includes(s) || s.includes("CANT") || s.includes("BER")) {
+                          color = 'red';
+                        } else if (['AT_DEPOT_REPAIRED', 'RECEIVED_AT_DEPOT', 'RECEIVED_AT_GURGAON', 'PENDING_DISPATCH_TO_DEPOT'].includes(s)) {
+                          color = 'purple';
+                        }
+
+                        // Text Normalization for BER
+                        let displayStatus = statusStr;
+                        if (color === 'red') displayStatus = "BER"; 
+
+                        return <Tag color={color} style={{ fontWeight: 600 }}>{displayStatus}</Tag>;
+                      })()}
                     </Col>
                   </Row>
 
