@@ -147,7 +147,7 @@ const RmaLayout = ({ children }) => {
           style={{
             height: isMobile ? (collapsed ? 0 : "100vh") : "auto",
             position: isMobile && !collapsed ? "fixed" : "relative",
-            zIndex: 2100,
+            zIndex: isMobile ? 1005 : 10,
             left: 0,
             top: isMobile ? 0 : 0,
             display: isMobile && collapsed ? "none" : "block",
