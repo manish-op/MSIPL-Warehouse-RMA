@@ -41,6 +41,17 @@ const { TextArea } = Input;
 const { Option } = Select;
 const { Title, Text, Paragraph } = Typography;
 
+// Debounce utility
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(null, args);
+    }, delay);
+  };
+};
+
 // Fallback product catalog (used if API fails)
 const DEFAULT_PRODUCT_CATALOG = [
   { name: "Other", model: "", partNo: "" },
@@ -48,6 +59,9 @@ const DEFAULT_PRODUCT_CATALOG = [
 
 function RmaRequestForm() {
   const [form] = Form.useForm();
+
+  // Create a ref to store the stable debounced function
+  const debouncedCheckRef = React.useRef(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -71,20 +85,29 @@ function RmaRequestForm() {
   const [serialHistoryVisible, setSerialHistoryVisible] = useState(false);
   const [serialChecking, setSerialChecking] = useState(false);
 
-  //handler for serial history
-  const handleSerialBlur = async(name) =>{
+  //handler for serial history - refactored to support direct value input
+  const handleSerialBlur = async(name, directValue) => {
     console.log("DEBUG: handleSerialBlur triggered for item name/index:", name);
     
-    // Use the name path from the Form.List to get the specific item's serial number
-    const serialNo = form.getFieldValue(["items", name, "serialNo"])?.toString()?.trim();
+    // Use directValue if provided (from onChange), otherwise fallback to form value
+    // We check if directValue is undefined because it could be an empty string which is falsy but valid
+    let serialNo;
+    if (directValue !== undefined) {
+      serialNo = directValue?.toString()?.trim();
+    } else {
+      serialNo = form.getFieldValue(["items", name, "serialNo"])?.toString()?.trim();
+    }
+    
     console.log("DEBUG: Retrieved serialNo:", serialNo);
     
-    if(!serialNo || serialNo.length < 1) {
-      console.log("DEBUG: serialNo is empty, skipping check");
+    // Increased minimum length to 3 to avoid premature checks on short inputs
+    if(!serialNo || serialNo.length < 3) {
+      console.log("DEBUG: serialNo is empty or too short, skipping check");
       return;
     }
 
-    setSerialChecking(true);
+    // Don't show global loading for background check
+    // setSerialChecking(true); 
     try{
       console.log(`DEBUG: Fetching history for serialNo: ${serialNo}`);
       const res = await RmaApi.getSerialHistory(serialNo);
@@ -100,14 +123,28 @@ function RmaRequestForm() {
           console.log("DEBUG: No history found for this serial number");
         }
       } else {
-        console.error("DEBUG: Serial history API failure:", res.error);
-        // Show silent notification if it fails to help debug
-        if(res.error) message.debug ? message.debug(res.error) : console.warn("API Error:", res.error);
+        // Silent fail for background check errors to not spam user
+        console.warn("API Error during background check:", res.error);
       }
     } catch(error) {
       console.error("DEBUG: Serial history check exception:", error);
     } finally {
-      setSerialChecking(false);
+      // setSerialChecking(false);
+    }
+  };
+
+  // Initialize/Update the debounced check function
+  // We use a ref and effect to keep the debounced function stable but accessing the latest handleSerialBlur
+  useEffect(() => {
+    debouncedCheckRef.current = debounce((name, value) => {
+      handleSerialBlur(name, value);
+    }, 500); // 500ms delay
+  }, [form]); // Re-create if form instance changes (unlikely) or just once
+
+  // Wrapper to call the debounced function
+  const triggerDebouncedSerialCheck = (name, value) => {
+    if (debouncedCheckRef.current) {
+      debouncedCheckRef.current(name, value);
     }
   };
 
@@ -881,10 +918,10 @@ function RmaRequestForm() {
                           >
                             <Input placeholder="Enter serial number "
                               size="large"
-                              onBlur={() => {
-                                console.log("onBlur event fired for serial number at name:", name);
-                                handleSerialBlur(name);
-                              } }
+                              onChange={(e) => {
+                                // Trigger debounced check on change
+                                triggerDebouncedSerialCheck(name, e.target.value);
+                              }}
                               suffix={serialChecking ? "..." : null} />
                           </Form.Item>
                         </Col>
