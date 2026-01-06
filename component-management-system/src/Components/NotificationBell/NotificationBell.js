@@ -48,8 +48,12 @@ const NotificationBell = () => {
   }, []);
 
   // Determine severity based on message content
-  const getSeverity = (message) => {
-    const lowerMsg = message.toLowerCase();
+  const getSeverity = (alert) => {
+    if (typeof alert === 'object') {
+      return alert.severity ? alert.severity.toLowerCase() : 'info';
+    }
+    // Fallback for strings
+    const lowerMsg = String(alert).toLowerCase();
     if (lowerMsg.includes('critical') || lowerMsg.includes('urgent') || lowerMsg.includes('0 left')) {
       return 'critical';
     } else if (lowerMsg.includes('low') || lowerMsg.includes('below')) {
@@ -105,13 +109,15 @@ const NotificationBell = () => {
 
         {!loading && alertMessages.map((msg, index) => {
           const severity = getSeverity(msg);
+          const messageText = typeof msg === 'object' ? msg.message : msg;
+
           return (
             <div key={index} className={`notification-item ${severity}`}>
               <div className="notification-item-icon">
                 {getSeverityIcon(severity)}
               </div>
               <div className="notification-item-content">
-                <p className="notification-message">{msg}</p>
+                <p className="notification-message">{messageText}</p>
                 <span className="notification-time">
                   <ClockCircleOutlined /> Just now
                 </span>

@@ -11,16 +11,18 @@ function HistoryTable() {
   const [data, setData] = useState([]);
 
   // Load data from context or localStorage on mount and when itemHistory changes
+  // Load data from context or localStorage on mount and when itemHistory changes
   useEffect(() => {
-    if (itemHistory && itemHistory.length > 0) {
+    if (itemHistory) {
       setData(itemHistory);
     } else {
-      // Fallback: read from localStorage
+      // Fallback logic only if itemHistory is strictly null/undefined (not just empty)
+      // Although context initializes it to [] or localStorage value.
       const storedHistory = localStorage.getItem('itemHistory');
       if (storedHistory) {
         try {
           const parsed = JSON.parse(storedHistory);
-          if (parsed && parsed.length > 0) {
+          if (parsed) {
             setData(parsed);
           }
         } catch (e) {

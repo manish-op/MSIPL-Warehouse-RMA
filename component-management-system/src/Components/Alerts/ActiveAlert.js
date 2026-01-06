@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Empty, Spin, Badge, Button, message } from 'antd';
 import {
     AlertOutlined,
@@ -18,6 +19,7 @@ function ActiveAlerts() {
     const [alertCount, setAlertCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const navigate = useNavigate();
 
     const fetchAlerts = async (showMessage = false) => {
         if (showMessage) setRefreshing(true);
@@ -45,14 +47,18 @@ function ActiveAlerts() {
         return () => clearInterval(interval);
     }, []);
 
-    const getSeverity = (message) => {
-        const lowerMsg = message.toLowerCase();
-        if (lowerMsg.includes('critical') || lowerMsg.includes('urgent') || lowerMsg.includes('0 left')) {
-            return 'critical';
-        } else if (lowerMsg.includes('low') || lowerMsg.includes('below')) {
-            return 'warning';
+    const getSeverity = (alert) => {
+        // Handle both string (old format fallback) and object (new format)
+        if (typeof alert === 'string') {
+            const lowerMsg = alert.toLowerCase();
+            if (lowerMsg.includes('critical') || lowerMsg.includes('urgent') || lowerMsg.includes('0 left')) {
+                return 'critical';
+            } else if (lowerMsg.includes('low') || lowerMsg.includes('below')) {
+                return 'warning';
+            }
+            return 'info';
         }
-        return 'info';
+        return alert.severity ? alert.severity.toLowerCase() : 'info';
     };
 
     const getSeverityIcon = (severity) => {
@@ -78,10 +84,10 @@ function ActiveAlerts() {
     };
 
     // Group alerts by severity
-    const groupedAlerts = alerts.reduce((acc, msg) => {
-        const severity = getSeverity(msg);
+    const groupedAlerts = alerts.reduce((acc, alert) => {
+        const severity = getSeverity(alert);
         if (!acc[severity]) acc[severity] = [];
-        acc[severity].push(msg);
+        acc[severity].push(alert);
         return acc;
     }, {});
 
@@ -176,8 +182,11 @@ function ActiveAlerts() {
                     />
                 ) : (
                     <div className="alerts-list">
-                        {alerts.map((msg, index) => {
-                            const severity = getSeverity(msg);
+                        {alerts.map((alert, index) => {
+                            const severity = getSeverity(alert);
+                            const msgText = typeof alert === 'string' ? alert : alert.message;
+                            const serialNo = typeof alert === 'object' ? alert.serialNo : null;
+
                             return (
                                 <div key={index} className={`alert-item ${severity}`}>
                                     <div className="alert-item-left">
@@ -185,7 +194,7 @@ function ActiveAlerts() {
                                             {getSeverityIcon(severity)}
                                         </div>
                                         <div className="alert-content">
-                                            <p className="alert-message">{msg}</p>
+                                            <p className="alert-message">{msgText}</p>
                                             <div className="alert-meta">
                                                 <span className="alert-time">
                                                     <ClockCircleOutlined /> Active now
@@ -194,6 +203,16 @@ function ActiveAlerts() {
                                             </div>
                                         </div>
                                     </div>
+                                    {serialNo && (
+                                        <Button
+                                            type="primary"
+                                            size="small"
+                                            className="resolve-btn"
+                                            onClick={() => navigate('/dashboard/updateItem', { state: { serialNo } })}
+                                        >
+                                            Resolve
+                                        </Button>
+                                    )}
                                 </div>
                             );
                         })}

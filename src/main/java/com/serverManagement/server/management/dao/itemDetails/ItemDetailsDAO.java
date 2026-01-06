@@ -80,4 +80,6 @@ public interface ItemDetailsDAO
         @Query("SELECT COUNT(i) FROM ItemDetailsEntity i WHERE LOWER(i.availableStatusId.itemAvailableOption) LIKE '%repair%'")
         long countRepairingItems();
 
+        @Query("SELECT i FROM ItemDetailsEntity i WHERE LOWER(i.availableStatusId.itemAvailableOption) LIKE '%issue%' AND i.returnDuration IS NOT NULL")
+        List<ItemDetailsEntity> findIssuedItemsWithReturnDuration();
 }

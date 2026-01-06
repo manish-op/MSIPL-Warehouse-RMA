@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,17 +27,10 @@ public class AlertController {
      */
     @GetMapping("/active")
     public ResponseEntity<?> getActiveAlerts(Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(401).body("User not authenticated");
-        }
-
-        // This list will be empty if there are no alerts
-        List<String> alerts = alertService.getActiveAlerts(principal);
-
-
-        return ResponseEntity.ok(Map.of(
-                "count", alerts.size(),
-                "messages", alerts
-        ));
+        List<java.util.Map<String, String>> alerts = alertService.getActiveAlerts(principal);
+        Map<String, Object> response = new HashMap<>();
+        response.put("count", alerts.size());
+        response.put("messages", alerts);
+        return ResponseEntity.ok(response);
     }
 }

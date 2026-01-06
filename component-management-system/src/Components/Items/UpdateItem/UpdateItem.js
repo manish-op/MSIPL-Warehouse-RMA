@@ -8,10 +8,14 @@ import GetItemStatusOptionAPI from "../../API/StatusOptions/ItemStatusOption/Get
 import { useItemDetails } from "./ItemContext";
 import UpdateItemAPI from "../../API/ItemRelatedApi/UpdateItem/UpdateItemAPI";
 import UtcToISO from "../../UtcToISO";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import Cookies from "js-cookie";
+import { message } from "antd";
+import { URL } from "../../API/URL";
 
 function UpdateItem() {
   const [form] = Form.useForm();
+  const location = useLocation(); // Hook to access navigation state
   const role = localStorage.getItem("_User_role_for_MSIPL");
   const [regions, setRegions] = useState();
   const [keywords, setKeywords] = useState();
@@ -19,10 +23,91 @@ function UpdateItem() {
   const [itemAvailabilityOption, setitemAvailabilityOption] = useState();
   const [itemStatusOption, setitemStatusOption] = useState();
   const [keywordSelection, setkeywordSelection] = useState({ keywordName: "" });
-  const { itemDetails, setItemDetails } = useItemDetails();
+  const { itemDetails, setItemDetails, setItemHistory } = useItemDetails();
 
   // ... (All your useEffects and handler functions remain exactly the same) ...
-  
+
+  // Search function to find item details
+  const fetchItemDetails = async (serialNo) => {
+    const token = atob(Cookies.get("authToken") || "");
+    if (!token) {
+      message.error("User not authenticated");
+      return;
+    }
+
+    // Clear previous history to avoid showing stale data while loading
+    setItemHistory([]);
+
+    try {
+      const response = await fetch(`${URL}/componentDetails/serialno`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: serialNo,
+      });
+
+      if (!response.ok) {
+        const mess = await response.text();
+        message.warning(mess, 2);
+      } else {
+        const data = await response.json();
+        if (data) {
+          setItemDetails(data);
+          form.setFieldsValue({
+            ...data,
+            // Ensure fields match form names if different
+          });
+          message.success("Item details fetched successfully");
+
+          // Fetch History
+          try {
+            fetch(`${URL}/componentDetails/history`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(serialNo),
+              // In GetItemHistoryBySerialNoAPI.js: body: JSON.stringify(values.serialNo)
+              // But wait, values.serialNo is a string. So it sends "serial".
+              // Let's safe bet: send serialNo as raw string if the header is not application/json, or json string if it is.
+            })
+              .then(async (histRes) => {
+                if (histRes.ok) {
+                  const histData = await histRes.json();
+                  if (histData && Array.isArray(histData)) {
+                    setItemHistory(histData);
+                  }
+                }
+              });
+          } catch (err) {
+            console.error("Failed to fetch history", err);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      message.error("Failed to fetch item details");
+    }
+  };
+
+  const onSearch = async (value) => {
+    if (value) {
+      await fetchItemDetails(value);
+    }
+  };
+  // Pre-fill serial number if coming from Alerts
+  useEffect(() => {
+    if (location.state && location.state.serialNo) {
+      const serial = location.state.serialNo;
+      form.setFieldsValue({ serialNo: serial }); // Use correct field name 'serialNo' matching the form item
+      fetchItemDetails(serial);
+    }
+  }, [location.state, form]);
+
+
   //Api is calling for getting item availability status option
   useEffect(() => {
     const fetchAvailabilityStatus = async () => {
@@ -504,10 +589,24 @@ function UpdateItem() {
               </Col>
               <Col span={8}>
                 <Form.Item
-                  label="Party Name"
+                  label="Return Duration (Days)"
+                  name="returnDuration"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Please enter return duration in days!",
+                    },
+                  ]}
+                >
+                  <Input type="number" placeholder="Enter days (e.g., 7)" />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  label="Loaned To"
                   name="partyName"
                   rules={[
-                    { required: true, message: "Please add Party name!" },
+                    { required: true, message: "Please add Loaned To Name!" },
                   ]}
                 >
                   <Input />
@@ -548,8 +647,8 @@ function UpdateItem() {
                 Update
               </Button>
             </Form.Item>
-          </Form> 
-         
+          </Form>
+
           <div style={{ textAlign: "center" }}>
             <Link to="/dashboard/itemRepairing">
               <Button type="default">

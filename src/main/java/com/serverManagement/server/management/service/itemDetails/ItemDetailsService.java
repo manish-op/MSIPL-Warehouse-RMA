@@ -133,7 +133,7 @@ public class ItemDetailsService {
                             historyChangedByAdmin.setSerial_No(addComponent.getSerialNo().trim().toLowerCase());
                         }
 
-                        // region handling (unchanged)
+                        // region handling
                         if (addComponent.getRegion() != null && addComponent.getRegion().trim().length() > 0) {
                             if (loginUserRole.equals("admin")) {
                                 regionEntity = regionDAO.findByCity(addComponent.getRegion().toLowerCase());
@@ -583,6 +583,25 @@ public class ItemDetailsService {
                                                     .body("this option is not listed add another one");
                                         }
                                     }
+                                }
+                            }
+
+                            // Return Duration Logic
+                            if (assignItemDetails.getReturnDuration() != null) {
+                                itemDetails.setReturnDuration(assignItemDetails.getReturnDuration());
+                                // Automatically set status to "issued" (likely the correct DB value) if return
+                                // duration is set
+                                String statusToSet = "issued";
+                                itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(statusToSet);
+
+                                if (itemAvailEntity == null) {
+                                    statusToSet = "issue";
+                                    itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(statusToSet);
+                                }
+
+                                if (itemAvailEntity != null) {
+                                    itemDetails.setAvailableStatusId(itemAvailEntity);
+                                    historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                 }
                             }
 
