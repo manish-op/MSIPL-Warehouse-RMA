@@ -96,15 +96,7 @@ public class DepotDispatchItemDto {
     }
 
     private String depotStage;
-    // repairStatus is generally inherited or defined elsewhere if Duplicate, but
-    // here we just need to avoid redeclaration.
-    // If it was already there, we keep it but ensure no dupes.
-    // The lint said duplicate, so I will remove this one if it exists elsewhere.
-    // Actually, looking at the file (Step 1306/1320), I don't see another
-    // definition in the snippet,
-    // BUT the lint says there is one at line 154 (which is likely the original one
-    // I missed).
-    // I will just remove it from here.
+
     private String depotReturnDcNo;
     private String dispatchTo;
 

@@ -1,6 +1,7 @@
 package com.serverManagement.server.management.controller.rma.common;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
@@ -26,8 +28,8 @@ public class FileController {
 
     private final Path fileStorageLocation;
 
-    public FileController() {
-        this.fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+    public FileController(@Value("${file.upload-dir}") String uploadDir) {
+        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
@@ -46,7 +48,10 @@ public class FileController {
 
             String fileName = UUID.randomUUID().toString() + fileExtension;
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
-            Files.copy(file.getInputStream(), targetLocation);
+
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, targetLocation);
+            }
 
             Map<String, String> response = new HashMap<>();
             response.put("fileId", fileName);
