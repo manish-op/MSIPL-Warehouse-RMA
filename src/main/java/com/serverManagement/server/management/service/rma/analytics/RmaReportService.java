@@ -301,7 +301,7 @@ public class RmaReportService {
                 // Draw Group Header
                 drawSectionHeader(contentStream, yPosition,
                         groupLabel + ": " + entry.getKey() + " (" + entry.getValue().size() + ")");
-                yPosition -= 20;
+                yPosition -= 40;
 
                 // Draw Table Header
                 drawTableHeaderRow(contentStream, yPosition, headers, colWidths);
@@ -332,7 +332,7 @@ public class RmaReportService {
                     drawTableRow(contentStream, yPosition, rowData, colWidths);
                     yPosition -= ROW_HEIGHT;
                 }
-                yPosition -= 20; // Space between groups
+                yPosition -= 35; // Space between groups
             }
 
             // Add Page Numbers
@@ -381,7 +381,7 @@ public class RmaReportService {
 
                 drawSectionHeader(contentStream, yPosition,
                         groupLabel + ": " + entry.getKey() + " (" + entry.getValue().size() + ")");
-                yPosition -= 20;
+                yPosition -= 40;
 
                 drawTableHeaderRow(contentStream, yPosition, headers, colWidths);
                 yPosition -= HEADER_HEIGHT;
@@ -422,7 +422,7 @@ public class RmaReportService {
                     drawTableRow(contentStream, yPosition, rowData, colWidths);
                     yPosition -= ROW_HEIGHT;
                 }
-                yPosition -= 20;
+                yPosition -= 35;
             }
 
             addPageNumbers(document, title);
@@ -452,7 +452,7 @@ public class RmaReportService {
 
                 // 1. Overview Section
                 drawSectionHeader(contentStream, yPosition, "Operational Overview");
-                yPosition -= 25;
+                yPosition -= 35;
 
                 // Draw 2 large stats boxes side by side
                 float boxWidth = (pageWidth - 2 * MARGIN - 20) / 2;
@@ -464,7 +464,7 @@ public class RmaReportService {
 
                 // 2. Status Breakdown Table
                 drawSectionHeader(contentStream, yPosition, "Status Breakdown");
-                yPosition -= 25;
+                yPosition -= 35;
 
                 float[] colWidths = { 350, 100 };
                 String[] statusHeaders = { "Status Category", "Count" };
@@ -488,7 +488,7 @@ public class RmaReportService {
 
                 // 3. Repair Type Breakdown
                 drawSectionHeader(contentStream, yPosition, "Repair Type Breakdown");
-                yPosition -= 25;
+                yPosition -= 35;
 
                 drawTableHeaderRow(contentStream, yPosition, statusHeaders, colWidths);
                 yPosition -= HEADER_HEIGHT;
@@ -506,7 +506,7 @@ public class RmaReportService {
 
                 // 4. Performance Metrics
                 drawSectionHeader(contentStream, yPosition, "Performance Metrics");
-                yPosition -= 25;
+                yPosition -= 35;
 
                 // Calculate approximate completion from status keys
                 long completedCount = statusCounts.entrySet().stream()

@@ -21,6 +21,7 @@ public class DepotDispatchItemDto {
     private ZonedDateTime dispatchedDate;
     private ZonedDateTime depotReturnDispatchDate;
     private ZonedDateTime depotReturnDeliveredDate;
+    private ZonedDateTime createdDate;
 
     public static DepotDispatchItemDto fromEntity(RmaItemEntity item) {
         DepotDispatchItemDto dto = new DepotDispatchItemDto();
@@ -46,7 +47,10 @@ public class DepotDispatchItemDto {
 
         dto.setDispatchedDate(item.getDispatchedDate());
         dto.setDepotReturnDispatchDate(item.getDepotReturnDispatchDate());
+        dto.setDispatchedDate(item.getDispatchedDate());
+        dto.setDepotReturnDispatchDate(item.getDepotReturnDispatchDate());
         dto.setDepotReturnDeliveredDate(item.getDepotReturnDeliveredDate());
+        dto.setCreatedDate(item.getRmaRequest() != null ? item.getRmaRequest().getCreatedDate() : null);
 
         return dto;
     }
@@ -73,6 +77,14 @@ public class DepotDispatchItemDto {
 
     public void setDepotReturnDeliveredDate(ZonedDateTime depotReturnDeliveredDate) {
         this.depotReturnDeliveredDate = depotReturnDeliveredDate;
+    }
+
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 
     public String getDepotStage() {

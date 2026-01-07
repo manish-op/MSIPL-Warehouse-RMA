@@ -138,7 +138,7 @@ const ChatComponent = () => {
         const SockJS = window.SockJS;
 
         try {
-            const socket = new SockJS('http://localhost:8081/ws');
+            const socket = new SockJS('/ws');
             const client = Stomp.over(socket);
             stompClientRef.current = client;
 

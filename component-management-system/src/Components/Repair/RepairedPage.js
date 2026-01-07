@@ -56,6 +56,7 @@ export default function RepairedPage() {
     const [generatingGatepass, setGeneratingGatepass] = useState(null);
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewData, setPreviewData] = useState({ rmaNo: "", items: [] });
+    const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
 
     // DC Modal State
     const [dcModalVisible, setDcModalVisible] = useState(false);
@@ -386,6 +387,38 @@ export default function RepairedPage() {
     const totalDispatchedRma = Object.keys(groupedDispatchedItems).length;
     const totalDispatchedItems = dispatchedItems.length;
 
+    const getSortedGroups = (groups, isDispatched = false) => {
+        const groupsArray = Object.entries(groups);
+        const dateKey = isDispatched ? 'dispatchedDate' : 'receivedDate';
+
+        return groupsArray.sort((a, b) => {
+            const itemsA = a[1];
+            const itemsB = b[1];
+            // Use first item of group for comparison
+            const itemA = itemsA[0] || {};
+            const itemB = itemsB[0] || {};
+
+            switch (sortOption) {
+                case "date_desc":
+                    // Most recent first
+                    return new Date(itemB[dateKey] || 0) - new Date(itemA[dateKey] || 0);
+
+                case "date_asc":
+                    // Oldest first
+                    return new Date(itemA[dateKey] || 0) - new Date(itemB[dateKey] || 0);
+
+                case "customer_asc":
+                    // A-Z
+                    const nameA = (itemA.userName || itemA.companyName || "").toLowerCase();
+                    const nameB = (itemB.userName || itemB.companyName || "").toLowerCase();
+                    return nameA.localeCompare(nameB);
+
+                default:
+                    return 0;
+            }
+        });
+    };
+
     return (
         <RmaLayout>
             <div className="unrepaired-page">
@@ -398,7 +431,17 @@ export default function RepairedPage() {
                                 <Text type="secondary">Items repaired locally and ready for dispatch</Text>
                             </div>
                         </div>
-                        <Button icon={<ReloadOutlined />} onClick={loadItems} loading={loading} className="refresh-btn">Refresh</Button>
+                        <Select
+                            value={sortOption}
+                            onChange={setSortOption}
+                            className="header-select"
+                            style={{ marginRight: 8 }}
+                            options={[
+                                { value: "date_desc", label: "Date: Newest First" },
+                                { value: "date_asc", label: "Date: Oldest First" },
+                                { value: "customer_asc", label: "Customer: A-Z" },
+                            ]}
+                        />
                     </div>
                     {/* Stats */}
                     <Row gutter={16} className="stats-row">
@@ -442,7 +485,7 @@ export default function RepairedPage() {
                                         expandIconPosition="end"
                                         ghost
                                     >
-                                        {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => {
+                                        {getSortedGroups(groupedItems, false).map(([rmaNo, rmaItems]) => {
                                             const firstItem = rmaItems[0];
                                             const createdDate = firstItem.receivedDate ? new Date(firstItem.receivedDate).toLocaleDateString() : "N/A";
                                             const itemCount = rmaItems.length;
@@ -460,6 +503,9 @@ export default function RepairedPage() {
                                                                 </div>
                                                                 <Text type="secondary" style={{ fontSize: '12px' }}>
                                                                     <span role="img" aria-label="user">👤</span> {firstItem.userName || "User"}
+                                                                </Text>
+                                                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                                                    <span role="img" aria-label="customer">🏢Customer ::</span> {firstItem.companyName || "Unknown Customer"}
                                                                 </Text>
                                                             </div>
                                                         </Col>
@@ -572,7 +618,7 @@ export default function RepairedPage() {
                                         expandIconPosition="end"
                                         ghost
                                     >
-                                        {Object.entries(groupedDispatchedItems).map(([rmaNo, rmaItems]) => {
+                                        {getSortedGroups(groupedDispatchedItems, true).map(([rmaNo, rmaItems]) => {
                                             const firstItem = rmaItems[0];
                                             const dispatchedDate = firstItem.dispatchedDate ? new Date(firstItem.dispatchedDate).toLocaleDateString() : "N/A";
                                             const itemCount = rmaItems.length;
@@ -590,6 +636,9 @@ export default function RepairedPage() {
                                                                 </div>
                                                                 <Text type="secondary" style={{ fontSize: '12px' }}>
                                                                     <span role="img" aria-label="courier">🚚</span> {firstItem.courierName || "Courier"}
+                                                                </Text>
+                                                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                                                    <span role="img" aria-label="customer">🏢</span> {firstItem.companyName || "Unknown Customer"}
                                                                 </Text>
                                                             </div>
                                                         </Col>

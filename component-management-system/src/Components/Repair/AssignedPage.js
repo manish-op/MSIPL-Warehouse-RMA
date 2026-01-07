@@ -46,6 +46,7 @@ const { Panel } = Collapse;
 export default function AssignedPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
     const [statusModalVisible, setStatusModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [newStatus, setNewStatus] = useState("");
@@ -127,6 +128,39 @@ export default function AssignedPage() {
         acc[rmaNo].push(item);
         return acc;
     }, {});
+
+    const getSortedGroups = (groups) => {
+        const groupsArray = Object.entries(groups);
+
+        return groupsArray.sort((a, b) => {
+            const itemsA = a[1];
+            const itemsB = b[1];
+            // Use first item of group for comparison
+            const itemA = itemsA[0] || {};
+            const itemB = itemsB[0] || {};
+
+            switch (sortOption) {
+                case "date_desc":
+                    // Most recent first
+                    return new Date(itemB.receivedDate || 0) - new Date(itemA.receivedDate || 0);
+
+                case "date_asc":
+                    // Oldest first
+                    return new Date(itemA.receivedDate || 0) - new Date(itemB.receivedDate || 0);
+
+                case "customer_asc":
+                    // A-Z
+                    const nameA = (itemA.userName || itemA.companyName || "").toLowerCase();
+                    const nameB = (itemB.userName || itemB.companyName || "").toLowerCase();
+                    return nameA.localeCompare(nameB);
+
+                default:
+                    return 0;
+            }
+        });
+    };
+
+    const sortedGroups = getSortedGroups(groupedItems);
 
     const totalRmaRequests = Object.keys(groupedItems).length;
     const totalItems = items.length;
@@ -229,14 +263,17 @@ export default function AssignedPage() {
                                 </Text>
                             </div>
                         </div>
-                        <Button
-                            icon={<ReloadOutlined />}
-                            onClick={loadItems}
-                            loading={loading}
-                            className="refresh-btn"
-                        >
-                            Refresh
-                        </Button>
+                        <Select
+                            value={sortOption}
+                            onChange={setSortOption}
+                            className="header-select"
+                            style={{ marginRight: 8 }}
+                            options={[
+                                { value: "date_desc", label: "Date: Newest First" },
+                                { value: "date_asc", label: "Date: Oldest First" },
+                                { value: "customer_asc", label: "Customer: A-Z" },
+                            ]}
+                        />
                     </div>
 
                     {/* Stats Row */}
@@ -282,7 +319,7 @@ export default function AssignedPage() {
                             expandIconPosition="end"
                             ghost
                         >
-                            {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => {
+                            {sortedGroups.map(([rmaNo, rmaItems]) => {
                                 const firstItem = rmaItems[0];
                                 const createdDate = firstItem.receivedDate ? new Date(firstItem.receivedDate).toLocaleDateString() : "N/A";
                                 const itemCount = rmaItems.length;
@@ -300,6 +337,9 @@ export default function AssignedPage() {
                                                     </div>
                                                     <Text type="secondary" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                         <span role="img" aria-label="user">👤</span> {firstItem.userName || firstItem.assignedToName || "User"}
+                                                    </Text>
+                                                    <Text type="secondary" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span role="img" aria-label="customer">🏢Customer ::</span> {firstItem.companyName || "Unknown Customer"}
                                                     </Text>
                                                 </div>
                                             </Col>
@@ -602,6 +642,6 @@ export default function AssignedPage() {
                     </Modal>
                 )}
             </div>
-        </RmaLayout>
+        </RmaLayout >
     );
 }

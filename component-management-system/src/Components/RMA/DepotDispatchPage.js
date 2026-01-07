@@ -57,6 +57,7 @@ export default function DepotDispatchPage() {
   const [items, setItems] = useState([]);
   const [inTransitItems, setInTransitItems] = useState([]);
   const [activeTab, setActiveTab] = useState("1");
+  const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
 
   // Edit RMA State
   const [editRmaModalVisible, setEditRmaModalVisible] = useState(false);
@@ -192,6 +193,42 @@ export default function DepotDispatchPage() {
   const totalRma = Object.keys(groupedItems).length;
   const totalInTransitRma = Object.keys(groupedInTransit).length;
   const totalInTransitItems = inTransitItems.length;
+
+  const getSortedGroups = (groups, inTransit = false) => {
+    const groupsArray = Object.entries(groups);
+    // In transit might rely on dispatchedDate or similar, but let's check item fields.
+    // For now, using dispatchedDate if available, else receivedDate as fallback or createdDate
+    // Actually, looking at previous pages, we used receivedDate or dispatchedDate.
+    // Depot items are "Ready to Dispatch" or "In Transit".
+    // Ready to dispatch -> has receivedDate? 
+    // In Transit -> has dispatchedDate?
+
+    return groupsArray.sort((a, b) => {
+      const itemsA = a[1];
+      const itemsB = b[1];
+      const itemA = itemsA[0] || {};
+      const itemB = itemsB[0] || {};
+
+      const dateKey = inTransit ? 'dispatchedDate' : 'receivedDate';
+      // Note: Check if these keys exist in DepotDispatch items. 
+      // If not, fallback to 'createdDate' or 'modifiedDate' might be needed.
+      // Assuming consistent API response with other pages.
+
+      switch (sortOption) {
+        case "date_desc":
+          return new Date(itemB[dateKey] || itemB.createdDate || 0) - new Date(itemA[dateKey] || itemA.createdDate || 0);
+        case "date_asc":
+          return new Date(itemA[dateKey] || itemA.createdDate || 0) - new Date(itemB[dateKey] || itemB.createdDate || 0);
+        case "customer_asc":
+          // A-Z
+          const nameA = (itemA.userName || itemA.companyName || "").toLowerCase();
+          const nameB = (itemB.userName || itemB.companyName || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        default:
+          return 0;
+      }
+    });
+  };
 
   const openDispatchModal = async (rmaNo, rmaItems) => {
     const validItems = rmaItems.filter(item => item.itemRmaNo && item.itemRmaNo.trim() !== "");
@@ -555,14 +592,17 @@ export default function DepotDispatchPage() {
                 </Text>
               </div>
             </div>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={loadItems}
-              loading={loading}
-              className="refresh-btn"
-            >
-              Refresh
-            </Button>
+            <Select
+              value={sortOption}
+              onChange={setSortOption}
+              className="header-select"
+              style={{ marginRight: 8 }}
+              options={[
+                { value: "date_desc", label: "Date: Newest First" },
+                { value: "date_asc", label: "Date: Oldest First" },
+                { value: "customer_asc", label: "Customer: A-Z" },
+              ]}
+            />
           </div>
         </div>
 
@@ -591,232 +631,230 @@ export default function DepotDispatchPage() {
                       <div className="rma-groups">
 
                         <Collapse defaultActiveKey={[]} className="rma-collapse">
-                          {Object.entries(groupedItems)
-                            .sort(([rmaNoA, itemsA], [rmaNoB, itemsB]) => {
-                              const isAllCompletedA = itemsA.every(
-                                (i) =>
-                                  i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" ||
-                                  i.depotCycleClosed
-                              );
-                              const isAllCompletedB = itemsB.every(
-                                (i) =>
-                                  i.depotStage === "GGN_DELIVERED_TO_CUSTOMER" ||
-                                  i.depotCycleClosed
-                              );
-                              if (!isAllCompletedA && isAllCompletedB) return -1;
-                              if (isAllCompletedA && !isAllCompletedB) return 1;
-                              return 0;
-                            })
-                            .map(([rmaNo, rmaItems]) => {
-                              const firstItem = rmaItems[0];
-                              const headerContentResponsive = (
-                                <div
-                                  className="rma-collapse-header"
-                                  style={{ width: "100%", padding: "4px 0" }}
+                          {getSortedGroups(groupedItems).map(([rmaNo, rmaItems]) => {
+                            const firstItem = rmaItems[0];
+                            const headerContentResponsive = (
+                              <div
+                                className="rma-collapse-header"
+                                style={{ width: "100%", padding: "4px 0" }}
+                              >
+                                <Row
+                                  gutter={[16, 16]}
+                                  align="middle"
+                                  style={{ width: "100%" }}
                                 >
-                                  <Row
-                                    gutter={[16, 16]}
-                                    align="middle"
-                                    style={{ width: "100%" }}
-                                  >
-                                    {/* Column 1: RMA Identity */}
-                                    <Col xs={24} sm={12} md={8} lg={7} xl={6}>
-                                      <div
-                                        style={{
-                                          display: "flex",
-                                          flexDirection: "column",
-                                        }}
-                                      >
-                                        <div
-                                          style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "8px",
-                                          }}
-                                        >
-                                          <Title
-                                            level={5}
-                                            style={{
-                                              margin: 0,
-                                              color: "var(--primary-color)",
-                                            }}
-                                          >
-                                            {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
-                                          </Title>
-                                        </div>
-                                        <Text
-                                          type="secondary"
-                                          style={{
-                                            fontSize: "12px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                          }}
-                                        >
-                                          <span role="img" aria-label="user">
-                                            👤
-                                          </span>{" "}
-                                          {firstItem.userName || "Unknown"}
-                                        </Text>
-                                        <Text
-                                          type="secondary"
-                                          style={{
-                                            fontSize: "12px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                          }}
-                                        >
-                                          <Badge
-                                            count={rmaItems.length}
-                                            style={{ backgroundColor: "var(--status-success)" }}
-                                            showZero
-                                          />{" "}
-                                          Items
-                                        </Text>
-                                      </div>
-                                    </Col>
-
-                                    {/* Column 2: Status/Info placeholder */}
-                                    <Col xs={12} sm={12} md={5} lg={5} xl={4}>
-                                      <div
-                                        style={{
-                                          display: "flex",
-                                          flexDirection: "column",
-                                          gap: "2px",
-                                        }}
-                                      >
-                                        <Text type="secondary" style={{ fontSize: "11px" }}>
-                                          Status
-                                        </Text>
-                                        <Tag color="orange">Ready to Dispatch</Tag>
-                                      </div>
-                                    </Col>
-
-                                    {/* Column 3: Actions */}
-                                    <Col
-                                      xs={24}
-                                      sm={24}
-                                      md={11}
-                                      lg={12}
-                                      xl={14}
-                                      style={{ display: "flex", justifyContent: "flex-end", paddingRight: "24px" }}
+                                  {/* Column 1: RMA Identity */}
+                                  <Col xs={24} sm={12} md={8} lg={7} xl={6}>
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                      }}
                                     >
                                       <div
-                                        className="header-actions"
-                                        onClick={(e) => e.stopPropagation()}
                                         style={{
                                           display: "flex",
+                                          alignItems: "center",
                                           gap: "8px",
-                                          flexWrap: "wrap",
-                                          justifyContent: "flex-end",
-                                          width: "100%",
                                         }}
                                       >
-                                        <Button
-                                          size="middle"
-                                          icon={<FilePdfOutlined />}
-                                          onClick={() => openDcModal(rmaNo, rmaItems)}
+                                        <Title
+                                          level={5}
+                                          style={{
+                                            margin: 0,
+                                            color: "var(--primary-color)",
+                                          }}
                                         >
-                                          Generate DC
-                                        </Button>
-                                        <Button
-                                          type="primary"
-                                          size="middle"
-                                          icon={<SendOutlined />}
-                                          onClick={() =>
-                                            openDispatchModal(rmaNo, rmaItems)
-                                          }
-                                        >
-                                          Dispatch to Bangalore
-                                        </Button>
+                                          {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
+                                        </Title>
                                       </div>
-                                    </Col>
-                                  </Row>
-                                </div>
-                              );
-
-                              return (
-                                <Panel
-                                  header={headerContentResponsive}
-                                  key={rmaNo}
-                                  className="rma-panel"
-                                >
-                                  {/* MODERN CARD GRID LAYOUT START */}
-                                  <div className="rma-items-grid">
-                                    {rmaItems.map((item) => (
-                                      <div
-                                        key={item.id}
-                                        className="rma-item-card-modern"
+                                      <Text
+                                        type="secondary"
+                                        style={{
+                                          fontSize: "12px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                        }}
                                       >
-                                        {/* Header Strip */}
-                                        <div className="item-header">
-                                          <span className="item-product">
-                                            {item.product || "Product"}
-                                          </span>
-                                          <Tag color="purple">Depot Repair</Tag>
-                                        </div>
+                                        <span role="img" aria-label="user">
+                                          👤
+                                        </span>{" "}
+                                        {firstItem.userName || "Unknown"}
+                                      </Text>
+                                      <Text
+                                        type="secondary"
+                                        style={{
+                                          fontSize: "12px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                        }}
+                                      >
+                                        <span role="img" aria-label="customer">
+                                          🏢Customer ::
+                                        </span>{" "}
+                                        {firstItem.companyName || "Unknown Customer"}
+                                      </Text>
+                                      <Text
+                                        type="secondary"
+                                        style={{
+                                          fontSize: "12px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                        }}
+                                      >
+                                        <Badge
+                                          count={rmaItems.length}
+                                          style={{ backgroundColor: "var(--status-success)" }}
+                                          showZero
+                                        />{" "}
+                                        Items
+                                      </Text>
+                                    </div>
+                                  </Col>
 
-                                        {/* Details Grid */}
-                                        <div className="item-details-grid">
-                                          <div className="detail-box">
-                                            <span className="label">
-                                              <BarcodeOutlined /> Serial No
-                                            </span>
-                                            <span className="value monospace">
-                                              {item.serialNo}
-                                            </span>
-                                          </div>
-                                          <div className="detail-box">
-                                            <span className="label">Model</span>
-                                            <span className="value">{item.model}</span>
-                                          </div>
-                                          <div className="detail-box">
-                                            <span className="label">RMA Number</span>
-                                            {item.itemRmaNo ? (
-                                              <Tag color="purple">
-                                                {item.itemRmaNo}
-                                              </Tag>
-                                            ) : (
-                                              <Text
-                                                type="secondary"
-                                                style={{ fontSize: "12px" }}
-                                              >
-                                                None
-                                              </Text>
-                                            )}
-                                          </div>
-                                        </div>
+                                  {/* Column 2: Status/Info placeholder */}
+                                  <Col xs={12} sm={12} md={5} lg={5} xl={4}>
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "2px",
+                                      }}
+                                    >
+                                      <Text type="secondary" style={{ fontSize: "11px" }}>
+                                        Status
+                                      </Text>
+                                      <Tag color="orange">Ready to Dispatch</Tag>
+                                    </div>
+                                  </Col>
 
-                                        {/* Fault Box */}
-                                        <div className="fault-box">
+                                  {/* Column 3: Actions */}
+                                  <Col
+                                    xs={24}
+                                    sm={24}
+                                    md={11}
+                                    lg={12}
+                                    xl={14}
+                                    style={{ display: "flex", justifyContent: "flex-end", paddingRight: "24px" }}
+                                  >
+                                    <div
+                                      className="header-actions"
+                                      onClick={(e) => e.stopPropagation()}
+                                      style={{
+                                        display: "flex",
+                                        gap: "8px",
+                                        flexWrap: "wrap",
+                                        justifyContent: "flex-end",
+                                        width: "100%",
+                                      }}
+                                    >
+                                      <Button
+                                        size="middle"
+                                        icon={<FilePdfOutlined />}
+                                        onClick={() => openDcModal(rmaNo, rmaItems)}
+                                      >
+                                        Generate DC
+                                      </Button>
+                                      <Button
+                                        type="primary"
+                                        size="middle"
+                                        icon={<SendOutlined />}
+                                        onClick={() =>
+                                          openDispatchModal(rmaNo, rmaItems)
+                                        }
+                                      >
+                                        Dispatch to Bangalore
+                                      </Button>
+                                    </div>
+                                  </Col>
+                                </Row>
+                              </div>
+                            );
+
+                            return (
+                              <Panel
+                                header={headerContentResponsive}
+                                key={rmaNo}
+                                className="rma-panel"
+                              >
+                                {/* MODERN CARD GRID LAYOUT START */}
+                                <div className="rma-items-grid">
+                                  {rmaItems.map((item) => (
+                                    <div
+                                      key={item.id}
+                                      className="rma-item-card-modern"
+                                    >
+                                      {/* Header Strip */}
+                                      <div className="item-header">
+                                        <span className="item-product">
+                                          {item.product || "Product"}
+                                        </span>
+                                        <Tag color="purple">Depot Repair</Tag>
+                                      </div>
+
+                                      {/* Details Grid */}
+                                      <div className="item-details-grid">
+                                        <div className="detail-box">
                                           <span className="label">
-                                            Fault Description
+                                            <BarcodeOutlined /> Serial No
                                           </span>
-                                          <p className="fault-desc">
-                                            {item.faultDescription}
-                                          </p>
+                                          <span className="value monospace">
+                                            {item.serialNo}
+                                          </span>
                                         </div>
-
-                                        {/* Actions Footer */}
-                                        <div className="item-footer">
-                                          {!item.itemRmaNo && (
-                                            <Button
-                                              block
-                                              icon={<EditOutlined />}
-                                              onClick={() => openEditRmaModal(item)}
+                                        <div className="detail-box">
+                                          <span className="label">Model</span>
+                                          <span className="value">{item.model}</span>
+                                        </div>
+                                        <div className="detail-box">
+                                          <span className="label">RMA Number</span>
+                                          {item.itemRmaNo ? (
+                                            <Tag color="purple">
+                                              {item.itemRmaNo}
+                                            </Tag>
+                                          ) : (
+                                            <Text
+                                              type="secondary"
+                                              style={{ fontSize: "12px" }}
                                             >
-                                              Add RMA No.
-                                            </Button>
+                                              None
+                                            </Text>
                                           )}
                                         </div>
                                       </div>
-                                    ))}
-                                  </div>
-                                  {/* MODERN CARD GRID LAYOUT END */}
-                                </Panel>
-                              );
-                            })}
+
+                                      {/* Fault Box */}
+                                      <div className="fault-box">
+                                        <span className="label">
+                                          Fault Description
+                                        </span>
+                                        <p className="fault-desc">
+                                          {item.faultDescription}
+                                        </p>
+                                      </div>
+
+                                      {/* Actions Footer */}
+                                      <div className="item-footer">
+                                        {!item.itemRmaNo && (
+                                          <Button
+                                            block
+                                            icon={<EditOutlined />}
+                                            onClick={() => openEditRmaModal(item)}
+                                          >
+                                            Add RMA No.
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                {/* MODERN CARD GRID LAYOUT END */}
+                              </Panel>
+                            );
+                          })}
                         </Collapse>
                       </div>
 

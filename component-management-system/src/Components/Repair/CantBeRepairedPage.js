@@ -45,6 +45,7 @@ export default function CantBeRepairedPage() {
     const [replacedItems, setReplacedItems] = useState([]);
     const [activeTab, setActiveTab] = useState("1");
     const [loading, setLoading] = useState(false);
+    const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
 
     // --- NEW STATE FOR POPUPS ---
     const [isReplaceModalVisible, setIsReplaceModalVisible] = useState(false);
@@ -88,10 +89,10 @@ export default function CantBeRepairedPage() {
                 */
                 // So "BER" items ARE in RepairedPage too.
                 // In CantBeRepairedPage, we process them. Once processed, they might become "REPLACED".
-                
+
                 const pending = allItems.filter(item => item.repairStatus !== 'REPLACED');
                 const replaced = allItems.filter(item => item.repairStatus === 'REPLACED');
-                
+
                 setPendingItems(pending);
                 setReplacedItems(replaced);
             } else {
@@ -230,10 +231,46 @@ export default function CantBeRepairedPage() {
     const totalPendingItems = pendingItems.length;
     const totalReplacedItems = replacedItems.length;
 
+
+
+    const getSortedGroups = (groups, isHistory = false) => {
+        const groupsArray = Object.entries(groups);
+        const dateKey = isHistory ? 'repairedDate' : 'receivedDate';
+
+        return groupsArray.sort((a, b) => {
+            const itemsA = a[1];
+            const itemsB = b[1];
+            // Use first item of group for comparison
+            const itemA = itemsA[0] || {};
+            const itemB = itemsB[0] || {};
+
+            switch (sortOption) {
+                case "date_desc":
+                    // Most recent first
+                    return new Date(itemB[dateKey] || 0) - new Date(itemA[dateKey] || 0);
+
+                case "date_asc":
+                    // Oldest first
+                    return new Date(itemA[dateKey] || 0) - new Date(itemB[dateKey] || 0);
+
+                case "customer_asc":
+                    // A-Z
+                    const nameA = (itemA.userName || itemA.companyName || "").toLowerCase();
+                    const nameB = (itemB.userName || itemB.companyName || "").toLowerCase();
+                    return nameA.localeCompare(nameB);
+
+                default:
+                    return 0;
+            }
+        });
+    };
+
     const renderRmaCollapse = (groupedData, isHistory = false) => {
         if (Object.keys(groupedData).length === 0) {
             return <Empty description={isHistory ? "No replacement history found" : "No pending replacements found"} />;
         }
+
+        const sortedGroups = getSortedGroups(groupedData, isHistory);
 
         return (
             <Collapse
@@ -242,7 +279,7 @@ export default function CantBeRepairedPage() {
                 expandIconPosition="end"
                 ghost
             >
-                {Object.entries(groupedData).map(([rmaNo, rmaItems]) => {
+                {sortedGroups.map(([rmaNo, rmaItems]) => {
                     const firstItem = rmaItems[0];
                     const createdDate = firstItem.receivedDate ? new Date(firstItem.receivedDate).toLocaleDateString() : "N/A";
                     const itemCount = rmaItems.length;
@@ -257,6 +294,9 @@ export default function CantBeRepairedPage() {
                                         </Title>
                                         <Text type="secondary" style={{ fontSize: '12px' }}>
                                             <span role="img" aria-label="user">👤</span> {firstItem.userName || "User"}
+                                        </Text>
+                                        <Text type="secondary" style={{ fontSize: '12px' }}>
+                                            <span role="img" aria-label="customer">🏢Customer ::</span> {firstItem.companyName || "Unknown Customer"}
                                         </Text>
                                     </div>
                                 </Col>
@@ -382,7 +422,17 @@ export default function CantBeRepairedPage() {
                                 <Text type="secondary">Process replacements for Beyond Economic Repair (BER) items</Text>
                             </div>
                         </div>
-                        <Button icon={<ReloadOutlined />} onClick={loadItems} loading={loading} className="refresh-btn">Refresh</Button>
+                        <Select
+                            value={sortOption}
+                            onChange={setSortOption}
+                            className="header-select"
+                            style={{ marginRight: 8 }}
+                            options={[
+                                { value: "date_desc", label: "Date: Newest First" },
+                                { value: "date_asc", label: "Date: Oldest First" },
+                                { value: "customer_asc", label: "Customer: A-Z" },
+                            ]}
+                        />
                     </div>
 
                     <Row gutter={16} className="stats-row">

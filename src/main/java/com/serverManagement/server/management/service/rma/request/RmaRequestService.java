@@ -484,9 +484,8 @@ public class RmaRequestService {
             if (serialNo == null || serialNo.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("Serial number cannot be empty");
             }
-            System.out.println("DEBUG: Fetching serial history for: " + serialNo);
+
             List<RmaItemEntity> items = rmaItemDAO.findBySerialNoIgnoreCaseOrderByIdDesc(serialNo.trim());
-            System.out.println("DEBUG: Found items: " + (items != null ? items.size() : 0));
 
             List<Map<String, Object>> history = new ArrayList<>();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");

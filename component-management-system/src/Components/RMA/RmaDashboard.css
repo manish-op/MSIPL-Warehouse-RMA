@@ -752,3 +752,38 @@ html[data-theme='dark'] .tat-breached .ant-statistic-title,
 html[data-theme='dark'] .tat-breached .ant-statistic-content {
   color: #ff7875 !important;
 }
+
+
+.header-select {
+  width: 200px;
+}
+
+/* Override Ant Design Select styles for visibility on dark headers */
+.header-select .ant-select-selector {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 6px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.header-select .ant-select-selection-item {
+  color: #333333 !important;
+  font-weight: 500;
+}
+
+.header-select .ant-select-arrow {
+  color: #333333 !important;
+}
+
+/* Response for Mobile */
+@media screen and (max-width: 768px) {
+  .header-select {
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-top: 10px;
+  }
+}
