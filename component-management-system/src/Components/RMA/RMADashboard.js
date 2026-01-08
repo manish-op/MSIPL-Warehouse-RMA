@@ -446,7 +446,7 @@ function RmaDashboard() {
           </div>
           <div className="dashboard-search-wrapper">
             <Search
-              placeholder="Search by Product, Serial, RMA, Model, or Request No"
+              placeholder="Search by Product, Serial No, or Model No"
               allowClear
               enterButton={<Button type="primary" icon={<SearchOutlined />}>Search</Button>}
               size="large"

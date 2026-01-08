@@ -42,8 +42,6 @@ public class RmaItemWorkflowDTO {
 
     // TAT from Request (Days)
     private Integer tat;
-    // Due Date from Request
-    private ZonedDateTime dueDate;
 
     // Delivery confirmation fields
     private String deliveredTo; // Name of person who received
@@ -360,13 +358,5 @@ public class RmaItemWorkflowDTO {
 
     public void setTat(Integer tat) {
         this.tat = tat;
-    }
-
-    public ZonedDateTime getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(ZonedDateTime dueDate) {
-        this.dueDate = dueDate;
     }
 }

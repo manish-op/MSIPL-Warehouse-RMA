@@ -123,14 +123,4 @@ public class DepotDispatchRequest {
     public void setDispatchTo(String dispatchTo) {
         this.dispatchTo = dispatchTo;
     }
-
-    private String issueFixed;
-
-    public String getIssueFixed() {
-        return issueFixed;
-    }
-
-    public void setIssueFixed(String issueFixed) {
-        this.issueFixed = issueFixed;
-    }
 }
