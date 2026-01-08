@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
 import {
   Typography,
@@ -57,7 +58,42 @@ export default function DepotDispatchPage() {
   const [items, setItems] = useState([]);
   const [inTransitItems, setInTransitItems] = useState([]);
   const [activeTab, setActiveTab] = useState("1");
+  const [activeKeys, setActiveKeys] = useState([]); // Persistent collapse state
   const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.highlightRma) {
+      setActiveKeys((prev) => [...new Set([...prev, location.state.highlightRma])]);
+
+      const itemId = location.state.highlightItemId;
+      if (itemId) {
+        // Check if item is in In Transit list (Tab 2)
+        const inTransit = inTransitItems.some(i => i.id === itemId);
+        if (inTransit) {
+          setActiveTab("2");
+        } else {
+          setActiveTab("1");
+        }
+
+        // Scroll logic (wait for renders)
+        if (items.length > 0 || inTransitItems.length > 0) {
+          setTimeout(() => {
+            const element = document.getElementById(`item-card-${itemId}`);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              element.style.border = '2px solid #722ed1'; // Purple for Depot
+              element.style.transition = 'all 0.3s';
+              setTimeout(() => {
+                element.style.border = '';
+                element.style.transition = '';
+              }, 3000);
+            }
+          }, 800);
+        }
+      }
+    }
+  }, [location.state, items, inTransitItems]);
 
   // Edit RMA State
   const [editRmaModalVisible, setEditRmaModalVisible] = useState(false);
@@ -133,16 +169,12 @@ export default function DepotDispatchPage() {
   };
 
   const fetchTransporters = async () => {
-    try {
-      const result = await RmaApi.getAllTransporters();
-      if (result && result.success !== false) {
-        setTransporters(
-          Array.isArray(result) ? result : result.data || []
-        );
-      }
-    } catch (error) {
-      console.error("Failed to fetch transporters", error);
-    }
+    // RESTRICTED: Only Blue Dart and Safe Express allowed
+    const ALLOWED_TRANSPORTERS = [
+      { id: "bd", name: "Blue Dart", transporterId: "27AAACB0446L1ZS" },
+      { id: "se", name: "Safe Express", transporterId: "27AAECS4363H2Z7" }
+    ];
+    setTransporters(ALLOWED_TRANSPORTERS);
   };
 
   /* Access Control Removed by User Request */
@@ -309,7 +341,7 @@ export default function DepotDispatchPage() {
 
   const handleTransporterChange = (val) => {
     const selectedValue = Array.isArray(val) ? val[val.length - 1] : val;
-    const exists = transporters.find((t) => t.transporterName === selectedValue);
+    const exists = transporters.find((t) => t.name === selectedValue);
 
     if (!exists) {
       setIsNewTransporter(true);
@@ -630,7 +662,11 @@ export default function DepotDispatchPage() {
                     ) : (
                       <div className="rma-groups">
 
-                        <Collapse defaultActiveKey={[]} className="rma-collapse">
+                        <Collapse
+                          activeKey={activeKeys}
+                          onChange={setActiveKeys}
+                          className="rma-collapse"
+                        >
                           {getSortedGroups(groupedItems).map(([rmaNo, rmaItems]) => {
                             const firstItem = rmaItems[0];
                             const headerContentResponsive = (
@@ -878,7 +914,11 @@ export default function DepotDispatchPage() {
                       />
                     ) : (
                       <div className="rma-groups">
-                        <Collapse defaultActiveKey={[]} className="rma-collapse">
+                        <Collapse
+                          activeKey={activeKeys}
+                          onChange={setActiveKeys}
+                          className="rma-collapse"
+                        >
                           {Object.entries(groupedInTransit).map(([rmaNo, rmaItems]) => {
                             const sortedItems = [...rmaItems];
                             const firstItem = rmaItems[0];
@@ -1055,6 +1095,7 @@ export default function DepotDispatchPage() {
                                   {sortedItems.map((item) => (
                                     <div
                                       key={item.id}
+                                      id={`item-card-${item.id}`}
                                       className="rma-item-card-modern"
                                     >
                                       {/* Header */}
@@ -1418,18 +1459,13 @@ export default function DepotDispatchPage() {
                   rules={[{ required: true, message: "Required" }]}
                 >
                   <Select
-                    mode="tags"
                     style={{ width: "100%" }}
                     placeholder="Select or Type"
                     onChange={handleTransporterChange}
-                    options={[
-                      ...transporters.map((t) => ({
-                        label: t.transporterName,
-                        value: t.transporterName,
-                      })),
-                      { label: "Blue Dart", value: "Blue Dart" },
-                      { label: "Safe Express", value: "Safe Express" },
-                    ]}
+                    options={transporters.map((t) => ({
+                        label: t.name,
+                        value: t.name,
+                      }))}
                   />
                 </Form.Item>
               </Col>

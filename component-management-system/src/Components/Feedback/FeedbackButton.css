@@ -1,7 +1,7 @@
 /* Floating Feedback Button Container */
 .feedback-button-container {
     position: fixed;
-    bottom: 24px;
+    bottom: 60px;
     right: 24px;
     z-index: 1000;
     display: flex;
@@ -57,7 +57,7 @@
 /* Minimized State Button */
 .feedback-button-minimized {
     position: fixed;
-    bottom: 24px;
+    bottom: 60px;
     right: 24px;
     z-index: 1000;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -107,7 +107,7 @@
 /* Responsive */
 @media (max-width: 576px) {
     .feedback-button-container {
-        bottom: 16px;
+        bottom: 50px;
         right: 16px;
     }
     
@@ -118,7 +118,7 @@
     }
     
     .feedback-button-minimized {
-        bottom: 16px;
+        bottom: 50px;
         right: 16px;
         width: 44px;
         height: 44px;

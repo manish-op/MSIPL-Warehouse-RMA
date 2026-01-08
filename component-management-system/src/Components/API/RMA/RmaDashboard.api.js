@@ -8,7 +8,7 @@ export const RmaDashboardApi = {
     getTatComplianceReport: async () => apiGet("/rma/tat-compliance-report"),
 
     // Dashboard Interactive Modals
-    getRmaRequests: async (filter) => apiGet(`/rma/requests?filter=${filter || "all"}`),
+    getRmaRequests: async (filter) => apiGet(`/rma/requests?timeFilter=${filter || "all"}`),
 
     getAllItems: async () => apiGet("/rma/items/all"),
 

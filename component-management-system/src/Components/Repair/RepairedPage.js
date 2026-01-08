@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
     Typography,
     Tag,
@@ -57,6 +58,41 @@ export default function RepairedPage() {
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewData, setPreviewData] = useState({ rmaNo: "", items: [] });
     const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
+    const [activeKeys, setActiveKeys] = useState([]); // Persistent collapse state
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.highlightRma) {
+            setActiveKeys((prev) => [...new Set([...prev, location.state.highlightRma])]);
+
+            const itemId = location.state.highlightItemId;
+            if (itemId) {
+                // Check if item is in Dispatched list (Tab 2)
+                const inDispatched = dispatchedItems.some(i => i.id === itemId);
+                if (inDispatched) {
+                    setActiveTab("2");
+                } else {
+                    setActiveTab("1");
+                }
+
+                // Scroll logic
+                if (items.length > 0 || dispatchedItems.length > 0) {
+                    setTimeout(() => {
+                        const element = document.getElementById(`item-card-${itemId}`);
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            element.style.border = '2px solid #52c41a'; // Green
+                            element.style.transition = 'all 0.3s';
+                            setTimeout(() => { 
+                                element.style.border = ''; 
+                                element.style.transition = '';
+                            }, 3000);
+                        }
+                    }, 800);
+                }
+            }
+        }
+    }, [location.state, items, dispatchedItems]);
 
     // DC Modal State
     const [dcModalVisible, setDcModalVisible] = useState(false);
@@ -123,21 +159,12 @@ export default function RepairedPage() {
     };
 
     const fetchTransporters = async () => {
-        try {
-            const result = await RmaApi.getAllTransporters();
-            let allTransporters = result.success ? (result.data || []) : [];
-
-            // Merge with predefined ones if not already in the database
-            Object.entries(PREDEFINED_TRANSPORTERS).forEach(([name, tid]) => {
-                if (!allTransporters.find(t => t.name === name)) {
-                    allTransporters.push({ id: `pre-${name}`, name, transporterId: tid });
-                }
-            });
-
-            setTransporters(allTransporters);
-        } catch (error) {
-            console.error("Failed to fetch transporters", error);
-        }
+        // RESTRICTED: Only Blue Dart and Safe Express allowed
+        const ALLOWED_TRANSPORTERS = [
+            { id: "bd", name: "Blue Dart", transporterId: "27AAACB0446L1ZS" },
+            { id: "se", name: "Safe Express", transporterId: "27AAECS4363H2Z7" }
+        ];
+        setTransporters(ALLOWED_TRANSPORTERS);
     };
 
     useEffect(() => {
@@ -794,7 +821,7 @@ export default function RepairedPage() {
                             <Col span={6}><Form.Item name="modeOfShipment" label="Mode"><Select><Select.Option value="ROAD">ROAD</Select.Option><Select.Option value="AIR">AIR</Select.Option></Select></Form.Item></Col>
                         </Row>
                         <Row gutter={16}>
-                            <Col span={12}><Form.Item name="courierName" label="Courier Name" rules={[{ required: true, message: 'Required' }]}><Select mode="tags" onChange={(val) => { const v = Array.isArray(val) ? val[val.length - 1] : val; const t = transporters.find(x => x.name === v); if (t) dcForm.setFieldValue('transporterId', t.transporterId); }}>{transporters.map(t => <Select.Option key={t.id} value={t.name}>{t.name}</Select.Option>)}</Select></Form.Item></Col>
+                            <Col span={12}><Form.Item name="courierName" label="Courier Name" rules={[{ required: true, message: 'Required' }]}><Select style={{ width: "100%" }} placeholder="Select" onChange={(val) => { const t = transporters.find(x => x.name === val); if (t) dcForm.setFieldValue('transporterId', t.transporterId); }}>{transporters.map(t => <Select.Option key={t.id} value={t.name}>{t.name}</Select.Option>)}</Select></Form.Item></Col>
                             <Col span={12}><Form.Item name="transporterId" label="Transporter ID"><Input /></Form.Item></Col>
                         </Row>
                         <Divider>Items</Divider>

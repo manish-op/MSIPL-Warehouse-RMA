@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import {
     Typography,
     Tag,
@@ -46,6 +47,7 @@ const { Panel } = Collapse;
 export default function AssignedPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
+
     const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
     const [statusModalVisible, setStatusModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -53,7 +55,30 @@ export default function AssignedPage() {
     const [remarks, setRemarks] = useState("");
     const [issueFixed, setIssueFixed] = useState("");
     const [updating, setUpdating] = useState(false);
+    const [activeKeys, setActiveKeys] = useState([]);
+    const location = useLocation();
 
+    useEffect(() => {
+        if (location.state?.highlightRma) {
+            setActiveKeys((prev) => [...new Set([...prev, location.state.highlightRma])]);
+            
+            if (location.state?.highlightItemId && items.length > 0) {
+                setTimeout(() => {
+                    const element = document.getElementById(`item-card-${location.state.highlightItemId}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.style.border = '2px solid #1890ff';
+                        element.style.transition = 'all 0.3s';
+                        setTimeout(() => { 
+                            element.style.border = ''; 
+                            element.style.transition = '';
+                        }, 3000);
+                    }
+                }, 800);
+            }
+        }
+    }, [location.state, items]);
+    
     // Status options from backend
     const [repairStatuses, setRepairStatuses] = useState([]);
 
@@ -315,7 +340,8 @@ export default function AssignedPage() {
                     ) : (
                         <Collapse
                             className="rma-collapse"
-                            defaultActiveKey={[]}
+                            activeKey={activeKeys}
+                            onChange={setActiveKeys}
                             expandIconPosition="end"
                             ghost
                         >
@@ -383,7 +409,7 @@ export default function AssignedPage() {
                                         {/* MODERN CARD GRID */}
                                         <div className="rma-items-grid">
                                             {rmaItems.map((item) => (
-                                                <div key={item.id} className="rma-item-card-modern">
+                                                <div key={item.id} id={`item-card-${item.id}`} className="rma-item-card-modern">
 
                                                     {/* Header Strip */}
                                                     <div className="item-header">
@@ -451,6 +477,7 @@ export default function AssignedPage() {
                                                 </div>
                                             ))}
                                         </div>
+
                                     </Panel>
                                 );
                             })}

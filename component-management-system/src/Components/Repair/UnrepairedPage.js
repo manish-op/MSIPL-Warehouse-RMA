@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
 import {
     Typography,
@@ -44,7 +45,33 @@ const { Panel } = Collapse;
 export default function UnrepairedPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [activeKeys, setActiveKeys] = useState([]); // Persistent collapse state
     const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.highlightRma) {
+            setActiveKeys((prev) => [...new Set([...prev, location.state.highlightRma])]);
+
+            // Scroll to specific item if ID provided
+            if (location.state?.highlightItemId && items.length > 0) {
+                setTimeout(() => {
+                    const element = document.getElementById(`item-card-${location.state.highlightItemId}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.style.border = '2px solid #1890ff';
+                        element.style.boxShadow = '0 0 10px rgba(24, 144, 255, 0.5)';
+                        element.style.transition = 'all 0.3s';
+                        setTimeout(() => {
+                             element.style.border = '';
+                             element.style.boxShadow = '';
+                             element.style.transition = '';
+                        }, 3000);
+                    }
+                }, 800); // Delay to ensure collapse animation finishes and content renders
+            }
+        }
+    }, [location.state, items]);
 
     // --- Assign Modal State ---
     const [assignModalVisible, setAssignModalVisible] = useState(false);
@@ -90,16 +117,12 @@ export default function UnrepairedPage() {
 
     // --- Load Data ---
     const fetchTransporters = async () => {
-        try {
-            const result = await RmaApi.getAllTransporters();
-            if (result.success && Array.isArray(result.data)) {
-                setTransporters(result.data);
-            } else {
-                console.error("Failed to fetch transporters:", result.error);
-            }
-        } catch (error) {
-            console.error("Error fetching transporters:", error);
-        }
+        // RESTRICTED: Only Blue Dart and Safe Express allowed
+        const ALLOWED_TRANSPORTERS = [
+            { id: "bd", name: "Blue Dart", transporterId: "27AAACB0446L1ZS" },
+            { id: "se", name: "Safe Express", transporterId: "27AAECS4363H2Z7" }
+        ];
+        setTransporters(ALLOWED_TRANSPORTERS);
     };
 
     const loadItems = async () => {
@@ -628,7 +651,8 @@ export default function UnrepairedPage() {
                     ) : (
                         <Collapse
                             className="rma-collapse"
-                            defaultActiveKey={[]}
+                            activeKey={activeKeys}
+                            onChange={setActiveKeys}
                             expandIconPosition="end"
                             ghost
                         >
@@ -826,7 +850,7 @@ export default function UnrepairedPage() {
                                     >
                                         <div className="rma-items-grid">
                                             {rmaItems.map((item) => (
-                                                <div key={item.id} className="rma-item-card-modern">
+                                                <div key={item.id} id={`item-card-${item.id}`} className="rma-item-card-modern">
                                                     <div className="item-header">
                                                         <span className="item-product">{item.product || "Unknown Product"}</span>
                                                         {!item.itemRmaNo ? (
@@ -979,11 +1003,10 @@ export default function UnrepairedPage() {
                                     <Form.Item name="dcNo" label="DC Number" rules={[{ required: true }]}><Input placeholder="DC Number" /></Form.Item>
                                     <Form.Item name="transporterName" label="Transporter">
                                         <Select
-                                            mode="tags"
+                                            style={{ width: "100%" }}
+                                            placeholder="Select"
                                             onChange={(val) => {
-                                                const v = Array.isArray(val) ? val[val.length - 1] : val;
-                                                const t = transporters.find(x => x.name === v);
-                                                setIsNewTransporter(!t);
+                                                const t = transporters.find(x => x.name === val);
                                                 if (t) dcForm.setFieldValue('transporterId', t.transporterId);
                                             }}
                                         >

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Row, Col, Card, Statistic, Spin, message, Modal,
   Table, Select, Tag, Button, Avatar, Tooltip as AntTooltip, Input, Progress, Typography
@@ -36,6 +37,7 @@ const PIE_COLORS = ['#52c41a', '#fa8c16', '#f5222d']; // Green, Orange, Red
 function RmaDashboard() {
   const { theme } = useContext(ThemeContext);
   const isDarkMode = theme === "dark";
+  const navigate = useNavigate();
 
   // --- State ---
   const [stats, setStats] = useState(null);
@@ -255,11 +257,61 @@ function RmaDashboard() {
     },
   ];
 
+  // --- Navigation Logic ---
+  const handleRequestClick = (record) => {
+    const items = record.items || [];
+    let targetPath = '/unrepaired'; // Default fallback
+
+    const normalize = (s) => (s || '').toUpperCase();
+
+    // Check conditions based on items
+    const hasDepot = items.some(i => i.repairType === 'Depot Repair' || i.repairType === 'DEPOT');
+    
+    // Status Checks
+    const hasUnassigned = items.some(i => {
+       const s = normalize(i.repairStatus);
+       return s === 'UNASSIGNED' || s === '';
+    });
+    
+    const hasAssigned = items.some(i => {
+       const s = normalize(i.repairStatus);
+       return ['ASSIGNED', 'REPAIRING'].includes(s);
+    });
+    
+    const hasBER = items.some(i => {
+       const s = normalize(i.repairStatus);
+       return ['BER', 'CANT_BE_REPAIRED', 'BER_AT_DEPOT', 'REPLACED'].includes(s);
+    });
+
+    const hasRepaired = items.some(i => {
+        const s = normalize(i.repairStatus);
+        return ['REPAIRED', 'DISPATCHED', 'DELIVERED', 'CLOSED', 'DISPATCHED_TO_CUSTOMER'].includes(s);
+    });
+
+    // Priority Logic (Earliest action required moves to top)
+    if (hasDepot) targetPath = '/depot-dispatch';
+    else if (hasUnassigned) targetPath = '/unrepaired';
+    else if (hasAssigned) targetPath = '/assigned';
+    else if (hasBER) targetPath = '/cant-be-repaired';
+    else if (hasRepaired) targetPath = '/repaired';
+
+    navigate(targetPath, { state: { highlightRma: record.requestNumber } });
+  };
+
   // --- Table Columns ---
   const requestColumns = [
-    { title: "Request No", dataIndex: "requestNumber", key: "requestNumber" },
+    { 
+      title: "Request No", 
+      dataIndex: "requestNumber", 
+      key: "requestNumber",
+      render: (text, record) => (
+        <a onClick={() => handleRequestClick(record)} style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
+          {text}
+        </a>
+      )
+    },
     { title: "Company", dataIndex: "companyName", key: "companyName" },
-    { title: "Date  & Time", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
+    { title: "Date & Time", dataIndex: "createdDate", key: "createdDate", render: (date) => new Date(date).toLocaleString() },
     {
       title: "Items", dataIndex: "itemsCount", key: "itemsCount", align: "center", render: (val, record) =>
         typeof val === "number"
@@ -617,6 +669,7 @@ function RmaDashboard() {
               <span style={{ marginRight: 8 }}>Filter by Date:</span>
               <Select defaultValue="all" value={timeFilter} onChange={setTimeFilter} style={{ width: 120 }}>
                 <Option value="all">All Time</Option>
+                <Option value="today">Today</Option>
                 <Option value="year">Last Year</Option>
                 <Option value="month">Last Month</Option>
                 <Option value="week">Last Week</Option>
@@ -632,6 +685,79 @@ function RmaDashboard() {
             pagination={{ pageSize: 8 }}
             scroll={{ x: 'max-content' }}
             size="small"
+            expandable={
+              modalType === 'requests' ? {
+                expandedRowRender: (record) => {
+                  const items = record.items || [];
+                  const subColumns = [
+                    { title: "Product", dataIndex: "product", key: "product" },
+                    { title: "Serial No", dataIndex: "serialNo", key: "serialNo" },
+                    {
+                      title: "Status",
+                      dataIndex: "repairStatus",
+                      key: "repairStatus",
+                      render: (status) => {
+                        let color = "default";
+                        const s = (status || "").toUpperCase();
+                        if (
+                          ["REPAIRED", "REPLACED", "REPAIRED_AT_DEPOT", "DELIVERED", "DELIVERED_TO_CUSTOMER", "CLOSED"].includes(s)
+                        )
+                          color = "green";
+                        else if (s === "UNASSIGNED" || !status) color = "orange";
+                        else if (s === "ASSIGNED") color = "blue";
+                        else if (s === "REPAIRING") color = "geekblue";
+                        else if (
+                          ["DISPATCHED", "DISPATCHED_TO_CUSTOMER", "DISPATCHED_TO_DEPOT"].includes(s)
+                        )
+                          color = "cyan";
+                        else if (["BER", "BER_AT_DEPOT", "CANT_BE_REPAIRED"].includes(s))
+                          color = "red";
+                        else if (
+                          ["AT_DEPOT_REPAIRED", "RECEIVED_AT_DEPOT", "RECEIVED_AT_GURGAON"].includes(s)
+                        )
+                          color = "purple";
+                        return <Tag color={color}>{status || "UNASSIGNED"}</Tag>;
+                      },
+                    },
+                    {
+                      title: "Action",
+                      key: "action",
+                      render: (_, item) => (
+                        <Button
+                          size="small"
+                          type="link"
+                          onClick={() => {
+                            // Single item navigation using same logic but specific to this item
+                            const normalize = (s) => (s || "").toUpperCase();
+                            const s = normalize(item.repairStatus);
+                            let targetPath = "/unrepaired";
+                            
+                            const isDepot = item.repairType === 'Depot Repair' || item.repairType === 'DEPOT';
+
+                            if (isDepot) targetPath = "/depot-dispatch";
+                            else if (s === "UNASSIGNED" || s === "") targetPath = "/unrepaired";
+                            else if (['ASSIGNED', 'REPAIRING'].includes(s)) targetPath = "/assigned";
+                            else if (['BER', 'CANT_BE_REPAIRED', 'BER_AT_DEPOT', 'REPLACED'].includes(s)) targetPath = "/cant-be-repaired";
+                            else if (['REPAIRED', 'DISPATCHED', 'DELIVERED', 'CLOSED', 'DISPATCHED_TO_CUSTOMER', 'REPAIRED_AT_DEPOT', 'RECEIVED_AT_DEPOT', 'RECEIVED_AT_GURGAON', 'DISPATCHED_TO_DEPOT'].includes(s)) targetPath = "/repaired";
+                            
+                            navigate(targetPath, { 
+                              state: { 
+                                highlightRma: record.requestNumber,
+                                highlightItemId: item.id 
+                              } 
+                            });
+                          }}
+                        >
+                          Go to Item
+                        </Button>
+                      ),
+                    },
+                  ];
+                  return <Table columns={subColumns} dataSource={items} pagination={false} size="small" rowKey="id" />;
+                },
+                rowExpandable: (record) => record.items && record.items.length > 0,
+              } : undefined
+            }
           />
         </Modal>
 

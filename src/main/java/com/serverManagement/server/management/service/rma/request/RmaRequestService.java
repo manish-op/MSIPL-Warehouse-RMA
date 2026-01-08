@@ -166,8 +166,6 @@ public class RmaRequestService {
         rmaRequestEntity.setUpdatedDate(now);
 
         // Generate unique request number (auto-generated when request is submitted)
-        String requestNumber = generateRmaNumber(); // REQ-YYYYMMDD-HHMMSS
-        rmaRequestEntity.setRequestNumber(requestNumber);
 
         // RMA number will be set later by service team after approval
         // Do not auto-generate RMA number for items
@@ -281,8 +279,13 @@ public class RmaRequestService {
         // Set items to request entity
         rmaRequestEntity.setItems(rmaItemEntities);
 
-        // 6. Save to Database (Cascade will save items too)
+        // 6. Save to Database to generate ID
         RmaRequestEntity savedEntity = rmaRequestDAO.save(rmaRequestEntity);
+
+        // 6a. Update request number with ID (RMA-1, RMA-2, etc.)
+        String requestNumber = "RMA-" + savedEntity.getId();
+        savedEntity.setRequestNumber(requestNumber);
+        rmaRequestDAO.save(savedEntity);
 
         // Audit Log: Record creation of items
         String loggedInUserName = adminUserEntity.getName();
@@ -290,7 +293,7 @@ public class RmaRequestService {
             for (RmaItemEntity item : savedEntity.getItems()) {
                 RmaAuditLogEntity auditLog = new RmaAuditLogEntity();
                 auditLog.setRmaItemId(item.getId());
-                auditLog.setRmaNo(requestNumber); // Use request number as RMA No initially
+                auditLog.setRmaNo(requestNumber); // Use the new ID-based number
                 auditLog.setAction("CREATED");
                 auditLog.setOldValue("None");
                 auditLog.setNewValue("Created via RMA Form");
@@ -305,28 +308,12 @@ public class RmaRequestService {
         // 7. Create Response
         RmaResponse response = new RmaResponse();
         response.setRmaRequestId(savedEntity.getId());
-        response.setRmaNo(requestNumber); // Return the request number (not item RMA number)
+        response.setRmaNo(requestNumber);
         response.setMessage("RMA Request submitted successfully");
         response.setTimestamp(now);
         response.setItems(itemResponses);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    /**
-     * Generate unique RMA number
-     * Format: RMA-DDMMYYYY-HHMMSS
-     */
-    private String generateRmaNumber() {
-        ZonedDateTime now = ZonedDateTime.now();
-        String timestamp = String.format("%02d%02d%04d-%02d%02d%02d",
-                now.getDayOfMonth(),
-                now.getMonthValue(),
-                now.getYear(),
-                now.getHour(),
-                now.getMinute(),
-                now.getSecond());
-        return String.format("RMA-%s", timestamp);
     }
 
     /**
@@ -366,6 +353,9 @@ public class RmaRequestService {
                 threshold = now.minusMonths(1);
             } else if (timeFilter.equalsIgnoreCase("year")) {
                 threshold = now.minusYears(1);
+            } else if (timeFilter.equalsIgnoreCase("today")) {
+                // Filter for today: from 00:00:00 today
+                threshold = now.toLocalDate().atStartOfDay(java.time.ZoneId.systemDefault());
             }
 
             final ZonedDateTime finalThreshold = threshold;

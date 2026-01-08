@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
     Typography,
     Tag,
@@ -46,6 +47,29 @@ export default function CantBeRepairedPage() {
     const [activeTab, setActiveTab] = useState("1");
     const [loading, setLoading] = useState(false);
     const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
+    const [activeKeys, setActiveKeys] = useState([]); // Persistent collapse state
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.highlightRma) {
+            setActiveKeys((prev) => [...new Set([...prev, location.state.highlightRma])]);
+            
+            if (location.state?.highlightItemId && (pendingItems.length > 0 || replacedItems.length > 0)) {
+                setTimeout(() => {
+                    const element = document.getElementById(`item-card-${location.state.highlightItemId}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.style.border = '2px solid #ff4d4f'; // Red for BER
+                        element.style.transition = 'all 0.3s';
+                        setTimeout(() => { 
+                            element.style.border = ''; 
+                            element.style.transition = '';
+                        }, 3000);
+                    }
+                }, 800);
+            }
+        }
+    }, [location.state, pendingItems, replacedItems]);
 
     // --- NEW STATE FOR POPUPS ---
     const [isReplaceModalVisible, setIsReplaceModalVisible] = useState(false);
@@ -275,7 +299,8 @@ export default function CantBeRepairedPage() {
         return (
             <Collapse
                 className="rma-collapse"
-                defaultActiveKey={[]}
+                activeKey={activeKeys}
+                onChange={setActiveKeys}
                 expandIconPosition="end"
                 ghost
             >
@@ -334,7 +359,7 @@ export default function CantBeRepairedPage() {
                         >
                             <div className="rma-items-grid">
                                 {rmaItems.map((item) => (
-                                    <div key={item.id} className="rma-item-card-modern">
+                                    <div key={item.id} id={`item-card-${item.id}`} className="rma-item-card-ber">
                                         <div className="item-header">
                                             <span className="item-product">{item.product || "Product"}</span>
                                             {isHistory ? (
