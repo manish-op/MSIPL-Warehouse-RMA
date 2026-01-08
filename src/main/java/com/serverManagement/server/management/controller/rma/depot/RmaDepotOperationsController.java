@@ -65,7 +65,8 @@ public class RmaDepotOperationsController {
         }
 
         try {
-            rmaDepotService.markAsRepaired(req.getItemIds(), req.getRepairStatus(), loggedInUserEmail, loggedInUserName,
+            rmaDepotService.markAsRepaired(req.getItemIds(), req.getRepairStatus(), req.getRemarks(),
+                    req.getIssueFixed(), loggedInUserEmail, loggedInUserName,
                     getClientIpAddress(request));
             return ResponseEntity.ok("Items marked as "
                     + (req.getRepairStatus() != null ? req.getRepairStatus() : "Repaired") + " at Depot");

@@ -173,6 +173,11 @@ public class RmaDepotService {
             item.setDepotStage("AT_DEPOT_RECEIVED");
             item.setRepairStatus("RECEIVED_AT_DEPOT");
 
+            // Assign to the user receiving it (effectively the technician at depot)
+            item.setAssignedToEmail(userEmail);
+            item.setAssignedToName(userName);
+            item.setAssignedDate(ZonedDateTime.now());
+
             createAuditLog(item, "DEPOT_STATUS_CHANGED", "Stage: " + (oldStage != null ? oldStage : "UNKNOWN"),
                     "Stage: AT_DEPOT_RECEIVED", userEmail, userName, ipAddress,
                     "Item marked as received at Bangalore depot");
@@ -181,8 +186,8 @@ public class RmaDepotService {
     }
 
     @Transactional
-    public void markAsRepaired(List<Long> itemIds, String repairStatus, String userEmail, String userName,
-            String ipAddress) {
+    public void markAsRepaired(List<Long> itemIds, String repairStatus, String remarks, String issueFixed,
+            String userEmail, String userName, String ipAddress) {
         if (itemIds == null || itemIds.isEmpty())
             throw new IllegalArgumentException("No items provided");
 
@@ -204,9 +209,16 @@ public class RmaDepotService {
             }
             item.setRepairStatus(status + "_AT_DEPOT");
 
+            // Save repair details
+            item.setRepairRemarks(remarks);
+            item.setIssueFixed(issueFixed);
+            item.setRepairedByEmail(userEmail);
+            item.setRepairedByName(userName);
+            item.setRepairedDate(ZonedDateTime.now());
+
             createAuditLog(item, "DEPOT_STATUS_CHANGED", "Stage: " + (oldStage != null ? oldStage : "UNKNOWN"),
                     "Stage: AT_DEPOT_REPAIRED (" + status + ")", userEmail, userName, ipAddress,
-                    "Item marked as " + status + " at Depot");
+                    "Item marked as " + status + " at Depot. Issues: " + (issueFixed != null ? issueFixed : "N/A"));
         }
         rmaItemDAO.saveAll(items);
     }

@@ -137,6 +137,13 @@ export default function DepotDispatchPage() {
   const [ggnProofRemarks, setGgnProofRemarks] = useState("");
   const [ggnSubmitting, setGgnSubmitting] = useState(false);
 
+  // Status Update Modal State
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
+  const [issueFixed, setIssueFixed] = useState("");
+  const [remarks, setRemarks] = useState("");
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
   // Dispatch logic flags
   const [isReturnDispatch, setIsReturnDispatch] = useState(false);
   const [isCustomerDispatch, setIsCustomerDispatch] = useState(false);
@@ -1173,6 +1180,12 @@ export default function DepotDispatchPage() {
                                       <div className="fault-box">
                                         <span className="label">Fault Description</span>
                                         <p className="fault-desc" style={{ marginBottom: '4px' }}>{item.faultDescription}</p>
+                                        {item.issueFixed && (
+                                          <>
+                                            <span className="label">Issue Fixed</span>
+                                            <p className="fault-desc" style={{ marginBottom: '4px', color: 'var(--status-success)' }}>{item.issueFixed}</p>
+                                          </>
+                                        )}
                                         {item.repairRemarks && (
                                           <>
                                             <span className="label">Repair Note</span>
@@ -1194,28 +1207,22 @@ export default function DepotDispatchPage() {
                                           </Button>
                                         )}
 
-                                        {/* Status Dropdown at Depot */}
+                                        {/* Status Button at Depot (Replaces simple Dropdown) */}
                                         {item.depotStage === "AT_DEPOT_RECEIVED" && (
-                                          <Dropdown
-                                            menu={{
-                                              items: [
-                                                { label: "Repaired", key: "REPAIRED" },
-                                                { label: "Replaced", key: "REPLACED" },
-                                                { label: "BER", key: "BER" },
-                                                { label: "Unrepaired", key: "UNREPAIRED" },
-                                              ],
-                                              onClick: async ({ key }) => {
-                                                const payload = { itemIds: [item.id], repairStatus: key };
-                                                const res = await RmaApi.markDepotRepaired(payload);
-                                                if (res.success) { message.success("Status Updated"); loadItems(); }
-                                                else { message.error(res.error || "Failed"); }
-                                              }
+                                          <Button
+                                            size="small"
+                                            type="primary"
+                                            icon={<EditOutlined />}
+                                            onClick={() => {
+                                              setSelectedItem(item);
+                                              setNewStatus(item.repairStatus?.replace("_AT_DEPOT", "") || "REPAIRED"); // Clean status
+                                              setIssueFixed(item.issueFixed || "");
+                                              setRemarks(item.repairRemarks || "");
+                                              setStatusModalVisible(true);
                                             }}
                                           >
-                                            <Button size="small" type="primary">
-                                              Update Status <DownOutlined />
-                                            </Button>
-                                          </Dropdown>
+                                            Update Status
+                                          </Button>
                                         )}
 
                                         {/* Dispatch Buttons (Depot -> GGN/Customer) */}
@@ -1874,6 +1881,78 @@ export default function DepotDispatchPage() {
           </div>
         </Modal>
       </div>
+
+      {/* Status Update Modal (New- Like AssignedPage) */}
+      <Modal
+        title="Update Repair Status"
+        open={statusModalVisible}
+        onCancel={() => setStatusModalVisible(false)}
+        confirmLoading={updatingStatus}
+        onOk={async () => {
+          if (!newStatus) { message.warning("Status is required"); return; }
+          // Only enforce issueFixed for REPAIRED/REPLACED usually, but user asked for robust checks.
+          // We'll enforce if status is REPAIRED or REPLACED
+          if (['REPAIRED', 'REPLACED'].includes(newStatus) && !issueFixed.trim()) {
+            message.warning("Please describe the issue fixed");
+            return;
+          }
+
+          setUpdatingStatus(true);
+          const payload = {
+            itemIds: [selectedItem.id],
+            repairStatus: newStatus,
+            issueFixed: issueFixed,
+            remarks: remarks
+          };
+          const res = await RmaApi.markDepotRepaired(payload);
+          setUpdatingStatus(false);
+          if (res.success) {
+            message.success("Status Updated Successfully");
+            setStatusModalVisible(false);
+            loadItems();
+          } else {
+            message.error(res.error || "Failed to update status");
+          }
+        }}
+      >
+        <Space direction="vertical" style={{ width: "100%" }} size="middle">
+          <div>
+            <Text strong>Status</Text>
+            <Select
+              style={{ width: "100%", marginTop: 4 }}
+              value={newStatus}
+              onChange={(val) => setNewStatus(val)}
+              options={[
+                { label: "Repaired", value: "REPAIRED" },
+                { label: "Replaced", value: "REPLACED" },
+                { label: "BER", value: "BER" },
+                { label: "Unrepaired", value: "UNREPAIRED" },
+              ]}
+            />
+          </div>
+          <div>
+            <Text strong>Issue Fixed / Action Taken</Text>
+            <Input.TextArea
+              rows={3}
+              value={issueFixed}
+              onChange={(e) => setIssueFixed(e.target.value)}
+              placeholder="Describe what was fixed or action taken"
+              style={{ marginTop: 4 }}
+            />
+          </div>
+          <div>
+            <Text strong>Remarks (Optional)</Text>
+            <Input.TextArea
+              rows={2}
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              placeholder="Internal remarks..."
+              style={{ marginTop: 4 }}
+            />
+          </div>
+        </Space>
+      </Modal>
+
     </RmaLayout >
   );
 }

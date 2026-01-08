@@ -639,6 +639,28 @@ export default function UnrepairedPage() {
                             ]}
                         />
                     </div>
+
+                    {/* Stats */}
+                    <Row gutter={16} className="stats-row">
+                        <Col xs={12} sm={8}>
+                            <div className="stat-box">
+                                <FileTextOutlined />
+                                <div>
+                                    <div className="stat-value">{totalRmaRequests}</div>
+                                    <div className="stat-label">Total Requests</div>
+                                </div>
+                            </div>
+                        </Col>
+                        <Col xs={12} sm={8}>
+                            <div className="stat-box">
+                                <ToolOutlined />
+                                <div>
+                                    <div className="stat-value">{totalItems}</div>
+                                    <div className="stat-label">Pending Items</div>
+                                </div>
+                            </div>
+                        </Col>
+                    </Row>
                 </div>
 
                 {/* Content */}

@@ -40,4 +40,9 @@ public interface AdminUserDAO extends JpaRepository<AdminUserEntity, Long> {
     // Count online users (active within last 5 minutes)
     @Query("SELECT COUNT(u) FROM AdminUserEntity u WHERE u.lastActiveAt IS NOT NULL AND u.lastActiveAt > :cutoffTime")
     Long countOnlineUsers(@Param("cutoffTime") java.time.ZonedDateTime cutoffTime);
+
+    // Batch fetch users by email list (case-insensitive handling recommended in
+    // service layer or query)
+    @Query("SELECT u FROM AdminUserEntity u WHERE LOWER(u.email) IN :emails")
+    List<AdminUserEntity> findByEmailIn(@Param("emails") List<String> emails);
 }
