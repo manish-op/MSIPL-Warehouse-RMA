@@ -72,6 +72,16 @@ function RmaRequestForm() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [submittedFormData, setSubmittedFormData] = useState(null); // Store form data for Excel export
   const [repairType, setRepairType] = useState(null);
+  const [courierOptions, setCourierOptions] = useState([]);
+
+  useEffect(() => {
+    // Fetch unique courier companies
+    RmaApi.getAllCourierCompanies().then(res => {
+      if(res.success) {
+        setCourierOptions(res.data || []);
+      }
+    });
+  }, []);
   const [previewData, setPreviewData] = useState(null);
   const [conformVisible, setConfrimVisible] = useState(false);
   const [finalSubmitting, setFinalSubmitting] = useState(false);
@@ -367,9 +377,7 @@ function RmaRequestForm() {
     const isValid = await validateStep(currentStep);
     if (isValid) {
       if (currentStep === 2) {
-        if (!form.getFieldValue("signature")) {
-          form.setFieldsValue({ signature: form.getFieldValue("contactName") });
-        }
+         // Do not auto-fill signature
       }
       setCurrentStep(currentStep + 1);
     }
@@ -784,8 +792,8 @@ function RmaRequestForm() {
                     rules={[{ required: true, message: "Required" }]}
                   >
                     <Select placeholder="Select transport mode" size="large">
-                      <Option value="Air">Air</Option>
-                      <Option value="Road">Road</Option>
+                      <Option value="Air">By Air</Option>
+                      <Option value="Road">By Road</Option>
                     </Select>
                   </Form.Item>
                 </Col>
@@ -814,18 +822,18 @@ function RmaRequestForm() {
                         label="Courier Company Name"
                         name="courierCompanyName"
                         rules={[{
-                          required: getFieldValue("shippingMethod") === "Other Courier Service",
-                          message: "Required when using other courier",
+                          required: getFieldValue("shippingMethod") !== "Motorola Courier Service",
+                          message: "Required",
                         }]}
                       >
-                        <Select
-                          placeholder="Select courier company"
-                          size="large"
-                          disabled={getFieldValue("shippingMethod") !== "Other Courier Service"}
-                        >
-                          <Option value="Blue Dart">Blue Dart</Option>
-                          <Option value="Safe Express">Safe Express</Option>
-                        </Select>
+                         <AutoComplete
+                            options={courierOptions.map(c => ({ value: c }))}
+                            placeholder="Select or type courier company"
+                            size="large"
+                            filterOption={(inputValue, option) =>
+                              option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                            }
+                        />
                       </Form.Item>
                     )}
                   </Form.Item>

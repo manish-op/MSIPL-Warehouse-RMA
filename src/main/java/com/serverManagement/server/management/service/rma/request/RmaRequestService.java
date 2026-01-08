@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.format.DateTimeFormatter;
@@ -537,6 +538,25 @@ public class RmaRequestService {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error fetching serial history: " + e.getMessage());
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getUniqueCourierCompanies() {
+        try {
+            List<String> companies = rmaRequestDAO.findDistinctCourierCompanyNames();
+            // Ensure Blue Dart and Safe Express are always in the list
+            if (!companies.contains("Blue Dart"))
+                companies.add("Blue Dart");
+            if (!companies.contains("Safe Express"))
+                companies.add("Safe Express");
+            // Remove duplicates and sort
+            List<String> sortedCompanies = companies.stream().distinct().sorted().collect(Collectors.toList());
+            return ResponseEntity.ok(sortedCompanies);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch courier companies");
         }
     }
 

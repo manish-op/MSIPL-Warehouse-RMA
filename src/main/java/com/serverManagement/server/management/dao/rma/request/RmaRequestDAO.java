@@ -25,4 +25,8 @@ public interface RmaRequestDAO extends JpaRepository<RmaRequestEntity, Long> {
 
     // Find requests by created date range
     List<RmaRequestEntity> findByCreatedDateBetween(ZonedDateTime startDate, ZonedDateTime endDate);
+
+    // Get distinct courier company names
+    @Query("SELECT DISTINCT r.courierCompanyName FROM RmaRequestEntity r WHERE r.courierCompanyName IS NOT NULL AND r.courierCompanyName <> ''")
+    List<String> findDistinctCourierCompanyNames();
 }

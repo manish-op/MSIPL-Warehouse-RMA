@@ -107,4 +107,14 @@ public class RmaRequestController {
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/courier-companies")
+    public ResponseEntity<?> getCourierCompanies() {
+        try {
+            return rmaRequestService.getUniqueCourierCompanies();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
+    }
 }

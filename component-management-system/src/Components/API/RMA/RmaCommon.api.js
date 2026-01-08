@@ -20,6 +20,8 @@ export const RmaCommonApi = {
 
     getAllTransporters: async () => apiGet("/transporters"),
 
+    getAllCourierCompanies: async () => apiGet("/rma/courier-companies"),
+
     createTransporter: async (payload) => {
         // The original implementation returned { success: true } on success without data/message wrapper in one case
 
