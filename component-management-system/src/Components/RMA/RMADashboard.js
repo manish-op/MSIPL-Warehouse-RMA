@@ -266,26 +266,26 @@ function RmaDashboard() {
 
     // Check conditions based on items
     const hasDepot = items.some(i => i.repairType === 'Depot Repair' || i.repairType === 'DEPOT');
-    
+
     // Status Checks
     const hasUnassigned = items.some(i => {
-       const s = normalize(i.repairStatus);
-       return s === 'UNASSIGNED' || s === '';
+      const s = normalize(i.repairStatus);
+      return s === 'UNASSIGNED' || s === '';
     });
-    
+
     const hasAssigned = items.some(i => {
-       const s = normalize(i.repairStatus);
-       return ['ASSIGNED', 'REPAIRING'].includes(s);
+      const s = normalize(i.repairStatus);
+      return ['ASSIGNED', 'REPAIRING'].includes(s);
     });
-    
+
     const hasBER = items.some(i => {
-       const s = normalize(i.repairStatus);
-       return ['BER', 'CANT_BE_REPAIRED', 'BER_AT_DEPOT', 'REPLACED'].includes(s);
+      const s = normalize(i.repairStatus);
+      return ['BER', 'CANT_BE_REPAIRED', 'BER_AT_DEPOT', 'REPLACED'].includes(s);
     });
 
     const hasRepaired = items.some(i => {
-        const s = normalize(i.repairStatus);
-        return ['REPAIRED', 'DISPATCHED', 'DELIVERED', 'CLOSED', 'DISPATCHED_TO_CUSTOMER'].includes(s);
+      const s = normalize(i.repairStatus);
+      return ['REPAIRED', 'DISPATCHED', 'DELIVERED', 'CLOSED', 'DISPATCHED_TO_CUSTOMER'].includes(s);
     });
 
     // Priority Logic (Earliest action required moves to top)
@@ -300,9 +300,9 @@ function RmaDashboard() {
 
   // --- Table Columns ---
   const requestColumns = [
-    { 
-      title: "Request No", 
-      dataIndex: "requestNumber", 
+    {
+      title: "Request No",
+      dataIndex: "requestNumber",
       key: "requestNumber",
       render: (text, record) => (
         <a onClick={() => handleRequestClick(record)} style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
@@ -446,7 +446,7 @@ function RmaDashboard() {
           </div>
           <div className="dashboard-search-wrapper">
             <Search
-              placeholder="Search by Product, Serial No, or Model No"
+              placeholder="Search by Product, Serial, RMA, Model, or Request No"
               allowClear
               enterButton={<Button type="primary" icon={<SearchOutlined />}>Search</Button>}
               size="large"
@@ -731,7 +731,7 @@ function RmaDashboard() {
                             const normalize = (s) => (s || "").toUpperCase();
                             const s = normalize(item.repairStatus);
                             let targetPath = "/unrepaired";
-                            
+
                             const isDepot = item.repairType === 'Depot Repair' || item.repairType === 'DEPOT';
 
                             if (isDepot) targetPath = "/depot-dispatch";
@@ -739,12 +739,12 @@ function RmaDashboard() {
                             else if (['ASSIGNED', 'REPAIRING'].includes(s)) targetPath = "/assigned";
                             else if (['BER', 'CANT_BE_REPAIRED', 'BER_AT_DEPOT', 'REPLACED'].includes(s)) targetPath = "/cant-be-repaired";
                             else if (['REPAIRED', 'DISPATCHED', 'DELIVERED', 'CLOSED', 'DISPATCHED_TO_CUSTOMER', 'REPAIRED_AT_DEPOT', 'RECEIVED_AT_DEPOT', 'RECEIVED_AT_GURGAON', 'DISPATCHED_TO_DEPOT'].includes(s)) targetPath = "/repaired";
-                            
-                            navigate(targetPath, { 
-                              state: { 
+
+                            navigate(targetPath, {
+                              state: {
                                 highlightRma: record.requestNumber,
-                                highlightItemId: item.id 
-                              } 
+                                highlightItemId: item.id
+                              }
                             });
                           }}
                         >

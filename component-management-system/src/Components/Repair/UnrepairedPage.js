@@ -63,9 +63,9 @@ export default function UnrepairedPage() {
                         element.style.boxShadow = '0 0 10px rgba(24, 144, 255, 0.5)';
                         element.style.transition = 'all 0.3s';
                         setTimeout(() => {
-                             element.style.border = '';
-                             element.style.boxShadow = '';
-                             element.style.transition = '';
+                            element.style.border = '';
+                            element.style.boxShadow = '';
+                            element.style.transition = '';
                         }, 3000);
                     }
                 }, 800); // Delay to ensure collapse animation finishes and content renders
@@ -639,6 +639,76 @@ export default function UnrepairedPage() {
                             ]}
                         />
                     </div>
+                </div>
+
+                {/* Statistics Row */}
+                <div style={{ padding: '0 24px', marginBottom: '24px' }}>
+                    <Row gutter={[24, 24]}>
+                        <Col xs={24} sm={12}>
+                            <Card
+                                bordered={false}
+                                className="stat-card"
+                                style={{
+                                    background: 'linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%)',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 8px 20px rgba(91, 134, 229, 0.3)',
+                                    color: '#fff',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                                bodyStyle={{ padding: '24px' }}
+                            >
+                                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <Text style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '14px', fontWeight: 500 }}>Total Requests</Text>
+                                        <Title level={2} style={{ margin: '4px 0 0 0', color: '#fff', fontWeight: 700 }}>{totalRmaRequests}</Title>
+                                    </div>
+                                    <div style={{
+                                        background: 'rgba(255, 255, 255, 0.2)',
+                                        borderRadius: '50%',
+                                        padding: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
+                                        <FileTextOutlined style={{ fontSize: '28px', color: '#fff' }} />
+                                    </div>
+                                </div>
+                            </Card>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                            <Card
+                                bordered={false}
+                                className="stat-card"
+                                style={{
+                                    background: 'linear-gradient(135deg, #FF9966 0%, #FF5E62 100%)',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 8px 20px rgba(255, 94, 98, 0.3)',
+                                    color: '#fff',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                                bodyStyle={{ padding: '24px' }}
+                            >
+                                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <Text style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '14px', fontWeight: 500 }}>Pending Items</Text>
+                                        <Title level={2} style={{ margin: '4px 0 0 0', color: '#fff', fontWeight: 700 }}>{totalItems}</Title>
+                                    </div>
+                                    <div style={{
+                                        background: 'rgba(255, 255, 255, 0.2)',
+                                        borderRadius: '50%',
+                                        padding: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
+                                        <ToolOutlined style={{ fontSize: '28px', color: '#fff' }} />
+                                    </div>
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
                 </div>
 
                 {/* Content */}

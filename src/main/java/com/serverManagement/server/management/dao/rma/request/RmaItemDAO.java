@@ -109,8 +109,9 @@ public interface RmaItemDAO extends JpaRepository<RmaItemEntity, Long> {
     // first, case-insensitive)
     List<RmaItemEntity> findBySerialNoIgnoreCaseOrderByIdDesc(String serialNo);
 
-    // Search items by Product or Serial Number (case-insensitive)
-    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.product) LIKE LOWER(:query) OR LOWER(r.serialNo) LIKE LOWER(:query)")
+    // Search items by Product, Serial Number, RMA Number, Model Number or RMA
+    // Request Number (case-insensitive)
+    @Query("SELECT r FROM RmaItemEntity r WHERE LOWER(r.product) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(r.serialNo) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(r.rmaNo) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(r.model) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(r.rmaRequest.requestNumber) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<RmaItemEntity> searchItems(@Param("query") String query);
 
 }

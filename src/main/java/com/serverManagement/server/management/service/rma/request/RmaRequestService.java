@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.format.DateTimeFormatter;
@@ -280,6 +279,8 @@ public class RmaRequestService {
         rmaRequestEntity.setItems(rmaItemEntities);
 
         // 6. Save to Database to generate ID
+        // Set temporary request number to satisfy NOT NULL constraint
+        rmaRequestEntity.setRequestNumber("RMA-" + java.util.UUID.randomUUID().toString());
         RmaRequestEntity savedEntity = rmaRequestDAO.save(rmaRequestEntity);
 
         // 6a. Update request number with ID (RMA-1, RMA-2, etc.)
@@ -449,16 +450,8 @@ public class RmaRequestService {
                 return ResponseEntity.badRequest().body("Search query cannot be empty");
             }
 
-            // Fetch all items and filter in memory to avoid DB query issues
-            List<RmaItemEntity> allItems = rmaItemDAO.findAll();
-
-            String lowerQuery = query.toLowerCase().trim();
-
-            List<RmaItemEntity> filteredItems = allItems.stream()
-                    .filter(item -> (item.getProduct() != null && item.getProduct().toLowerCase().contains(lowerQuery))
-                            ||
-                            (item.getSerialNo() != null && item.getSerialNo().equalsIgnoreCase(lowerQuery)))
-                    .collect(Collectors.toList());
+            // Optimized database-level search
+            List<RmaItemEntity> filteredItems = rmaItemDAO.searchItems(query.trim());
 
             return ResponseEntity.ok(rmaModelMapper.convertToItemDTOList(filteredItems));
         } catch (Exception e) {
