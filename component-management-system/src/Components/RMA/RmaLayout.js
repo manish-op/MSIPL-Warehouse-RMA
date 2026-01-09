@@ -1,5 +1,5 @@
 // src/Components/RMA/RmaLayout.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Layout, Menu, Modal, Segmented } from "antd";
 import {
   DashboardOutlined,
@@ -17,6 +17,8 @@ import {
   CarOutlined,
   CloseCircleOutlined,
   BarChartOutlined,
+  UnorderedListOutlined,
+  PlusOutlined
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../Header/Header"; // Import Global Header
@@ -28,10 +30,11 @@ import GlobalFooter from "../Footer/Footer";
 const { Sider, Footer, Content } = Layout;
 const { confirm } = Modal;
 
-const RmaLayout = ({ children }) => {
+const RmaLayout = ({ children, noSidebar = false, sidebarType = 'rma' }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Module state
   const [currentModule, setCurrentModule] = useState(() => {
@@ -83,18 +86,46 @@ const RmaLayout = ({ children }) => {
     });
   };
 
-  const location = useLocation();
-  let selectedKey = "rma-dashboard";
-  if (location.pathname.includes("rma-requests")) selectedKey = "rma-request";
-  if (location.pathname.includes("unrepaired")) selectedKey = "unrepaired";
-  if (location.pathname.includes("assigned")) selectedKey = "assigned";
-  if (location.pathname.includes("repaired") && !location.pathname.includes("cant") && !location.pathname.includes("unrepaired")) selectedKey = "repaired";
-  if (location.pathname.includes("cant-be-repaired")) selectedKey = "cant-be-repaired";
-  if (location.pathname.includes("depot-dispatch")) selectedKey = "depot-dispatch";
-  if (location.pathname.includes("audit-trail")) selectedKey = "audit-trail";
-  if (location.pathname.includes("rma-reports")) selectedKey = "rma-reports";
+  // Determine active key based on path
+  const getSelectedKey = () => {
+    const path = location.pathname;
+    
+    // Customer SLA Keys
+    if (path.includes('/customer-sla/manage')) return 'sla-manage';
+    if (path.includes('/customer-sla/add')) return 'sla-add';
+    if (path.includes('/customer-sla')) return 'sla-dashboard';
+
+    // RMA Keys
+    if (path.includes("rma-requests")) return "rma-request";
+    if (path.includes("unrepaired")) return "unrepaired";
+    if (path.includes("assigned")) return "assigned";
+    if (path.includes("repaired") && !path.includes("cant") && !path.includes("unrepaired")) return "repaired";
+    if (path.includes("cant-be-repaired")) return "cant-be-repaired";
+    if (path.includes("depot-dispatch")) return "depot-dispatch";
+    if (path.includes("audit-trail")) return "audit-trail";
+    if (path.includes("rma-reports")) return "rma-reports";
+
+    return "rma-dashboard";
+  };
+
+  const [selectedKey, setSelectedKey] = useState(getSelectedKey());
+
+  useEffect(() => {
+    setSelectedKey(getSelectedKey());
+  }, [location.pathname]);
 
   const handleMenuClick = ({ key }) => {
+    if (key === "logout") {
+        showLogoutConfirm();
+        return;
+    }
+
+    // Customer SLA Navigation
+    if (key === "sla-dashboard") navigate("/customer-sla");
+    if (key === "sla-manage") navigate("/customer-sla/manage");
+    if (key === "sla-add") navigate("/customer-sla/add");
+
+    // RMA Navigation
     if (key === "rma-dashboard") navigate("/rma-dashboard");
     if (key === "rma-request") navigate("/rma-requests");
     if (key === "unrepaired") navigate("/unrepaired");
@@ -104,7 +135,6 @@ const RmaLayout = ({ children }) => {
     if (key === "depot-dispatch") navigate("/depot-dispatch");
     if (key === "audit-trail") navigate("/audit-trail");
     if (key === "rma-reports") navigate("/rma-reports");
-    if (key === "logout") showLogoutConfirm();
 
     // Auto-close sidebar on mobile after navigation
     if (isMobile) {
@@ -120,16 +150,40 @@ const RmaLayout = ({ children }) => {
     return "theme-blue"; // default for dashboard, unrepaired, assigned, rma-request
   };
 
+  // Menu Items Definition
+  const rmaMenuItems = [
+    { key: "rma-dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
+    { key: "rma-request", icon: <FileTextOutlined />, label: "RMA Request" },
+    { key: "unrepaired", icon: <ToolOutlined />, label: "Unrepaired" },
+    { key: "assigned", icon: <UserSwitchOutlined />, label: "Assigned" },
+    { key: "repaired", icon: <CheckCircleOutlined />, label: "Local Repaired" },
+    { key: "depot-dispatch", icon: <CarOutlined />, label: "Depot Dispatch" },
+    { key: "cant-be-repaired", icon: <WarningOutlined />, label: "Can't Be Repaired" },
+    { key: "rma-reports", icon: <BarChartOutlined />, label: "Reports" },
+    { key: "audit-trail", icon: <HistoryOutlined />, label: "Audit Trail" },
+    { key: "logout", icon: <LogoutOutlined />, label: "Logout", danger: true },
+  ];
+
+  const customerSlaMenuItems = [
+    { key: "sla-dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
+    { key: "sla-manage", icon: <UnorderedListOutlined />, label: "Manage All SLAs" },
+    { key: "sla-add", icon: <PlusOutlined />, label: "Add New SLA" },
+    { key: "logout", icon: <LogoutOutlined />, label: "Logout", danger: true },
+  ];
+
+  const menuItems = sidebarType === 'customerSla' ? customerSlaMenuItems : rmaMenuItems;
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {/* Global Header with Sidebar Toggle */}
       <Header
         onLogout={showLogoutConfirm}
-        onToggleSidebar={() => setCollapsed(!collapsed)}
+        onToggleSidebar={noSidebar ? undefined : () => setCollapsed(!collapsed)}
       />
 
       <Layout>
         {/* Sidebar */}
+        {!noSidebar && (
         <Sider
           width={220}
           collapsible
@@ -179,10 +233,9 @@ const RmaLayout = ({ children }) => {
           >
             {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           </div>
-          )
 
-          {/* Module Switcher */}
-          {!collapsed && (
+          {/* Module Switcher - Only show for default RMA */}
+          {!collapsed && sidebarType === 'rma' && (
             <div className="module-switcher-rma">
               <div className="module-switcher-label-rma">
                 <SwapOutlined style={{ marginRight: 6 }} />
@@ -200,67 +253,23 @@ const RmaLayout = ({ children }) => {
               />
             </div>
           )}
+          
+          {/* For Customer SLA Header */}
+          {!collapsed && sidebarType === 'customerSla' && (
+             <div style={{ padding: '16px', color: 'rgba(255,255,255,0.4)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '10px' }}>
+                Customer SLA
+             </div>
+          )}
 
           <Menu
             mode="inline"
             selectedKeys={[selectedKey]}
             theme="dark"
             onClick={handleMenuClick}
-            items={[
-              {
-                key: "rma-dashboard",
-                icon: <DashboardOutlined />,
-                label: "Dashboard",
-              },
-              {
-                key: "rma-request",
-                icon: <FileTextOutlined />,
-                label: "RMA Request",
-              },
-              {
-                key: "unrepaired",
-                icon: <ToolOutlined />,
-                label: "Unrepaired",
-              },
-              {
-                key: "assigned",
-                icon: <UserSwitchOutlined />,
-                label: "Assigned",
-              },
-              {
-                key: "repaired",
-                icon: <CheckCircleOutlined />,
-                label: "Local Repaired",
-              },
-              {
-                key: "depot-dispatch",
-                icon: <CarOutlined />,
-                label: "Depot Dispatch",
-              },
-              {
-                key: "cant-be-repaired",
-                icon: <WarningOutlined />,
-                label: "Can't Be Repaired",
-              },
-              {
-                key: "rma-reports",
-                icon: <BarChartOutlined />,
-                label: "Reports",
-              },
-              {
-                key: "audit-trail",
-                icon: <HistoryOutlined />,
-                label: "Audit Trail",
-              },
-              {
-                key: "logout",
-                icon: <LogoutOutlined />,
-                label: "Logout",
-                danger: true,
-              },
-            ]}
+            items={menuItems}
           />
         </Sider>
+        )}
 
         {/* Main content + footer */}
         <Layout>

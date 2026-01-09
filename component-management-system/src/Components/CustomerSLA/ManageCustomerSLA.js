@@ -4,6 +4,7 @@ import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Highlighter from 'react-highlight-words';
 import { CustomerSlaApi } from '../API/CustomerSla/CustomerSlaApi';
+import RmaLayout from "../RMA/RmaLayout";
 
 const ManageCustomerSLA = () => {
     const [data, setData] = useState([]);
@@ -137,7 +138,8 @@ const ManageCustomerSLA = () => {
     ];
 
     return (
-        <div style={{ padding: '24px' }}>
+        <RmaLayout sidebarType="customerSla">
+            <div style={{ padding: '24px' }}>
             <Card
                 title="Manage Customer SLA"
                 extra={
@@ -156,6 +158,7 @@ const ManageCustomerSLA = () => {
                 />
             </Card>
         </div>
+        </RmaLayout>
     );
 };
 

@@ -3,6 +3,7 @@ import { Form, Input, Button, DatePicker, Card, Row, Col, notification, Divider,
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { CustomerSlaApi } from '../API/CustomerSla/CustomerSlaApi';
+import RmaLayout from "../RMA/RmaLayout";
 
 const AddCustomerSLA = () => {
     const [form] = Form.useForm();
@@ -63,7 +64,8 @@ const AddCustomerSLA = () => {
     };
 
     return (
-        <div style={{ padding: '24px' }}>
+        <RmaLayout sidebarType="customerSla">
+            <div style={{ padding: '24px' }}>
             <div style={{ marginBottom: '16px' }}>
                 <Button type="link" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
                     Back
@@ -203,6 +205,7 @@ const AddCustomerSLA = () => {
                 </Form>
             </Card>
         </div>
+        </RmaLayout>
     );
 };
 

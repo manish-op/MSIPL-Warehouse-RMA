@@ -43,6 +43,7 @@ import ReportsPage from "./Components/RMA/ReportsPage.js";
 import FeedbackButton from "./Components/Feedback/FeedbackButton.js";
 import AddCustomerSLA from "./Components/CustomerSLA/AddCustomerSLA.js";
 import ManageCustomerSLA from "./Components/CustomerSLA/ManageCustomerSLA.js";
+import CustomerSlaDashboard from "./Components/CustomerSLA/CustomerSlaDashboard.js";
 
 // checking the branch changes
 
@@ -173,6 +174,7 @@ function App() {
             <Route path="/audit-trail" element={<AuditTrail />} />
             <Route path="/customer-sla/add" element={<AddCustomerSLA />} />
             <Route path="/customer-sla/manage" element={<ManageCustomerSLA />} />
+            <Route path="/customer-sla" element={<CustomerSlaDashboard />} />
           </Route>
         </Routes>
         <FeedbackButton />

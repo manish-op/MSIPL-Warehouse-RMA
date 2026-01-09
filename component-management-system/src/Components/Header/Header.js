@@ -48,17 +48,7 @@ function Header({ onToggleSidebar }) {
               items: [
                 {
                   key: 'customerSla',
-                  label: 'Customer Sla',
-                  children: [
-                    {
-                      key: 'addSla',
-                      label: <Link to="/customer-sla/add">Add New</Link>,
-                    },
-                    {
-                      key: 'manageSla',
-                      label: <Link to="/customer-sla/manage">Manage</Link>,
-                    },
-                  ],
+                  label: <Link to="/customer-sla">Customer SLA</Link>,
                 },
                 {
                   key: 'service',
