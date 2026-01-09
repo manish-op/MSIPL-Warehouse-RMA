@@ -41,6 +41,8 @@ import AuditTrail from "./Components/RMA/AuditTrail.js";
 import DepotDispatchPage from "./Components/RMA/DepotDispatchPage.js";
 import ReportsPage from "./Components/RMA/ReportsPage.js";
 import FeedbackButton from "./Components/Feedback/FeedbackButton.js";
+import AddCustomerSLA from "./Components/CustomerSLA/AddCustomerSLA.js";
+import ManageCustomerSLA from "./Components/CustomerSLA/ManageCustomerSLA.js";
 
 // checking the branch changes
 
@@ -169,6 +171,8 @@ function App() {
             <Route path="/depot-dispatch" element={<DepotDispatchPage />} />
             <Route path="/rma-reports" element={<ReportsPage />} />
             <Route path="/audit-trail" element={<AuditTrail />} />
+            <Route path="/customer-sla/add" element={<AddCustomerSLA />} />
+            <Route path="/customer-sla/manage" element={<ManageCustomerSLA />} />
           </Route>
         </Routes>
         <FeedbackButton />

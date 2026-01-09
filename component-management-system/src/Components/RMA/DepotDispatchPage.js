@@ -1463,9 +1463,9 @@ export default function DepotDispatchPage() {
                     placeholder="Select or Type"
                     onChange={handleTransporterChange}
                     options={transporters.map((t) => ({
-                        label: t.name,
-                        value: t.name,
-                      }))}
+                      label: t.name,
+                      value: t.name,
+                    }))}
                   />
                 </Form.Item>
               </Col>
