@@ -1,36 +1,316 @@
-/* src/components/EmployeeList/EmployeeList.css */
+/* ============================================
+   Employee List Page - Modern Design
+   ============================================ */
 
-/*
- * This is the main wrapper for the entire page.
- * It uses the --background-color variable from your App.css
- * to ensure the page background matches the theme.
- */
-.employee-list-wrapper {
-  width: 100%;
+/* --- Page Container --- */
+.employee-list-page {
+  min-height: 100dvh;
   padding: 24px;
-  /* Use the global background color */
   background-color: var(--background-color);
 }
 
-/*
- * This class is applied to your <Card>.
- * Your App.css already styles `.ant-card` for the theme.
- * We just add some layout rules here, like max-width.
- */
-.employee-list-card {
-  max-width: 1400px;
-  margin: 0 auto;
-  /* * No need to set background-color or border-color here.
-   * Your App.css rule for .ant-card already handles it!
-   */
+/* --- Page Header --- */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-/*
- * This is your custom class for the <Table>.
- * It makes the table rows more compact by reducing padding.
- * The table's colors are already handled by App.css.
- */
-.compact-table .ant-table-thead > tr > th,
-.compact-table .ant-table-tbody > tr > td {
-  padding: 12px 12px; /* Default is 16px, this is smaller */
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 28px;
+  color: #fff;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  margin: 0 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 14px;
+}
+
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  height: 40px !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* --- Stats Cards --- */
+.employee-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: var(--component-background);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 24px;
+}
+
+.stat-card.total .stat-icon {
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  color: #fff;
+}
+
+.stat-card.online .stat-icon {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: #fff;
+}
+
+.stat-card.online .stat-icon .ant-badge-status-dot {
+  width: 16px;
+  height: 16px;
+}
+
+/* Offline card */
+.stat-card.offline .stat-icon {
+  background: linear-gradient(135deg, #8c8c8c 0%, #bfbfbf 100%);
+  color: #fff;
+}
+
+.stat-card.offline .stat-icon .ant-badge-status-dot {
+  width: 16px;
+  height: 16px;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-top: 2px;
+}
+
+.stat-sublabel {
+  font-size: 12px;
+  color: var(--text-color-secondary);
+}
+
+/* Filter Card */
+.stat-card.filter {
+  flex: 1;
+  min-width: 250px;
+}
+
+.stat-card.filter .stat-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-card.filter .ant-select-lg .ant-select-selector {
+  border-radius: 8px !important;
+}
+
+/* --- Table Card --- */
+.employee-table-card {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.employee-table-card .ant-card-body {
+  padding: 16px;
+}
+
+/* --- Table Styling --- */
+.employee-table .ant-table {
+  background: transparent;
+}
+
+.employee-table .ant-table-thead>tr>th {
+  background-color: var(--background-color) !important;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.employee-table .ant-table-tbody>tr>td {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.employee-table .ant-table-tbody>tr:hover>td {
+  background-color: var(--hover-color, rgba(0, 0, 0, 0.02)) !important;
+}
+
+.employee-table .ant-table-tbody>tr:last-child>td {
+  border-bottom: none;
+}
+
+/* Pagination */
+.employee-table .ant-pagination {
+  margin-top: 16px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .employee-list-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+  }
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .header-title {
+    font-size: 20px !important;
+  }
+
+  .refresh-btn {
+    width: 100%;
+  }
+
+  .employee-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .employee-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .employee-table-card .ant-card-body {
+    padding: 12px;
+  }
+}
+
+/* --- Dark Theme --- */
+[data-theme='dark'] .page-header {
+  background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .stat-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .stat-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .employee-table-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .employee-table .ant-table-thead>tr>th {
+  background-color: #252525 !important;
+  color: #e8e6e3;
+}
+
+[data-theme='dark'] .employee-table .ant-table-tbody>tr>td {
+  border-bottom-color: #333;
+}
+
+[data-theme='dark'] .employee-table .ant-table-tbody>tr:hover>td {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Dark Theme Select Fixes */
+[data-theme='dark'] .stat-card.filter .ant-select-selector {
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+[data-theme='dark'] .stat-card.filter .ant-select-selection-item,
+[data-theme='dark'] .stat-card.filter .ant-select-selection-placeholder {
+  color: #e8e6e3 !important;
 }

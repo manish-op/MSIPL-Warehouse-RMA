@@ -60,10 +60,10 @@ function CheckItemSearchBySerialNo() {
         message.warning(mess, 2);
       } else {
         const data = await response.json();
-        
+
         // 1. Store the data locally and in Context
         setItemData(data);
-        setItemDetails(data); 
+        setItemDetails(data);
 
         // 2. Extract Current Region safely (Handling various backend structures)
         const regionName = data?.region?.regionName || data?.region?.city || data?.region || "N/A";
@@ -79,11 +79,12 @@ function CheckItemSearchBySerialNo() {
   };
 
   // --- 3. Choice Handlers ---
-  
+
   // Option A: Full Update (Navigate to existing page)
   const proceedToFullUpdate = () => {
     setIsChoiceModalVisible(false);
-    navigate("/dashboard/updateItem");
+    const serialNo = itemData?.serial_No || itemData?.serialNo || form.getFieldValue("serialNo");
+    navigate("/dashboard/updateItem", { state: { serialNo } });
   };
 
   // Option B: Quick Region Update (Open second modal)
@@ -105,18 +106,18 @@ function CheckItemSearchBySerialNo() {
     // 1. Try DB field (usually serial_No)
     // 2. Try camelCase (serialNo)
     // 3. Fallback to what user typed in the form input
-    const serialNoToSend = 
-        itemData?.serial_No || 
-        itemData?.serialNo || 
-        form.getFieldValue("serialNo");
+    const serialNoToSend =
+      itemData?.serial_No ||
+      itemData?.serialNo ||
+      form.getFieldValue("serialNo");
 
     if (!serialNoToSend) {
-        message.error("Could not identify Serial Number. Please search again.");
-        return;
+      message.error("Could not identify Serial Number. Please search again.");
+      return;
     }
 
     setRegionUpdateLoading(true);
-    
+
     try {
       const payload = {
         serialNo: serialNoToSend,
@@ -136,7 +137,7 @@ function CheckItemSearchBySerialNo() {
         message.success("Region updated successfully!");
         setIsRegionModalVisible(false);
         setIsChoiceModalVisible(false);
-        
+
         // Optional: Reset form to clear state
         // form.resetFields();
       } else {

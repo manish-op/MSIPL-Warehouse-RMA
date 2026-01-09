@@ -6,7 +6,9 @@ import { message } from "antd";
 export const AlertApi = {
 
   getActiveAlerts: async () => {
-    const token = atob(Cookies.get("authToken"));
+    const tokenRaw = Cookies.get("authToken");
+    if (!tokenRaw) return null;
+    const token = atob(tokenRaw);
 
     try {
       // This calls the GET /api/alerts/active endpoint
@@ -22,9 +24,9 @@ export const AlertApi = {
         message.error(mess || "Failed to fetch alerts.", 5);
         return null;
       }
-      
+
       return await response.json(); // Returns { count, messages }
-    
+
     } catch (error) {
       // This will catch network errors
       message.error("API Network Error: " + error.message, 5);

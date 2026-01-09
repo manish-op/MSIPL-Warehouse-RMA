@@ -1,0 +1,808 @@
+/* Depot Dispatch Page Styles - Lighter Pink/Lilac Theme */
+.depot-page {
+  min-height: 100%;
+  background: var(--background-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+
+/* Header Section - Lighter Pink/Lilac Gradient */
+/* Was #b37feb 0%, #722ed1 100% */
+/* Now #d3adf7 0%, #9254de 100% (Two grades lighter in Ant Design palette approx) */
+.depot-header {
+  background: var(--header-depot-grad);
+  padding: 24px 32px;
+  border-radius: 0 0 24px 24px;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 24px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  font-size: 36px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  color: #fff !important;
+}
+
+/* Stats Row */
+.stats-row {
+  margin-top: 16px;
+}
+
+.stat-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 16px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-box .anticon {
+  font-size: 24px;
+  opacity: 0.95;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+/* Content Section */
+.depot-content {
+  padding: 24px 32px;
+}
+
+/* Tabs Styling to match header */
+.depot-content .ant-tabs-nav::before {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.depot-content .ant-tabs-tab {
+  padding: 12px 16px;
+  margin: 0 4px 0 0;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.depot-content .ant-tabs-tab-active {
+  color: var(--primary-color) !important;
+  font-weight: 600;
+}
+
+.depot-content .ant-tabs-ink-bar {
+  background: var(--primary-color) !important;
+}
+
+/* RMA Groups */
+.rma-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rma-group-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  background: var(--component-background);
+}
+
+.rma-group-card .ant-card-head {
+  background: var(--secondary-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 24px;
+}
+
+.rma-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rma-panel {
+  background: var(--card-bg) !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--card-head-border) !important;
+  overflow: hidden !important;
+  margin-bottom: 16px !important;
+}
+
+[data-theme='dark'] .rma-panel {
+  background: var(--component-background) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .rma-panel .ant-collapse-content {
+  background-color: var(--component-background) !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.rma-collapse-header {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding-right: 24px !important; /* Space for the expand icon */
+}
+
+/* Item Cards */
+.item-card, .rma-item-card-modern {
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  height: 100%;
+  background: var(--component-background);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-card:hover, .rma-item-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(146, 84, 222, 0.12);
+  border-color: var(--primary-color);
+}
+
+[data-theme='dark'] .item-card, [data-theme='dark'] .rma-item-card-modern {
+  background: #1f1f1f !important;
+  border-color: #303030 !important;
+}
+
+.item-card .ant-card-head, .rma-item-card-modern .item-header {
+  min-height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--secondary-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-product, .item-card .ant-card-head-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--primary-color);
+}
+
+.item-content, .item-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+}
+
+.item-row, .detail-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-row .ant-typography-secondary, .detail-box .label {
+  font-size: 11px;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.item-row span, .detail-box .value {
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.value.monospace {
+  font-family: 'Consolas', monospace;
+  background: var(--hover-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.fault-box {
+  margin: 0 16px 16px 16px;
+  padding: 12px;
+  background: var(--hover-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.fault-box .label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.item-footer {
+  padding: 12px 16px;
+  background: var(--secondary-bg);
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}
+
+/* Custom Buttons */
+.btn-generate-dc {
+  background: #fff !important;
+  border-color: #d9d9d9 !important;
+  color: #595959 !important;
+}
+
+.btn-generate-dc:hover {
+  border-color: #9254de !important;
+  color: #9254de !important;
+}
+
+.btn-dispatch {
+  background: linear-gradient(135deg, #d3adf7 0%, #9254de 100%) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 2px 4px rgba(114, 46, 209, 0.15);
+}
+
+.btn-dispatch:hover {
+  background: linear-gradient(135deg, #b37feb 0%, #722ed1 100%) !important;
+  transform: translateY(-1px);
+}
+
+.in-transit-box {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-container {
+  padding: 80px 0;
+  text-align: center;
+  background: var(--component-background);
+  border-radius: 16px;
+}
+
+/* CSS Cleanup - Removed user duplicate block */
+
+/* =========================================================================
+   DARK MODE OVERRIDES (Specific to Depot Dispatch Page)
+   ========================================================================= */
+
+[data-theme="dark"] .depot-page {
+  background: #000000;
+}
+
+[data-theme="dark"] .in-transit-box {
+  background: #141414;
+  border-color: #303030;
+  color: #fff;
+}
+
+[data-theme="dark"] .loading-container,
+[data-theme="dark"] .empty-state {
+  background: #1f1f1f;
+  border: 1px solid #303030;
+}
+
+[data-theme='dark'] .rma-group-card .ant-card-head {
+  background: var(--secondary-bg) !important;
+}
+
+/* Fix Tabs Visibility */
+[data-theme="dark"] .depot-content .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme="dark"] .depot-content .ant-tabs-tab:hover {
+  color: #fff;
+}
+
+[data-theme="dark"] .depot-content .ant-tabs-tab-active {
+  color: #d3adf7 !important;
+  /* Keep purple theme but lighter for contrast */
+}
+
+[data-theme="dark"] .depot-content .ant-tabs-tab-btn {
+  text-shadow: none;
+}
+
+/* Modal Styling Fixes for Depot Page */
+[data-theme="dark"] .dispatch-modal .ant-modal-title *,
+[data-theme="dark"] .dc-modal .ant-modal-title * {
+  color: #fff !important;
+}
+
+[data-theme='dark'] .dispatch-modal .ant-typography,
+[data-theme='dark'] .dispatch-modal .ant-typography-secondary,
+[data-theme='dark'] .dispatch-modal span,
+[data-theme='dark'] .dispatch-modal strong,
+[data-theme='dark'] .dispatch-modal div,
+/* Aggressive catch-all */
+[data-theme='dark'] .dc-modal .ant-typography,
+[data-theme='dark'] .dc-modal .ant-typography-secondary,
+[data-theme='dark'] .dc-modal span,
+[data-theme='dark'] .dc-modal strong,
+[data-theme='dark'] .dc-modal div {
+  color: #e8e6e3 !important;
+}
+
+/* Reset input text color to be visible (AntD handles this but just in case) */
+[data-theme="dark"] .dispatch-modal input,
+[data-theme="dark"] .dispatch-modal textarea,
+[data-theme="dark"] .dc-modal input,
+[data-theme="dark"] .dc-modal textarea {
+  color: #fff !important;
+  background-color: #141414 !important;
+  border-color: #434343 !important;
+}
+
+/* Fix for Material Code Table in DC Modal */
+[data-theme="dark"] .dc-modal .ant-table-thead>tr>th {
+  background: #262626 !important;
+  color: #fff !important;
+  border-bottom: 1px solid #434343;
+}
+
+[data-theme="dark"] .dc-modal .ant-table-tbody>tr>td {
+  background: #1f1f1f !important;
+  color: #fff !important;
+  border-bottom: 1px solid #434343;
+}
+
+/* Fix Input inside Table (Rate/Qty) */
+[data-theme="dark"] .dc-modal .ant-table-tbody .ant-form-item input {
+  background: #141414 !important;
+  color: #fff !important;
+  border: 1px solid #434343;
+}
+
+[data-theme="dark"] .dc-modal .ant-table-cell-row-hover {
+  background: #2a2a2a !important;
+}
+
+/* ==========================================================================
+   DARK MODE OVERRIDES
+   ========================================================================== */
+[data-theme="dark"] .depot-page {
+  background: #000000;
+}
+
+[data-theme="dark"] .depot-header {
+  background: linear-gradient(135deg, #22075e 0%, #391085 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .stat-box {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .rma-group-card {
+  background: #141414;
+  border: 1px solid #303030;
+}
+
+[data-theme="dark"] .rma-group-card .ant-card-head {
+  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+  border-bottom: 1px solid #303030;
+  color: #fff;
+}
+
+[data-theme="dark"] .rma-group-card .ant-card-head .ant-card-head-title {
+  color: #fff;
+}
+
+[data-theme="dark"] .item-card {
+  background: #1f1f1f;
+  border-color: #303030;
+}
+
+[data-theme="dark"] .item-card .ant-card-head {
+  border-bottom: 1px solid #303030;
+  color: #fff;
+}
+
+[data-theme="dark"] .item-card .ant-card-head-title {
+  color: #fff;
+}
+
+/* Text Visibility */
+[data-theme="dark"] .item-row .ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='dark'] .item-row span,
+[data-theme='dark'] .item-row strong,
+[data-theme='dark'] .item-row div,
+[data-theme='dark'] .item-row .ant-typography,
+[data-theme='dark'] .item-row div.ant-typography {
+  color: #fff !important;
+}
+
+/* Buttons */
+[data-theme="dark"] .btn-generate-dc {
+  background: transparent !important;
+  border-color: #434343 !important;
+  color: #fff !important;
+}
+
+[data-theme="dark"] .btn-generate-dc:hover {
+  border-color: #9254de !important;
+  color: #9254de !important;
+}
+
+/* In Transit Box */
+[data-theme="dark"] .in-transit-box {
+  background: #1f1f1f;
+  border-color: #303030;
+  color: #fff;
+}
+
+[data-theme="dark"] .in-transit-box .ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme="dark"] .depot-content .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme="dark"] .depot-content .ant-tabs-tab-active {
+  color: #9254de !important;
+}
+
+/* Fix for 'In Transit' and 'Received' Tags */
+[data-theme="dark"] .ant-tag-processing {
+  background: #111d2c !important;
+  border: 1px solid #103362 !important;
+  color: #177ddc !important;
+  /* Ant Design Dark Blue */
+}
+
+[data-theme="dark"] .ant-tag-success {
+  background: #162312 !important;
+  border: 1px solid #274916 !important;
+  color: #49aa19 !important;
+  /* Ant Design Dark Green */
+}
+
+[data-theme="dark"] .ant-tag-cyan {
+  background: #002329 !important;
+  border: 1px solid #00474f !important;
+  color: #13c2c2 !important;
+}
+
+/* [REMOVED REDUNDANT MODAL START] */
+
+/* [REMOVED REDUNDANT INPUT/PICKER OVERRIDES] */
+
+/* DatePicker Dropdown Fix */
+[data-theme="dark"] .ant-picker-dropdown,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel-container {
+  background-color: #1f1f1f !important;
+}
+
+[data-theme="dark"] .ant-picker-header,
+[data-theme="dark"] .ant-picker-footer {
+  color: #fff !important;
+  border-bottom: 1px solid #303030 !important;
+}
+
+[data-theme="dark"] .ant-picker-header-view button {
+  color: #fff !important;
+}
+
+[data-theme="dark"] .ant-picker-content th {
+  color: #fff !important;
+}
+
+/* [REMOVED REDUNDANT PICKER CELL OVERRIDES] */
+
+/* Fix for DC Generation Modal Cards & Table */
+[data-theme="dark"] .ant-card-small {
+  background: #1f1f1f !important;
+  border-color: #303030 !important;
+}
+
+[data-theme="dark"] .ant-card-head {
+  border-bottom: 1px solid #303030 !important;
+  color: #fff !important;
+}
+
+[data-theme="dark"] .ant-card-head .ant-card-head-title {
+  color: #fff !important;
+}
+
+/* [REMOVED REDUNDANT CARD/TABLE OVERRIDES] */
+
+/* RMA Card Header Styling */
+.rma-card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.rma-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.rma-id-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.rma-label {
+  font-size: 11px;
+  color: #8c8c8c;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.rma-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.rma-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* =========================================================================
+   MOBILE RESPONSIVENESS OVERRIDES
+   ========================================================================= */
+
+@media (max-width: 768px) {
+
+  /* Header Adjustments */
+  .depot-header {
+    padding: 16px;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-content .refresh-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* Stats Row - Stack or Grid */
+  .stats-row .ant-col {
+    width: 100% !important;
+    /* Force full width on mobile */
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin-bottom: 8px;
+  }
+
+  .stat-box {
+    padding: 12px;
+  }
+
+  /* Content Padding */
+  .depot-content {
+    padding: 16px;
+  }
+
+  /* In Transit Box - Stack Vertically */
+  .in-transit-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .in-transit-box .ant-space {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .in-transit-box .anticon {
+    font-size: 20px !important;
+    /* Smaller icon */
+    align-self: flex-start;
+  }
+
+  /* Fault Box Mobile (In Transit Tab) */
+  .fault-box {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .fault-box>div {
+    width: 100%;
+  }
+
+  /* 3. RMA Group Card */
+  .rma-card-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .rma-identity {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    /* Spread content out */
+    align-items: center;
+  }
+
+  .rma-actions {
+    width: 100%;
+    justify-content: flex-start;
+    /* items alignment: flex-end in JS override? */
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  /* Override the inline style from JS if possible, or ensure children behave */
+  .rma-actions>div {
+    align-items: flex-start !important;
+    /* Force left alignment on mobile */
+    width: 100%;
+    flex-direction: row !important;
+    /* Maybe keep row for tag + button? */
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .rma-actions .ant-btn {
+    flex: 1 0 auto;
+    font-size: 12px;
+    padding: 6px 12px;
+    height: auto;
+    min-height: 32px;
+    white-space: nowrap;
+    overflow: visible;
+  }
+
+  /* 4. Item Grid (Modern) */
+  .rma-items-grid {
+    grid-template-columns: 1fr;
+    /* Single column on mobile */
+    gap: 16px;
+  }
+
+  .rma-item-card-modern {
+    margin-bottom: 0;
+  }
+
+  /* 5. Item Details (Modern) */
+  .item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .item-product {
+    font-size: 14px;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .item-details-grid {
+    grid-template-columns: 1fr;
+    /* Stack details */
+    gap: 12px;
+  }
+
+  .detail-box .value {
+    word-break: break-all;
+    white-space: normal;
+  }
+
+  /* Legacy Item Card support (if still used) */
+  .item-card {
+    border-radius: 8px;
+  }
+
+  .item-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-bottom: 8px;
+  }
+
+  .item-row .ant-typography-secondary {
+    font-size: 11px;
+    margin-bottom: 0;
+  }
+
+  .item-row strong,
+  .item-row span:not(.ant-typography-secondary) {
+    font-size: 13px;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  /* Buttons */
+  .btn-dispatch,
+  .btn-generate-dc {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  /* Tabs Scrollable */
+  .depot-content .ant-tabs-nav-list {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+
+  /* DC Modal Mobile Adjustments */
+  .dc-modal .ant-modal-body {
+    padding: 16px;
+  }
+
+  .dc-modal .ant-card-head-title {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+
+  .dc-modal .ant-form-item {
+    margin-bottom: 12px;
+  }
+
+  /* Hide text on very small screens (<400px) - REMOVED AS REQUESTED */
+  /*
+  @media screen and (max-width: 400px) {
+    .rma-actions .ant-btn>span:not(.anticon) {
+      display: none;
+    }
+  }
+  */
+}

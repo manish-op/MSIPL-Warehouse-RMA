@@ -10,10 +10,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface ItemHistoryUpdatedByAdminDAO extends JpaRepository<ItemHistoryUpdatedByAdminEntity, Long> {
 
-    @Query("SELECT um FROM ItemHistoryUpdatedByAdminEntity um WHERE um.serial_No = :serial")
+    @Query("SELECT um FROM ItemHistoryUpdatedByAdminEntity um WHERE LOWER(um.serial_No) = :serial")
     List<ItemHistoryUpdatedByAdminEntity> getHistoryDetailsBySerialNo(@Param("serial") String serial);
 
-    @Query("SELECT h FROM ItemHistoryUpdatedByAdminEntity h " + "WHERE (:city IS NULL OR lower(h.region.city) = :city) " + "ORDER BY h.update_Date DESC")
+    @Query("SELECT h FROM ItemHistoryUpdatedByAdminEntity h " + "WHERE (:city IS NULL OR lower(h.region.city) = :city) "
+            + "ORDER BY h.update_Date DESC")
     List<ItemHistoryUpdatedByAdminEntity> findRecentByRegion(@Param("city") String city, Pageable pageable);
 
     @Query("SELECT h FROM ItemHistoryUpdatedByAdminEntity h ORDER BY h.update_Date DESC")

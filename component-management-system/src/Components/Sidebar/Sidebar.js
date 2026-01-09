@@ -1,48 +1,60 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Menu, Layout, Button } from "antd";
+import React, { useState, useMemo } from "react";
+import { Menu, Layout, Segmented, Modal } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
-  RiMenu3Line, 
-  RiMenuFold4Line, 
-  RiDashboardLine, 
-  RiUserSettingsLine, 
-  RiShieldUserLine, 
-  RiPriceTag3Line, 
-  RiMapPinLine, 
-  RiBox3Line, 
+import {
+  RiMenu3Line,
+  RiMenuFold4Line,
+  RiDashboardLine,
+  RiUserSettingsLine,
+  RiShieldUserLine,
+  RiPriceTag3Line,
+  RiMapPinLine,
+  RiBox3Line,
   RiLogoutBoxRLine,
   RiFileExcel2Line,      // For Import/Export
   RiFileList3Line,       // For Activity Logs
   RiAlarmWarningLine,    // For Thresholds/Alerts
-  RiSettings4Line        // For Options
+  RiSettings4Line,       // For Options
+  RiExchangeLine,        // For Module Switch
 } from "react-icons/ri";
+import { CloseCircleOutlined } from "@ant-design/icons";
 import "./Sidebar.css";
 
 const { Sider } = Layout;
 
-function Sidebar() {
+// Receive props from Dashboard
+function Sidebar({ collapsed, setCollapsed, isMobile }) {
   const role = localStorage.getItem("_User_role_for_MSIPL");
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // 1. Initialize state based on screen size
-  const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Module state (warehouse or rma)
+  const [currentModule, setCurrentModule] = useState(() => {
+    return sessionStorage.getItem("msipl_service_mode") || "warehouse";
+  });
+
   const [openKeys, setOpenKeys] = useState(["dashboard"]);
 
-  // 2. Handle Screen Resize
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (mobile) {
-        setCollapsed(true);
-      }
-    };
+  // Handle module switch with confirmation
+  const handleModuleSwitch = (newModule) => {
+    if (newModule === currentModule) return;
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    Modal.confirm({
+      title: `Switch to ${newModule === "rma" ? "RMA Portal" : "Warehouse"}?`,
+      content: `You are about to switch to the ${newModule === "rma" ? "RMA Request Portal" : "Warehouse Management System"}. Continue?`,
+      okText: "Switch",
+      cancelText: "Cancel",
+      onOk: () => {
+        setCurrentModule(newModule);
+        sessionStorage.setItem("msipl_service_mode", newModule);
+        if (newModule === "rma") {
+          navigate("/rma-dashboard");
+        } else {
+          navigate("/dashboard/profile");
+        }
+      },
+    });
+  };
 
   // 3. Define Menu Items (Restored All Original Options)
   const menuItems = useMemo(() => {
@@ -53,7 +65,6 @@ function Sidebar() {
         icon: <RiDashboardLine />,
         children: [
           { label: "Profile", key: "profile" },
-          { label: "Change Password", key: "changePassword" },
         ],
       },
       (role === "admin" || role === "manager") && {
@@ -62,9 +73,7 @@ function Sidebar() {
         icon: <RiUserSettingsLine />,
         children: [
           { label: "Add Employee", key: "addEmployee" },
-          role === "admin" && { label: "Change Role", key: "changEmployeeRole" },
-          role === "admin" && { label: "Change Region", key: "changEmployeeRegion" },
-          { label: "Reset Password", key: "changEmployeePass" },
+          { label: "Manage Employees", key: "employeeManagement" },
         ].filter(Boolean),
       },
       role === "admin" && {
@@ -72,10 +81,7 @@ function Sidebar() {
         key: "keyword",
         icon: <RiPriceTag3Line />,
         children: [
-          { label: "Add Keyword", key: "addKeyword" },
-          { label: "Update Keyword", key: "updateKeyword" },
-          { label: "Add SubKeyword", key: "addSubKeyword" },
-          { label: "Update SubKeyword", key: "updateSubKeyword" },
+          { label: "Manage Keywords", key: "keywordManagement" },
         ],
       },
       role === "admin" && {
@@ -83,8 +89,7 @@ function Sidebar() {
         key: "region",
         icon: <RiMapPinLine />,
         children: [
-          { label: "Add Region", key: "addNewRegion" },
-          { label: "Update Region", key: "updateRegion" },
+          { label: "Manage Regions", key: "regionManagement" },
         ],
       },
       {
@@ -93,9 +98,7 @@ function Sidebar() {
         icon: <RiBox3Line />,
         children: [
           (role === "admin" || role === "manager") && { label: "Add Item", key: "addItem" },
-          { label: "Search By Keyword", key: "getItemByKeyword" },
-          { label: "Search By Serial", key: "getItemBySerial" },
-          { label: "Item History", key: "itemHistory" },
+          { label: "Search Items", key: "itemSearch" },
         ].filter(Boolean),
       },
       {
@@ -111,12 +114,9 @@ function Sidebar() {
       role === "admin" && {
         label: "Options & Status",
         key: "options_group",
-        icon: <RiSettings4Line />, 
+        icon: <RiSettings4Line />,
         children: [
-          { label: "Add Avail. Option", key: "addAvailStatus" },
-          { label: "Update Avail. Option", key: "updateAvailStatus" },
-          { label: "Add Item Status", key: "addItemStatus" },
-          { label: "Update Item Status", key: "UpdateItemStatus" },
+          { label: "Manage Status", key: "statusManagement" },
         ],
       },
       (role === "admin" || role === "manager") && {
@@ -134,7 +134,7 @@ function Sidebar() {
         children: [
           { label: "Chat", key: "activity-logs" },
           { label: "Users List", key: "all-users" },
-           { label: "Activity Logs", key: "items/activity" },
+          { label: "Activity Logs", key: "items/activity" },
         ],
       },
       (role === "admin" || role === "manager") && {
@@ -176,20 +176,10 @@ function Sidebar() {
   return (
     <>
       {/* Mobile Overlay */}
-      <div 
-        className={`sidebar-overlay ${isMobile && !collapsed ? "visible" : ""}`} 
+      <div
+        className={`sidebar-overlay ${isMobile && !collapsed ? "visible" : ""}`}
         onClick={() => setCollapsed(true)}
       />
-
-      {/* Mobile Toggle Button */}
-      {isMobile && collapsed && (
-        <Button
-          type="primary"
-          className="mobile-toggle-btn"
-          onClick={() => setCollapsed(false)}
-          icon={<RiMenu3Line />}
-        />
-      )}
 
       <Sider
         width={260}
@@ -200,26 +190,62 @@ function Sidebar() {
         trigger={null}
         collapsedWidth={isMobile ? 0 : 80}
         style={{
-            height: '100vh',
-            position: isMobile ? 'fixed' : 'sticky',
-            top: 0,
-            left: 0,
-            zIndex: 1001
+          minHeight: '100vh',
+          position: isMobile ? 'fixed' : 'sticky',
+          top: 0,
+          left: 0,
+          zIndex: isMobile ? 1005 : 10
         }}
       >
         <div className="sidebar-header">
-           <div className="logo-text">{collapsed }</div>
-           {!isMobile && (
-             <div className="desktop-toggle" onClick={() => setCollapsed(!collapsed)}>
+          {/* Mobile Sidebar Header with Close Button */}
+          {isMobile && !collapsed && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              marginBottom: '8px',
+              width: '100%'
+            }}>
+              <span style={{ color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>Menu</span>
+              <CloseCircleOutlined
+                style={{ fontSize: '24px', color: '#ff4d4f', cursor: 'pointer' }}
+                onClick={() => setCollapsed(true)}
+              />
+            </div>
+          )}
+
+          {!isMobile && (
+            <>
+              <div className="logo-text">{collapsed}</div>
+              <div className="desktop-toggle" onClick={() => setCollapsed(!collapsed)}>
                 {collapsed ? <RiMenu3Line /> : <RiMenuFold4Line />}
-             </div>
-           )}
-           {isMobile && !collapsed && (
-              <div className="mobile-close" onClick={() => setCollapsed(true)}>
-                  <RiMenuFold4Line />
               </div>
-           )}
+            </>
+          )}
         </div>
+
+        {/* Module Switcher */}
+        {!collapsed && (
+          <div className="module-switcher">
+            <div className="module-switcher-label">
+              <RiExchangeLine style={{ marginRight: 6 }} />
+              <span>Switch Module </span>
+            </div>
+            <Segmented
+              value={currentModule}
+              onChange={handleModuleSwitch}
+              options={[
+                { label: "Warehouse", value: "warehouse" },
+                { label: "RMA", value: "rma" },
+              ]}
+              block
+              size="small"
+            />
+          </div>
+        )}
 
         <Menu
           mode="inline"

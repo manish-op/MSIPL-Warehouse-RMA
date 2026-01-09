@@ -24,54 +24,59 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/api/admin/user")
 public class AdminUserController {
 
-	private AdminUserService service;
+    private AdminUserService service;
     @Autowired
     private AdminUserDAO adminUserDAO;
 
     @Autowired
     private ItemDetailsService itemDetailsService;
 
-
     public AdminUserController(AdminUserService service) {
-		super();
-		this.service = service;
-	}
+        super();
+        this.service = service;
+    }
 
-	@PostMapping("/addUser")
-	public ResponseEntity<?> createUser(HttpServletRequest request, @RequestBody AddUserRequest addUser) throws Exception {
-		return service.createAdminUser(request, addUser);
-	}
+    @PostMapping("/addUser")
+    public ResponseEntity<?> createUser(HttpServletRequest request, @RequestBody AddUserRequest addUser)
+            throws Exception {
+        return service.createAdminUser(request, addUser);
+    }
 
-//	@GetMapping
-//	public ResponseEntity<?> getUserList(HttpServletRequest requestServlet, @RequestParam int pageNo,
-//			@RequestParam int noOfRecord, @RequestParam(required = false) String searchKey,
-//			@RequestParam(required = false) String role) throws Exception {
-//		return service.getUserList(requestServlet, pageNo, noOfRecord, searchKey, role);
-//	}
+    // @GetMapping
+    // public ResponseEntity<?> getUserList(HttpServletRequest requestServlet,
+    // @RequestParam int pageNo,
+    // @RequestParam int noOfRecord, @RequestParam(required = false) String
+    // searchKey,
+    // @RequestParam(required = false) String role) throws Exception {
+    // return service.getUserList(requestServlet, pageNo, noOfRecord, searchKey,
+    // role);
+    // }
 
-	@PostMapping("/login")
-	public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request) throws Exception {
-		return service.adminLogin(request);
-	}
+    @PostMapping("/login")
+    public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request) throws Exception {
+        return service.adminLogin(request);
+    }
 
-	@PutMapping("/change/password")
-	public ResponseEntity<?> changePassword(HttpServletRequest requestServlet, @RequestBody PasswordRequest requestBody)
-			throws Exception {
-		return service.changePassword(requestServlet, requestBody);
-	}
-	
-	@PutMapping("/change/password/admin")
-	public ResponseEntity<?> changeUserPassword(HttpServletRequest requestServlet, @RequestBody ChangeEmployeePasswordRequest passRequestBody)
-			throws Exception {
-		return service.changeUserPassword(requestServlet, passRequestBody);
-	}
+    @PutMapping("/change/password")
+    public ResponseEntity<?> changePassword(HttpServletRequest requestServlet, @RequestBody PasswordRequest requestBody)
+            throws Exception {
+        return service.changePassword(requestServlet, requestBody);
+    }
 
-	@PostMapping("/delete")
-	@Hidden
-	public ResponseEntity<String> deleteUser(HttpServletRequest request, @RequestParam(required = true) String email) throws Exception {
+    @PutMapping("/change/password/admin")
+    public ResponseEntity<?> changeUserPassword(HttpServletRequest requestServlet,
+            @RequestBody ChangeEmployeePasswordRequest passRequestBody)
+            throws Exception {
+        return service.changeUserPassword(requestServlet, passRequestBody);
+    }
 
-		return service.deleteUser(request, email);
-	}
+    @PostMapping("/delete")
+    @Hidden
+    public ResponseEntity<String> deleteUser(HttpServletRequest request, @RequestParam(required = true) String email)
+            throws Exception {
+
+        return service.deleteUser(request, email);
+    }
 
     @GetMapping("/dashboard-summary")
     public ResponseEntity<?> getDashboardSummary(HttpServletRequest request) {
@@ -85,7 +90,8 @@ public class AdminUserController {
             } catch (Exception ignored) {
             }
 
-            // 2) If principal not present, try Authorization header fallback (AddItemAPI style)
+            // 2) If principal not present, try Authorization header fallback (AddItemAPI
+            // style)
             if (loggedInUserName == null || loggedInUserName.trim().isEmpty()) {
                 String authHeader = request.getHeader("Authorization");
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -127,7 +133,8 @@ public class AdminUserController {
                 regionName = loggedUser.getRegionEntity().getCity().toLowerCase();
             }
 
-            // 6) Delegate to existing service method you already added in ItemDetailsService
+            // 6) Delegate to existing service method you already added in
+            // ItemDetailsService
             DashboardSummaryDto summary = itemDetailsService.getDashboardSummary(isAdmin, regionName);
 
             return ResponseEntity.ok(summary);

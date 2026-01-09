@@ -29,25 +29,26 @@ public class ItemDetailsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
-    private String serial_No;//serial number of item
-    private String boxNo;//location box number of item
+    private String serial_No;// serial number of item
+    private String boxNo;// location box number of item
     @Nullable
-    private String partNo;//partNo of item
-    private String modelNo;//model number of item
-    private String rack_No;//rack no or item
+    private String partNo;// partNo of item
+    private String modelNo;// model number of item
+    private String rack_No;// rack no or item
     @ManyToOne()
-    private ItemStatusOptionEntity itemStatusId;//for item new,old,repaired or other status
-    private String spare_Location;//location of item
-    private String system;//module type
-    private String moduleFor;//module required for
-    private String system_Version;//module version
+    private ItemStatusOptionEntity itemStatusId;// for item new,old,repaired or other status
+    private String spare_Location;// location of item
+    private String system;// module type
+    private String moduleFor;// module required for
+    private String system_Version;// module version
     @ManyToOne()
-    private ItemAvailableStatusOptionEntity availableStatusId;//automatically generate status issued and available at the time of add and assign
-    private String itemDescription;//description can added at the time of adding items
-    private String remark;//it can filled at the time of allotting item
-    private String empEmail;//it automatically takes email id of logged in user
-    private String addedByEmail;//it automatically taken the email id of user who adding component
-    private String partyName;//party name required at the time of issue items
+    private ItemAvailableStatusOptionEntity availableStatusId;// automatically generate status issued and available at
+                                                              // the time of add and assign
+    private String itemDescription;// description can added at the time of adding items
+    private String remark;// it can filled at the time of allotting item
+    private String empEmail;// it automatically takes email id of logged in user
+    private String addedByEmail;// it automatically taken the email id of user who adding component
+    private String partyName;// party name required at the time of issue items
     private ZonedDateTime update_Date;
     private ZonedDateTime adding_Date;
     @ManyToOne()
@@ -62,7 +63,7 @@ public class ItemDetailsEntity {
     @JsonIgnore
     private List<ItemHistoryUpdatedByAdminEntity> itemHistoryUpdatedByAdminEntityList;
     private Integer threshold;
-
+    private Integer returnDuration;
 
     public Integer getThreshold() {
         return threshold;
@@ -72,15 +73,14 @@ public class ItemDetailsEntity {
         this.threshold = threshold;
     }
 
-
-
-    //Constructor
+    // Constructor
     public ItemDetailsEntity(Long id, String serial_No, String boxNo, String partNo, String modelNo, String rack_No,
-                             ItemStatusOptionEntity itemStatusId, String spare_Location, String system, String moduleFor,
-                             String system_Version, ItemAvailableStatusOptionEntity availableStatusId, String itemDescription,
-                             String remark, String empEmail, String addedByEmail, String partyName, ZonedDateTime update_Date,
-                             ZonedDateTime adding_Date, RegionEntity region, KeywordEntity keywordEntity,
-                             SubKeywordEntity subKeyWordEntity, List<ItemHistoryUpdatedByAdminEntity> itemHistoryUpdatedByAdminEntityList,Integer threshold) {
+            ItemStatusOptionEntity itemStatusId, String spare_Location, String system, String moduleFor,
+            String system_Version, ItemAvailableStatusOptionEntity availableStatusId, String itemDescription,
+            String remark, String empEmail, String addedByEmail, String partyName, ZonedDateTime update_Date,
+            ZonedDateTime adding_Date, RegionEntity region, KeywordEntity keywordEntity,
+            SubKeywordEntity subKeyWordEntity,
+            List<ItemHistoryUpdatedByAdminEntity> itemHistoryUpdatedByAdminEntityList, Integer threshold) {
         super();
         this.id = id;
         this.serial_No = serial_No;
@@ -105,14 +105,14 @@ public class ItemDetailsEntity {
         this.keywordEntity = keywordEntity;
         this.subKeyWordEntity = subKeyWordEntity;
         this.itemHistoryUpdatedByAdminEntityList = itemHistoryUpdatedByAdminEntityList;
-        this.threshold=threshold;
+        this.threshold = threshold;
     }
 
     public ItemDetailsEntity() {
         super();
     }
 
-    //getter and setter
+    // getter and setter
     public Long getId() {
         return id;
     }
@@ -298,7 +298,15 @@ public class ItemDetailsEntity {
         this.itemHistoryUpdatedByAdminEntityList = itemHistoryUpdatedByAdminEntityList;
     }
 
-    //toString
+    public Integer getReturnDuration() {
+        return returnDuration;
+    }
+
+    public void setReturnDuration(Integer returnDuration) {
+        this.returnDuration = returnDuration;
+    }
+
+    // toString
     @Override
     public String toString() {
         return "ItemDetailsEntity [id=" + id + ", serial_No=" + serial_No + ", boxNo=" + boxNo + ", partNo=" + partNo
@@ -308,8 +316,8 @@ public class ItemDetailsEntity {
                 + ", itemDescription=" + itemDescription + ", remark=" + remark + ", empEmail=" + empEmail
                 + ", addedByEmail=" + addedByEmail + ", partyName=" + partyName + ", update_Date=" + update_Date
                 + ", adding_Date=" + adding_Date + ", region=" + region + ", keywordEntity=" + keywordEntity
-                + ", subKeyWordEntity=" + subKeyWordEntity + ", itemHistoryUpdatedByAdminEntityList=" + itemHistoryUpdatedByAdminEntityList + "]";
+                + ", subKeyWordEntity=" + subKeyWordEntity + ", itemHistoryUpdatedByAdminEntityList="
+                + itemHistoryUpdatedByAdminEntityList + ", returnDuration=" + returnDuration + "]";
     }
-
 
 }

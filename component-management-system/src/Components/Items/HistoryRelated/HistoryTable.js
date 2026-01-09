@@ -2,13 +2,35 @@
 
 import "../GetItem/TableCss.css";
 import "./PrintHistoryTable.css"; // We will add the theme styles here
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useItemDetails } from "../UpdateItem/ItemContext";
 import UtcToISO from "../../UtcToISO";
 
 function HistoryTable() {
   const { itemHistory } = useItemDetails();
-  const data = itemHistory;
+  const [data, setData] = useState([]);
+
+  // Load data from context or localStorage on mount and when itemHistory changes
+  // Load data from context or localStorage on mount and when itemHistory changes
+  useEffect(() => {
+    if (itemHistory) {
+      setData(itemHistory);
+    } else {
+      // Fallback logic only if itemHistory is strictly null/undefined (not just empty)
+      // Although context initializes it to [] or localStorage value.
+      const storedHistory = localStorage.getItem('itemHistory');
+      if (storedHistory) {
+        try {
+          const parsed = JSON.parse(storedHistory);
+          if (parsed) {
+            setData(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse itemHistory from localStorage:", e);
+        }
+      }
+    }
+  }, [itemHistory]);
 
   const handlePrint = () => {
     window.print();

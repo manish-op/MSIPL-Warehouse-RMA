@@ -76,9 +76,10 @@ public class SecurityConfig {
                                 "/api/thresholds/**",
                                 "/api/alerts/**",
                                 "/ws/**",
-                                "api/items/**",
-                                "/api/rma/items/grouped")
+                                "/api/items/**") // Fixed typo api/items -> /api/items
                         .permitAll()
+                        // Explicitly secure all RMA endpoints
+                        .requestMatchers("/api/rma/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint((request, response, e) -> {

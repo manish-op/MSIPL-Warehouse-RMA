@@ -59,7 +59,6 @@ public class ItemDetailsService {
     @Autowired
     private ItemStatusOptionDAO itemStatusOptionDAO;
 
-
     private AdminUserEntity adminUserEntity;
     private RegionEntity regionEntity;
     private KeywordEntity keywordEntity;
@@ -86,7 +85,8 @@ public class ItemDetailsService {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User Not Login");
                 } else {
                     String loginUserRole = adminUserEntity.getRoleModel().getRoleName().toLowerCase();
-                    if (loginUserRole.equals("admin") || loginUserRole.equals("manager") || loginUserRole.equals("employee")) {
+                    if (loginUserRole.equals("admin") || loginUserRole.equals("manager")
+                            || loginUserRole.equals("employee")) {
 
                         // Debug log incoming payload
                         System.out.println("DEBUG addComponent payload: " + addComponent);
@@ -96,14 +96,14 @@ public class ItemDetailsService {
                                 || isBlank(addComponent.getKeyword())
                                 || isBlank(addComponent.getRackNo())
                                 || isBlank(addComponent.getAvailableStatus())
-                                || isBlank(addComponent.getItemStatus())
-                        ) {
+                                || isBlank(addComponent.getItemStatus())) {
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                     .body("Keyword or Region or RackNo or AvailableStatus or ItemStatus must not be null");
                         }
 
                         // If serial empty -> generate; else check uniqueness
-                        String serialFromRequest = (addComponent.getSerialNo() == null ? "" : addComponent.getSerialNo().trim());
+                        String serialFromRequest = (addComponent.getSerialNo() == null ? ""
+                                : addComponent.getSerialNo().trim());
                         boolean serialWasGenerated = false;
                         if (serialFromRequest.isEmpty()) {
                             String generated = generateSerialForKeyword(addComponent.getKeyword());
@@ -115,11 +115,13 @@ public class ItemDetailsService {
                         } else {
                             boolean serialExists = itemDetailsDAO.isSerialExist(serialFromRequest.toLowerCase());
                             if (serialExists) {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Serial number already exists");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("Serial number already exists");
                             }
                         }
 
-                        // At this point, serialFromRequest contains final serial (provided or generated)
+                        // At this point, serialFromRequest contains final serial (provided or
+                        // generated)
 
                         // Build entity and map values (mostly your original logic)
                         ItemDetailsEntity componentDetails = new ItemDetailsEntity();
@@ -131,7 +133,7 @@ public class ItemDetailsService {
                             historyChangedByAdmin.setSerial_No(addComponent.getSerialNo().trim().toLowerCase());
                         }
 
-                        // region handling (unchanged)
+                        // region handling
                         if (addComponent.getRegion() != null && addComponent.getRegion().trim().length() > 0) {
                             if (loginUserRole.equals("admin")) {
                                 regionEntity = regionDAO.findByCity(addComponent.getRegion().toLowerCase());
@@ -139,14 +141,16 @@ public class ItemDetailsService {
                                     componentDetails.setRegion(regionEntity);
                                     historyChangedByAdmin.setRegion(regionEntity);
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This region not Listed, First add this region");
+                                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                            .body("This region not Listed, First add this region");
                                 }
                             } else {
                                 if (adminUserEntity.getRegionEntity() != null) {
                                     componentDetails.setRegion(adminUserEntity.getRegionEntity());
                                     historyChangedByAdmin.setRegion(adminUserEntity.getRegionEntity());
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Your region is not assign, contact to admin to assign a region");
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("Your region is not assign, contact to admin to assign a region");
                                 }
                             }
                         } else {
@@ -155,10 +159,12 @@ public class ItemDetailsService {
                                     componentDetails.setRegion(adminUserEntity.getRegionEntity());
                                     historyChangedByAdmin.setRegion(adminUserEntity.getRegionEntity());
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No region assign to you, contact to admin to assign a region");
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("No region assign to you, contact to admin to assign a region");
                                 }
                             } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Region is required for Admin Role");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("Region is required for Admin Role");
                             }
                         }
 
@@ -168,8 +174,10 @@ public class ItemDetailsService {
                             if (keywordEntity != null) {
                                 componentDetails.setKeywordEntity(keywordEntity);
                                 historyChangedByAdmin.setKeywordEntity(keywordEntity);
-                                if (addComponent.getSubKeyword() != null && addComponent.getSubKeyword().trim().length() > 0) {
-                                    subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity, addComponent.getSubKeyword().toLowerCase());
+                                if (addComponent.getSubKeyword() != null
+                                        && addComponent.getSubKeyword().trim().length() > 0) {
+                                    subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity,
+                                            addComponent.getSubKeyword().toLowerCase());
                                     if (subKeywordEntity != null) {
                                         componentDetails.setSubKeyWordEntity(subKeywordEntity);
                                         historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
@@ -178,7 +186,8 @@ public class ItemDetailsService {
                                     }
                                 }
                             } else {
-                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("keyword is new, First add this keyword");
+                                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                        .body("keyword is new, First add this keyword");
                             }
                         }
 
@@ -187,7 +196,8 @@ public class ItemDetailsService {
                             componentDetails.setBoxNo(addComponent.getBoxNo());
                             historyChangedByAdmin.setBoxNo(addComponent.getBoxNo());
                         }
-                        if (addComponent.getItemDescription() != null && addComponent.getItemDescription().trim().length() > 0) {
+                        if (addComponent.getItemDescription() != null
+                                && addComponent.getItemDescription().trim().length() > 0) {
                             componentDetails.setItemDescription(addComponent.getItemDescription());
                             historyChangedByAdmin.setItemDescription(addComponent.getItemDescription());
                         }
@@ -204,19 +214,22 @@ public class ItemDetailsService {
                             historyChangedByAdmin.setModelNo(addComponent.getModelNo());
                         }
                         if (addComponent.getItemStatus() != null && addComponent.getItemStatus().trim().length() > 0) {
-                            itemStatusOptionEntity = itemStatusOptionDAO.getItemStatusOptionDetails(addComponent.getItemStatus().toLowerCase());
+                            itemStatusOptionEntity = itemStatusOptionDAO
+                                    .getItemStatusOptionDetails(addComponent.getItemStatus().toLowerCase());
                             if (itemStatusOptionEntity != null) {
                                 componentDetails.setItemStatusId(itemStatusOptionEntity);
                                 historyChangedByAdmin.setItemStatusId(itemStatusOptionEntity);
                             } else {
-                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("this item status is not listed add another one");
+                                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                        .body("this item status is not listed add another one");
                             }
                         }
                         if (addComponent.getRackNo() != null && addComponent.getRackNo().trim().length() > 0) {
                             componentDetails.setRack_No(addComponent.getRackNo());
                             historyChangedByAdmin.setRack_No(addComponent.getRackNo());
                         }
-                        if (addComponent.getSpareLocation() != null && addComponent.getSpareLocation().trim().length() > 0) {
+                        if (addComponent.getSpareLocation() != null
+                                && addComponent.getSpareLocation().trim().length() > 0) {
                             componentDetails.setSpare_Location(addComponent.getSpareLocation().trim());
                             historyChangedByAdmin.setSpare_Location(addComponent.getSpareLocation());
                         }
@@ -232,13 +245,15 @@ public class ItemDetailsService {
                             componentDetails.setRemark(addComponent.getRemark());
                             historyChangedByAdmin.setRemark(addComponent.getRemark());
                         }
-                        if (addComponent.getSystemVersion() != null && addComponent.getSystemVersion().trim().length() > 0) {
+                        if (addComponent.getSystemVersion() != null
+                                && addComponent.getSystemVersion().trim().length() > 0) {
                             componentDetails.setSystem_Version(addComponent.getSystemVersion());
                             historyChangedByAdmin.setSystem_Version(addComponent.getSystemVersion());
                         }
 
                         // availability status mapping
-                        if (addComponent.getAvailableStatus() != null && addComponent.getAvailableStatus().trim().length() > 0) {
+                        if (addComponent.getAvailableStatus() != null
+                                && addComponent.getAvailableStatus().trim().length() > 0) {
                             String availLower = addComponent.getAvailableStatus().toLowerCase();
                             if (availLower.equals("issue") || availLower.equals("available")) {
                                 itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(availLower);
@@ -246,10 +261,12 @@ public class ItemDetailsService {
                                     componentDetails.setAvailableStatusId(itemAvailEntity);
                                     historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("available status is not not listed try another");
+                                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                            .body("available status is not not listed try another");
                                 }
                             } else {
-                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("At the time of adding you only set status available or issue");
+                                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                        .body("At the time of adding you only set status available or issue");
                             }
                         }
 
@@ -278,18 +295,21 @@ public class ItemDetailsService {
                                 if (componentDetails != null) {
                                     String createdSerial = componentDetails.getSerial_No();
                                     return ResponseEntity.status(HttpStatus.CREATED)
-                                            .body("Item added successfully. Serial: " + createdSerial + (message != null ? message : ""));
+                                            .body("Item added successfully. Serial: " + createdSerial
+                                                    + (message != null ? message : ""));
                                 } else {
                                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                             .body("Something went wrong");
                                 }
                             } catch (DataIntegrityViolationException dive) {
                                 // likely unique constraint violation on serial_No
-                                System.out.println("DataIntegrityViolation on save attempt " + attempt + ": " + dive.getMessage());
+                                System.out.println(
+                                        "DataIntegrityViolation on save attempt " + attempt + ": " + dive.getMessage());
                                 if (!serialWasGenerated) {
                                     // user provided serial and it's duplicate -> conflict
                                     return ResponseEntity.status(HttpStatus.CONFLICT)
-                                            .body("serial no :" + addComponent.getSerialNo() + " is already available, Serial no is case sensitive");
+                                            .body("serial no :" + addComponent.getSerialNo()
+                                                    + " is already available, Serial no is case sensitive");
                                 }
                                 if (attempt >= MAX_RETRIES) {
                                     return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -299,16 +319,19 @@ public class ItemDetailsService {
                                 String newSerial = generateSerialForKeyword(addComponent.getKeyword());
                                 componentDetails.setSerial_No(newSerial.toLowerCase());
                                 historyChangedByAdmin.setSerial_No(newSerial.toLowerCase());
-                                System.out.println("Retrying save with regenerated serial: " + newSerial + " (attempt " + attempt + ")");
+                                System.out.println("Retrying save with regenerated serial: " + newSerial + " (attempt "
+                                        + attempt + ")");
                                 // continue loop to retry
                             } catch (Exception ex) {
                                 ex.printStackTrace();
-                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body("Internal server error");
                             }
                         }
 
                     } else {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Your role is not authorized to add Items");
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body("Your role is not authorized to add Items");
                     }
                 }
             } else {
@@ -323,8 +346,6 @@ public class ItemDetailsService {
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
-
-
 
     // function for update items
     public ResponseEntity<?> issueItems(HttpServletRequest request, AssignItemDetailsRequest assignItemDetails) {
@@ -348,10 +369,12 @@ public class ItemDetailsService {
                     }
                     String loginUserRole = adminUserEntity.getRoleModel().getRoleName().trim().toLowerCase();
 
-                    if (assignItemDetails == null || assignItemDetails.getSerialNo() == null || assignItemDetails.getSerialNo().trim().length() < 0) {
+                    if (assignItemDetails == null || assignItemDetails.getSerialNo() == null
+                            || assignItemDetails.getSerialNo().trim().length() < 0) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("serial no could not be null");
                     } else {// getting data from database on the basis of serial no.
-                        ItemDetailsEntity itemDetails = itemDetailsDAO.getItemDetailsBySerialNo(assignItemDetails.getSerialNo().trim().toLowerCase());
+                        ItemDetailsEntity itemDetails = itemDetailsDAO
+                                .getItemDetailsBySerialNo(assignItemDetails.getSerialNo().trim().toLowerCase());
 
                         if (itemDetails == null) {// check is their have data against provided serial no
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Serial nu not registered");
@@ -363,10 +386,12 @@ public class ItemDetailsService {
                                 if (!adminUserEntity.getRoleModel().getRoleName().toLowerCase().equals("admin")) {
 
                                     if (adminUserEntity.getRegionEntity() == null) {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No region assign to you");
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .body("No region assign to you");
                                     } else {
                                         if (!itemDetails.getRegion().equals(adminUserEntity.getRegionEntity())) {
-                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("this item not belonging to your region");
+                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                    .body("this item not belonging to your region");
                                         }
                                     }
                                 }
@@ -374,16 +399,24 @@ public class ItemDetailsService {
                                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No role assign to you");
                             }
 
-
                             // check for party name both at db and from user
-                            if ((itemDetails.getPartyName() == null || (itemDetails.getPartyName() != null && itemDetails.getPartyName().trim().length() <= 0)) && (assignItemDetails.getPartyName() == null || (assignItemDetails.getPartyName() != null && assignItemDetails.getPartyName().trim().length() <= 0))) {
+                            if ((itemDetails.getPartyName() == null || (itemDetails.getPartyName() != null
+                                    && itemDetails.getPartyName().trim().length() <= 0))
+                                    && (assignItemDetails.getPartyName() == null
+                                            || (assignItemDetails.getPartyName() != null
+                                                    && assignItemDetails.getPartyName().trim().length() <= 0))) {
 
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Party name required at first time for update");
-                            } else if (assignItemDetails.getPartyName() != null && assignItemDetails.getPartyName().trim().length() > 0) {
-                                if (itemDetails.getPartyName() != null && itemDetails.getPartyName().trim().length() > 0) {
-                                    if (!itemDetails.getPartyName().toLowerCase().equals(assignItemDetails.getPartyName().toLowerCase())) {
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("Party name required at first time for update");
+                            } else if (assignItemDetails.getPartyName() != null
+                                    && assignItemDetails.getPartyName().trim().length() > 0) {
+                                if (itemDetails.getPartyName() != null
+                                        && itemDetails.getPartyName().trim().length() > 0) {
+                                    if (!itemDetails.getPartyName().toLowerCase()
+                                            .equals(assignItemDetails.getPartyName().toLowerCase())) {
                                         itemDetails.setPartyName(assignItemDetails.getPartyName().toLowerCase());
-                                        historyChangedByAdmin.setPartyName(assignItemDetails.getPartyName().toLowerCase());
+                                        historyChangedByAdmin
+                                                .setPartyName(assignItemDetails.getPartyName().toLowerCase());
                                     }
                                 } else {
                                     itemDetails.setPartyName(assignItemDetails.getPartyName().toLowerCase());
@@ -393,25 +426,32 @@ public class ItemDetailsService {
 
                             }
 
-                            //boxNo
-                            if (assignItemDetails.getBoxNo() != null && assignItemDetails.getBoxNo().trim().length() > 0) {
+                            // boxNo
+                            if (assignItemDetails.getBoxNo() != null
+                                    && assignItemDetails.getBoxNo().trim().length() > 0) {
                                 if (itemDetails.getBoxNo() != null && itemDetails.getBoxNo().trim().length() > 0) {
-                                    if (!itemDetails.getBoxNo().toLowerCase().equals(assignItemDetails.getBoxNo().toLowerCase())) {//check previous and new not equal
+                                    if (!itemDetails.getBoxNo().toLowerCase()
+                                            .equals(assignItemDetails.getBoxNo().toLowerCase())) {// check previous and
+                                                                                                  // new not equal
                                         itemDetails.setBoxNo(assignItemDetails.getBoxNo());
                                         historyChangedByAdmin.setBoxNo(assignItemDetails.getBoxNo());
                                     }
                                 } else {
-                                    if (!itemDetails.getBoxNo().toLowerCase().equals(assignItemDetails.getBoxNo().toLowerCase())) {//check previous and new not equal
+                                    if (!itemDetails.getBoxNo().toLowerCase()
+                                            .equals(assignItemDetails.getBoxNo().toLowerCase())) {// check previous and
+                                                                                                  // new not equal
                                         itemDetails.setBoxNo(assignItemDetails.getBoxNo());
                                         historyChangedByAdmin.setBoxNo(assignItemDetails.getBoxNo());
                                     }
                                 }
                             }
 
-                            //rack no
-                            if (assignItemDetails.getRackNo() != null && assignItemDetails.getRackNo().trim().length() > 0) {
+                            // rack no
+                            if (assignItemDetails.getRackNo() != null
+                                    && assignItemDetails.getRackNo().trim().length() > 0) {
                                 if (itemDetails.getRack_No() != null && itemDetails.getRack_No().trim().length() > 0) {
-                                    if (!itemDetails.getRack_No().toLowerCase().equals(assignItemDetails.getRackNo().toLowerCase())) {
+                                    if (!itemDetails.getRack_No().toLowerCase()
+                                            .equals(assignItemDetails.getRackNo().toLowerCase())) {
                                         itemDetails.setRack_No(assignItemDetails.getRackNo());
                                         historyChangedByAdmin.setRack_No(assignItemDetails.getRackNo());
                                     }
@@ -421,10 +461,13 @@ public class ItemDetailsService {
                                 }
                             }
 
-                            //spare Location
-                            if (assignItemDetails.getSpareLocation() != null && assignItemDetails.getSpareLocation().trim().length() > 0) {
-                                if (itemDetails.getSpare_Location() != null && itemDetails.getSpare_Location().trim().length() > 0) {
-                                    if (!itemDetails.getSpare_Location().toLowerCase().equals(assignItemDetails.getSpareLocation().toLowerCase())) {
+                            // spare Location
+                            if (assignItemDetails.getSpareLocation() != null
+                                    && assignItemDetails.getSpareLocation().trim().length() > 0) {
+                                if (itemDetails.getSpare_Location() != null
+                                        && itemDetails.getSpare_Location().trim().length() > 0) {
+                                    if (!itemDetails.getSpare_Location().toLowerCase()
+                                            .equals(assignItemDetails.getSpareLocation().toLowerCase())) {
                                         itemDetails.setSpare_Location(assignItemDetails.getSpareLocation());
                                         historyChangedByAdmin.setSpare_Location(assignItemDetails.getSpareLocation());
                                     }
@@ -434,12 +477,16 @@ public class ItemDetailsService {
                                 }
                             }
 
-                            //item Description
-                            if (assignItemDetails.getItemDescription() != null && assignItemDetails.getItemDescription().trim().length() > 0) {
-                                if (itemDetails.getItemDescription() != null && itemDetails.getItemDescription().trim().length() > 0) {
-                                    if (!itemDetails.getItemDescription().toLowerCase().equals(assignItemDetails.getItemDescription().toLowerCase())) {
+                            // item Description
+                            if (assignItemDetails.getItemDescription() != null
+                                    && assignItemDetails.getItemDescription().trim().length() > 0) {
+                                if (itemDetails.getItemDescription() != null
+                                        && itemDetails.getItemDescription().trim().length() > 0) {
+                                    if (!itemDetails.getItemDescription().toLowerCase()
+                                            .equals(assignItemDetails.getItemDescription().toLowerCase())) {
                                         itemDetails.setItemDescription(assignItemDetails.getItemDescription());
-                                        historyChangedByAdmin.setItemDescription(assignItemDetails.getItemDescription());
+                                        historyChangedByAdmin
+                                                .setItemDescription(assignItemDetails.getItemDescription());
                                     }
                                 } else {
                                     itemDetails.setItemDescription(assignItemDetails.getItemDescription());
@@ -447,10 +494,12 @@ public class ItemDetailsService {
                                 }
                             }
 
-                            //remark
-                            if (assignItemDetails.getRemark() != null && assignItemDetails.getRemark().trim().length() > 0) {
+                            // remark
+                            if (assignItemDetails.getRemark() != null
+                                    && assignItemDetails.getRemark().trim().length() > 0) {
                                 if (itemDetails.getRemark() != null && itemDetails.getRemark().trim().length() > 0) {
-                                    if (!itemDetails.getRemark().toLowerCase().equals(assignItemDetails.getRemark().toLowerCase())) {
+                                    if (!itemDetails.getRemark().toLowerCase()
+                                            .equals(assignItemDetails.getRemark().toLowerCase())) {
                                         itemDetails.setRemark(assignItemDetails.getRemark());
                                         historyChangedByAdmin.setRemark(assignItemDetails.getRemark());
                                     }
@@ -460,61 +509,99 @@ public class ItemDetailsService {
                                 }
                             }
 
-                            //item Status
-                            if (assignItemDetails.getItemStatus() != null && assignItemDetails.getItemStatus().trim().length() > 0) {
+                            // item Status
+                            if (assignItemDetails.getItemStatus() != null
+                                    && assignItemDetails.getItemStatus().trim().length() > 0) {
                                 if (itemDetails.getItemStatusId() == null) {
-                                    itemStatusOptionEntity = itemStatusOptionDAO.getItemStatusOptionDetails(assignItemDetails.getItemStatus().toLowerCase());
+                                    itemStatusOptionEntity = itemStatusOptionDAO.getItemStatusOptionDetails(
+                                            assignItemDetails.getItemStatus().toLowerCase());
                                     if (itemStatusOptionEntity != null) {
                                         itemDetails.setItemStatusId(itemStatusOptionEntity);
                                         historyChangedByAdmin.setItemStatusId(itemStatusOptionEntity);
                                     } else {
-                                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("this item status is not listed add another one");
+                                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                .body("this item status is not listed add another one");
                                     }
                                 } else {
-                                    if (!itemDetails.getItemStatusId().getItemStatus().toLowerCase().equals(assignItemDetails.getItemStatus().toLowerCase())) {
-                                        itemStatusOptionEntity = itemStatusOptionDAO.getItemStatusOptionDetails(assignItemDetails.getItemStatus().toLowerCase());
+                                    if (!itemDetails.getItemStatusId().getItemStatus().toLowerCase()
+                                            .equals(assignItemDetails.getItemStatus().toLowerCase())) {
+                                        itemStatusOptionEntity = itemStatusOptionDAO.getItemStatusOptionDetails(
+                                                assignItemDetails.getItemStatus().toLowerCase());
                                         if (itemStatusOptionEntity != null) {
                                             itemDetails.setItemStatusId(itemStatusOptionEntity);
                                             historyChangedByAdmin.setItemStatusId(itemStatusOptionEntity);
                                         } else {
-                                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("this item status is not listed add another one");
+                                            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                    .body("this item status is not listed add another one");
                                         }
                                     }
                                 }
                             }
 
-                            //item Availability
-                            if (assignItemDetails.getItemAvailability() != null && assignItemDetails.getItemAvailability().trim().length() > 0) {
-                                //check is their trying to updating available status to repairing or delete
-                                if (assignItemDetails.getItemAvailability().toLowerCase().equals("repairing") || assignItemDetails.getItemAvailability().toLowerCase().equals("delete")) {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("you can not change avilable status " + assignItemDetails.getItemAvailability() + " from here");
+                            // item Availability
+                            if (assignItemDetails.getItemAvailability() != null
+                                    && assignItemDetails.getItemAvailability().trim().length() > 0) {
+                                // check is their trying to updating available status to repairing or delete
+                                if (assignItemDetails.getItemAvailability().toLowerCase().equals("repairing")
+                                        || assignItemDetails.getItemAvailability().toLowerCase().equals("delete")) {
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("you can not change avilable status "
+                                                    + assignItemDetails.getItemAvailability() + " from here");
                                 }
-                                //check itemdetails have avilable status at table or not
+                                // check itemdetails have avilable status at table or not
                                 if (itemDetails.getAvailableStatusId() == null) {
-                                    itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(assignItemDetails.getItemAvailability().toLowerCase());
+                                    itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(
+                                            assignItemDetails.getItemAvailability().toLowerCase());
                                     if (itemAvailEntity != null) {
                                         itemDetails.setAvailableStatusId(itemAvailEntity);
                                         historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                     } else {
-                                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("this option is not listed add another one");
+                                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                .body("this option is not listed add another one");
                                     }
-                                } else {//if available status stored in table then check for both are same or not
-                                    if (itemDetails.getAvailableStatusId().getItemAvailableOption().toLowerCase().equals("repairing") || itemDetails.getAvailableStatusId().getItemAvailableOption().toLowerCase().equals("delete")) {
+                                } else {// if available status stored in table then check for both are same or not
+                                    if (itemDetails.getAvailableStatusId().getItemAvailableOption().toLowerCase()
+                                            .equals("repairing")
+                                            || itemDetails.getAvailableStatusId().getItemAvailableOption().toLowerCase()
+                                                    .equals("delete")) {
                                         if (loginUserRole.equals("employee")) {
                                             System.out.println(loginUserRole);
-                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Only admin or manager can change repairing or detele item status");
+                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                                                    "Only admin or manager can change repairing or detele item status");
                                         }
                                     }
-                                    if (!itemDetails.getAvailableStatusId().getItemAvailableOption().toLowerCase().equals(assignItemDetails.getItemAvailability().toLowerCase())) {
+                                    if (!itemDetails.getAvailableStatusId().getItemAvailableOption().toLowerCase()
+                                            .equals(assignItemDetails.getItemAvailability().toLowerCase())) {
 
-                                        itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(assignItemDetails.getItemAvailability().toLowerCase());
+                                        itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(
+                                                assignItemDetails.getItemAvailability().toLowerCase());
                                         if (itemAvailEntity != null) {
                                             itemDetails.setAvailableStatusId(itemAvailEntity);
                                             historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                         } else {
-                                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("this option is not listed add another one");
+                                            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                    .body("this option is not listed add another one");
                                         }
                                     }
+                                }
+                            }
+
+                            // Return Duration Logic
+                            if (assignItemDetails.getReturnDuration() != null) {
+                                itemDetails.setReturnDuration(assignItemDetails.getReturnDuration());
+                                // Automatically set status to "issued" (likely the correct DB value) if return
+                                // duration is set
+                                String statusToSet = "issued";
+                                itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(statusToSet);
+
+                                if (itemAvailEntity == null) {
+                                    statusToSet = "issue";
+                                    itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption(statusToSet);
+                                }
+
+                                if (itemAvailEntity != null) {
+                                    itemDetails.setAvailableStatusId(itemAvailEntity);
+                                    historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                 }
                             }
 
@@ -522,8 +609,10 @@ public class ItemDetailsService {
                             if (loginUserRole.equals("admin") || loginUserRole.equals("manager")) {
                                 // only for admin set region
                                 if (loginUserRole.equals("admin")) {
-                                    if (assignItemDetails.getRegion() != null && assignItemDetails.getRegion().trim().length() > 0) {
-                                        regionEntity = regionDAO.findByCity(assignItemDetails.getRegion().toLowerCase());
+                                    if (assignItemDetails.getRegion() != null
+                                            && assignItemDetails.getRegion().trim().length() > 0) {
+                                        regionEntity = regionDAO
+                                                .findByCity(assignItemDetails.getRegion().toLowerCase());
                                         if (regionEntity != null) {
                                             if (itemDetails.getRegion().equals(regionEntity)) {
                                                 // if previous and new region are same then leave it
@@ -539,10 +628,13 @@ public class ItemDetailsService {
 
                                 } // admin set region section closed
 
-                                //model no
-                                if (assignItemDetails.getModelNo() != null && assignItemDetails.getModelNo().trim().length() > 0) {
-                                    if (itemDetails.getModelNo() != null && itemDetails.getModelNo().trim().length() > 0) {
-                                        if (!itemDetails.getModelNo().toLowerCase().equals(assignItemDetails.getModelNo().toLowerCase())) {
+                                // model no
+                                if (assignItemDetails.getModelNo() != null
+                                        && assignItemDetails.getModelNo().trim().length() > 0) {
+                                    if (itemDetails.getModelNo() != null
+                                            && itemDetails.getModelNo().trim().length() > 0) {
+                                        if (!itemDetails.getModelNo().toLowerCase()
+                                                .equals(assignItemDetails.getModelNo().toLowerCase())) {
                                             itemDetails.setModelNo(assignItemDetails.getModelNo());
                                             historyChangedByAdmin.setModelNo(assignItemDetails.getModelNo());
                                         }
@@ -552,10 +644,13 @@ public class ItemDetailsService {
                                     }
                                 }
 
-                                //system name
-                                if (assignItemDetails.getSystemName() != null && assignItemDetails.getSystemName().trim().length() > 0) {
-                                    if (itemDetails.getSystem() != null && itemDetails.getSystem().trim().length() > 0) {
-                                        if (!itemDetails.getSystem().toLowerCase().equals(assignItemDetails.getSystemName().toLowerCase())) {
+                                // system name
+                                if (assignItemDetails.getSystemName() != null
+                                        && assignItemDetails.getSystemName().trim().length() > 0) {
+                                    if (itemDetails.getSystem() != null
+                                            && itemDetails.getSystem().trim().length() > 0) {
+                                        if (!itemDetails.getSystem().toLowerCase()
+                                                .equals(assignItemDetails.getSystemName().toLowerCase())) {
                                             itemDetails.setSystem(assignItemDetails.getSystemName());
                                             historyChangedByAdmin.setSystem(assignItemDetails.getSystemName());
                                         }
@@ -565,12 +660,16 @@ public class ItemDetailsService {
                                     }
                                 }
 
-                                //system version
-                                if (assignItemDetails.getSystemVersion() != null && assignItemDetails.getSystemVersion().trim().length() > 0) {
-                                    if (itemDetails.getSystem_Version() != null && itemDetails.getSystem_Version().trim().length() > 0) {
-                                        if (!itemDetails.getSystem_Version().toLowerCase().equals(assignItemDetails.getSystemVersion().toLowerCase())) {
+                                // system version
+                                if (assignItemDetails.getSystemVersion() != null
+                                        && assignItemDetails.getSystemVersion().trim().length() > 0) {
+                                    if (itemDetails.getSystem_Version() != null
+                                            && itemDetails.getSystem_Version().trim().length() > 0) {
+                                        if (!itemDetails.getSystem_Version().toLowerCase()
+                                                .equals(assignItemDetails.getSystemVersion().toLowerCase())) {
                                             itemDetails.setSystem_Version(assignItemDetails.getSystemVersion());
-                                            historyChangedByAdmin.setSystem_Version(assignItemDetails.getSystemVersion());
+                                            historyChangedByAdmin
+                                                    .setSystem_Version(assignItemDetails.getSystemVersion());
                                         }
                                     } else {
                                         itemDetails.setSystem_Version(assignItemDetails.getSystemVersion());
@@ -578,10 +677,13 @@ public class ItemDetailsService {
                                     }
                                 }
 
-                                //module for
-                                if (assignItemDetails.getModuleFor() != null && assignItemDetails.getModuleFor().trim().length() > 0) {
-                                    if (itemDetails.getModuleFor() != null && itemDetails.getModuleFor().trim().length() > 0) {
-                                        if (!itemDetails.getModuleFor().toLowerCase().equals(assignItemDetails.getModuleFor().toLowerCase())) {
+                                // module for
+                                if (assignItemDetails.getModuleFor() != null
+                                        && assignItemDetails.getModuleFor().trim().length() > 0) {
+                                    if (itemDetails.getModuleFor() != null
+                                            && itemDetails.getModuleFor().trim().length() > 0) {
+                                        if (!itemDetails.getModuleFor().toLowerCase()
+                                                .equals(assignItemDetails.getModuleFor().toLowerCase())) {
                                             itemDetails.setModuleFor(assignItemDetails.getModuleFor());
                                             historyChangedByAdmin.setModuleFor(assignItemDetails.getModuleFor());
                                         }
@@ -592,22 +694,27 @@ public class ItemDetailsService {
                                 }
 
                                 // check keyword and sub keyword section for adding
-                                if (assignItemDetails.getKeywordName() != null && assignItemDetails.getKeywordName().trim().length() > 0) {
-                                    keywordEntity = keywordDAO.getByKeyword(assignItemDetails.getKeywordName().toLowerCase());
+                                if (assignItemDetails.getKeywordName() != null
+                                        && assignItemDetails.getKeywordName().trim().length() > 0) {
+                                    keywordEntity = keywordDAO
+                                            .getByKeyword(assignItemDetails.getKeywordName().toLowerCase());
                                     if (keywordEntity != null) {
                                         if (itemDetails.getKeywordEntity() == null) {// if previous keyword null
                                             itemDetails.setKeywordEntity(keywordEntity);
                                             historyChangedByAdmin.setKeywordEntity(keywordEntity);
 
                                             // check sub keyword if keyword exist
-                                            if (assignItemDetails.getSubKeywordName() != null && assignItemDetails.getSubKeywordName().trim().length() > 0) {
-                                                subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity, assignItemDetails.getSubKeywordName().toLowerCase());
+                                            if (assignItemDetails.getSubKeywordName() != null
+                                                    && assignItemDetails.getSubKeywordName().trim().length() > 0) {
+                                                subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity,
+                                                        assignItemDetails.getSubKeywordName().toLowerCase());
                                                 if (subKeywordEntity != null) {
                                                     if (itemDetails.getSubKeyWordEntity() == null) {
                                                         itemDetails.setSubKeyWordEntity(subKeywordEntity);
                                                         historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
                                                     } else {
-                                                        if (!itemDetails.getSubKeyWordEntity().equals(subKeywordEntity)) {
+                                                        if (!itemDetails.getSubKeyWordEntity()
+                                                                .equals(subKeywordEntity)) {
                                                             itemDetails.setSubKeyWordEntity(subKeywordEntity);
                                                             historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
                                                         }
@@ -616,16 +723,20 @@ public class ItemDetailsService {
                                                     subKeyMessage = ", sub keyword not listed under this keyword, item saved under keyword only";
                                                 }
                                             }
-                                        } else {  //if previous keyword not null
+                                        } else { // if previous keyword not null
                                             if (!itemDetails.getKeywordEntity().equals(keywordEntity)) {
                                                 itemDetails.setKeywordEntity(keywordEntity);
                                                 historyChangedByAdmin.setKeywordEntity(keywordEntity);
 
                                                 // check sub keyword if keyword exist
-                                                if (assignItemDetails.getSubKeywordName() != null && assignItemDetails.getSubKeywordName().trim().length() > 0) {
-                                                    subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity, assignItemDetails.getSubKeywordName().toLowerCase());
+                                                if (assignItemDetails.getSubKeywordName() != null
+                                                        && assignItemDetails.getSubKeywordName().trim().length() > 0) {
+                                                    subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(
+                                                            keywordEntity,
+                                                            assignItemDetails.getSubKeywordName().toLowerCase());
                                                     if (subKeywordEntity != null) {
-                                                        if (!itemDetails.getSubKeyWordEntity().equals(subKeywordEntity)) {
+                                                        if (!itemDetails.getSubKeyWordEntity()
+                                                                .equals(subKeywordEntity)) {
                                                             itemDetails.setSubKeyWordEntity(subKeywordEntity);
                                                             historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
                                                         }
@@ -634,16 +745,21 @@ public class ItemDetailsService {
                                                     }
                                                 }
                                             } else {
-                                                if (assignItemDetails.getSubKeywordName() != null && assignItemDetails.getSubKeywordName().trim().length() > 0) {
-                                                    subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity, assignItemDetails.getSubKeywordName().toLowerCase());
+                                                if (assignItemDetails.getSubKeywordName() != null
+                                                        && assignItemDetails.getSubKeywordName().trim().length() > 0) {
+                                                    subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(
+                                                            keywordEntity,
+                                                            assignItemDetails.getSubKeywordName().toLowerCase());
                                                     if (subKeywordEntity != null) {
                                                         if (itemDetails.getSubKeyWordEntity() == null) {
                                                             itemDetails.setSubKeyWordEntity(subKeywordEntity);
                                                             historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
                                                         } else {
-                                                            if (!itemDetails.getSubKeyWordEntity().equals(subKeywordEntity)) {
+                                                            if (!itemDetails.getSubKeyWordEntity()
+                                                                    .equals(subKeywordEntity)) {
                                                                 itemDetails.setSubKeyWordEntity(subKeywordEntity);
-                                                                historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
+                                                                historyChangedByAdmin
+                                                                        .setSubKeyWordEntity(subKeywordEntity);
                                                             }
                                                         }
                                                     } else {
@@ -654,12 +770,12 @@ public class ItemDetailsService {
                                         }
 
                                     } else {
-                                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("keyword is new, First add this keyword");
+                                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                .body("keyword is new, First add this keyword");
                                     }
-                                }// keyword and subkeyword section closed
+                                } // keyword and subkeyword section closed
 
-                            }// admin and manager section closed
-
+                            } // admin and manager section closed
 
                             boolean isEmpty = true;
                             for (Field field : historyChangedByAdmin.getClass().getDeclaredFields()) {
@@ -673,9 +789,10 @@ public class ItemDetailsService {
 
                             if (isEmpty) {
                                 // The object is considered empty
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("All field  is upto date" + message + "" + subKeyMessage);
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("All field  is upto date" + message + "" + subKeyMessage);
                             } else {
-                                //if (historyChangedByAdmin != null) {
+                                // if (historyChangedByAdmin != null) {
                                 // setting date and update person name
 
                                 historyChangedByAdmin.setSerial_No(itemDetails.getSerial_No());
@@ -694,12 +811,13 @@ public class ItemDetailsService {
 
                             }
 
-
                             itemDetails = itemDetailsDAO.save(itemDetails);// save to database
                             if (itemDetails != null) {
-                                return ResponseEntity.status(HttpStatus.OK).body("Item updated succesfully" + message + "" + subKeyMessage);
+                                return ResponseEntity.status(HttpStatus.OK)
+                                        .body("Item updated succesfully" + message + "" + subKeyMessage);
                             } else {
-                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
+                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body("Something went wrong");
                             }
 
                         }
@@ -748,14 +866,19 @@ public class ItemDetailsService {
                 }
 
                 // 3. Get the Item
-                ItemDetailsEntity itemDetails = itemDetailsDAO.getItemDetailsBySerialNo(regionDto.getSerialNo().trim().toLowerCase());
+                ItemDetailsEntity itemDetails = itemDetailsDAO
+                        .getItemDetailsBySerialNo(regionDto.getSerialNo().trim().toLowerCase());
 
                 if (itemDetails == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Serial No not registered");
                 }
 
                 // 4. Get the New Region Entity
-                RegionEntity newRegionEntity = regionDAO.findByCity(regionDto.getNewRegionName().toLowerCase()); // Assuming findByCity is your method
+                RegionEntity newRegionEntity = regionDAO.findByCity(regionDto.getNewRegionName().toLowerCase()); // Assuming
+                                                                                                                 // findByCity
+                                                                                                                 // is
+                                                                                                                 // your
+                                                                                                                 // method
 
                 if (newRegionEntity == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Region not found in database");
@@ -765,7 +888,6 @@ public class ItemDetailsService {
                 if (itemDetails.getRegion() != null && itemDetails.getRegion().equals(newRegionEntity)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Item is already in this region");
                 }
-
 
                 // A. Create the History Object
                 ItemHistoryUpdatedByAdminEntity historyChangedByAdmin = new ItemHistoryUpdatedByAdminEntity();
@@ -809,10 +931,10 @@ public class ItemDetailsService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
         }
     }
-
 
     // find item via serial no
     public ResponseEntity<?> getItemDetailsBySerialNo(HttpServletRequest request, String serialNo) {
@@ -831,14 +953,16 @@ public class ItemDetailsService {
                 } else {
 
                     if (serialNo == null) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Serial no  is required please add serial number first");
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("Serial no  is required please add serial number first");
                     }
                     String loginUserRole = adminUserEntity.getRoleModel().getRoleName().toLowerCase();
                     itemDetailsEntity = itemDetailsDAO.getItemDetailsBySerialNo(serialNo.trim().toLowerCase());
                     if (itemDetailsEntity != null) {
                         if (!loginUserRole.equals("admin")) {
                             if (!adminUserEntity.getRegionEntity().equals(itemDetailsEntity.getRegion())) {
-                                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("this item not belonging to your region");
+                                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                        .body("this item not belonging to your region");
                             }
                         }
                         ItemDetailsResponse itemDetailsResponse = new ItemDetailsResponse();
@@ -862,24 +986,29 @@ public class ItemDetailsService {
                         }
                         if (itemDetailsEntity.getItemStatusId() != null) {
 
-                            itemDetailsResponse.setItemStatus(itemDetailsEntity.getItemStatusId().getItemStatus().toUpperCase());
+                            itemDetailsResponse
+                                    .setItemStatus(itemDetailsEntity.getItemStatusId().getItemStatus().toUpperCase());
                         }
-                        if (itemDetailsEntity.getSpare_Location() != null && !itemDetailsEntity.getSpare_Location().isEmpty()) {
+                        if (itemDetailsEntity.getSpare_Location() != null
+                                && !itemDetailsEntity.getSpare_Location().isEmpty()) {
                             itemDetailsResponse.setSpareLocation(itemDetailsEntity.getSpare_Location());
                         }
                         if (itemDetailsEntity.getSystem() != null && !itemDetailsEntity.getSystem().isEmpty()) {
                             itemDetailsResponse.setSystem(itemDetailsEntity.getSystem());
                         }
-                        if (itemDetailsEntity.getSystem_Version() != null && !itemDetailsEntity.getSystem_Version().isEmpty()) {
+                        if (itemDetailsEntity.getSystem_Version() != null
+                                && !itemDetailsEntity.getSystem_Version().isEmpty()) {
                             itemDetailsResponse.setSystemVersion(itemDetailsEntity.getSystem_Version());
                         }
                         if (itemDetailsEntity.getModuleFor() != null && !itemDetailsEntity.getModuleFor().isEmpty()) {
                             itemDetailsResponse.setModuleFor(itemDetailsEntity.getModuleFor());
                         }
                         if (itemDetailsEntity.getAvailableStatusId() != null) {
-                            itemDetailsResponse.setItemAvailability(itemDetailsEntity.getAvailableStatusId().getItemAvailableOption().toUpperCase());
+                            itemDetailsResponse.setItemAvailability(
+                                    itemDetailsEntity.getAvailableStatusId().getItemAvailableOption().toUpperCase());
                         }
-                        if (itemDetailsEntity.getItemDescription() != null && !itemDetailsEntity.getItemDescription().isEmpty()) {
+                        if (itemDetailsEntity.getItemDescription() != null
+                                && !itemDetailsEntity.getItemDescription().isEmpty()) {
                             itemDetailsResponse.setItemDescription(itemDetailsEntity.getItemDescription());
                         }
                         if (itemDetailsEntity.getRemark() != null && !itemDetailsEntity.getRemark().isEmpty()) {
@@ -888,7 +1017,8 @@ public class ItemDetailsService {
                         if (itemDetailsEntity.getEmpEmail() != null && !itemDetailsEntity.getEmpEmail().isEmpty()) {
                             itemDetailsResponse.setEmpEmail(itemDetailsEntity.getEmpEmail());
                         }
-                        if (itemDetailsEntity.getAddedByEmail() != null && !itemDetailsEntity.getAddedByEmail().isEmpty()) {
+                        if (itemDetailsEntity.getAddedByEmail() != null
+                                && !itemDetailsEntity.getAddedByEmail().isEmpty()) {
                             itemDetailsResponse.setAddedByEmail(itemDetailsEntity.getAddedByEmail());
                         }
                         if (itemDetailsEntity.getPartyName() != null && !itemDetailsEntity.getPartyName().isEmpty()) {
@@ -904,10 +1034,12 @@ public class ItemDetailsService {
                             itemDetailsResponse.setRegion(itemDetailsEntity.getRegion().getCity().toUpperCase());
                         }
                         if (itemDetailsEntity.getKeywordEntity() != null) {
-                            itemDetailsResponse.setKeyword(itemDetailsEntity.getKeywordEntity().getKeywordName().toUpperCase());
+                            itemDetailsResponse
+                                    .setKeyword(itemDetailsEntity.getKeywordEntity().getKeywordName().toUpperCase());
                         }
                         if (itemDetailsEntity.getSubKeyWordEntity() != null) {
-                            itemDetailsResponse.setSubKeyword(itemDetailsEntity.getSubKeyWordEntity().getSubKeyword().toUpperCase());
+                            itemDetailsResponse.setSubKeyword(
+                                    itemDetailsEntity.getSubKeyWordEntity().getSubKeyword().toUpperCase());
                         }
 
                         return ResponseEntity.status(HttpStatus.OK).body(itemDetailsResponse);
@@ -926,7 +1058,8 @@ public class ItemDetailsService {
     }
 
     // Getting Item Details via keyword subkeyword and region for admin
-    public ResponseEntity<?> getItemDetailsByKeyword(HttpServletRequest request, GetItemByKeywordRequest requestDetails) {
+    public ResponseEntity<?> getItemDetailsByKeyword(HttpServletRequest request,
+            GetItemByKeywordRequest requestDetails) {
 
         String loggedInUserName = null;
         String message = "";
@@ -952,61 +1085,74 @@ public class ItemDetailsService {
 
                     String loginUserRole = adminUserEntity.getRoleModel().getRoleName().toLowerCase();
 
-//					if (requestDetails == null || requestDetails.getKeyword() == null
-//							|| (requestDetails.getKeyword()!=null && requestDetails.getKeyword().trim().length() <= 0)) {
-//						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("keyword required");
-//					}
-                    if (loginUserRole.equals("admin")) {//region for admin start
-                        if (requestDetails.getRegion() == null || (requestDetails.getRegion() != null && requestDetails.getRegion().trim().length() <= 0)) {
+                    // if (requestDetails == null || requestDetails.getKeyword() == null
+                    // || (requestDetails.getKeyword()!=null &&
+                    // requestDetails.getKeyword().trim().length() <= 0)) {
+                    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("keyword
+                    // required");
+                    // }
+                    if (loginUserRole.equals("admin")) {// region for admin start
+                        if (requestDetails.getRegion() == null || (requestDetails.getRegion() != null
+                                && requestDetails.getRegion().trim().length() <= 0)) {
 
                             message = "Region required for Admin Role";
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
                         } else {
-                            //regionEntity=null;
+                            // regionEntity=null;
                             region = regionDAO.findByCity(requestDetails.getRegion().trim().toLowerCase());
                             if (region == null) {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The region with this " + requestDetails.getRegion().trim() + "city name is not listed");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The region with this "
+                                        + requestDetails.getRegion().trim() + "city name is not listed");
                             }
                         }
-                    } else {//region for manager start
+                    } else {// region for manager start
                         if (adminUserEntity.getRegionEntity() != null) {
-                            //regionEntity=null;
+                            // regionEntity=null;
                             region = adminUserEntity.getRegionEntity();
                         } else {
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No region assign to you");
                         }
                     }
 
-                    //keyword and SubKeyword
+                    // keyword and SubKeyword
                     if (requestDetails.getKeyword() != null && requestDetails.getKeyword().trim().length() > 0) {
-                        //keywordEntity=null;
+                        // keywordEntity=null;
                         keyword = keywordDAO.getByKeyword(requestDetails.getKeyword().toLowerCase());
                         if (keyword == null) {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Keyword is not listed with this name");
-                        } else if (requestDetails.getSubKeyword() != null && requestDetails.getSubKeyword().trim().length() > 0 && keyword != null) {
-                            //subKeywordEntity=null;
-                            subKeyword = subKeywordDAO.getSpecificSubKeyword(keyword, requestDetails.getSubKeyword().toLowerCase());
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body("Keyword is not listed with this name");
+                        } else if (requestDetails.getSubKeyword() != null
+                                && requestDetails.getSubKeyword().trim().length() > 0 && keyword != null) {
+                            // subKeywordEntity=null;
+                            subKeyword = subKeywordDAO.getSpecificSubKeyword(keyword,
+                                    requestDetails.getSubKeyword().toLowerCase());
                             if (subKeyword == null || subKeyword.getId() == null) {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sub keyword id not listed/Not belonging to this keyword");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("Sub keyword id not listed/Not belonging to this keyword");
                             }
                         }
                     }
 
-                    //item Availability
-                    if (requestDetails.getItemAvailability() != null && requestDetails.getItemAvailability().trim().length() > 0) {
-                        //itemAvailEntity=null;
-                        availableDetail = itemAvailableStatusDAO.getStatusDetailsByOption(requestDetails.getItemAvailability().trim().toLowerCase());
+                    // item Availability
+                    if (requestDetails.getItemAvailability() != null
+                            && requestDetails.getItemAvailability().trim().length() > 0) {
+                        // itemAvailEntity=null;
+                        availableDetail = itemAvailableStatusDAO
+                                .getStatusDetailsByOption(requestDetails.getItemAvailability().trim().toLowerCase());
                         if (availableDetail == null || availableDetail.getId() == null) {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This Available option is not listed");
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body("This Available option is not listed");
                         }
                     }
 
-                    //item Status Option
+                    // item Status Option
                     if (requestDetails.getItemStatus() != null && requestDetails.getItemStatus().trim().length() > 0) {
-                        //itemStatusOptionEntity=null;
-                        itemStatus = itemStatusOptionDAO.getItemStatusOptionDetails(requestDetails.getItemStatus().toLowerCase());
+                        // itemStatusOptionEntity=null;
+                        itemStatus = itemStatusOptionDAO
+                                .getItemStatusOptionDetails(requestDetails.getItemStatus().toLowerCase());
                         if (itemStatus == null || itemStatus.getId() == null) {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This item status option is not listed");
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body("This item status option is not listed");
                         }
                     }
 
@@ -1025,13 +1171,15 @@ public class ItemDetailsService {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Keyword or PartNo required");
                     }
 
-                    Specification<ItemDetailsEntity> specification = ItemDetailsDynamicQueryBuilder.getItemDetailsQuery(region, keyword, subKeyword, availableDetail, itemStatus, partNo, systemName);
+                    Specification<ItemDetailsEntity> specification = ItemDetailsDynamicQueryBuilder.getItemDetailsQuery(
+                            region, keyword, subKeyword, availableDetail, itemStatus, partNo, systemName);
                     List<ItemDetailsEntity> itemList = new ArrayList<>();
                     itemList = itemDetailsDAO.findAll(specification);
                     if (itemList != null && !itemList.isEmpty()) {
                         return ResponseEntity.status(HttpStatus.OK).body(itemList);
                     } else {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No data listed, with your specific search");
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No data listed, with your specific search");
                     }
 
                 }
@@ -1044,14 +1192,19 @@ public class ItemDetailsService {
         }
     }
 
-
     public DashboardSummaryDto getDashboardSummary(boolean isAdmin, String userRegion) {
         List<RegionCountDto> regionCounts = new ArrayList<>();
+
+        // Get status counts (same for admin and non-admin)
+        long availableCount = itemDetailsDAO.countAvailableItems();
+        long issuedCount = itemDetailsDAO.countIssuedItems();
+        long repairingCount = itemDetailsDAO.countRepairingItems();
 
         if (isAdmin) {
             long total = itemDetailsDAO.countAllItems();
 
-            List<Object[]> rows = itemDetailsDAO.countByRegion(); // returns [region, count] where region may be String or RegionEntity
+            List<Object[]> rows = itemDetailsDAO.countByRegion(); // returns [region, count] where region may be String
+                                                                  // or RegionEntity
             for (Object[] row : rows) {
                 String regionName = null;
                 long cnt = 0L;
@@ -1065,7 +1218,8 @@ public class ItemDetailsService {
                         regionName = (String) r0;
                     } else if (r0 != null) {
                         try {
-                            // If it's a RegionEntity (or proxy), attempt to call getCity() via reflection to be safe
+                            // If it's a RegionEntity (or proxy), attempt to call getCity() via reflection
+                            // to be safe
                             Class<?> clazz = r0.getClass();
                             try {
                                 java.lang.reflect.Method m = clazz.getMethod("getCity");
@@ -1102,7 +1256,7 @@ public class ItemDetailsService {
                 regionCounts.add(new RegionCountDto(regionName, cnt));
             }
 
-            return new DashboardSummaryDto(total, regionCounts);
+            return new DashboardSummaryDto(total, availableCount, issuedCount, repairingCount, regionCounts);
         } else {
             // Non-admin user (manager/employee): only their region counts should be visible
             long total = 0L;
@@ -1116,10 +1270,9 @@ public class ItemDetailsService {
                 total = 0L;
             }
 
-            return new DashboardSummaryDto(total, regionCounts);
+            return new DashboardSummaryDto(total, availableCount, issuedCount, repairingCount, regionCounts);
         }
     }
-
 
     private String generateSerialForKeyword(String rawKeyword) {
         if (rawKeyword == null || rawKeyword.trim().isEmpty()) {
@@ -1140,7 +1293,5 @@ public class ItemDetailsService {
         } while (itemDetailsDAO.isSerialExist(candidate.trim().toLowerCase()));
         return candidate.trim().toLowerCase();
     }
-
-
 
 }

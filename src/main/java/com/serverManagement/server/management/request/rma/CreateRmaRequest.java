@@ -32,6 +32,10 @@ public class CreateRmaRequest {
 
     // Signature
     private String signature;
+    private String repairType;
+
+    // Turn Around Time in days
+    private Integer tat;
 
     // List of Items
     private List<RmaItemRequest> items;
@@ -45,7 +49,8 @@ public class CreateRmaRequest {
             String courierCompanyName, String companyName, String email, String contactName,
             String telephone, String mobile, String returnAddress, String invoiceCompanyName,
             String invoiceEmail, String invoiceContactName, String invoiceTelephone,
-            String invoiceMobile, String invoiceAddress, String signature, List<RmaItemRequest> items) {
+            String invoiceMobile, String invoiceAddress, String signature, String repairType,
+            List<RmaItemRequest> items) {
         super();
         this.dplLicense = dplLicense;
         this.date = date;
@@ -65,6 +70,7 @@ public class CreateRmaRequest {
         this.invoiceMobile = invoiceMobile;
         this.invoiceAddress = invoiceAddress;
         this.signature = signature;
+        this.repairType = repairType;
         this.items = items;
     }
 
@@ -75,6 +81,14 @@ public class CreateRmaRequest {
 
     public void setDplLicense(String dplLicense) {
         this.dplLicense = dplLicense;
+    }
+
+    public String getRepairType() {
+        return repairType;
+    }
+
+    public void setRepairType(String repairType) {
+        this.repairType = repairType;
     }
 
     public String getDate() {
@@ -219,6 +233,14 @@ public class CreateRmaRequest {
 
     public void setItems(List<RmaItemRequest> items) {
         this.items = items;
+    }
+
+    public Integer getTat() {
+        return tat;
+    }
+
+    public void setTat(Integer tat) {
+        this.tat = tat;
     }
 
     @Override

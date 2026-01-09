@@ -6,9 +6,7 @@ import {
   Select,
   message,
   Typography,
-  Space,
   Spin,
-  Divider,
   Table,
   Button,
   Badge,
@@ -16,40 +14,37 @@ import {
   Tag,
 } from "antd";
 import {
-  TeamOutlined, // For the title
-  GlobalOutlined, // For the region select
-  ReloadOutlined, // For the refresh button
+  TeamOutlined,
+  ReloadOutlined,
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  GlobalOutlined,
 } from "@ant-design/icons";
 
-// Import the new API
 import GetEmployeeListAPI from "../API/GetEmployeeListAPI/GetEmployeeListAPI";
-// Import the regions API from your reference
 import GetRegionAPI from "../API/Region/GetRegion/GetRegionAPI";
-
-// Import a new CSS file for this component
 import "./EmployeeList.css";
 
-const { Text } = Typography;
+const { Title, Text } = Typography;
 
 function EmployeeList() {
-  const role = useMemo(() => localStorage.getItem("_User_role_for_MSIPL") || "user", []);
+  const role = useMemo(
+    () => localStorage.getItem("_User_role_for_MSIPL") || "user",
+    []
+  );
 
-  // State for the employee list and loading
   const [employees, setEmployees] = useState([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
-
-  // State for regions (copied from your AddEmployee)
   const [regions, setRegions] = useState([]);
   const [loadingRegions, setLoadingRegions] = useState(false);
-
-  // State to track the currently selected filter
-  const [selectedRegion, setSelectedRegion] = useState(null); // null = "All Regions"
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     document.title = "Employee List";
   }, []);
 
-  // Function to fetch regions (copied from your AddEmployee)
   const fetchRegions = async () => {
     setLoadingRegions(true);
     try {
@@ -67,11 +62,9 @@ function EmployeeList() {
     }
   };
 
-  // Function to fetch the employee list
   const fetchEmployees = async (region) => {
     setLoadingEmployees(true);
     try {
-      // 'region' will be null for "All Regions" or a string
       const data = await GetEmployeeListAPI(region);
       if (Array.isArray(data)) {
         setEmployees(data);
@@ -81,42 +74,42 @@ function EmployeeList() {
       }
     } catch (error) {
       console.error("API Error (Employee List):", error);
-      message.error(error?.message || "Failed to fetch employees. Please try again.", 3);
+      message.error(
+        error?.message || "Failed to fetch employees. Please try again.",
+        3
+      );
     } finally {
       setLoadingEmployees(false);
     }
   };
 
-  // Load initial data on component mount
   useEffect(() => {
-    // Fetch all employees initially
     fetchEmployees(null);
-
-    // Fetch regions if the user is an admin
     if (role === "admin") {
       fetchRegions();
     }
-  }, [role]); // Re-run if role changes (though unlikely)
+  }, [role]);
 
-  // Handler for when the region filter changes
   const handleRegionChange = (value) => {
-    // 'value' will be undefined/null if "All Regions" is selected
     const regionToFetch = value || null;
     setSelectedRegion(regionToFetch);
     fetchEmployees(regionToFetch);
   };
 
-  // Handler for the refresh button
-  const handleRefresh = () => {
-    // Re-fetch employees with the currently selected region
-    fetchEmployees(selectedRegion);
-    // Also refresh the regions list if admin
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchEmployees(selectedRegion);
     if (role === "admin") {
-      fetchRegions();
+      await fetchRegions();
     }
+    setRefreshing(false);
+    message.success("List refreshed");
   };
 
-  // Define columns for the Ant Design Table
+  // Stats
+  const totalEmployees = employees.length;
+  const onlineCount = employees.filter((e) => e.online).length;
+
   const columns = [
     {
       title: "Status",
@@ -131,7 +124,6 @@ function EmployeeList() {
             </Tooltip>
           );
         }
-        // Calculate "last seen" text
         let lastSeenText = "Offline";
         if (record.lastActiveAt) {
           const lastActive = new Date(record.lastActiveAt);
@@ -146,26 +138,47 @@ function EmployeeList() {
           }
         }
         return (
-          <Tooltip title={record.lastActiveAt ? `Last seen: ${new Date(record.lastActiveAt).toLocaleString()}` : "Never logged in"}>
-            <Badge status="default" text={<Text type="secondary">{lastSeenText}</Text>} />
+          <Tooltip
+            title={
+              record.lastActiveAt
+                ? `Last seen: ${new Date(record.lastActiveAt).toLocaleString()}`
+                : "Never logged in"
+            }
+          >
+            <Badge
+              status="default"
+              text={<Text type="secondary">{lastSeenText}</Text>}
+            />
           </Tooltip>
         );
       },
       sorter: (a, b) => (a.online === b.online ? 0 : a.online ? -1 : 1),
     },
     {
-      title: "Name",
+      title: (
+        <span>
+          <UserOutlined /> Name
+        </span>
+      ),
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
-      title: "Email",
+      title: (
+        <span>
+          <MailOutlined /> Email
+        </span>
+      ),
       dataIndex: "email",
       key: "email",
     },
     {
-      title: "Mobile No",
+      title: (
+        <span>
+          <PhoneOutlined /> Mobile No
+        </span>
+      ),
       dataIndex: "mobileNo",
       key: "mobileNo",
     },
@@ -173,88 +186,151 @@ function EmployeeList() {
       title: "Role",
       dataIndex: "role",
       key: "role",
-
+      render: (role) => {
+        const colors = {
+          admin: "red",
+          manager: "blue",
+          employee: "green",
+        };
+        return (
+          <Tag color={colors[role?.toLowerCase()] || "default"}>
+            {role || "N/A"}
+          </Tag>
+        );
+      },
       filters: [
-        { text: 'Admin', value: 'admin' },
-        { text: 'Manager', value: 'manager' },
-        { text: 'Employee', value: 'employee' },
+        { text: "Admin", value: "admin" },
+        { text: "Manager", value: "manager" },
+        { text: "Employee", value: "employee" },
       ],
       onFilter: (value, record) =>
-        String(record.role || '').toLowerCase() === value,
+        String(record.role || "").toLowerCase() === value,
     },
     {
-      title: "Region",
+      title: (
+        <span>
+          <GlobalOutlined /> Region
+        </span>
+      ),
       dataIndex: "regionName",
       key: "regionName",
-
-      ...(role !== "admin" && { responsive: ['md'] })
+      ...(role !== "admin" && { responsive: ["md"] }),
     },
   ];
 
-  // Filter out the 'Region' column if the user is not an admin
-  const finalColumns = (role === "admin")
-    ? columns
-    : columns.filter(col => col.key !== 'regionName');
+  const finalColumns =
+    role === "admin"
+      ? columns
+      : columns.filter((col) => col.key !== "regionName");
 
   return (
-    <div className="employee-list-wrapper">
-      <Card
-        className="employee-list-card"
-        bordered={false}
-        title={
-          <Space align="center">
-            <TeamOutlined style={{ color: "var(--primary-color)" }} />
-            <span>Employee List</span>
-          </Space>
-        }
-        extra={
-          <Space>
-            {/* Conditionally render the region filter for admins */}
-            {role === "admin" && (
+    <div className="employee-list-page">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="header-content">
+          <div className="header-icon">
+            <TeamOutlined />
+          </div>
+          <div className="header-text">
+            <Title level={3} className="header-title">
+              Employee List
+            </Title>
+            <Text className="header-subtitle">
+              Browse, filter, and manage all employees in the system
+            </Text>
+          </div>
+        </div>
+        <Button
+          icon={<ReloadOutlined spin={refreshing} />}
+          onClick={handleRefresh}
+          loading={refreshing}
+          className="refresh-btn"
+        >
+          Refresh
+        </Button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="employee-stats">
+        <div className="stat-card total">
+          <div className="stat-icon">
+            <TeamOutlined />
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">{totalEmployees}</span>
+            <span className="stat-label">Total Employees</span>
+            <span className="stat-sublabel">Registered users</span>
+          </div>
+        </div>
+
+        <div className="stat-card online">
+          <div className="stat-icon online-icon">
+            <Badge status="success" />
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">{onlineCount}</span>
+            <span className="stat-label">Online Now</span>
+            <span className="stat-sublabel">Currently active</span>
+          </div>
+        </div>
+
+        <div className="stat-card offline">
+          <div className="stat-icon">
+            <Badge status="default" />
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">{totalEmployees - onlineCount}</span>
+            <span className="stat-label">Offline</span>
+            <span className="stat-sublabel">Not active</span>
+          </div>
+        </div>
+
+        {role === "admin" && (
+          <div className="stat-card filter">
+            <div className="stat-content">
+              <span className="filter-label">
+                <GlobalOutlined /> Filter by Region
+              </span>
               <Select
                 showSearch
-                placeholder={loadingRegions ? "Loading regions..." : "Filter by region"}
-                prefix={<GlobalOutlined />}
+                placeholder={
+                  loadingRegions ? "Loading..." : "All Regions"
+                }
                 loading={loadingRegions}
                 disabled={loadingRegions}
                 allowClear
-                style={{ width: 200 }}
-                onChange={handleRegionChange} // Set the handler
-                value={selectedRegion}       // Control the component's value
+                style={{ width: "100%" }}
+                size="large"
+                onChange={handleRegionChange}
+                value={selectedRegion}
                 optionFilterProp="children"
-                filterOption={(input, option) => (option?.children ?? "").toLowerCase().includes(input.toLowerCase())}
+                filterOption={(input, option) =>
+                  (option?.children ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
               >
-
                 {regions.map((region) => (
-                  <Select.Option key={region} value={region}>{region}</Select.Option>
+                  <Select.Option key={region} value={region}>
+                    {region}
+                  </Select.Option>
                 ))}
               </Select>
-            )}
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={handleRefresh}
-              type="text"
-              style={{ color: "var(--primary-color)" }}
-            >
-              Refresh List
-            </Button>
-          </Space>
-        }
-      >
-        <Text type="secondary" style={{ color: "var(--text-color-secondary)" }}>
-          Browse, filter, and manage all employees in the system.
-        </Text>
+            </div>
+          </div>
+        )}
+      </div>
 
-        <Divider style={{ margin: "16px 0" }} />
-
+      {/* Table Card */}
+      <Card className="employee-table-card" bordered={false}>
         <Spin spinning={loadingEmployees} tip="Loading employees...">
           <Table
             dataSource={employees}
             columns={finalColumns}
-            rowKey="email" // Use a unique key, 'email' or 'id' if you have it
-            pagination={{ pageSize: 10 }}
-            scroll={{ x: true }} // For better mobile responsiveness
-            className="compact-table"
+            rowKey="email"
+            pagination={{ pageSize: 10, showSizeChanger: true }}
+            scroll={{ x: true }}
+            className="employee-table"
           />
         </Spin>
       </Card>

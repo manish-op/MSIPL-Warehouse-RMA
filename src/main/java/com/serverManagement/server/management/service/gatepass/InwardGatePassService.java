@@ -126,32 +126,44 @@ public class InwardGatePassService {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User Not Login");
                 } else {
                     String loginUserRole = adminUserEntity.getRoleModel().getRoleName().toLowerCase();
-                    if (passRequest == null || passRequest.getPartyName() == null || (passRequest.getPartyName() != null && passRequest.getPartyName().trim().length() < 1) || passRequest.getPartyAddress() == null || (passRequest.getPartyAddress() != null && passRequest.getPartyAddress().trim().length() < 1) || passRequest.getItemList() == null || (passRequest.getItemList() != null && passRequest.getItemList().isEmpty())) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("party name, Address and Atleast 1 item is required for gatepass");
+                    if (passRequest == null || passRequest.getPartyName() == null
+                            || (passRequest.getPartyName() != null && passRequest.getPartyName().trim().length() < 1)
+                            || passRequest.getPartyAddress() == null
+                            || (passRequest.getPartyAddress() != null
+                                    && passRequest.getPartyAddress().trim().length() < 1)
+                            || passRequest.getItemList() == null
+                            || (passRequest.getItemList() != null && passRequest.getItemList().isEmpty())) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("party name, Address and Atleast 1 item is required for gatepass");
                     } else {
                         InwardGatePassEntity newGatePassInward = new InwardGatePassEntity();
                         newGatePassInward.setPartyName(passRequest.getPartyName());
                         newGatePassInward.setPartyAddress(passRequest.getPartyAddress());
                         newGatePassInward.setCreatedBy(loggedInUserName);
                         newGatePassInward.setCreatedDate(LocalDate.now());
-                        if (passRequest.getPartyContact() != null && passRequest.getPartyContact().trim().length() >= 9) {
+                        if (passRequest.getPartyContact() != null
+                                && passRequest.getPartyContact().trim().length() >= 9) {
                             newGatePassInward.setPartyContact(passRequest.getPartyContact().trim());
                         }
 
                         if (loginUserRole.equals("admin")) {
                             if (passRequest.getRegion() != null && passRequest.getRegion().trim().length() > 0) {
-                                RegionEntity regionDetails = regionDAO.findByCity(passRequest.getRegion().trim().toLowerCase());
+                                RegionEntity regionDetails = regionDAO
+                                        .findByCity(passRequest.getRegion().trim().toLowerCase());
                                 if (regionDetails != null) {
                                     newGatePassInward.setRegionDetails(regionDetails);
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Provided region not listed in our database");
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("Provided region not listed in our database");
                                 }
                             } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Region is required for admin role");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("Region is required for admin role");
                             }
                         } else {
                             // user region assign to gate pass
-                            if (adminUserEntity.getRegionEntity() != null && adminUserEntity.getRegionEntity().getId() != null) {
+                            if (adminUserEntity.getRegionEntity() != null
+                                    && adminUserEntity.getRegionEntity().getId() != null) {
 
                                 newGatePassInward.setRegionDetails(adminUserEntity.getRegionEntity());
                             } else {
@@ -162,10 +174,13 @@ public class InwardGatePassService {
                         List<FruEntity> fruList = new ArrayList<FruEntity>();
                         List<ItemListViaGatePassInward> gatepassItemList = new ArrayList<ItemListViaGatePassInward>();
                         for (InwardGatepassItemList gatepassItem : passRequest.getItemList()) {
-                            if (gatepassItem.getSerialNo() == null || (gatepassItem.getSerialNo() != null && gatepassItem.getSerialNo().trim().length() <= 0)) {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("serial number for every item is required");
+                            if (gatepassItem.getSerialNo() == null || (gatepassItem.getSerialNo() != null
+                                    && gatepassItem.getSerialNo().trim().length() <= 0)) {
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("serial number for every item is required");
                             }
-                            ItemDetailsEntity itemDetail = itemDetailsDAO.getComponentDetailsBySerialNo(gatepassItem.getSerialNo().trim().toLowerCase());
+                            ItemDetailsEntity itemDetail = itemDetailsDAO
+                                    .getComponentDetailsBySerialNo(gatepassItem.getSerialNo().trim().toLowerCase());
                             ItemHistoryUpdatedByAdminEntity historyChangedByAdmin = new ItemHistoryUpdatedByAdminEntity();
                             if (itemDetail == null) {
                                 ItemDetailsEntity item = new ItemDetailsEntity();
@@ -177,7 +192,8 @@ public class InwardGatePassService {
                                 itemDetail.setPartyName(newGatePassInward.getPartyName());
                                 historyChangedByAdmin.setPartyName(newGatePassInward.getPartyName());
 
-                                if (gatepassItem.getModuleFor() != null && gatepassItem.getModuleFor().trim().length() > 0) {
+                                if (gatepassItem.getModuleFor() != null
+                                        && gatepassItem.getModuleFor().trim().length() > 0) {
 
                                     itemDetail.setModuleFor(loginUserRole);
                                     historyChangedByAdmin.setModuleFor(loginUserRole);
@@ -189,17 +205,20 @@ public class InwardGatePassService {
                                     historyChangedByAdmin.setPartNo(gatepassItem.getPartNo().trim().toLowerCase());
                                 }
 
-                                if (gatepassItem.getModeuleVersion() != null && gatepassItem.getModuleFor().trim().length() > 0) {
+                                if (gatepassItem.getModeuleVersion() != null
+                                        && gatepassItem.getModuleFor().trim().length() > 0) {
 
                                     itemDetail.setSystem_Version(loginUserRole);
                                     historyChangedByAdmin.setSystem_Version(loginUserRole);
                                 }
-                                if (gatepassItem.getSpareLocation() != null && gatepassItem.getSpareLocation().trim().length() > 0) {
+                                if (gatepassItem.getSpareLocation() != null
+                                        && gatepassItem.getSpareLocation().trim().length() > 0) {
 
                                     itemDetail.setSpare_Location(gatepassItem.getSpareLocation());
                                     historyChangedByAdmin.setSpare_Location(gatepassItem.getSpareLocation());
                                 }
-                                if (gatepassItem.getSystemName() != null && gatepassItem.getSystemName().trim().length() > 0) {
+                                if (gatepassItem.getSystemName() != null
+                                        && gatepassItem.getSystemName().trim().length() > 0) {
                                     itemDetail.setSystem(loginUserRole);
                                     historyChangedByAdmin.setSystem(loginUserRole);
                                 }
@@ -213,46 +232,57 @@ public class InwardGatePassService {
                                 }
 
                                 // section for item Status new, old or repair
-                                if (gatepassItem.getItemStatus() != null && gatepassItem.getItemStatus().trim().length() > 0) {
+                                if (gatepassItem.getItemStatus() != null
+                                        && gatepassItem.getItemStatus().trim().length() > 0) {
 
-                                    itemStatusOptionEntity = itemStatusOptionDAO.getItemStatusOptionDetails(gatepassItem.getItemStatus().toLowerCase());
+                                    itemStatusOptionEntity = itemStatusOptionDAO
+                                            .getItemStatusOptionDetails(gatepassItem.getItemStatus().toLowerCase());
                                     if (itemStatusOptionEntity != null) {
                                         itemDetail.setItemStatusId(itemStatusOptionEntity);
                                         historyChangedByAdmin.setItemStatusId(itemStatusOptionEntity);
                                     } else {
-                                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("this item status is not listed add another one");
+                                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                .body("this item status is not listed add another one");
                                     }
 
                                 } // Item status new,old or repair closed
 
                                 // check keyword and sub keyword section for adding
-                                if (gatepassItem.getKeywordName() == null && gatepassItem.getKeywordName().trim().length() < 1) {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Keyword is required for adding item first time :-" + gatepassItem.getSerialNo());
+                                if (gatepassItem.getKeywordName() == null
+                                        || gatepassItem.getKeywordName().trim().length() < 1) {
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("Keyword is required for adding item first time :-"
+                                                    + gatepassItem.getSerialNo());
                                 } else {
-                                    keywordEntity = keywordDAO.getByKeyword(gatepassItem.getKeywordName().toLowerCase());
+                                    keywordEntity = keywordDAO
+                                            .getByKeyword(gatepassItem.getKeywordName().toLowerCase());
                                     if (keywordEntity != null) {
                                         itemDetail.setKeywordEntity(keywordEntity);
                                         historyChangedByAdmin.setKeywordEntity(keywordEntity);
                                         // check sub keyword if keyword exist
-                                        if (gatepassItem.getSubkeywordName() != null && gatepassItem.getSubkeywordName().trim().length() > 0) {
-                                            subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity, gatepassItem.getSubkeywordName().toLowerCase());
+                                        if (gatepassItem.getSubkeywordName() != null
+                                                && gatepassItem.getSubkeywordName().trim().length() > 0) {
+                                            subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity,
+                                                    gatepassItem.getSubkeywordName().toLowerCase());
                                             if (subKeywordEntity != null) {
                                                 itemDetail.setSubKeyWordEntity(subKeywordEntity);
                                                 historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
                                             }
                                         }
                                     } else {
-                                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("keyword is new, First add this keyword");
+                                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                .body("keyword is new, First add this keyword");
                                     }
                                 } // Keyword Section closed
 
-
-                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption("available");
+                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO
+                                        .getStatusDetailsByOption("available");
                                 if (itemAvailEntity != null) {
                                     itemDetail.setAvailableStatusId(itemAvailEntity);
                                     historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("AVAILABLE Status is not listed in our database add this first");
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("AVAILABLE Status is not listed in our database add this first");
                                 }
 
                                 // region adding section open
@@ -267,17 +297,19 @@ public class InwardGatePassService {
 
                             } else {// closing for adding new item into table
 
-                                if (!itemDetail.getRegion().equals(newGatePassInward.getRegionDetails())) {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(itemDetail.getSerial_No() + " is not belongs to your region");
+                                if (itemDetail.getRegion() != null
+                                        && !itemDetail.getRegion().equals(newGatePassInward.getRegionDetails())) {
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body(itemDetail.getSerial_No() + " is not belongs to your region");
                                 }
-
 
                                 historyChangedByAdmin.setSerial_No(gatepassItem.getSerialNo().trim().toLowerCase());
 
-//								
+                                //
 
                                 if (newGatePassInward.getRegionDetails() != null) {
-                                    if (itemDetail.getRegion() != null && (!itemDetail.getRegion().equals(newGatePassInward.getRegionDetails()))) {
+                                    if (itemDetail.getRegion() != null
+                                            && (!itemDetail.getRegion().equals(newGatePassInward.getRegionDetails()))) {
                                         itemDetail.setRegion(newGatePassInward.getRegionDetails());
                                         historyChangedByAdmin.setRegion(newGatePassInward.getRegionDetails());
                                     } else if (itemDetail.getRegion() != null) {
@@ -290,16 +322,22 @@ public class InwardGatePassService {
                                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Region not available");
                                 }
 
-                                if (gatepassItem.getModuleFor() != null && gatepassItem.getModuleFor().trim().length() > 0) {
-                                    if (!itemDetail.getModuleFor().trim().toLowerCase().equals(gatepassItem.getModuleFor().trim().toLowerCase())) {
-                                        itemDetail.setModuleFor(loginUserRole);
-                                        historyChangedByAdmin.setModuleFor(loginUserRole);
+                                if (gatepassItem.getModuleFor() != null
+                                        && gatepassItem.getModuleFor().trim().length() > 0) {
+                                    if (itemDetail.getModuleFor() == null
+                                            || !itemDetail.getModuleFor().trim().toLowerCase()
+                                                    .equals(gatepassItem.getModuleFor().trim().toLowerCase())) {
+                                        itemDetail.setModuleFor(gatepassItem.getModuleFor());
+                                        historyChangedByAdmin.setModuleFor(gatepassItem.getModuleFor());
                                     }
                                 }
-                                if (gatepassItem.getModeuleVersion() != null && gatepassItem.getModuleFor().trim().length() > 0) {
-                                    if (!itemDetail.getSystem_Version().trim().toLowerCase().equals(gatepassItem.getModeuleVersion().trim().toLowerCase())) {
-                                        itemDetail.setSystem_Version(loginUserRole);
-                                        historyChangedByAdmin.setSystem_Version(loginUserRole);
+                                if (gatepassItem.getModeuleVersion() != null
+                                        && gatepassItem.getModeuleVersion().trim().length() > 0) {
+                                    if (itemDetail.getSystem_Version() == null
+                                            || !itemDetail.getSystem_Version().trim().toLowerCase()
+                                                    .equals(gatepassItem.getModeuleVersion().trim().toLowerCase())) {
+                                        itemDetail.setSystem_Version(gatepassItem.getModeuleVersion());
+                                        historyChangedByAdmin.setSystem_Version(gatepassItem.getModeuleVersion());
                                     }
                                 }
 
@@ -307,20 +345,26 @@ public class InwardGatePassService {
                                 itemDetail.setPartyName(newGatePassInward.getPartyName());
                                 historyChangedByAdmin.setPartyName(newGatePassInward.getPartyName());
 
-                                if (gatepassItem.getSpareLocation() != null && gatepassItem.getSpareLocation().trim().length() > 0) {
-                                    if (!itemDetail.getSpare_Location().trim().toLowerCase().equals(gatepassItem.getSpareLocation().trim().toLowerCase())) {
+                                if (gatepassItem.getSpareLocation() != null
+                                        && gatepassItem.getSpareLocation().trim().length() > 0) {
+                                    if (itemDetail.getSpare_Location() == null
+                                            || !itemDetail.getSpare_Location().trim().toLowerCase()
+                                                    .equals(gatepassItem.getSpareLocation().trim().toLowerCase())) {
                                         itemDetail.setSpare_Location(gatepassItem.getSpareLocation());
                                         historyChangedByAdmin.setSpare_Location(gatepassItem.getSpareLocation());
                                     }
                                 }
-                                if (gatepassItem.getSystemName() != null && !gatepassItem.getSystemName().trim().isEmpty()) {
-                                    if (!itemDetail.getSystem().trim().toLowerCase().equals(gatepassItem.getSystemName().trim().toLowerCase())) {
-                                        itemDetail.setSystem(loginUserRole);
-                                        historyChangedByAdmin.setSystem(loginUserRole);
+                                if (gatepassItem.getSystemName() != null
+                                        && !gatepassItem.getSystemName().trim().isEmpty()) {
+                                    if (itemDetail.getSystem() == null || !itemDetail.getSystem().trim().toLowerCase()
+                                            .equals(gatepassItem.getSystemName().trim().toLowerCase())) {
+                                        itemDetail.setSystem(gatepassItem.getSystemName());
+                                        historyChangedByAdmin.setSystem(gatepassItem.getSystemName());
                                     }
                                 }
                                 if (gatepassItem.getRackNo() != null && !gatepassItem.getRackNo().trim().isEmpty()) {
-                                    if (!itemDetail.getRack_No().trim().toLowerCase().equals(gatepassItem.getRackNo().toLowerCase().trim())) {
+                                    if (itemDetail.getRack_No() == null || !itemDetail.getRack_No().trim().toLowerCase()
+                                            .equals(gatepassItem.getRackNo().toLowerCase().trim())) {
                                         itemDetail.setRack_No(gatepassItem.getRackNo());
                                         historyChangedByAdmin.setRack_No(gatepassItem.getRackNo());
                                     }
@@ -333,64 +377,83 @@ public class InwardGatePassService {
                                 }
 
                                 if (gatepassItem.getPartNo() != null && gatepassItem.getPartNo().trim().length() > 0) {
-                                    if (!itemDetail.getPartNo().trim().toLowerCase().equals(gatepassItem.getPartNo().toLowerCase().trim())) {
+                                    if (itemDetail.getPartNo() == null || !itemDetail.getPartNo().trim().toLowerCase()
+                                            .equals(gatepassItem.getPartNo().toLowerCase().trim())) {
                                         itemDetail.setPartNo(gatepassItem.getPartNo().trim().toLowerCase());
                                         historyChangedByAdmin.setPartNo(gatepassItem.getPartNo().trim().toLowerCase());
                                     }
                                 }
 
                                 // section for item Status new, old or repair, faulty
-                                if (gatepassItem.getItemStatus() != null && gatepassItem.getItemStatus().trim().length() > 0) {
+                                if (gatepassItem.getItemStatus() != null
+                                        && gatepassItem.getItemStatus().trim().length() > 0) {
 
-                                    itemStatusOptionEntity = itemStatusOptionDAO.getItemStatusOptionDetails(gatepassItem.getItemStatus().toLowerCase());
+                                    itemStatusOptionEntity = itemStatusOptionDAO
+                                            .getItemStatusOptionDetails(gatepassItem.getItemStatus().toLowerCase());
                                     if (itemStatusOptionEntity != null) {
 
-                                        if (!itemDetail.getItemStatusId().equals(itemStatusOptionEntity)) {
+                                        if (itemDetail.getItemStatusId() == null
+                                                || !itemDetail.getItemStatusId().equals(itemStatusOptionEntity)) {
                                             itemDetail.setItemStatusId(itemStatusOptionEntity);
                                             historyChangedByAdmin.setItemStatusId(itemStatusOptionEntity);
                                         }
 
                                     } else {
-                                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("this item status is not listed add another one");
+                                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                .body("this item status is not listed add another one");
                                     } // Item status new,old or repair closed
                                 }
 
                                 // check keyword and sub keyword section for adding
 
-                                if (gatepassItem.getKeywordName() != null && !gatepassItem.getKeywordName().trim().isEmpty()) {
-                                    keywordEntity = keywordDAO.getByKeyword(gatepassItem.getKeywordName().toLowerCase());
+                                if (gatepassItem.getKeywordName() != null
+                                        && !gatepassItem.getKeywordName().trim().isEmpty()) {
+                                    keywordEntity = keywordDAO
+                                            .getByKeyword(gatepassItem.getKeywordName().toLowerCase());
                                     if (keywordEntity != null) {
                                         if (!itemDetail.getKeywordEntity().equals(keywordEntity)) {
                                             itemDetail.setKeywordEntity(keywordEntity);
                                             historyChangedByAdmin.setKeywordEntity(keywordEntity);
                                             // check sub keyword if keyword exist
-                                            if (gatepassItem.getSubkeywordName() != null && !gatepassItem.getSubkeywordName().trim().isEmpty()) {
-                                                subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity, gatepassItem.getSubkeywordName().toLowerCase());
+                                            if (gatepassItem.getSubkeywordName() != null
+                                                    && !gatepassItem.getSubkeywordName().trim().isEmpty()) {
+                                                subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity,
+                                                        gatepassItem.getSubkeywordName().toLowerCase());
                                                 if (subKeywordEntity != null) {
                                                     if (!itemDetail.getSubKeyWordEntity().equals(subKeywordEntity)) {
                                                         itemDetail.setSubKeyWordEntity(subKeywordEntity);
                                                         historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
                                                     }
                                                 } else {
-                                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This is subKeyword: " + gatepassItem.getSubkeywordName() + " not listed under this keyword: " + gatepassItem.getKeywordName());
+                                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                            .body("This is subKeyword: "
+                                                                    + gatepassItem.getSubkeywordName()
+                                                                    + " not listed under this keyword: "
+                                                                    + gatepassItem.getKeywordName());
                                                 }
                                             }
                                         } else {
-                                            if (gatepassItem.getSubkeywordName() != null && !gatepassItem.getSubkeywordName().trim().isEmpty()) {
-                                                subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity, gatepassItem.getSubkeywordName().toLowerCase().trim());
+                                            if (gatepassItem.getSubkeywordName() != null
+                                                    && !gatepassItem.getSubkeywordName().trim().isEmpty()) {
+                                                subKeywordEntity = subKeywordDAO.getSpecificSubKeyword(keywordEntity,
+                                                        gatepassItem.getSubkeywordName().toLowerCase().trim());
                                                 if (subKeywordEntity != null) {
                                                     if (!itemDetail.getSubKeyWordEntity().equals(subKeywordEntity)) {
                                                         itemDetail.setSubKeyWordEntity(subKeywordEntity);
                                                         historyChangedByAdmin.setSubKeyWordEntity(subKeywordEntity);
                                                     }
                                                 } else {
-                                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This subKeyword: " + gatepassItem.getSubkeywordName() + " not listed under this keyword: " + gatepassItem.getKeywordName());
+                                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                            .body("This subKeyword: " + gatepassItem.getSubkeywordName()
+                                                                    + " not listed under this keyword: "
+                                                                    + gatepassItem.getKeywordName());
                                                 }
                                             }
 
                                         }
                                     } else {
-                                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("keyword is new, First add this keyword");
+                                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                                .body("keyword is new, First add this keyword");
                                     }
                                 } // Keyword Section closed
                             }
@@ -399,9 +462,13 @@ public class InwardGatePassService {
                             if (gatepassItem.isFru()) {
                                 if (gatepassItem.getRmaNo() != null && !gatepassItem.getRmaNo().trim().isEmpty()) {
 
-                                    FruEntity fruConfirming = fruDAO.getRmaConfirmation(gatepassItem.getRmaNo().trim().toLowerCase(), newGatePassInward.getRegionDetails());
+                                    FruEntity fruConfirming = fruDAO.getRmaConfirmation(
+                                            gatepassItem.getRmaNo().trim().toLowerCase(),
+                                            newGatePassInward.getRegionDetails());
                                     if (fruConfirming != null) {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This Rma No: " + gatepassItem.getRmaNo().trim().toLowerCase() + " is already registered");
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .body("This Rma No: " + gatepassItem.getRmaNo().trim().toLowerCase()
+                                                        + " is already registered");
                                     }
 
                                     FruEntity fruTable = new FruEntity();
@@ -432,20 +499,23 @@ public class InwardGatePassService {
                                         newRepairingOption.setStatusOption("pending");
                                         repairOption = repairingOptionDAO.save(newRepairingOption);
                                         if (repairOption == null) {
-                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Getting error when creating Repairing option");
+                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                    .body("Getting error when creating Repairing option");
                                         }
                                     }
                                     itemInformation.setRepairStatus(repairOption);
 
                                     // this section is creating technicianStatus pending/Assign
-                                    TechnicianStatusEntity technicianStatus = technicianStatusDAO.getTechnicianStatus("pending");
+                                    TechnicianStatusEntity technicianStatus = technicianStatusDAO
+                                            .getTechnicianStatus("pending");
 
                                     if (technicianStatus == null) {
                                         TechnicianStatusEntity newTechnicianStatus = new TechnicianStatusEntity();
                                         newTechnicianStatus.setTechnicianAssign("pending");
                                         newTechnicianStatus = technicianStatusDAO.save(newTechnicianStatus);
                                         if (newTechnicianStatus == null) {
-                                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Getting error when creating technician Status pending");
+                                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                    .body("Getting error when creating technician Status pending");
                                         } else {
                                             technicianStatus = newTechnicianStatus;
                                         }
@@ -453,12 +523,17 @@ public class InwardGatePassService {
                                     itemInformation.setTechnicianStatus(technicianStatus);
 
                                     // this section is for getting warranty option details from table
-                                    if (gatepassItem.getWarrantyDetails() == null || gatepassItem.getWarrantyDetails() != null && gatepassItem.getWarrantyDetails().trim().length() <= 0) {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Warranty Details is required for item that have Rma no");
+                                    if (gatepassItem.getWarrantyDetails() == null
+                                            || gatepassItem.getWarrantyDetails() != null
+                                                    && gatepassItem.getWarrantyDetails().trim().length() <= 0) {
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .body("Warranty Details is required for item that have Rma no");
                                     }
-                                    WarrantyOptionEntity warrantyOption = warrantyOptionDAO.getWarrantyOption(gatepassItem.getWarrantyDetails().toLowerCase());
+                                    WarrantyOptionEntity warrantyOption = warrantyOptionDAO
+                                            .getWarrantyOption(gatepassItem.getWarrantyDetails().toLowerCase());
                                     if (warrantyOption == null) {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This warranty option is not listed before");
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .body("This warranty option is not listed before");
                                     }
                                     itemInformation.setWarrantyDetails(warrantyOption);
 
@@ -476,35 +551,51 @@ public class InwardGatePassService {
                             itemListForGatepass.setRmaNo(gatepassItem.getRmaNo());
                             itemListForGatepass.setInwardGatepass(newGatePassInward);
                             itemListForGatepass.setPartNo(itemDetail.getPartNo());
-                            itemListForGatepass.setKeywordName(itemDetail.getKeywordEntity().getKeywordName().toLowerCase());
-                            itemListForGatepass.setSubkeywordName(itemDetail.getSubKeyWordEntity().getSubKeyword().toLowerCase());
+                            if (itemDetail.getKeywordEntity() != null
+                                    && itemDetail.getKeywordEntity().getKeywordName() != null) {
+                                itemListForGatepass
+                                        .setKeywordName(itemDetail.getKeywordEntity().getKeywordName().toLowerCase());
+                            }
+                            if (itemDetail.getSubKeyWordEntity() != null
+                                    && itemDetail.getSubKeyWordEntity().getSubKeyword() != null) {
+                                itemListForGatepass.setSubkeywordName(
+                                        itemDetail.getSubKeyWordEntity().getSubKeyword().toLowerCase());
+                            } else {
+                                itemListForGatepass.setSubkeywordName("N/A");
+                            }
                             itemListForGatepass.setRemark(gatepassItem.getRemark());
 
                             gatepassItemList.add(itemListForGatepass);// adding item into gatepass for adding all at a
                             // time
                             /// Gate pass item Entity closed ---------------------------------
 
-                            if (gatepassItem.isFru() && gatepassItem.getRmaNo() != null && !gatepassItem.getRmaNo().trim().isEmpty()) {
+                            if (gatepassItem.isFru() && gatepassItem.getRmaNo() != null
+                                    && !gatepassItem.getRmaNo().trim().isEmpty()) {
 
-                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption("repairing");
+                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO
+                                        .getStatusDetailsByOption("repairing");
                                 if (itemAvailEntity != null) {
                                     itemDetail.setAvailableStatusId(itemAvailEntity);
                                     historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("REPAIRING Status is not listed in our database add this first");
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("REPAIRING Status is not listed in our database add this first");
                                 }
                             } else {
-                                if (itemDetail.getAvailableStatusId().getItemAvailableOption().trim().toLowerCase().equals("repairing")) {
-//									return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//											.body("This item is already under Repairing State");
+                                if (itemDetail.getAvailableStatusId().getItemAvailableOption().trim().toLowerCase()
+                                        .equals("repairing")) {
+                                    // return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    // .body("This item is already under Repairing State");
                                 } else {
                                     // section for available status if Rma no not available
-                                    ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption("available");
+                                    ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO
+                                            .getStatusDetailsByOption("available");
                                     if (itemAvailEntity != null) {
                                         itemDetail.setAvailableStatusId(itemAvailEntity);
                                         historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                     } else {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("AVAILABLE Status is not listed in our database add this first");
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                .body("AVAILABLE Status is not listed in our database add this first");
                                     }
                                 }
                             }
@@ -533,7 +624,8 @@ public class InwardGatePassService {
                         if (!gatepassItemList.isEmpty()) {
                             newGatePassInward.setItemList(gatepassItemList);
                         } else {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No item list is available for this gate pass");
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body("No item list is available for this gate pass");
                         }
                         if (fruList != null && !fruList.isEmpty()) {
                             newGatePassInward.setFruList(fruList);
@@ -545,11 +637,13 @@ public class InwardGatePassService {
                             itemList = itemDetailsDAO.saveAll(itemList);// save item details table
                             newGatePassInward = inwardGatePassDAO.save(newGatePassInward);// save gatepass table
                             if (!itemList.isEmpty() && !newGatePassInward.getItemList().isEmpty()) {
-//								if (!fruList.isEmpty()) {
-//									fruList = fruDAO.saveAll(fruList);// save repairing request table
-//								}
-                                if (newGatePassInward.getFruList() != null && !newGatePassInward.getFruList().isEmpty() && newGatePassInward.getFruList().size() > 1) {
-                                    return gatepassPassService.generateInvoicePdf(newGatePassInward, newGatePassInward.getFruList());
+                                // if (!fruList.isEmpty()) {
+                                // fruList = fruDAO.saveAll(fruList);// save repairing request table
+                                // }
+                                if (newGatePassInward.getFruList() != null && !newGatePassInward.getFruList().isEmpty()
+                                        && newGatePassInward.getFruList().size() > 1) {
+                                    return gatepassPassService.generateInvoicePdf(newGatePassInward,
+                                            newGatePassInward.getFruList());
                                 } else {
                                     return gatepassPassService.generateInvoicePdf(newGatePassInward, fruList);
                                 }
@@ -557,7 +651,8 @@ public class InwardGatePassService {
                                 // return ResponseEntity.status(HttpStatus.OK).body("gatepass generated
                                 // successfully");
                             } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No item list is available for this gate pass");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("No item list is available for this gate pass");
                             }
 
                         } else {
@@ -579,7 +674,8 @@ public class InwardGatePassService {
 
     // Generate Outward GatePass
     @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<?> generatedOutwardGatepass(HttpServletRequest httpRequest, OutwardGatepassRequest outPassRequest) {
+    public ResponseEntity<?> generatedOutwardGatepass(HttpServletRequest httpRequest,
+            OutwardGatepassRequest outPassRequest) {
         String loggedInUserName = null;
 
         try {
@@ -594,32 +690,44 @@ public class InwardGatePassService {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User Not Login");
                 } else {
                     String loginUserRole = adminUserEntity.getRoleModel().getRoleName().toLowerCase();
-                    if (outPassRequest == null || outPassRequest.getPartyName() == null || (outPassRequest.getPartyName() != null && outPassRequest.getPartyName().trim().isEmpty()) || outPassRequest.getPartyAddress() == null || (outPassRequest.getPartyAddress() != null && outPassRequest.getPartyAddress().trim().isEmpty()) || outPassRequest.getItemList() == null || (outPassRequest.getItemList() != null && outPassRequest.getItemList().isEmpty())) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("party name, Address and Atleast 1 item is required for gatepass");
+                    if (outPassRequest == null || outPassRequest.getPartyName() == null
+                            || (outPassRequest.getPartyName() != null && outPassRequest.getPartyName().trim().isEmpty())
+                            || outPassRequest.getPartyAddress() == null
+                            || (outPassRequest.getPartyAddress() != null
+                                    && outPassRequest.getPartyAddress().trim().isEmpty())
+                            || outPassRequest.getItemList() == null
+                            || (outPassRequest.getItemList() != null && outPassRequest.getItemList().isEmpty())) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("party name, Address and Atleast 1 item is required for gatepass");
                     } else {
                         OutwardGatepassEntity newGatePassOutward = new OutwardGatepassEntity();
                         newGatePassOutward.setPartyName(outPassRequest.getPartyName());
                         newGatePassOutward.setPartyAddress(outPassRequest.getPartyAddress());
                         newGatePassOutward.setCreatedBy(loggedInUserName);
                         newGatePassOutward.setCreatedDate(LocalDate.now());
-                        if (outPassRequest.getPartyContact() != null && outPassRequest.getPartyContact().trim().length() >= 9) {
+                        if (outPassRequest.getPartyContact() != null
+                                && outPassRequest.getPartyContact().trim().length() >= 9) {
                             newGatePassOutward.setPartyContact(outPassRequest.getPartyContact().trim());
                         }
 
                         if (loginUserRole.equals("admin")) {
                             if (outPassRequest.getRegion() != null && !outPassRequest.getRegion().trim().isEmpty()) {
-                                RegionEntity regionDetails = regionDAO.findByCity(outPassRequest.getRegion().trim().toLowerCase());
+                                RegionEntity regionDetails = regionDAO
+                                        .findByCity(outPassRequest.getRegion().trim().toLowerCase());
                                 if (regionDetails != null) {
                                     newGatePassOutward.setRegionDetails(regionDetails);
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Provided region not listed in our database");
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("Provided region not listed in our database");
                                 }
                             } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Region is required for admin role");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("Region is required for admin role");
                             }
                         } else {
                             // user region assign to gate pass
-                            if (adminUserEntity.getRegionEntity() != null && adminUserEntity.getRegionEntity().getId() != null) {
+                            if (adminUserEntity.getRegionEntity() != null
+                                    && adminUserEntity.getRegionEntity().getId() != null) {
 
                                 newGatePassOutward.setRegionDetails(adminUserEntity.getRegionEntity());
                             } else {
@@ -632,24 +740,33 @@ public class InwardGatePassService {
                         List<FruEntity> fruList = new ArrayList<FruEntity>();
                         List<ItemListViaGatePassOutwardEntity> gatepassItemList = new ArrayList<ItemListViaGatePassOutwardEntity>();
                         for (OutwardGatepassItemList gatepassItem : outPassRequest.getItemList()) {
-                            if (gatepassItem.getSerialNo() == null || (gatepassItem.getSerialNo() != null && gatepassItem.getSerialNo().trim().length() <= 0)) {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("serial number for every item is required");
+                            if (gatepassItem.getSerialNo() == null || (gatepassItem.getSerialNo() != null
+                                    && gatepassItem.getSerialNo().trim().length() <= 0)) {
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("serial number for every item is required");
                             }
-                            ItemDetailsEntity itemDetail = itemDetailsDAO.getComponentDetailsBySerialNo(gatepassItem.getSerialNo().trim().toLowerCase());
+                            ItemDetailsEntity itemDetail = itemDetailsDAO
+                                    .getComponentDetailsBySerialNo(gatepassItem.getSerialNo().trim().toLowerCase());
                             ItemHistoryUpdatedByAdminEntity historyChangedByAdmin = new ItemHistoryUpdatedByAdminEntity();
                             if (itemDetail == null) {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This item is not listed before with this serial no:-" + gatepassItem.getSerialNo().trim().toLowerCase());
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("This item is not listed before with this serial no:-"
+                                                + gatepassItem.getSerialNo().trim().toLowerCase());
                             } else {
 
                                 if (!itemDetail.getRegion().equals(newGatePassOutward.getRegionDetails())) {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(itemDetail.getSerial_No() + " is not belongs to your region");
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body(itemDetail.getSerial_No() + " is not belongs to your region");
                                 }
 
                                 historyChangedByAdmin.setSerial_No(gatepassItem.getSerialNo().trim().toLowerCase());
                                 if (!gatepassItem.isFru()) {
-                                    if (!itemDetail.getAvailableStatusId().getItemAvailableOption().trim().toLowerCase().equals("repairing")) {
-                                        if (itemDetail.getAvailableStatusId().getItemAvailableOption().trim().toLowerCase().equals("issue")) {
-                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This item is not available");
+                                    if (!itemDetail.getAvailableStatusId().getItemAvailableOption().trim().toLowerCase()
+                                            .equals("repairing")) {
+                                        if (itemDetail.getAvailableStatusId().getItemAvailableOption().trim()
+                                                .toLowerCase().equals("issue")) {
+                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                    .body("This item is not available");
                                         }
                                     }
                                 }
@@ -667,33 +784,44 @@ public class InwardGatePassService {
                             if (gatepassItem.isFru()) {
                                 if (gatepassItem.getRmaNo() != null && !gatepassItem.getRmaNo().trim().isEmpty()) {
 
-                                    FruEntity fruTable = fruDAO.getRmaConfirmation(gatepassItem.getRmaNo().trim().toLowerCase(), newGatePassOutward.getRegionDetails());
+                                    FruEntity fruTable = fruDAO.getRmaConfirmation(
+                                            gatepassItem.getRmaNo().trim().toLowerCase(),
+                                            newGatePassOutward.getRegionDetails());
                                     if (fruTable == null) {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This Rma No: " + gatepassItem.getRmaNo().trim().toLowerCase() + " is not registered");
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This Rma No: "
+                                                + gatepassItem.getRmaNo().trim().toLowerCase() + " is not registered");
                                     }
                                     fruTable.setClosingDate(LocalDate.now());
                                     fruTable.setOutGatepassID(newGatePassOutward);
 
                                     ItemRepairingEntity itemInformation = fruTable.getRepairingIdList();
                                     if (itemInformation == null) {
-                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No item registered under this " + fruTable.getRmaNo() + " RMA no");
+                                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                                                "No item registered under this " + fruTable.getRmaNo() + " RMA no");
                                     }
-                                    if (!itemDetail.getSerial_No().toLowerCase().equals(itemInformation.getSerialNo().trim().toLowerCase())) {
+                                    if (!itemDetail.getSerial_No().toLowerCase()
+                                            .equals(itemInformation.getSerialNo().trim().toLowerCase())) {
                                         // starting for available option null or not--------------
 
                                         // update for add remark on main item field under this rma
-                                        ItemDetailsEntity itemForAddRemark = itemDetailsDAO.getItemDetailsBySerialNo(itemInformation.getSerialNo().trim().toLowerCase());
-//										if(itemForAddRemark==null){
-//											return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This item is not available");
-//
-//										}else {
+                                        ItemDetailsEntity itemForAddRemark = itemDetailsDAO.getItemDetailsBySerialNo(
+                                                itemInformation.getSerialNo().trim().toLowerCase());
+                                        // if(itemForAddRemark==null){
+                                        // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This item is not
+                                        // available");
+                                        //
+                                        // }else {
                                         ItemHistoryUpdatedByAdminEntity historyRemark = new ItemHistoryUpdatedByAdminEntity();
                                         historyRemark.setSerial_No(itemInformation.getSerialNo().trim().toLowerCase());
                                         historyRemark.setItemDetailsEntity(itemForAddRemark);
                                         List<ItemHistoryUpdatedByAdminEntity> historyList = new ArrayList<>();
 
-                                        itemForAddRemark.setRemark("this is Replaced with :-" + itemDetail.getSerial_No().toLowerCase() + " for this Rma no:-" + gatepassItem.getRmaNo().toLowerCase());
-                                        historyRemark.setRemark("this is Replaced with :-" + itemDetail.getSerial_No().toLowerCase() + " for this Rma no:-" + gatepassItem.getRmaNo().toLowerCase());
+                                        itemForAddRemark.setRemark(
+                                                "this is Replaced with :-" + itemDetail.getSerial_No().toLowerCase()
+                                                        + " for this Rma no:-" + gatepassItem.getRmaNo().toLowerCase());
+                                        historyRemark.setRemark(
+                                                "this is Replaced with :-" + itemDetail.getSerial_No().toLowerCase()
+                                                        + " for this Rma no:-" + gatepassItem.getRmaNo().toLowerCase());
 
                                         itemForAddRemark.setUpdate_Date(ZonedDateTime.now());
                                         historyRemark.setUpdate_Date(ZonedDateTime.now());
@@ -706,19 +834,25 @@ public class InwardGatePassService {
 
                                         /// update main item remark closed
 
-                                        if (itemDetail.getAvailableStatusId().getItemAvailableOption() != null && !itemDetail.getAvailableStatusId().getItemAvailableOption().trim().isEmpty()) {
-                                            if (itemDetail.getAvailableStatusId().getItemAvailableOption().trim().toLowerCase().equals("available")) {
+                                        if (itemDetail.getAvailableStatusId().getItemAvailableOption() != null
+                                                && !itemDetail.getAvailableStatusId().getItemAvailableOption().trim()
+                                                        .isEmpty()) {
+                                            if (itemDetail.getAvailableStatusId().getItemAvailableOption().trim()
+                                                    .toLowerCase().equals("available")) {
 
-                                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption("issue");
+                                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO
+                                                        .getStatusDetailsByOption("issue");
                                                 if (itemAvailEntity != null) {
                                                     itemDetail.setAvailableStatusId(itemAvailEntity);
                                                     historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                                 } else {
-                                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("issue Status is not listed in our database, contact to Admin");
+                                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                                                            "issue Status is not listed in our database, contact to Admin");
                                                 }
 
                                                 String userRemark = itemDetail.getRemark();
-                                                String addExtraRemark = "This item is replacement of Item Serial: " + itemInformation.getSerialNo();
+                                                String addExtraRemark = "This item is replacement of Item Serial: "
+                                                        + itemInformation.getSerialNo();
                                                 String contcatinationOFUserAndExtra = userRemark + addExtraRemark;
                                                 itemDetail.setRemark(contcatinationOFUserAndExtra);
                                                 historyChangedByAdmin.setRemark(contcatinationOFUserAndExtra);
@@ -729,34 +863,44 @@ public class InwardGatePassService {
                                                 itemDetail.setEmpEmail(loggedInUserName);
                                                 historyChangedByAdmin.setUpdatedByEmail(loggedInUserName);
 
-
                                                 itemInformation.setReplaceItemSerial(itemDetail.getSerial_No());
-
 
                                             } else {
 
-                                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("item with serial number: " + itemDetail.getSerial_No() + " is already under" + itemDetail.getAvailableStatusId().getItemAvailableOption());
+                                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                        .body("item with serial number: " + itemDetail.getSerial_No()
+                                                                + " is already under"
+                                                                + itemDetail.getAvailableStatusId()
+                                                                        .getItemAvailableOption());
                                             }
 
                                         } else {// check for available option if null then closing-----
-                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Avilable status is null for this serial: " + itemDetail.getSerial_No());
+                                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                    .body("Avilable status is null for this serial: "
+                                                            + itemDetail.getSerial_No());
                                         }
 
                                         // replacement section closed
                                     } else {
 
-                                        if (itemDetail.getAvailableStatusId().getItemAvailableOption() != null && !itemDetail.getAvailableStatusId().getItemAvailableOption().trim().isEmpty()) {
-                                            if (itemDetail.getAvailableStatusId().getItemAvailableOption().trim().toLowerCase().equals("available")) {
+                                        if (itemDetail.getAvailableStatusId().getItemAvailableOption() != null
+                                                && !itemDetail.getAvailableStatusId().getItemAvailableOption().trim()
+                                                        .isEmpty()) {
+                                            if (itemDetail.getAvailableStatusId().getItemAvailableOption().trim()
+                                                    .toLowerCase().equals("available")) {
 
-                                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption("issue");
+                                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO
+                                                        .getStatusDetailsByOption("issue");
                                                 if (itemAvailEntity != null) {
                                                     itemDetail.setAvailableStatusId(itemAvailEntity);
                                                     historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                                 } else {
-                                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("issue Status is not listed in our database, contact to Admin");
+                                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                                                            "issue Status is not listed in our database, contact to Admin");
                                                 }
 
-                                                if (gatepassItem.getRemark() != null && !gatepassItem.getRemark().trim().isEmpty()) {
+                                                if (gatepassItem.getRemark() != null
+                                                        && !gatepassItem.getRemark().trim().isEmpty()) {
                                                     itemDetail.setRemark(gatepassItem.getRemark());
                                                     historyChangedByAdmin.setRemark(gatepassItem.getRemark());
                                                 }
@@ -765,7 +909,8 @@ public class InwardGatePassService {
                                         }
                                     }
 
-                                    if (gatepassItem.getDocketOutward() != null && !gatepassItem.getDocketOutward().trim().isEmpty()) {
+                                    if (gatepassItem.getDocketOutward() != null
+                                            && !gatepassItem.getDocketOutward().trim().isEmpty()) {
                                         itemInformation.setDocketIdOutward(gatepassItem.getDocketOutward());
                                     }
                                     itemInformation.setLastUpdateDate(LocalDate.now());
@@ -779,9 +924,8 @@ public class InwardGatePassService {
                             itemListForGatepass.setSerialNo(itemDetail.getSerial_No());
                             itemListForGatepass.setRmaNo(gatepassItem.getRmaNo());
                             itemListForGatepass.setPartNo(itemDetail.getPartNo());
-                            itemListForGatepass.setKeywordName(itemDetail.getKeywordEntity().getKeywordName().toLowerCase());
-
-
+                            itemListForGatepass
+                                    .setKeywordName(itemDetail.getKeywordEntity().getKeywordName().toLowerCase());
 
                             SubKeywordEntity subKeyword = itemDetail.getSubKeyWordEntity();
                             if (subKeyword != null && subKeyword.getSubKeyword() != null) {
@@ -799,12 +943,14 @@ public class InwardGatePassService {
 
                             if (!gatepassItem.isFru()) {
 
-                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO.getStatusDetailsByOption("issue");
+                                ItemAvailableStatusOptionEntity itemAvailEntity = itemAvailableStatusDAO
+                                        .getStatusDetailsByOption("issue");
                                 if (itemAvailEntity != null) {
                                     itemDetail.setAvailableStatusId(itemAvailEntity);
                                     historyChangedByAdmin.setAvailableStatusId(itemAvailEntity);
                                 } else {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Issue Status is not listed in our database add this first");
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("Issue Status is not listed in our database add this first");
                                 }
                             }
 
@@ -835,7 +981,8 @@ public class InwardGatePassService {
                         if (!gatepassItemList.isEmpty()) {
                             newGatePassOutward.setItemList(gatepassItemList);
                         } else {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No item list is available for this gate pass");
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body("No item list is available for this gate pass");
                         }
 
                         if (!itemList.isEmpty() && !gatepassItemList.isEmpty()) {
@@ -849,7 +996,8 @@ public class InwardGatePassService {
                                 }
                                 return outwardGatepassPDFService.generateInvoicePdf(newGatePassOutward);
                             } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No item list is available for this gate pass");
+                                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                        .body("No item list is available for this gate pass");
                             }
 
                         } else {

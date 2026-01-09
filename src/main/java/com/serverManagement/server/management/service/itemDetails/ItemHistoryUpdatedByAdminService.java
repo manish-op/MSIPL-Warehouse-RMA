@@ -56,10 +56,22 @@ public class ItemHistoryUpdatedByAdminService {
                         .body("Serial number is required");
             }
 
-            List<ItemHistoryUpdatedByAdminEntity> historyDetailsList = itemDetailsDAO
-                    .getComponentHistorySerialNo(serialNo.trim().toLowerCase());
+            // Clean the serial number - remove quotes if present from JSON string
+            String cleanSerialNo = serialNo.trim().toLowerCase();
+            if (cleanSerialNo.startsWith("\"") && cleanSerialNo.endsWith("\"")) {
+                cleanSerialNo = cleanSerialNo.substring(1, cleanSerialNo.length() - 1);
+            }
 
-            if (historyDetailsList.isEmpty()) {
+            // First try direct query from history table
+            List<ItemHistoryUpdatedByAdminEntity> historyDetailsList = historyDAO
+                    .getHistoryDetailsBySerialNo(cleanSerialNo);
+
+            // Fallback to ItemDetailsEntity relationship if direct query returns empty
+            if (historyDetailsList == null || historyDetailsList.isEmpty()) {
+                historyDetailsList = itemDetailsDAO.getComponentHistorySerialNo(cleanSerialNo);
+            }
+
+            if (historyDetailsList == null || historyDetailsList.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No history found for this serial number");
             }
@@ -71,7 +83,8 @@ public class ItemHistoryUpdatedByAdminService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
         }
     }
 
@@ -134,28 +147,48 @@ public class ItemHistoryUpdatedByAdminService {
             String action = "UPDATED";
             String remark = h.getRemark() != null ? h.getRemark().toLowerCase() : "";
 
+            // Check remark first for explicit action hints
             if (remark.contains("region changed") || remark.contains("quick update: region")) {
                 action = "REGION_CHANGED";
             } else if (remark.contains("added") || remark.contains("created") || remark.contains("new item")) {
                 action = "ADDED";
-            } else if (h.getAvailableStatusId() != null) {
-                String status = h.getAvailableStatusId().getItemAvailableOption().toLowerCase();
-                if (status.equals("issue")) {
-                    action = "ISSUED";
-                } else if (status.equals("available")) {
-                    // Check if the item was previously issued (it's a return)
-                    // or if it's a new addition to inventory
-                    // For first-time entries, we check if this is the only/first history record
-                    if (remark.isEmpty() && h.getKeywordEntity() != null && h.getItemStatusId() != null) {
-                        // If multiple fields are set together (keyword, status, etc), it's likely a new
-                        // addition
-                        action = "ADDED";
-                    } else {
-                        action = "RETURNED";
+            } else if (h.getItemStatusId() != null) {
+                // Check item status for NEW status
+                String itemStatus = h.getItemStatusId().getItemStatus().toLowerCase();
+                if (itemStatus.contains("new") || itemStatus.equals("added")) {
+                    action = "ADDED";
+                } else if (itemStatus.contains("repair")) {
+                    action = "REPAIRING";
+                } else if (itemStatus.contains("fault")) {
+                    action = "FAULTY";
+                } else if (h.getAvailableStatusId() != null) {
+                    // Check availability status
+                    String availStatus = h.getAvailableStatusId().getItemAvailableOption().toLowerCase();
+                    if (availStatus.equals("issue") || availStatus.contains("issued")) {
+                        action = "ISSUED";
+                    } else if (availStatus.equals("available")) {
+                        // For available items - check if it looks like a return based on remark
+                        if (remark.contains("return")) {
+                            action = "RETURNED";
+                        } else {
+                            action = "AVAILABLE";
+                        }
+                    } else if (availStatus.contains("repair")) {
+                        action = "REPAIRING";
+                    } else if (availStatus.equals("delete") || availStatus.contains("deleted")) {
+                        action = "DELETED";
                     }
-                } else if (status.equals("repairing")) {
-                    action = "SENT_FOR_REPAIR";
-                } else if (status.equals("delete")) {
+                }
+            } else if (h.getAvailableStatusId() != null) {
+                // Fallback: check availability status alone
+                String availStatus = h.getAvailableStatusId().getItemAvailableOption().toLowerCase();
+                if (availStatus.equals("issue") || availStatus.contains("issued")) {
+                    action = "ISSUED";
+                } else if (availStatus.equals("available")) {
+                    action = "AVAILABLE";
+                } else if (availStatus.contains("repair")) {
+                    action = "REPAIRING";
+                } else if (availStatus.equals("delete")) {
                     action = "DELETED";
                 }
             }

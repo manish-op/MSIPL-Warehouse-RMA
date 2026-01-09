@@ -1,245 +1,539 @@
-/* src/Components/UserProfile/Profile.css */
+/* ============================================
+   Profile Page - Modern Dashboard Theme
+   ============================================ */
 
-/* ---------------------------------------------------------
-   1. SELF-CONTAINED THEME DEFINITIONS (Guarantees Text Color)
-   --------------------------------------------------------- */
 :root {
-  /* Light Mode Defaults */
-  --profile-text-main: #333333;
-  --profile-text-muted: #666666;
-  --profile-bg: #ffffff;
-  --profile-border: #f0f0f0;
-  
-  /* Brand Colors */
-  --brand-1: #0f6fff;
-  --brand-2: #00bfa6;
-  --brand-3: #ffb300;
-  --brand-4: #8e44ad;
-  --brand-5: #ef5350;
-  
-  /* Component specifics */
-  --progress-track: #eef2ff;
-  --stat-secondary-bg: #2d3748;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --primary-gradient: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  --success-gradient: linear-gradient(135deg, #135200 0%, #389e0d 100%);
+  --card-bg: #ffffff;
+  --text-primary: #1f1f1f;
+  --text-secondary: #8c8c8c;
+  --bg-page: #f0f2f5;
 }
 
-/* DETECT DARK MODE 
-   (If your app uses a class .dark-mode instead of data-theme, change this selector)
-*/
 [data-theme='dark'] {
-  /* Dark Mode Overrides */
-  --profile-text-main: #ffffff;      /* Pure white text */
-  --profile-text-muted: #b0b0b0;     /* Light grey text */
-  --profile-bg: #1f1f1f;             /* Dark card background */
-  --profile-border: #444444;         /* Dark border */
-  
-  --progress-track: #303030;
-  --stat-secondary-bg: #3a3a3a;
-  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --card-bg: #141414;
+  --text-primary: #ffffff;
+  --text-secondary: #a6a6a6;
+  --bg-page: #000000;
 }
 
-/* ------------------------
-   2. Main Layout
-   ------------------------ */
-.profile-dashboard {
-  padding: 18px;
-  max-width: 1100px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  color: var(--profile-text-main);
-  /* Uses variable if available, fallback to transparent */
-  background-color: var(--background-color, transparent); 
+/* --- Page Container --- */
+.profile-page {
+  min-height: 100vh;
+  padding: 24px;
+  background-color: var(--bg-page);
 }
 
-.dashboard-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  text-align: center;
-  /* FORCE COLOR */
-  color: var(--profile-text-main) !important;
-}
-
-/* ------------------------
-   3. Card Styles
-   ------------------------ */
-.user-profile-card,
-.stats-card {
-  /* Force background and border color */
-  background-color: var(--profile-bg) !important;
-  border: 1px solid var(--profile-border) !important;
-  border-radius: 10px;
-  box-shadow: var(--card-shadow);
-  padding: 18px;
+/* --- Page Header --- */
+.page-header {
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-.user-profile-card .ant-card-body,
-.stats-card .ant-card-body {
-  padding: 0 !important;
-  width: 100%;
-}
-
-/* ------------------------
-   4. Profile Text (Crucial Fixes)
-   ------------------------ */
-.profile-header {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 24px;
+  background: var(--primary-gradient);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(31, 59, 87, 0.15);
+  color: #fff;
 }
 
-.user-name {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  /* FORCE COLOR */
-  color: var(--profile-text-main) !important;
-}
-
-.user-details-list p {
-  margin: 8px 0;
-  font-size: 14px;
-  /* FORCE COLOR */
-  color: var(--profile-text-main) !important;
-  padding-left: 10px;
-  border-left: 2px solid transparent;
-}
-
-.user-details-list strong {
-  /* Ensure labels (Email, Mobile) are also colored */
-  color: var(--profile-text-main) !important;
-  opacity: 0.9;
-}
-
-/* ------------------------
-   5. Stats & Graphs
-   ------------------------ */
-.stat-row {
+.header-content {
   display: flex;
-  gap: 12px;
-  margin-bottom: 14px;
+  align-items: center;
+  gap: 20px;
 }
 
-.stat-box {
-  border-radius: 8px;
-  color: #fff; /* Box text is always white because box has color bg */
+.header-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.header-title {
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: 24px !important;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 14px;
+}
+
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #fff !important;
+}
+
+.refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* --- Profile Card --- */
+.profile-card {
+  background: var(--card-bg) !important;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  height: 100%;
+}
+
+.profile-avatar-section {
+  text-align: center;
+  padding-top: 10px;
+}
+
+.profile-avatar {
+  background: var(--primary-gradient) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border: 4px solid var(--card-bg);
+}
+
+.profile-name {
+  margin-top: 16px !important;
+  color: var(--text-primary) !important;
+}
+
+.role-tag {
+  margin-top: 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  padding: 2px 10px;
+}
+
+.profile-divider {
+  border-color: rgba(140, 140, 140, 0.2) !important;
+  margin: 24px 0 !important;
+}
+
+.detail-item {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
   padding: 12px;
+  border-radius: 12px;
+  transition: background 0.3s;
+}
+
+.detail-item:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='dark'] .detail-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.detail-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(22, 119, 255, 0.1);
+  color: #1677ff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.detail-content {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 86px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.stat-box.main {
-  flex: 1 1 0;
-  background: var(--brand-1);
-}
-
-.stat-box.secondary {
-  width: 120px;
-  background: var(--stat-secondary-bg);
-  border: 1px solid var(--profile-border);
-  /* Ensure text inside the secondary box adapts if background is light/dark */
-  color: #fff; 
-}
-
-.stat-label {
+.detail-label {
   font-size: 12px;
-  opacity: 0.9;
+  color: var(--text-secondary) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary) !important;
+}
+
+.change-password-btn {
+  height: 48px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%) !important;
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+  border: none !important;
+  font-weight: 600 !important;
+}
+
+/* --- KPI Cards (New) --- */
+.kpi-card {
+  border-radius: 16px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+}
+
+.kpi-primary {
+  background: linear-gradient(135deg, #1f3b57 0%, #1677ff 100%);
+}
+
+.kpi-secondary {
+  background: linear-gradient(135deg, #0050b3 0%, #13c2c2 100%);
+}
+
+.kpi-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 2;
+  position: relative;
+}
+
+.kpi-label {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
-.stat-number {
-  font-size: 28px;
-  font-weight: 800;
-  margin-top: 4px;
+.kpi-value {
+  color: #fff !important;
+  margin: 4px 0 0 !important;
+  font-size: 36px !important;
 }
 
-/* ------------------------
-   6. Region Grid Text
-   ------------------------ */
-.region-cards-grid {
+.kpi-icon {
+  font-size: 40px;
+  opacity: 0.3;
+}
+
+.kpi-footer {
+  margin-top: 16px;
+  font-size: 13px;
+  opacity: 0.8;
+  z-index: 2;
+  position: relative;
+}
+
+/* --- Chart Cards (New) --- */
+.chart-card {
+  background: var(--card-bg) !important;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chart-card .ant-card-head {
+  border-bottom: 1px solid rgba(140, 140, 140, 0.15);
+}
+
+.chart-card .ant-card-head-title {
+  font-size: 16px;
+  color: var(--text-primary);
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 4px;
+  align-items: center;
+  gap: 8px;
 }
 
-.region-card {
+/* Recharts Tooltip Styling */
+.custom-chart-tooltip {
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+}
+
+.tooltip-label {
+  color: #fff;
+  font-size: 13px;
+  margin: 0 0 4px;
+  opacity: 0.8;
+}
+
+.tooltip-value {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Loading State */
+.loading-card {
+  min-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .refresh-btn {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   Enhanced Region Cards
+   ============================================ */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='dark'] .section-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.section-icon {
+  font-size: 18px;
+  color: #1677ff;
+}
+
+.section-title {
+  font-size: 16px;
+  color: var(--text-primary) !important;
+}
+
+.region-cards-enhanced {
+  margin-top: 8px;
+}
+
+.region-card-enhanced {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.region-card-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='dark'] .region-card-enhanced {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.region-card-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1 1 180px;
-  
-  /* Background and Border */
-  background-color: var(--profile-bg);
-  border: 1px solid var(--profile-border);
-  
-  border-radius: 8px;
-  padding: 10px;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  margin-bottom: 12px;
 }
 
-.region-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--region-hover-shadow);
-  border-color: var(--brand-1);
+.region-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
-.region-info {
+.region-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.region-name-enhanced {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary) !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.region-count-enhanced {
+  font-size: 12px;
+  color: var(--text-secondary) !important;
+}
+
+.region-percentage {
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.region-progress-bar {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .region-progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.region-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease-out;
+}
+
+/* Stats Section Enhancements */
+.stats-card {
+  background: var(--card-bg) !important;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stats-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stats-header-icon {
+  font-size: 20px;
+  color: #1677ff;
+}
+
+.stats-header-title {
+  font-size: 18px;
+  color: var(--text-primary) !important;
+}
+
+.stats-divider {
+  margin: 16px 0 !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme='dark'] .stats-divider {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.stat-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 14px;
+  background: rgba(22, 119, 255, 0.06);
+  transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+  transform: scale(1.02);
+}
+
+.stat-box.primary {
+  background: rgba(22, 119, 255, 0.08);
+}
+
+.stat-box.success {
+  background: rgba(82, 196, 26, 0.08);
+}
+
+.stat-box.purple {
+  background: rgba(114, 46, 209, 0.08);
+}
+
+.stat-box.warning {
+  background: rgba(250, 140, 22, 0.08);
+}
+
+.stat-box .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(22, 119, 255, 0.15);
+  color: #1677ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.stat-box .stat-content {
   display: flex;
   flex-direction: column;
 }
 
-.region-info .region-name {
+.stat-box .stat-label {
+  font-size: 12px;
+  color: var(--text-secondary) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-box .stat-number {
+  font-size: 24px;
   font-weight: 700;
-  font-size: 13px;
-  /* FORCE COLOR */
-  color: var(--profile-text-main) !important;
+  color: #1677ff;
 }
 
-.region-info .region-count {
-  font-size: 13px;
-  /* FORCE COLOR (Muted) */
-  color: var(--profile-text-muted) !important;
+.progress-section {
+  margin: 20px 0;
 }
 
-/* ------------------------
-   7. Utilities & Responsive
-   ------------------------ */
-.profile-avatar {
-  background: var(--brand-1) !important;
-  color: #fff !important;
-  font-size: 40px !important;
+.progress-bar {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
+[data-theme='dark'] .progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1677ff, #4096ff);
+  border-radius: 4px;
+  transition: width 0.8s ease-out;
+}
+
+/* Loading and Error States */
 .centered-spin {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 180px;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.loading-text {
+  color: var(--text-secondary) !important;
+}
+
+.error-container {
+  text-align: center;
+  padding: 40px;
 }
 
 .error-text {
-  color: #ff4d4f;
-  text-align: center;
-  padding: 20px;
-}
-
-@media (max-width: 900px) {
-  .profile-row { flex-direction: column; }
-  .left-col, .right-col { width: 100%; flex: 0 0 auto; }
-}
-
-@media (max-width: 480px) {
-  .stat-row { flex-direction: column; }
-  .stat-box.secondary { width: 100%; }
-  .stat-number { font-size: 22px; }
+  color: #ff4d4f !important;
 }

@@ -1,210 +1,286 @@
-/* =================================================================
-   1. GLOBAL THEME VARIABLES
-   ================================================================= */
-:root {
-  /* --- Light Theme Defaults --- */
-  --background-color: #f0f2f5;
-  --component-background: #ffffff;
-  --text-color: #1c1e21;
-  --text-color-secondary: #65676b;
-  --border-color: #d9d9d9;
-  --hover-color: #f5f5f5;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-
-  /* Semantic Colors */
-  --primary-color: #1677ff;
-  --color-error: #ff4d4f;
-  --color-success: #52c41a;
-}
-
-/* --- Dark Theme Overrides --- */
-[data-theme='dark'] {
-  --background-color: #141414;
-  --component-background: #1d1d1d;
-  --text-color: #e8e6e3;
-  --text-color-secondary: #a6a6a6;
-  --border-color: #434343;
-  --hover-color: #333333;
-  --shadow-color: rgba(0, 0, 0, 0.45);
-
-  --primary-color: #1677ff;
-  --color-error: #a61d24;
-  --color-success: #49aa19;
-}
-
-/* =================================================================
-   2. GLOBAL RESET & TYPOGRAPHY
-   ================================================================= */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
+.add-item-page {
+  min-height: 100dvh;
+  padding: 24px;
   background-color: var(--background-color);
-  color: var(--text-color);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 16px;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Ensure headings and common text tags inherit the theme color */
-h1, h2, h3, h4, h5, h6, p, span, div {
-  color: inherit;
+/* --- Page Header --- */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-/* =================================================================
-   3. ANT DESIGN COMPONENT OVERRIDES (Fixing Font Colors)
-   ================================================================= */
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 
-/* --- Card --- */
-.ant-card {
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 28px;
+  color: #fff;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  margin: 0 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 14px;
+}
+
+/* --- Add Item Card --- */
+.add-item-card {
   background-color: var(--component-background) !important;
-  color: var(--text-color) !important;
-  border-color: var(--border-color) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
-.ant-card-head {
+
+.add-item-card .ant-card-head {
   border-bottom: 1px solid var(--border-color) !important;
-  color: var(--text-color) !important;
-}
-.ant-card-head-title {
-  color: var(--text-color) !important;
+  padding: 12px 24px;
 }
 
-/* --- Typography / Text --- */
-.ant-typography {
-  color: var(--text-color) !important;
-}
-.ant-typography-secondary {
-  color: var(--text-color-secondary) !important;
+.add-item-card .ant-card-body {
+  padding: 24px;
 }
 
-/* --- Form Labels (Crucial for "Fonts not changing") --- */
-.ant-form-item-label > label {
-  color: var(--text-color) !important;
-}
-
-/* --- Inputs & TextAreas --- */
-.ant-input,
-.ant-input-affix-wrapper {
-  background-color: var(--component-background) !important;
-  color: var(--text-color) !important;
-  border-color: var(--border-color) !important;
-}
-
-/* Fix Placeholder Color */
-.ant-input::placeholder,
-.ant-input-number-input::placeholder {
-  color: var(--text-color-secondary) !important;
-  opacity: 1; /* Firefox fix */
-}
-
-/* --- Select / Dropdowns --- */
-.ant-select-selector {
-  background-color: var(--component-background) !important;
-  color: var(--text-color) !important;
-  border-color: var(--border-color) !important;
-}
-.ant-select-arrow {
-  color: var(--text-color-secondary) !important;
-}
-.ant-select-selection-item {
-  color: var(--text-color) !important;
-}
-.ant-select-dropdown {
-  background-color: var(--component-background) !important;
-  border: 1px solid var(--border-color);
-}
-.ant-select-item {
-  color: var(--text-color) !important;
-}
-.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
-  background-color: var(--hover-color) !important;
-}
-.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-  background-color: var(--primary-color) !important;
-  color: #fff !important;
-}
-
-/* --- Checkbox --- */
-.ant-checkbox-wrapper {
-  color: var(--text-color) !important;
-}
-.ant-checkbox-inner {
-  background-color: var(--component-background) !important;
-  border-color: var(--border-color) !important;
-}
-.ant-checkbox-checked .ant-checkbox-inner {
-  background-color: var(--primary-color) !important;
-  border-color: var(--primary-color) !important;
-}
-
-/* --- Buttons (Toolbar) --- */
-.ant-btn-default {
-  background-color: var(--component-background) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-color) !important;
-}
-.ant-btn-default:hover {
-  border-color: var(--primary-color) !important;
-  color: var(--primary-color) !important;
-}
-.ant-btn-primary {
-  background-color: var(--primary-color) !important;
-  color: #fff !important;
-}
-
-/* =================================================================
-   4. CUSTOM TOOLBAR & TOOLTIP INTEGRATION
-   ================================================================= */
-
-/* Toolbar Wrapper */
+/* --- Card Title / Toolbar --- */
 .toolbar-wrap {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  color: var(--text-color); /* Ensures toolbar text is themed */
+  color: var(--text-color);
 }
 
-@media (max-width: 575px) {
+.toolbar-wrap .ant-typography {
+  color: var(--text-color) !important;
+}
+
+/* --- Form Styling --- */
+.add-item-card .ant-form-item-label>label {
+  color: var(--text-color) !important;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.add-item-card .ant-input,
+.add-item-card .ant-input-affix-wrapper,
+.add-item-card .ant-select-selector,
+.add-item-card .ant-picker {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+  border-radius: 8px !important;
+}
+
+.add-item-card .ant-input:focus,
+.add-item-card .ant-input:hover,
+.add-item-card .ant-select-selector:hover {
+  border-color: var(--primary-color) !important;
+}
+
+.add-item-card .ant-input::placeholder {
+  color: var(--text-color-secondary) !important;
+}
+
+/* --- Select Dropdown --- */
+.add-item-card .ant-select-arrow {
+  color: var(--text-color-secondary) !important;
+}
+
+.add-item-card .ant-select-selection-item {
+  color: var(--text-color) !important;
+}
+
+/* --- Checkbox --- */
+.add-item-card .ant-checkbox-wrapper {
+  color: var(--text-color) !important;
+}
+
+/* --- Submit Button --- */
+.add-item-card .ant-btn-primary {
+  height: 42px !important;
+  min-width: 140px !important;
+  border-radius: 8px !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
+  transition: all 0.2s ease;
+}
+
+.add-item-card .ant-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 59, 87, 0.4);
+}
+
+/* --- Toolbar Buttons --- */
+.add-item-card .ant-btn-default {
+  background-color: var(--component-background) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color) !important;
+  border-radius: 6px !important;
+}
+
+.add-item-card .ant-btn-default:hover {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+/* --- TextArea --- */
+.add-item-card .ant-input-textarea textarea {
+  background-color: var(--component-background) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+  border-radius: 8px !important;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .add-item-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+  }
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .header-title {
+    font-size: 20px !important;
+  }
+
+  .add-item-card .ant-card-body {
+    padding: 16px;
+  }
+
   .toolbar-wrap {
     flex-direction: column;
     align-items: stretch;
   }
 }
 
-/* CUSTOM TOOLTIP
-   Usage in JS: <div className="custom-tooltip" data-content="My Tooltip Text">...</div>
-   Note: Changed selector from 'Input' to '.custom-tooltip' because 
-   HTML <input> tags cannot have ::after pseudo-elements.
-*/
-.custom-tooltip {
-  position: relative; /* Needed for absolute positioning of the tooltip */
+@media (max-width: 480px) {
+  .page-header {
+    padding: 14px 16px;
+  }
+
+  .header-content {
+    gap: 12px;
+  }
+
+  .header-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .header-title {
+    font-size: 18px !important;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+  }
+
+  .add-item-card .ant-card-body {
+    padding: 12px;
+  }
 }
 
-.custom-tooltip:hover::after {
-  content: attr(data-content);
-  position: absolute;
-  top: 0; /* Adjust these values based on where you want the tooltip */
-  left: 100%; 
-  margin-left: 10px;
-  
-  /* Theme Integration */
-  background-color: var(--component-background);
-  color: var(--text-color);
-  border: 1px solid var(--primary-color);
-  box-shadow: 0 4px 12px var(--shadow-color);
-  
-  /* Box Model */
-  padding: 10px;
-  min-width: 200px;
-  border-radius: 4px;
-  z-index: 1000;
-  white-space: normal;
-  word-wrap: break-word;
-  font-size: 14px;
-  font-weight: normal;
+/* --- Dark Theme Enhancements --- */
+[data-theme='dark'] .page-header {
+  background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .add-item-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .add-item-card .ant-btn-primary {
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.2);
+}
+
+[data-theme='dark'] .add-item-card .ant-select-dropdown {
+  background-color: var(--component-background) !important;
+  border: 1px solid var(--border-color);
+}
+
+[data-theme='dark'] .add-item-card .ant-select-item {
+  color: var(--text-color) !important;
+}
+
+[data-theme='dark'] .add-item-card .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: var(--hover-color) !important;
+}
+
+/* Dark Theme Form Label and Input Fix */
+[data-theme='dark'] .add-item-card .ant-form-item-label>label {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .add-item-card .ant-input,
+[data-theme='dark'] .add-item-card .ant-input-affix-wrapper,
+[data-theme='dark'] .add-item-card textarea.ant-input {
+  color: #e8e6e3 !important;
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+[data-theme='dark'] .add-item-card .ant-input::placeholder,
+[data-theme='dark'] .add-item-card textarea::placeholder {
+  color: #888888 !important;
+}
+
+[data-theme='dark'] .add-item-card .ant-select-selector {
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+[data-theme='dark'] .add-item-card .ant-select-selection-item,
+[data-theme='dark'] .add-item-card .ant-select-selection-placeholder {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .add-item-card .ant-checkbox-wrapper {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .toolbar-wrap .ant-typography {
+  color: #e8e6e3 !important;
 }

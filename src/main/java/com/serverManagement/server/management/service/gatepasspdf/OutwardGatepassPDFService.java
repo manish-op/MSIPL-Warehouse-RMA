@@ -30,8 +30,6 @@ import org.springframework.stereotype.Service;
 import com.serverManagement.server.management.entity.gatePass.ItemListViaGatePassOutwardEntity;
 import com.serverManagement.server.management.entity.gatePass.OutwardGatepassEntity;
 
-
-
 @Service
 public class OutwardGatepassPDFService {
 
@@ -55,13 +53,9 @@ public class OutwardGatepassPDFService {
         PDDocument document = new PDDocument();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-
-
         // Load standard built-in fonts. These require no files.
         robotoRegular = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
         robotoBold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
-
-
 
         // --- Page 1: Invoice Details ---
         generateInvoicePage(document, outwardGatepass);
@@ -81,8 +75,6 @@ public class OutwardGatepassPDFService {
                 .build();
         headers.setContentDisposition(contentDisposition);
 
-
-
         headers.setContentLength(outputStream.toByteArray().length);
 
         return ResponseEntity.ok().headers(headers).body(outputStream.toByteArray());
@@ -94,7 +86,6 @@ public class OutwardGatepassPDFService {
         PDPageContentStream contentStream = new PDPageContentStream(document, page);
 
         float yPosition = PAGE_HEIGHT - MARGIN_TOP;
-
 
         PDImageXObject companyLogo = null;
         try (InputStream logoStream = getClass().getClassLoader().getResourceAsStream("images/companyLogo.png")) {
@@ -112,7 +103,6 @@ public class OutwardGatepassPDFService {
             // Optionally draw a placeholder text if logo fails to load
             drawText(contentStream, robotoBold, 18, "Motorola", MARGIN_LEFT + 5, yPosition - 20, TextAlignment.TA_LEFT);
         }
-
 
         // Company Name
         drawText(contentStream, robotoBold, 24, "Motorola Solutions India Pvt. Ltd.", MARGIN_LEFT + 70, yPosition - 40,
@@ -276,7 +266,6 @@ public class OutwardGatepassPDFService {
         drawText(contentStream, robotoRegular, 12, "Signature:" + signLine, footerLeftX, yPosition,
                 TextAlignment.TA_LEFT);
 
-
         PDImageXObject companyStamp = null;
         try (InputStream stampStream = getClass().getClassLoader().getResourceAsStream("images/companyLogo.png")) {
             if (stampStream == null) {
@@ -309,13 +298,14 @@ public class OutwardGatepassPDFService {
 
     // Generic method to draw text with alignment
     private void drawText(PDPageContentStream contentStream, PDFont font, float fontSize, String text, float x,
-                          float y, TextAlignment alignment) throws IOException {
+            float y, TextAlignment alignment) throws IOException {
+        String sanitized = sanitizeText(text);
         contentStream.beginText();
         contentStream.setFont(font, fontSize);
         contentStream.setNonStrokingColor(Color.BLACK);
         // contentStream.fillAndStroke(); // Border color for all cells
         contentStream.setLineWidth(1);
-        float textWidth = font.getStringWidth(text) / 1000 * fontSize;
+        float textWidth = font.getStringWidth(sanitized) / 1000 * fontSize;
 
         float startX;
         if (alignment == TextAlignment.TA_LEFT) {
@@ -326,13 +316,25 @@ public class OutwardGatepassPDFService {
             startX = x - (textWidth / 2);
         }
         contentStream.newLineAtOffset(startX, y);
-        contentStream.showText(text);
+        contentStream.showText(sanitized);
         contentStream.endText();
+    }
+
+    private String sanitizeText(String text) {
+        if (text == null)
+            return "";
+        // Replace all control characters (including newlines, tabs) with space to avoid
+        // PDFBox encoding errors
+        return text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", " ")
+                .replace("\n", " ")
+                .replace("\r", " ")
+                .replace("\t", " ")
+                .trim();
     }
 
     // Helper to draw a table header row
     private void drawTableHeader(PDPageContentStream contentStream, PDFont font, float fontSize, String[] headers,
-                                 float[] columnWidths, float startX, float startY, float rowHeight) throws IOException {
+            float[] columnWidths, float startX, float startY, float rowHeight) throws IOException {
 
         // Set general border style for cells
         contentStream.setStrokingColor(Color.BLACK); // Border color for all cells
@@ -354,7 +356,7 @@ public class OutwardGatepassPDFService {
 
     // Helper to draw a single cell with basic content
     private void drawCell(PDPageContentStream contentStream, PDFont font, float fontSize, String text, float x,
-                          float y, float width, float height, TextAlignment alignment) throws IOException {
+            float y, float width, float height, TextAlignment alignment) throws IOException {
         // contentStream.addRect(currentX, startY - rowHeight, columnWidths[i],
         // rowHeight);
         contentStream.setNonStrokingColor(Color.BLACK);
@@ -365,7 +367,7 @@ public class OutwardGatepassPDFService {
 
     // Helper for multi-line text drawing within a cell
     private float drawMultiLineCell(PDPageContentStream contentStream, PDFont font, float fontSize, String text,
-                                    float x, float y, float width, float minHeight, TextAlignment alignment) throws IOException {
+            float x, float y, float width, float minHeight, TextAlignment alignment) throws IOException {
         List<String> lines = splitTextIntoLines(font, fontSize, text, width - 10); // 10 for padding
         float currentY = y;
         float lineHeight = getTextHeight(font, fontSize) + 2; // Font height + small padding
@@ -386,21 +388,33 @@ public class OutwardGatepassPDFService {
             lines.add("");
             return lines;
         }
-        String[] words = text.split(" ");
-        StringBuilder currentLine = new StringBuilder();
-        for (String word : words) {
-            if (font.getStringWidth(currentLine + " " + word) / 1000 * fontSize < maxWidth) {
-                if (currentLine.length() > 0) {
-                    currentLine.append(" ");
+
+        // First split by actual newline characters
+        String[] manualLines = text.split("\\r?\\n");
+
+        for (String manualLine : manualLines) {
+            String[] words = manualLine.split(" ");
+            StringBuilder currentLine = new StringBuilder();
+            for (String word : words) {
+                if (font.getStringWidth(currentLine + " " + word) / 1000 * fontSize < maxWidth) {
+                    if (currentLine.length() > 0) {
+                        currentLine.append(" ");
+                    }
+                    currentLine.append(word);
+                } else {
+                    if (currentLine.length() > 0) {
+                        lines.add(currentLine.toString());
+                        currentLine = new StringBuilder(word);
+                    } else {
+                        // Word itself is longer than maxWidth, just add it
+                        lines.add(word);
+                        currentLine = new StringBuilder();
+                    }
                 }
-                currentLine.append(word);
-            } else {
-                lines.add(currentLine.toString());
-                currentLine = new StringBuilder(word);
             }
-        }
-        if (currentLine.length() > 0) {
-            lines.add(currentLine.toString());
+            if (currentLine.length() > 0) {
+                lines.add(currentLine.toString());
+            }
         }
         return lines;
     }
@@ -411,7 +425,7 @@ public class OutwardGatepassPDFService {
     }
 
     private float drawWrappedText(PDPageContentStream contentStream, PDFont font, float fontSize, String text,
-                                  float x, float y, float maxWidth, TextAlignment alignment) throws IOException {
+            float x, float y, float maxWidth, TextAlignment alignment) throws IOException {
         List<String> lines = splitTextIntoLines(font, fontSize, text, maxWidth); // Use your existing split function
         float currentY = y;
         float lineHeight = getTextHeight(font, fontSize) + 5; // Adjust line spacing as needed (fontSize + padding)

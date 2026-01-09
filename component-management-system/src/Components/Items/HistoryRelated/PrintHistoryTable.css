@@ -1,101 +1,257 @@
-/* --- Your existing styles (unchanged) --- */
+/* ============================================
+   History Table - Modern Design
+   ============================================ */
+
+/* --- Page Wrapper --- */
 .history-table-wrapper {
   width: 100%;
-  margin: 4px;
-  padding: 4px;
-  height: 100%;
-  overflow-y: scroll; /* This is the problem for printing */
-  align-items: center;
-  justify-content: space-evenly;
-  
-  /* Use theme variables */
+  min-height: calc(100vh - 200px);
+  padding: 24px;
   background-color: var(--component-background);
   color: var(--text-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
 }
 
+/* --- Title --- */
 .history-table-wrapper h2 {
   color: var(--text-color);
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--primary-color);
+  text-align: center;
+}
+
+/* --- Print Button --- */
+.print-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 24px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  color: #fff;
+  border: none;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
+}
+
+.print-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(31, 59, 87, 0.4);
+}
+
+.print-button:active {
+  transform: translateY(0);
 }
 
 /* --- Themed Table Styles --- */
 .history-table-themed {
   width: 100%;
+  min-width: 1800px;
   border-collapse: collapse;
   background-color: var(--component-background);
   color: var(--text-color);
-}
-
-.history-table-themed th,
-.history-table-themed td {
-  border: 1px solid var(--border-color);
-  padding: 8px;
-  text-align: left;
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
 }
 
 .history-table-themed th {
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-
-/* --- Button Style --- */
-.print-button {
-  border-radius: 6px;
-  font-size: 14px;
-  padding: 4px 15px;
-  cursor: pointer;
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
   color: #fff;
-  border: 1px solid var(--primary-color);
-  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 8px;
+  text-align: center;
+  white-space: nowrap;
+  border: 1px solid #1a3249;
+  border-bottom: 2px solid #fff;
 }
 
-.print-button:hover {
-  opacity: 0.8;
+.history-table-themed td {
+  padding: 10px 8px;
+  font-size: 12px;
+  text-align: center;
+  vertical-align: middle;
+  border: 1px dashed var(--border-color);
+  border-left: 1px dashed rgba(100, 100, 100, 0.3);
+  border-right: 1px dashed rgba(100, 100, 100, 0.3);
 }
 
-/* === UPDATED PRINT STYLES === */
+.history-table-themed tbody tr {
+  transition: background-color 0.2s ease;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.history-table-themed tbody tr:hover {
+  background-color: rgba(31, 59, 87, 0.08);
+}
+
+.history-table-themed tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.history-table-themed tbody tr:nth-child(even):hover {
+  background-color: rgba(31, 59, 87, 0.08);
+}
+
+/* --- Scrollable Container for Wide Tables --- */
+.history-table-wrapper .table-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+/* --- Dark Theme Support --- */
+[data-theme='dark'] .history-table-wrapper {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .history-table-themed th {
+  background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .history-table-themed tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme='dark'] .print-button {
+  background: linear-gradient(135deg, #2d5a87 0%, #3d7ab7 100%);
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
 @media print {
 
-  /* 1. Set print orientation to landscape */
+  /* Page setup - A4 Landscape */
   @page {
-    size: landscape;
-    margin: 1cm;
+    size: A4 landscape;
+    margin: 5mm;
   }
 
-  /* 2. Hide everything on the page by default */
+  /* Make everything visible */
   body * {
-    visibility: hidden;
+    visibility: visible !important;
   }
 
-  /* 3. Make only the table wrapper and its contents visible */
-  /* This ID is on your main wrapper <div> in HistoryTable.js */
+  body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide non-essential elements */
+  .print-button,
+  aside,
+  nav,
+  header,
+  footer,
+  .ant-layout-sider,
+  .ant-layout-header,
+  .ant-layout-footer {
+    display: none !important;
+  }
+
+  /* Position table wrapper */
   #historyTable,
   #historyTable * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
-  /* 4. Position the table to fill the printed page */
   #historyTable {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 10px; /* Add a little padding */
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    background: #fff !important;
+    box-shadow: none !important;
   }
 
-  /* 5. This is the critical fix:
-     Forcefully remove the scroll behavior from the wrapper
-     to ensure all rows are printed.
-  */
+  /* Remove scroll for print */
   .history-table-wrapper {
     overflow: visible !important;
     height: auto !important;
-    max-height: none !important; /* Be extra sure */
+    max-height: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: #fff !important;
   }
 
-  /* 6. Hide the print button itself */
-  .print-button {
-    display: none !important; /* Use display:none to remove it from layout */
+  /* Title styling for print */
+  .history-table-wrapper h2 {
+    color: #000 !important;
+    font-size: 16px !important;
+    margin-bottom: 15px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #000 !important;
+  }
+
+  /* Table visibility */
+  .history-table-themed,
+  .history-table-themed thead,
+  .history-table-themed tbody,
+  .history-table-themed tr,
+  .history-table-themed th,
+  .history-table-themed td {
+    display: revert !important;
+    visibility: visible !important;
+    overflow: visible !important;
+  }
+
+  /* Hide columns for print: Description (15th), Remark (17th), Updated By (18th), Updated Date (19th) */
+  .history-table-themed th:nth-child(15),
+  .history-table-themed td:nth-child(15),
+  .history-table-themed th:nth-child(17),
+  .history-table-themed td:nth-child(17),
+  .history-table-themed th:nth-last-child(-n+2),
+  .history-table-themed td:nth-last-child(-n+2) {
+    display: none !important;
+  }
+
+  /* Table header for print */
+  .history-table-themed th {
+    background: #333 !important;
+    color: #fff !important;
+    font-size: 9px !important;
+    font-weight: bold !important;
+    padding: 6px 4px !important;
+    border: 1px solid #000 !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  /* Table cells for print */
+  .history-table-themed td {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 9px !important;
+    padding: 5px 4px !important;
+    border: 1px solid #ccc !important;
+  }
+
+  /* Alternating row colors */
+  .history-table-themed tbody tr:nth-child(even) td {
+    background: #f5f5f5 !important;
+  }
+
+  /* Page breaks */
+  .history-table-themed tbody tr {
+    page-break-inside: avoid;
+  }
+
+  .history-table-themed thead {
+    display: table-header-group !important;
   }
 }

@@ -16,6 +16,8 @@ import {
   message,
   Result,
   AutoComplete,
+  Modal,
+  Radio,
 } from "antd";
 import {
   PlusOutlined,
@@ -32,12 +34,23 @@ import {
 import RmaLayout from "./RmaLayout";
 import "./RmaRequestForm.css";
 import { useNavigate } from "react-router-dom";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
 import { exportRmaToExcel } from "./RmaExcelExport";
 
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title, Text, Paragraph } = Typography;
+
+// Debounce utility
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(null, args);
+    }, delay);
+  };
+};
 
 // Fallback product catalog (used if API fails)
 const DEFAULT_PRODUCT_CATALOG = [
@@ -46,18 +59,97 @@ const DEFAULT_PRODUCT_CATALOG = [
 
 function RmaRequestForm() {
   const [form] = Form.useForm();
+
+  // Create a ref to store the stable debounced function
+  const debouncedCheckRef = React.useRef(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [rmaNumbers, setRmaNumbers] = useState([]);
+  const [rmaRequestNumber, setRmaRequestNumber] = useState(""); // Store the RMA request number
   const [sameAsReturn, setSameAsReturn] = useState(false);
   const [productCatalog, setProductCatalog] = useState(DEFAULT_PRODUCT_CATALOG);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [submittedFormData, setSubmittedFormData] = useState(null); // Store form data for Excel export
+  const [repairType, setRepairType] = useState(null);
+  const [courierOptions, setCourierOptions] = useState([]);
+
+  useEffect(() => {
+    // Fetch unique courier companies
+    RmaApi.getAllCourierCompanies().then(res => {
+      if(res.success) {
+        setCourierOptions(res.data || []);
+      }
+    });
+  }, []);
+  const [previewData, setPreviewData] = useState(null);
+  const [conformVisible, setConfrimVisible] = useState(false);
+  const [finalSubmitting, setFinalSubmitting] = useState(false);
 
   // Customer auto-complete state
   const [customerOptions, setCustomerOptions] = useState([]);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
+
+  //for serial history
+  const [serialHistory, setSerialHistory] = useState([]);
+  const [serialHistoryVisible, setSerialHistoryVisible] = useState(false);
+  const [serialChecking, setSerialChecking] = useState(false);
+
+  //handler for serial history - refactored to support direct value input
+  const handleSerialBlur = async (name, directValue) => {
+
+    // Use directValue if provided (from onChange), otherwise fallback to form value
+    // We check if directValue is undefined because it could be an empty string which is falsy but valid
+    let serialNo;
+    if (directValue !== undefined) {
+      serialNo = directValue?.toString()?.trim();
+    } else {
+      serialNo = form.getFieldValue(["items", name, "serialNo"])?.toString()?.trim();
+    }
+
+
+    // Check for empty only, allow short serial numbers like "5" or "76"
+    if (!serialNo || serialNo.length < 1) {
+      return;
+    }
+
+    // Don't show global loading for background check
+    // setSerialChecking(true); 
+    try {
+      const res = await RmaApi.getSerialHistory(serialNo);
+
+      if (res.success) {
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          setSerialHistory(res.data);
+          setSerialHistoryVisible(true);
+          message.warning(`Previous history found for Serial No. ${serialNo}`);
+        } else {
+        }
+      } else {
+        // Silent fail for background check errors to not spam user
+        console.warn("API Error during background check:", res.error);
+      }
+    } catch (error) {
+      console.error("Serial history check exception:", error);
+    } finally {
+      // setSerialChecking(false);
+    }
+  };
+
+  // Initialize/Update the debounced check function
+  // We use a ref and effect to keep the debounced function stable but accessing the latest handleSerialBlur
+  useEffect(() => {
+    debouncedCheckRef.current = debounce((name, value) => {
+      handleSerialBlur(name, value);
+    }, 500); // 500ms delay
+  }, [form]); // Re-create if form instance changes (unlikely) or just once
+
+  // Wrapper to call the debounced function
+  const triggerDebouncedSerialCheck = (name, value) => {
+    if (debouncedCheckRef.current) {
+      debouncedCheckRef.current(name, value);
+    }
+  };
 
   const navigate = useNavigate();
 
@@ -106,6 +198,62 @@ function RmaRequestForm() {
 
   // Save form data to localStorage whenever it changes
   const handleFormChange = (changedValues, allValues) => {
+    // List of return address field names
+    const returnAddressFields = [
+      "companyName",
+      "email",
+      "contactName",
+      "telephone",
+      "mobile",
+      "returnAddress"
+    ];
+
+    // List of invoice address field names and their corresponding return fields
+    const invoiceToReturnMap = {
+      invoiceCompanyName: "companyName",
+      invoiceEmail: "email",
+      invoiceContactName: "contactName",
+      invoiceTelephone: "telephone",
+      invoiceMobile: "mobile",
+      invoiceAddress: "returnAddress"
+    };
+
+    const updatedValues = { ...changedValues };
+
+    // If sameAsReturn is active and one of the return fields changed, update the invoice fields
+    if (sameAsReturn) {
+      let syncNeeded = false;
+      const newInvoiceValues = {};
+
+      returnAddressFields.forEach(field => {
+        if (changedValues[field] !== undefined) {
+          syncNeeded = true;
+          // Map return field to invoice field
+          const invoiceField = Object.keys(invoiceToReturnMap).find(
+            key => invoiceToReturnMap[key] === field
+          );
+          if (invoiceField) {
+            newInvoiceValues[invoiceField] = changedValues[field];
+          }
+        }
+      });
+
+      if (syncNeeded) {
+        form.setFieldsValue(newInvoiceValues);
+      }
+    }
+
+    // If one of the invoice fields was changed manually, disable sameAsReturn
+    const changedFields = Object.keys(changedValues);
+    const manualInvoiceEdit = changedFields.some(field =>
+      Object.keys(invoiceToReturnMap).includes(field)
+    );
+
+    if (manualInvoiceEdit && sameAsReturn) {
+      setSameAsReturn(false);
+      message.info("Synchronization disabled because invoice address was manually edited");
+    }
+
     localStorage.setItem("rmaFormData", JSON.stringify({ ...allValues, sameAsReturn }));
   };
 
@@ -148,7 +296,7 @@ function RmaRequestForm() {
             <div>
               <strong>{customer.companyName}</strong>
               <br />
-              <span style={{ color: '#666', fontSize: '12px' }}>
+              <span className="customer-info-secondary">
                 {customer.email} | {customer.contactName}
               </span>
             </div>
@@ -175,28 +323,42 @@ function RmaRequestForm() {
         telephone: customer.telephone,
         mobile: customer.mobile,
         returnAddress: customer.address,
+        tat: customer.tat, // Auto-fill TAT from saved customer
       });
       message.success(`Customer details loaded: ${customer.companyName}`);
     }
   };
 
   // Product selection handler - auto-fill model
-  const handleProductSelect = (value, index) => {
+  const handleProductSelect = (val, name) => {
+    // Select with mode="tags" returns an array
+    const value = Array.isArray(val) ? val[0] : val;
+    if (!value) return;
+
     const product = productCatalog.find(p => p.name === value);
+
+    // Get current items and update specifically using name index
+    const items = form.getFieldValue("items") || [];
+
+    // Ensure the item object at 'name' exists
+    if (!items[name]) items[name] = {};
+
+    // Keep as array because Select mode="tags" requires array value
+    items[name] = { ...items[name], product: Array.isArray(val) ? val : [val] };
+
     if (product && (product.model || product.partNo)) {
-      const items = form.getFieldValue("items") || [];
-      items[index] = { ...items[index], product: value, partNo: product.model || product.partNo || "" };
-      form.setFieldsValue({ items });
+      items[name].partNo = product.model || product.partNo || "";
     }
+    form.setFieldsValue({ items });
   };
 
   // Step validation
   const validateStep = async (step) => {
     try {
       if (step === 0) {
-        await form.validateFields(["companyName", "email", "contactName", "telephone", "mobile", "returnAddress"]);
+        await form.validateFields(["companyName", "email", "contactName", "telephone", "mobile", "returnAddress", "tat"]);
       } else if (step === 1) {
-        await form.validateFields(["modeOfTransport", "shippingMethod"]);
+        await form.validateFields(["modeOfTransport", "shippingMethod", "courierCompanyName"]);
       } else if (step === 2) {
         const items = form.getFieldValue("items") || [];
         if (items.length === 0) {
@@ -214,6 +376,9 @@ function RmaRequestForm() {
   const nextStep = async () => {
     const isValid = await validateStep(currentStep);
     if (isValid) {
+      if (currentStep === 2) {
+         // Do not auto-fill signature
+      }
       setCurrentStep(currentStep + 1);
     }
   };
@@ -224,7 +389,25 @@ function RmaRequestForm() {
 
   // Handle form submission
   const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      setPreviewData(values);
+      setRepairType(null); // Reset repair type
+      setConfrimVisible(true);
+    } catch (error) {
+      console.error("Validation failed:", error);
+      message.error("Please fill all required fields");
+    }
+  };
+
+  const finalSubmit = async () => {
+    if (!repairType) {
+      message.warning("Please select Local Repair or Depot Repair");
+      return;
+    }
+    setFinalSubmitting(true);
     setLoading(true);
+
     try {
       const values = await form.validateFields();
 
@@ -247,20 +430,23 @@ function RmaRequestForm() {
         invoiceMobile: values.invoiceMobile || "",
         invoiceAddress: values.invoiceAddress || "",
         signature: values.signature || values.contactName,
+        repairType: repairType,
+        tat: values.tat ? parseInt(values.tat, 10) : null,
+
         items: (values.items || []).map(item => ({
-          product: item.product,
+          product: Array.isArray(item.product) ? item.product[0] : (item.product || ""),
           model: item.partNo || "",
           serialNo: item.serialNo,
           faultDescription: item.faultDescription,
-          codeplug: item.codeplugProgramming || "Default",
+          codeplug: item.codeplugProgramming || "",
           flashCode: "",
-          repairStatus: item.status || "",
+          repairStatus: "",  // New items start as UNASSIGNED
           invoiceNo: item.invoiceNo || "",
           dateCode: "",
-          fmUlatex: item.fmUlAtex || "N",
-          encryption: item.encryption || "None",
-          firmwareVersion: item.firmwareVersion || "Latest",
-          lowerFirmwareVersion: item.lowerFirmwareVersion || "Follow Depot Mainboard Inventory Version",
+          fmUlatex: item.fmUlAtex || "",
+          encryption: item.encryption || "",
+          firmwareVersion: item.firmwareVersion || "",
+          lowerFirmwareVersion: item.lowerFirmwareVersion || "",
           remarks: item.remarks || ""
         }))
       };
@@ -269,17 +455,35 @@ function RmaRequestForm() {
 
       if (result.success) {
         const rmaItems = result.data?.items || [];
-        // Merge RMA numbers from response with full payload items for Excel export
         const itemsWithRma = payload.items.map((item, index) => ({
           ...item,
           rmaNo: rmaItems[index]?.rmaNo || ""
         }));
-        // Store form data for Excel export before resetting
         setSubmittedFormData({ formData: payload, items: itemsWithRma });
         setRmaNumbers(rmaItems);
+        setRmaRequestNumber(result.data?.rmaNo || ""); // Store the RMA request number
+
+        // Save company info for reuse in next request
+        const companyInfo = {
+          companyName: payload.companyName,
+          email: payload.email,
+          contactName: payload.contactName,
+          telephone: payload.telephone,
+          mobile: payload.mobile,
+          returnAddress: payload.returnAddress,
+          invoiceCompanyName: payload.invoiceCompanyName,
+          invoiceEmail: payload.invoiceEmail,
+          invoiceContactName: payload.invoiceContactName,
+          invoiceTelephone: payload.invoiceTelephone,
+          invoiceMobile: payload.invoiceMobile,
+          invoiceAddress: payload.invoiceAddress,
+        };
+        localStorage.setItem("rmaLastCompanyInfo", JSON.stringify(companyInfo));
+
         setSubmitted(true);
         form.resetFields();
         localStorage.removeItem("rmaFormData");
+        setConfrimVisible(false); // Close modal
       } else {
         message.error(result.error || "Failed to submit RMA request");
       }
@@ -288,8 +492,10 @@ function RmaRequestForm() {
       message.error("Please fill all required fields");
     } finally {
       setLoading(false);
+      setFinalSubmitting(false);
     }
   };
+
 
   // Steps configuration
   const steps = [
@@ -322,7 +528,24 @@ function RmaRequestForm() {
                 >
                   📥 Export to Excel
                 </Button>,
-                <Button key="new" onClick={() => { setSubmitted(false); setCurrentStep(0); setSubmittedFormData(null); }}>
+                <Button key="new" onClick={() => {
+                  // Load saved company info for reuse
+                  const savedCompanyInfo = localStorage.getItem("rmaLastCompanyInfo");
+                  setSubmitted(false);
+                  setCurrentStep(0);
+                  setSubmittedFormData(null);
+                  // Pre-fill company info after a brief delay to ensure form is ready
+                  if (savedCompanyInfo) {
+                    setTimeout(() => {
+                      try {
+                        const companyInfo = JSON.parse(savedCompanyInfo);
+                        form.setFieldsValue(companyInfo);
+                      } catch (e) {
+                        console.error("Failed to load saved company info:", e);
+                      }
+                    }, 100);
+                  }
+                }}>
                   Create New Request
                 </Button>,
                 <Button key="dashboard" onClick={() => navigate("/rma-dashboard")}>
@@ -331,9 +554,22 @@ function RmaRequestForm() {
               ]}
             />
 
+            {/* Display RMA Request Number prominently */}
+            {rmaRequestNumber && (
+              <div className="rma-request-number-display" style={{ textAlign: 'center', marginBottom: 24 }}>
+                <Title level={5} style={{ marginBottom: 8 }}>RMA Request Number:</Title>
+                <Tag color="blue" style={{ fontSize: 24, padding: "12px 24px", fontWeight: 'bold' }}>
+                  {rmaRequestNumber}
+                </Tag>
+                <Paragraph type="secondary" style={{ marginTop: 8 }}>
+                  Please save this number for tracking your request.
+                </Paragraph>
+              </div>
+            )}
+
             {rmaNumbers.length > 0 && (
               <div className="rma-numbers-list">
-                <Title level={5}>Generated RMA Number:</Title>
+                <Title level={5}>Items Submitted:</Title>
                 {rmaNumbers.map((item, idx) => (
                   <Card key={idx} size="small" className="rma-number-card">
                     <Row justify="space-between" align="middle">
@@ -368,8 +604,7 @@ function RmaRequestForm() {
               <Steps.Step
                 key={index}
                 title={step.title}
-                icon={<span className="step-icon">{step.icon}</span>}
-              />
+                icon={<span className="step-icon">{step.icon}</span>} />
             ))}
           </Steps>
         </Card>
@@ -404,8 +639,7 @@ function RmaRequestForm() {
                       options={customerOptions}
                       onSearch={handleCustomerSearch}
                       onSelect={handleCustomerSelect}
-                      notFoundContent={searchingCustomers ? "Searching..." : null}
-                    />
+                      notFoundContent={searchingCustomers ? "Searching..." : null} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
@@ -436,7 +670,10 @@ function RmaRequestForm() {
                   <Form.Item
                     label="Telephone"
                     name="telephone"
-                    rules={[{ required: true, message: "Telephone is required" }]}
+                    rules={[
+                      { required: true, message: "Telephone is required" },
+                      { pattern: /^\d{10}$/, message: "Must be 10 digits" }
+                    ]}
                   >
                     <Input placeholder="Enter phone number" size="large" />
                   </Form.Item>
@@ -445,7 +682,10 @@ function RmaRequestForm() {
                   <Form.Item
                     label="Mobile"
                     name="mobile"
-                    rules={[{ required: true, message: "Mobile is required" }]}
+                    rules={[
+                      { required: true, message: "Mobile is required" },
+                      { pattern: /^\d{10}$/, message: "Must be 10 digits" }
+                    ]}
                   >
                     <Input placeholder="Enter mobile number" size="large" />
                   </Form.Item>
@@ -460,17 +700,37 @@ function RmaRequestForm() {
                 <TextArea rows={3} placeholder="Enter full return address" size="large" />
               </Form.Item>
 
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={8}>
+                  <Form.Item
+                    label="TAT (Turn Around Time)"
+                    name="tat"
+                    rules={[{ required: true, message: "TAT is required" }]}
+                    tooltip="Expected number of days to complete repair and return items"
+                  >
+                    <Input
+                      type="number"
+                      placeholder="Enter days (e.g., 15)"
+                      size="large"
+                      min={1}
+                      max={365}
+                      suffix="days" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
               <Divider />
 
               <div className="invoice-section">
                 <div className="invoice-header">
                   <Title level={5} style={{ margin: 0 }}>Invoice Address</Title>
                   <Button
-                    type="link"
+                    type={sameAsReturn ? "primary" : "link"}
                     icon={<CopyOutlined />}
                     onClick={copyToInvoice}
+                    className={sameAsReturn ? "sync-active-btn" : ""}
                   >
-                    Same as Return Address
+                    {sameAsReturn ? "✓ Syncing with Return Address" : "Same as Return Address"}
                   </Button>
                 </div>
 
@@ -532,10 +792,8 @@ function RmaRequestForm() {
                     rules={[{ required: true, message: "Required" }]}
                   >
                     <Select placeholder="Select transport mode" size="large">
-                      <Option value="Air">Air</Option>
-                      <Option value="Road">Road</Option>
-                      <Option value="Sea">Sea</Option>
-                      <Option value="Courier">Courier</Option>
+                      <Option value="Air">By Air</Option>
+                      <Option value="Road">By Road</Option>
                     </Select>
                   </Form.Item>
                 </Col>
@@ -564,14 +822,17 @@ function RmaRequestForm() {
                         label="Courier Company Name"
                         name="courierCompanyName"
                         rules={[{
-                          required: getFieldValue("shippingMethod") === "Other Courier Service",
-                          message: "Required when using other courier",
+                          required: getFieldValue("shippingMethod") !== "Motorola Courier Service",
+                          message: "Required",
                         }]}
                       >
-                        <Input
-                          placeholder="Enter courier company name"
-                          size="large"
-                          disabled={getFieldValue("shippingMethod") !== "Other Courier Service"}
+                         <AutoComplete
+                            options={courierOptions.map(c => ({ value: c }))}
+                            placeholder="Select or type courier company"
+                            size="large"
+                            filterOption={(inputValue, option) =>
+                              option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                            }
                         />
                       </Form.Item>
                     )}
@@ -596,21 +857,19 @@ function RmaRequestForm() {
                       <Card
                         key={key}
                         className="item-card"
-                        title={
-                          <div className="item-card-header">
-                            <Tag color="blue">Item {index + 1}</Tag>
-                            {fields.length > 1 && (
-                              <Button
-                                type="text"
-                                danger
-                                icon={<MinusCircleOutlined />}
-                                onClick={() => remove(name)}
-                              >
-                                Remove
-                              </Button>
-                            )}
-                          </div>
-                        }
+                        title={<div className="item-card-header">
+                          <Tag color="blue">Item {index + 1}</Tag>
+                          {fields.length > 1 && (
+                            <Button
+                              type="text"
+                              danger
+                              icon={<MinusCircleOutlined />}
+                              onClick={() => remove(name)}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>}
                       >
                         <Row gutter={[16, 0]}>
                           <Col xs={24} md={8}>
@@ -621,14 +880,16 @@ function RmaRequestForm() {
                               rules={[{ required: true, message: "Product is required" }]}
                             >
                               <Select
-                                placeholder={loadingProducts ? "Loading products..." : "Select product"}
+                                placeholder={loadingProducts ? "Loading products..." : "Select or type product name"}
                                 size="large"
+                                mode="tags"
+                                maxCount={1}
                                 showSearch
                                 loading={loadingProducts}
-                                onChange={(val) => handleProductSelect(val, index)}
+                                onChange={(val) => handleProductSelect(val, name)}
                                 filterOption={(input, option) => {
-                                  const label = option.value || "";
-                                  return label.toLowerCase().includes(input.toLowerCase());
+                                  const label = option.children?.[0] || option.value || "";
+                                  return label.toString().toLowerCase().includes(input.toLowerCase());
                                 }}
                               >
                                 {productCatalog.map(p => (
@@ -654,9 +915,15 @@ function RmaRequestForm() {
                               {...restField}
                               label="Serial Number"
                               name={[name, "serialNo"]}
-                              rules={[{ required: true, message: "Serial number is required" }]}
+                              tooltip="Optional - leave blank for accessories without serial numbers"
                             >
-                              <Input placeholder="Enter serial number" size="large" />
+                              <Input placeholder="Enter serial number "
+                                size="large"
+                                onChange={(e) => {
+                                  // Trigger debounced check on change
+                                  triggerDebouncedSerialCheck(name, e.target.value);
+                                }}
+                                suffix={serialChecking ? "..." : null} />
                             </Form.Item>
                           </Col>
                         </Row>
@@ -670,21 +937,20 @@ function RmaRequestForm() {
                           <TextArea
                             rows={2}
                             placeholder="Describe the issue or fault clearly"
-                            size="large"
-                          />
+                            size="large" />
                         </Form.Item>
 
                         <Row gutter={[16, 0]}>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Codeplug" name={[name, "codeplugProgramming"]}>
-                              <Select placeholder="Select" defaultValue="Default">
+                              <Select placeholder="Select">
                                 <Option value="Default">Default</Option>
                                 <Option value="Customer Codeplug">Customer Codeplug</Option>
                               </Select>
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="Status" name={[name, "status"]}>
+                            <Form.Item {...restField} label="Warranty Status" name={[name, "status"]}>
                               <Select placeholder="Select warranty status">
                                 <Option value="WARR">Warranty</Option>
                                 <Option value="OOW">Out of Warranty</Option>
@@ -694,8 +960,13 @@ function RmaRequestForm() {
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
-                            <Form.Item {...restField} label="FM/UL/ATEX" name={[name, "fmUlAtex"]}>
-                              <Select placeholder="Select" defaultValue="N">
+                            <Form.Item
+                              {...restField}
+                              label="FM/UL/ATEX"
+                              name={[name, "fmUlAtex"]}
+                              rules={[{ required: true, message: "Required" }]}
+                            >
+                              <Select placeholder="Select">
                                 <Option value="N">Non FM/UL/ATEX</Option>
                                 <Option value="Y-FM">FM Certified</Option>
                                 <Option value="Y-UL">UL Certified</Option>
@@ -707,17 +978,39 @@ function RmaRequestForm() {
                         <Row gutter={[16, 0]}>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Encryption" name={[name, "encryption"]}>
-                              <Input placeholder="e.g., None, AES, DES" />
+                              <Select placeholder="Select">
+                                <Option value="TETRA">Tetra</Option>
+                                <Option value="ASTRO">Astro</Option>
+                              </Select>
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Firmware Version" name={[name, "firmwareVersion"]}>
-                              <Input placeholder="e.g., R02.01.00" />
+                              <Select placeholder="Select">
+                                <Option value="TETRA">Tetra</Option>
+                                <Option value="ASTRO">Astro</Option>
+                              </Select>
                             </Form.Item>
                           </Col>
                           <Col xs={24} md={8}>
                             <Form.Item {...restField} label="Invoice No." name={[name, "invoiceNo"]}>
                               <Input placeholder="For accessories" />
+                            </Form.Item>
+                          </Col>
+                          <Col xs={24} md={8}>
+                            <Form.Item {...restField} label="Lower Firmaware Version" name={[name, "lowerFirmwareVersion"]}>
+                              <Select placeholder="Select">
+                                <Option value="Follow Depot Mainboard Inventory Version">Follow Depot Mainboard Inventory Version</Option>
+                                <Option value="Return Unrepaired">Return Unrepaired</Option>
+                              </Select>
+                            </Form.Item>
+                          </Col>
+                          <Col xs={12} md={8}>
+                            <Form.Item {...restField} label="Partial Shipment" name={[name, "partialshipment"]}>
+                              <Select placeholder="Select">
+                                <Option value="Y">Yes</Option>
+                                <Option value="N">No</Option>
+                              </Select>
                             </Form.Item>
                           </Col>
                         </Row>
@@ -817,9 +1110,7 @@ function RmaRequestForm() {
                 >
                   <Input
                     placeholder="Enter your name"
-                    size="large"
-                    defaultValue={form.getFieldValue("contactName")}
-                  />
+                    size="large" />
                 </Form.Item>
               </div>
             </div>
@@ -853,8 +1144,212 @@ function RmaRequestForm() {
             </Space>
           </div>
         </Card>
-      </div>
-    </RmaLayout>
+
+        <Modal
+          title="Confirm RMA Submission"
+          open={conformVisible}
+          onCancel={() => setConfrimVisible(false)}
+          footer={[
+            <Button key="back" onClick={() => setConfrimVisible(false)}>
+              Cancel
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              loading={finalSubmitting}
+              onClick={finalSubmit}
+            >
+              Confirm Submit
+            </Button>,
+          ]}
+          width={700}
+          zIndex={1200}
+        >
+          <div style={{ padding: "10px 0" }}>
+            <Title level={5}>Select Repair Type</Title>
+            <Radio.Group
+              onChange={(e) => setRepairType(e.target.value)}
+              value={repairType}
+              style={{ marginBottom: 20 }}
+            >
+              <Radio value="Local Repair">Local Repair</Radio>
+              <Radio value="Depot Repair">Depot Repair</Radio>
+            </Radio.Group>
+
+            {previewData && (
+              <div className="request-preview-box">
+                <Title level={5}>Request Preview</Title>
+                <Row gutter={[16, 8]}>
+                  <Col span={12}>
+                    <Text type="secondary">Company:</Text> <Text strong>{previewData.companyName}</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Contact:</Text> <Text strong>{previewData.contactName}</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Transport:</Text> <Text strong>{previewData.modeOfTransport}</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Total Items:</Text> <Text strong>{previewData.items?.length || 0}</Text>
+                  </Col>
+                </Row>
+
+                <Divider style={{ margin: "12px 0" }} />
+
+                <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                  <Text strong>Items:</Text>
+                  <ul style={{ paddingLeft: 20, margin: "5px 0" }}>
+                    {previewData.items?.map((item, idx) => (
+                      <li key={idx}>
+                        <Text>{item.product} ({item.serialNo})</Text>
+                        <br />
+                        <Text type="secondary" style={{ fontSize: 12 }}>{item.faultDescription}</Text>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+        </Modal>
+      </div><Modal
+        title={<Space>
+          <FileSearchOutlined style={{ color: '#1890ff' }} />
+          <span>Serial Number History</span>
+        </Space>}
+        open={serialHistoryVisible}
+        onCancel={() => setSerialHistoryVisible(false)}
+        footer={[
+          <Button key="close" type="primary" onClick={() => setSerialHistoryVisible(false)}>
+            Got it
+          </Button>
+        ]}
+        width={700}
+        zIndex={1200}
+        className="serial-history-modal"
+      >
+        <Paragraph type="secondary" style={{ marginBottom: 16 }}>
+          Historical records found for this serial number in the system.
+        </Paragraph>
+
+        {serialHistory.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <InboxOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+            <Text type="secondary">No previous records found for this serial number.</Text>
+          </div>
+        ) : (
+          <div className="history-box">
+            {serialHistory.map((h, idx) => (
+              <Card
+                key={idx}
+                size="small"
+                className="history-card"
+                title={<Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                  <Col>
+                    <Text strong>{h.rmaNo}</Text>
+                    <Text type="secondary" style={{ fontSize: 10, marginLeft: 8 }}>
+                      Record ID: #{h.itemId || "MISSING"}
+                    </Text>
+                  </Col>
+                  <Col>
+                    <Text type="secondary" style={{ fontSize: '12px' }}>{h.createdDate}</Text>
+                  </Col>
+                </Row>}
+              >
+                <Space direction="vertical" style={{ width: "100%" }} size={4}>
+                  <Row align="middle" gutter={8}>
+                    <Col>
+                      {(() => {
+                        // STRICT ALIGNMENT: Use ONLY repairStatus, matching Dashboard "Total Items" logic.
+                        const statusStr = h.repairStatus || "UNASSIGNED";
+                        const s = statusStr.toUpperCase();
+                        let color = 'default';
+
+                        // Color Logic from RMADashboard.js
+                        if (['REPAIRED', 'REPLACED', 'REPAIRED_AT_DEPOT', 'DELIVERED', 'DELIVERED_TO_CUSTOMER', 'CLOSED'].includes(s)) {
+                          color = 'green';
+                        } else if (s === 'UNASSIGNED') {
+                          color = 'orange';
+                        } else if (s === 'ASSIGNED') {
+                          color = 'blue';
+                        } else if (s === 'REPAIRING') {
+                          color = 'geekblue';
+                        } else if (['DISPATCHED', 'DISPATCHED_TO_CUSTOMER', 'DISPATCHED_TO_DEPOT'].includes(s)) {
+                          color = 'cyan';
+                        } else if (['BER', 'BER_AT_DEPOT', 'CANT_BE_REPAIRED'].includes(s) || s.includes("CANT") || s.includes("BER")) {
+                          color = 'red';
+                        } else if (['AT_DEPOT_REPAIRED', 'RECEIVED_AT_DEPOT', 'RECEIVED_AT_GURGAON', 'PENDING_DISPATCH_TO_DEPOT'].includes(s)) {
+                          color = 'purple';
+                        }
+
+                        // Text Normalization for BER
+                        let displayStatus = statusStr;
+                        if (color === 'red') displayStatus = "BER";
+
+                        return <Tag color={color} style={{ fontWeight: 600 }}>{displayStatus}</Tag>;
+                      })()}
+                    </Col>
+                  </Row>
+
+                  <div style={{ marginTop: 8 }}>
+                    <Text strong style={{ fontSize: 15 }}>{h.product}</Text>
+                    {h.model && <Text type="secondary" style={{ marginLeft: 8 }}>({h.model})</Text>}
+                  </div>
+
+                  <div style={{ color: 'rgba(0,0,0,0.65)', fontSize: 13, marginBottom: 8 }}>
+                    <UserOutlined style={{ marginRight: 4, color: '#1890ff' }} />
+                    <Text strong>{h.customerName}</Text>
+                  </div>
+
+                  <Divider style={{ margin: '8px 0' }} />
+
+                  <Row gutter={16}>
+                    <Col span={12}>
+                      <Space direction="vertical" size={0}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>ASSIGNED TO</Text>
+                        <Text strong style={{ fontSize: 13 }}>{h.assignedTechnician || "N/A"}</Text>
+                      </Space>
+                    </Col>
+                    <Col span={12}>
+                      <Space direction="vertical" size={0}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>REPAIRED BY</Text>
+                        <Text strong style={{ fontSize: 13 }}>{h.repairedBy || "N/A"}</Text>
+                        {h.repairedDate && <Text type="secondary" style={{ fontSize: 10 }}>on {h.repairedDate}</Text>}
+                      </Space>
+                    </Col>
+                  </Row>
+
+                  <div style={{ marginTop: 12 }}>
+                    <Text type="secondary" style={{ fontSize: 11 }}>FAULT DESCRIPTION</Text>
+                    <Paragraph style={{ margin: 0, fontSize: 13 }}>{h.faultDescription}</Paragraph>
+                  </div>
+
+                  {h.issueFixed && h.issueFixed !== "N/A" && (
+                    <div className="issue-fixed-box">
+                      <Text strong className="text-success-themed">ISSUE FIXED / ACTION TAKEN</Text>
+                      <Paragraph style={{ margin: 0, fontSize: 13 }}>{h.issueFixed}</Paragraph>
+                    </div>
+                  )}
+
+                  <div style={{
+                    marginTop: 8,
+                    backgroundColor: 'rgba(0,0,0,0.02)',
+                    padding: '8px',
+                    borderRadius: 4,
+                    borderLeft: '3px solid #faad14'
+                  }}>
+                    <Text strong className="text-warning-themed">TECHNICIAN REMARKS</Text>
+                    <Paragraph style={{ marginBottom: 0, marginTop: 4, fontSize: 13, fontStyle: 'italic' }}>
+                      {h.repairRemarks || "No remarks provided."}
+                    </Paragraph>
+                  </div>
+                </Space>
+              </Card>
+            ))}
+          </div>
+        )}
+      </Modal>
+    </RmaLayout >
   );
 }
 export default RmaRequestForm;

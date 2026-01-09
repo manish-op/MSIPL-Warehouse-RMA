@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import {
     Typography,
     Tag,
@@ -15,36 +16,94 @@ import {
     Badge,
     Empty,
     Divider,
+    Dropdown,
+    Menu,
+    Collapse,
+    Tooltip
 } from "antd";
 import {
     EditOutlined,
     UserSwitchOutlined,
     TeamOutlined,
     ReloadOutlined,
+    BarcodeOutlined,
+    UserOutlined,
+    InfoCircleOutlined,
+    WarningOutlined,
+    CheckCircleOutlined,
+    DownOutlined
 } from "@ant-design/icons";
-import { RmaApi } from "../API/RMA/RmaCreateAPI";
+import { RmaApi } from "../API/RMA";
+import { URL } from "../API/URL";
 import RmaLayout from "../RMA/RmaLayout";
-import "./UnrepairedPage.css";
+import "./UnrepairedPage.css"; // Uses the shared modern CSS
+import BERCertificateForm from "./BERCertificateForm";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
+const { Panel } = Collapse;
 
 export default function AssignedPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    const [sortOption, setSortOption] = useState("date_desc"); // Default: Newest first
     const [statusModalVisible, setStatusModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [newStatus, setNewStatus] = useState("");
     const [remarks, setRemarks] = useState("");
     const [issueFixed, setIssueFixed] = useState("");
     const [updating, setUpdating] = useState(false);
+    const [activeKeys, setActiveKeys] = useState([]);
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.highlightRma) {
+            setActiveKeys((prev) => [...new Set([...prev, location.state.highlightRma])]);
+            
+            if (location.state?.highlightItemId && items.length > 0) {
+                setTimeout(() => {
+                    const element = document.getElementById(`item-card-${location.state.highlightItemId}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.style.border = '2px solid #1890ff';
+                        element.style.transition = 'all 0.3s';
+                        setTimeout(() => { 
+                            element.style.border = ''; 
+                            element.style.transition = '';
+                        }, 3000);
+                    }
+                }, 800);
+            }
+        }
+    }, [location.state, items]);
+    
+    // Status options from backend
+    const [repairStatuses, setRepairStatuses] = useState([]);
+
+    // Reassignment state
+    const [reassignModalVisible, setReassignModalVisible] = useState(false);
+    const [employees, setEmployees] = useState([]);
+    const [newAssignee, setNewAssignee] = useState(null);
+    const [reassignReason, setReassignReason] = useState("");
+    const berFormRef = useRef(null);
+
+    //BER Certification
+    const [showBERForm, setShowBERForm] = useState(false);
+    const [berProductData, setBerProductData] = useState(null);
+
 
     const getStatusColor = (status) => {
         switch (status?.toUpperCase()) {
             case "ASSIGNED": return "blue";
             case "REPAIRING": return "orange";
             case "BER": return "red";
+<<<<<<< HEAD
+=======
+            case "REPAIRED": return "green";
+            case "CANT_BE_REPAIRED": return "purple";
+>>>>>>> main
             default: return "default";
         }
     };
@@ -53,15 +112,39 @@ export default function AssignedPage() {
         setLoading(true);
         const result = await RmaApi.getAssignedItems();
         if (result.success) {
-            setItems(result.data || []);
+            // Filter out Depot items, show everything else (Local, legacy nulls, etc.)
+            const localItems = (result.data || []).filter(item => item.repairType !== 'DEPOT');
+            setItems(localItems);
         } else {
             message.error("Failed to load assigned items");
         }
         setLoading(false);
     };
 
+    const loadEmployees = async () => {
+        const result = await RmaApi.getAllUsers();
+        if (result.success) {
+            setEmployees(result.data || []);
+        } else {
+            console.error("Failed to load employees:", result.error);
+        }
+    };
+
+    const loadRepairStatuses = async () => {
+        const result = await RmaApi.getRepairStatuses();
+        if (result.success) {
+            setRepairStatuses(result.data || []);
+        } else {
+            console.error("Failed to load statuses: ", result.error);
+            message.error("Could not load repair statuses");
+            setRepairStatuses([]);
+        }
+    };
+
     useEffect(() => {
         loadItems();
+        loadEmployees();
+        loadRepairStatuses();
     }, []);
 
     // Group items by RMA number
@@ -73,6 +156,39 @@ export default function AssignedPage() {
         acc[rmaNo].push(item);
         return acc;
     }, {});
+
+    const getSortedGroups = (groups) => {
+        const groupsArray = Object.entries(groups);
+
+        return groupsArray.sort((a, b) => {
+            const itemsA = a[1];
+            const itemsB = b[1];
+            // Use first item of group for comparison
+            const itemA = itemsA[0] || {};
+            const itemB = itemsB[0] || {};
+
+            switch (sortOption) {
+                case "date_desc":
+                    // Most recent first
+                    return new Date(itemB.receivedDate || 0) - new Date(itemA.receivedDate || 0);
+
+                case "date_asc":
+                    // Oldest first
+                    return new Date(itemA.receivedDate || 0) - new Date(itemB.receivedDate || 0);
+
+                case "customer_asc":
+                    // A-Z
+                    const nameA = (itemA.userName || itemA.companyName || "").toLowerCase();
+                    const nameB = (itemB.userName || itemB.companyName || "").toLowerCase();
+                    return nameA.localeCompare(nameB);
+
+                default:
+                    return 0;
+            }
+        });
+    };
+
+    const sortedGroups = getSortedGroups(groupedItems);
 
     const totalRmaRequests = Object.keys(groupedItems).length;
     const totalItems = items.length;
@@ -101,8 +217,59 @@ export default function AssignedPage() {
             message.success("Status updated successfully!");
             setStatusModalVisible(false);
             loadItems();
+
+            //if status is BER
+            if (newStatus === "BER") {
+                setBerProductData({
+                    customer: selectedItem.customerName || selectedItem.customer || "",
+                    consignee: selectedItem.consignee || "",
+                    dateIn: selectedItem.dateIn || "",
+                    warrantyStatus: selectedItem.warrantyStatus || "",
+                    isStatus: selectedItem.isStatus || "",
+                    incomingGIN: selectedItem.ginNo || "",
+                    jobID: selectedItem.jobId || "",
+                    serialNo: selectedItem.serialNo || "",
+                    tanapa: selectedItem.product || "",
+                    faultFromCustomer: selectedItem.faultDescription || "",
+                });
+                setShowBERForm(true);
+            }
         } else {
             message.error(result.error || "Failed to update status");
+        }
+        setUpdating(false);
+    };
+
+    const openReassignModal = (item) => {
+        setSelectedItem(item);
+        setNewAssignee(null);
+        setReassignReason("");
+        setReassignModalVisible(true);
+    };
+
+    const handleReassign = async () => {
+        if (!newAssignee) {
+            message.warning("Please select a new technician");
+            return;
+        }
+        if (!reassignReason.trim()) {
+            message.warning("Please enter a reason for reassignment");
+            return;
+        }
+
+        setUpdating(true);
+        const result = await RmaApi.reassignItem(
+            selectedItem.id,
+            newAssignee.email,
+            newAssignee.name,
+            reassignReason
+        );
+        if (result.success) {
+            message.success(result.message || "Item reassigned successfully!");
+            setReassignModalVisible(false);
+            loadItems();
+        } else {
+            message.error(result.error || "Failed to reassign item");
         }
         setUpdating(false);
     };
@@ -110,28 +277,31 @@ export default function AssignedPage() {
     return (
         <RmaLayout>
             <div className="unrepaired-page">
-                {/* Header Section */}
-                <div className="unrepaired-header">
+                {/* Header Section - Light Blue Theme (Matches Unrepaired) */}
+                <div className="unrepaired-header header-assigned">
                     <div className="header-content">
                         <div className="header-title">
                             <UserSwitchOutlined className="header-icon" />
                             <div>
-                                <Title level={2} style={{ margin: 0, color: "#fff" }}>
+                                <Title level={2} style={{ margin: 0 }}>
                                     Assigned Items
                                 </Title>
-                                <Text style={{ color: "rgba(255,255,255,0.85)" }}>
+                                <Text type="secondary">
                                     Items currently being worked on by technicians
                                 </Text>
                             </div>
                         </div>
-                        <Button
-                            icon={<ReloadOutlined />}
-                            onClick={loadItems}
-                            loading={loading}
-                            className="refresh-btn"
-                        >
-                            Refresh
-                        </Button>
+                        <Select
+                            value={sortOption}
+                            onChange={setSortOption}
+                            className="header-select"
+                            style={{ marginRight: 8 }}
+                            options={[
+                                { value: "date_desc", label: "Date: Newest First" },
+                                { value: "date_asc", label: "Date: Oldest First" },
+                                { value: "customer_asc", label: "Customer: A-Z" },
+                            ]}
+                        />
                     </div>
 
                     {/* Stats Row */}
@@ -171,57 +341,104 @@ export default function AssignedPage() {
                             className="empty-state"
                         />
                     ) : (
-                        <div className="rma-groups">
-                            {Object.entries(groupedItems).map(([rmaNo, rmaItems]) => (
-                                <Card
-                                    key={rmaNo}
-                                    className="rma-group-card"
-                                    title={
-                                        <div className="rma-card-header">
-                                            <span className="rma-number">
-                                                <Tag color="#1890ff" style={{ fontSize: 14, padding: "4px 12px" }}>
-                                                    RMA: {rmaNo}
-                                                </Tag>
-                                            </span>
-                                            <Badge
-                                                count={rmaItems.length}
-                                                style={{ backgroundColor: "#1890ff" }}
-                                                overflowCount={99}
-                                            />
-                                        </div>
-                                    }
-                                >
-                                    <Row gutter={[16, 16]}>
-                                        {rmaItems.map((item) => (
-                                            <Col xs={24} md={12} lg={8} key={item.id}>
-                                                <Card
-                                                    className="item-card"
-                                                    size="small"
-                                                    hoverable
-                                                    actions={[
-                                                        <Button
-                                                            type="primary"
-                                                            icon={<EditOutlined />}
-                                                            onClick={() => openStatusModal(item)}
-                                                            className="assign-btn"
-                                                        >
-                                                            Update Status
-                                                        </Button>
-                                                    ]}
-                                                >
-                                                    <div className="item-content">
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Product</Text>
-                                                            <Text strong>{item.product || "N/A"}</Text>
+                        <Collapse
+                            className="rma-collapse"
+                            activeKey={activeKeys}
+                            onChange={setActiveKeys}
+                            expandIconPosition="end"
+                            ghost
+                        >
+                            {sortedGroups.map(([rmaNo, rmaItems]) => {
+                                const firstItem = rmaItems[0];
+                                const createdDate = firstItem.receivedDate ? new Date(firstItem.receivedDate).toLocaleDateString() : "N/A";
+                                const itemCount = rmaItems.length;
+
+                                const headerContent = (
+                                    <div className="rma-collapse-header" style={{ width: '100%', padding: '4px 0' }}>
+                                        <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
+                                            {/* Column 1: RMA Identity */}
+                                            <Col xs={24} sm={12} md={8} lg={7} xl={6}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <Title level={5} style={{ margin: 0, color: 'var(--primary-color)' }}>
+                                                            {rmaNo !== "Unknown" ? rmaNo : "No RMA #"}
+                                                        </Title>
+                                                    </div>
+                                                    <Text type="secondary" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span role="img" aria-label="user">👤</span> {firstItem.userName || firstItem.assignedToName || "User"}
+                                                    </Text>
+                                                    <Text type="secondary" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span role="img" aria-label="customer">🏢Customer ::</span> {firstItem.companyName || "Unknown Customer"}
+                                                    </Text>
+                                                </div>
+                                            </Col>
+
+                                            {/* Column 2: Date */}
+                                            <Col xs={12} sm={12} md={5} lg={5} xl={4}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <Text type="secondary" style={{ fontSize: '11px' }}>Created Date</Text>
+                                                    <Text strong>{createdDate}</Text>
+                                                </div>
+                                            </Col>
+
+                                            {/* Column 3: Stats */}
+                                            <Col xs={12} sm={8} md={3} lg={3} xl={2}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <Text type="secondary" style={{ fontSize: '11px' }}>Items</Text>
+                                                    <div>
+                                                        <Badge
+                                                            count={itemCount}
+                                                            style={{ backgroundColor: 'var(--status-success)' }}
+                                                            showZero
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </Col>
+
+                                            {/* Column 4: Types/Status Summary (optional) */}
+                                            <Col xs={24} sm={24} md={8} lg={9} xl={12} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '24px' }}>
+                                                {/* Placeholder for future group actions */}
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                );
+
+                                return (
+                                    <Panel
+                                        key={rmaNo}
+                                        header={headerContent}
+                                        className="rma-panel"
+                                    >
+                                        {/* MODERN CARD GRID */}
+                                        <div className="rma-items-grid">
+                                            {rmaItems.map((item) => (
+                                                <div key={item.id} id={`item-card-${item.id}`} className="rma-item-card-modern">
+
+                                                    {/* Header Strip */}
+                                                    <div className="item-header">
+                                                        <span className="item-product">
+                                                            {item.product || "Product"}
+                                                        </span>
+                                                        <Tag color={getStatusColor(item.repairStatus)}>
+                                                            {item.repairStatus || "ASSIGNED"}
+                                                        </Tag>
+                                                    </div>
+
+                                                    {/* Details Grid */}
+                                                    <div className="item-details-grid">
+                                                        <div className="detail-box">
+                                                            <span className="label"><BarcodeOutlined /> Serial No</span>
+                                                            <span className="value monospace">{item.serialNo || "N/A"}</span>
                                                         </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Serial No.</Text>
-                                                            <Text code>{item.serialNo || "N/A"}</Text>
+                                                        <div className="detail-box">
+                                                            <span className="label">Model</span>
+                                                            <span className="value">{item.model || "N/A"}</span>
                                                         </div>
-                                                        <div className="item-row">
-                                                            <Text type="secondary">Assigned To</Text>
-                                                            <Text>{item.assignedToName || "N/A"}</Text>
+                                                        <div className="detail-box">
+                                                            <span className="label"><UserOutlined /> Technician</span>
+                                                            <span className="value">{item.assignedToName || "N/A"}</span>
                                                         </div>
+<<<<<<< HEAD
                                                         <div className="item-row">
                                                             <Text type="secondary">Status</Text>
                                                             <Tag color={getStatusColor(item.repairStatus)}>
@@ -243,15 +460,55 @@ export default function AssignedPage() {
                                                             >
                                                                 {item.faultDescription || "No description"}
                                                             </Paragraph>
+=======
+                                                        <div className="detail-box">
+                                                            <span className="label">RMA No</span>
+                                                            {item.itemRmaNo ? <Tag color="blue">{item.itemRmaNo}</Tag> : <Text type="secondary" style={{ fontSize: '11px' }}>None</Text>}
+>>>>>>> main
                                                         </div>
                                                     </div>
-                                                </Card>
-                                            </Col>
-                                        ))}
-                                    </Row>
-                                </Card>
-                            ))}
-                        </div>
+
+                                                    {/* Fault / Reason Box */}
+                                                    <div className="fault-box">
+                                                        <span className="label">Fault Description</span>
+                                                        <p className="fault-desc">{item.faultDescription || "No description provided."}</p>
+
+                                                        {item.lastReassignmentReason && (
+                                                            <div style={{ marginTop: '8px', borderTop: '1px dashed var(--border-split)', paddingTop: '4px' }}>
+                                                                <span className="label">Reassign Reason</span>
+                                                                <p className="fault-desc" style={{ fontStyle: 'italic' }}>{item.lastReassignmentReason}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Footer Actions */}
+                                                    <div className="item-footer" style={{ display: 'flex', gap: '8px' }}>
+                                                        <Button
+                                                            type="primary"
+                                                            block
+                                                            size="small"
+                                                            icon={<EditOutlined />}
+                                                            onClick={() => openStatusModal(item)}
+                                                        >
+                                                            Update
+                                                        </Button>
+                                                        <Button
+                                                            block
+                                                            size="small"
+                                                            icon={<UserSwitchOutlined />}
+                                                            onClick={() => openReassignModal(item)}
+                                                        >
+                                                            Reassign
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                    </Panel>
+                                );
+                            })}
+                        </Collapse>
                     )}
                 </div>
 
@@ -274,33 +531,32 @@ export default function AssignedPage() {
                             type="primary"
                             loading={updating}
                             onClick={handleUpdateStatus}
+                            style={{ backgroundColor: "#1890ff", borderColor: "#1890ff" }}
                         >
                             Update Status
                         </Button>
                     ]}
-                    className="assign-modal"
                 >
-                    <div className="modal-item-info">
-                        <Card size="small" style={{ marginBottom: 16, backgroundColor: "#e6f7ff" }}>
-                            <Row gutter={16}>
-                                <Col span={12}>
-                                    <Text type="secondary">Product</Text>
-                                    <div><Text strong>{selectedItem?.product}</Text></div>
-                                </Col>
-                                <Col span={12}>
-                                    <Text type="secondary">Assigned To</Text>
-                                    <div><Text>{selectedItem?.assignedToName}</Text></div>
-                                </Col>
-                            </Row>
-                            <div style={{ marginTop: 12 }}>
-                                <Text type="secondary">Fault</Text>
-                                <Paragraph style={{ margin: 0 }}>{selectedItem?.faultDescription}</Paragraph>
-                            </div>
-                        </Card>
+                    <div className="fault-box" style={{ margin: '0 0 16px 0' }}>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>Product</Text>
+                                <div><Text strong>{selectedItem?.product}</Text></div>
+                            </Col>
+                            <Col span={12}>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>Technician</Text>
+                                <div><Text strong>{selectedItem?.assignedToName}</Text></div>
+                            </Col>
+                        </Row>
+                        <div style={{ marginTop: '8px' }}>
+                            <Text type="secondary" style={{ fontSize: '12px' }}>Fault</Text>
+                            <Paragraph style={{ margin: 0, fontSize: '13px' }} ellipsis={{ rows: 2 }}>{selectedItem?.faultDescription}</Paragraph>
+                        </div>
                     </div>
+
                     <Space direction="vertical" style={{ width: "100%" }} size="middle">
                         <div>
-                            <Text strong>Update Status *</Text>
+                            <Text strong>New Status *</Text>
                             <Select
                                 style={{ width: "100%", marginTop: 4 }}
                                 size="large"
@@ -308,10 +564,18 @@ export default function AssignedPage() {
                                 onChange={(val) => setNewStatus(val)}
                                 placeholder="Select status"
                             >
+<<<<<<< HEAD
                                 <Option value="REPAIRING">Repairing</Option>
                                 <Option value="REPAIRED">Repaired</Option>
                                 <Option value="CANT_BE_REPAIRED">Can't Be Repaired</Option>
                                 <Option value="BER">BER</Option>
+=======
+                                {repairStatuses.map(status => (
+                                    <Option key={status.value} value={status.value}>
+                                        {status.label}
+                                    </Option>
+                                ))}
+>>>>>>> main
                             </Select>
                         </div>
                         <div>
@@ -327,7 +591,7 @@ export default function AssignedPage() {
                         <div>
                             <Text strong>Remarks</Text>
                             <TextArea
-                                rows={3}
+                                rows={2}
                                 placeholder="Enter remarks about the repair"
                                 value={remarks}
                                 onChange={(e) => setRemarks(e.target.value)}
@@ -336,7 +600,109 @@ export default function AssignedPage() {
                         </div>
                     </Space>
                 </Modal>
+
+                {/* Reassign Modal */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <UserSwitchOutlined style={{ color: "#fa8c16" }} />
+                            <span>Reassign Technician</span>
+                        </div>
+                    }
+                    open={reassignModalVisible}
+                    onCancel={() => setReassignModalVisible(false)}
+                    footer={[
+                        <Button key="cancel" onClick={() => setReassignModalVisible(false)}>
+                            Cancel
+                        </Button>,
+                        <Button
+                            key="reassign"
+                            type="primary"
+                            loading={updating}
+                            onClick={handleReassign}
+                            style={{ backgroundColor: "#fa8c16", borderColor: "#fa8c16" }}
+                        >
+                            Reassign
+                        </Button>
+                    ]}
+                >
+                    <div className="fault-box" style={{ margin: '0 0 16px 0' }}>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>Product</Text>
+                                <div><Text strong>{selectedItem?.product}</Text></div>
+                            </Col>
+                            <Col span={12}>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>Current Tech</Text>
+                                <div><Text strong>{selectedItem?.assignedToName}</Text></div>
+                            </Col>
+                        </Row>
+                    </div>
+                    <Space direction="vertical" style={{ width: "100%" }} size="middle">
+                        <div>
+                            <Text strong>New Technician *</Text>
+                            <Select
+                                style={{ width: "100%", marginTop: 4 }}
+                                size="large"
+                                placeholder="Select new technician"
+                                value={newAssignee ? newAssignee.email : undefined}
+                                optionLabelProp="value"
+                                onChange={(value) => {
+                                    const emp = employees.find(e => e.email === value);
+                                    setNewAssignee(emp);
+                                }}
+                                showSearch
+                                filterOption={(input, option) =>
+                                    (option?.children ?? "").toString().toLowerCase().includes(input.toLowerCase())
+                                }
+                            >
+                                {employees
+                                    .filter(emp => emp.email !== selectedItem?.assignedToEmail)
+                                    .map(emp => (
+                                        <Option key={emp.email} value={emp.email}>
+                                            {`${emp.name} (${emp.email})`}
+                                        </Option>
+                                    ))}
+                            </Select>
+                        </div>
+                        <div>
+                            <Text strong>Reason for Reassignment *</Text>
+                            <TextArea
+                                rows={3}
+                                placeholder="Enter the reason for reassigning this item (mandatory)"
+                                value={reassignReason}
+                                onChange={(e) => setReassignReason(e.target.value)}
+                                style={{ marginTop: 4 }}
+                            />
+                        </div>
+                    </Space>
+                </Modal>
+
+                {showBERForm && (
+                    <Modal
+                        open={showBERForm}
+                        onCancel={() => setShowBERForm(false)}
+                        width={1000}
+                        closable={true}
+                        maskClosable={false}
+                        styles={{ body: { height: '80vh', overflowY: 'auto', padding: 0 } }}
+                        footer={[
+                            <Button key="close" onClick={() => setShowBERForm(false)}>
+                                Close
+                            </Button>,
+                            <Button key="download" type="primary" onClick={() => berFormRef.current?.handleDownloadPDF()}>
+                                Download PDF
+                            </Button>,
+                        ]}
+                    >
+                        <BERCertificateForm
+                            ref={berFormRef}
+                            productData={berProductData}
+                            onClose={() => setShowBERForm(false)}
+                        />
+                    </Modal>
+                )}
             </div>
-        </RmaLayout>
+        </RmaLayout >
     );
 }

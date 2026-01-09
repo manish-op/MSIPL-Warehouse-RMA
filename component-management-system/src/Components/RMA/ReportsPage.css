@@ -1,0 +1,256 @@
+:root {
+  --page-bg: var(--background-color);
+  --header-text: var(--header-text);
+  --card-bg: var(--component-background);
+  --card-head-bg: var(--secondary-bg);
+  --card-head-border: var(--border-color);
+  --text-main: var(--text-color);
+  --text-secondary: var(--text-color-secondary);
+  --shadow-main: var(--card-shadow);
+}
+
+/* =========================================
+   1. Page Layout & Global
+   ========================================= */
+.reports-page {
+  padding: 0;
+  background-color: var(--page-bg);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  display: block; /* Reset flex if it was there */
+}
+
+/* =========================================
+   2. Page Header
+   ========================================= */
+.reports-header-wrapper {
+  padding: 24px 32px;
+  margin-bottom: 24px;
+}
+
+.header-reports {
+  background: var(--header-audit-grad); /* Using Audit gradient for Reports */
+  box-shadow: var(--card-shadow);
+  padding: 24px;
+  border-radius: 0; /* Standard doesn't have radius usually, or depends on container. UnrepairedPage uses full width header bar usually or standard container. UnrepairedPage.js has .unrepaired-header which has padding. */ 
+}
+
+/* UnrepairedPage.css defines .unrepaired-header with padding, but the background class on inner div? 
+   Checking UnrepairedPage.js:
+   <div className="unrepaired-header header-unrepaired"> 
+   So the outer div has the background.
+*/
+
+.reports-header-container {
+    /* Corresponds to .unrepaired-header in UnrepairedPage.js which combines layout + visual class */
+    padding: 24px 32px;
+    margin-bottom: 24px;
+    background: var(--header-audit-grad);
+    box-shadow: var(--card-shadow);
+}
+
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  font-size: 28px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+
+/* Force text visibility in headers - Global Override for Reports Header */
+.reports-header-container,
+.reports-header-container .ant-typography,
+.reports-header-container h1,
+.reports-header-container h2,
+.reports-header-container h3,
+.reports-header-container h4,
+.reports-header-container h5,
+.reports-header-container span,
+.reports-header-container div {
+  color: #ffffff !important;
+}
+
+.reports-header-container .ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* =========================================
+   3. Main Content Area
+   ========================================= */
+.reports-content {
+  padding: 0 32px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Section Containers (Replacing Glass) */
+.reports-section-container {
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  padding: 24px;
+  box-shadow: 0 2px 8px var(--shadow-main);
+}
+
+/* Report Cards */
+.report-card {
+  height: 100%;
+  cursor: pointer;
+  background: var(--card-bg) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-color) !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  position: relative;
+}
+
+.report-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-color) !important;
+}
+
+.report-card.selected {
+  background: var(--card-bg) !important;
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: 0 0 0 4px rgba(24, 144, 255, 0.1), 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
+
+.report-card-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--hover-color);
+  margin: 0 auto 16px auto;
+  transition: all 0.3s ease;
+}
+
+.report-card:hover .report-card-icon {
+  background: var(--primary-color);
+  color: white !important; /* Force icon white on hover */
+}
+
+/* Allow icon color override via inline style to propagate if not hovered, 
+   but simplistic approach: */
+.report-card:hover .report-card-icon span {
+    color: white !important; /* Antd icons are spans/svgs */
+}
+
+.report-card-content {
+  text-align: center;
+}
+
+.report-card-content .ant-typography strong {
+  font-size: 1.1em;
+  color: var(--text-main);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.report-description {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* Action Bar / Controls */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group .ant-typography {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Action Bar / Controls */
+
+.action-buttons-container {
+  display: flex;
+  gap: 12px;
+  height: 100%;
+  align-items: flex-end;
+}
+
+.generate-btn {
+    height: 40px; /* Standardize height */
+    border-radius: 6px;
+}
+
+.preview-btn {
+    height: 40px;
+    border-radius: 6px;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px); /* Keeping slight blur for modal overlay is fine, standard antd does similar masks */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+[data-theme='dark'] .loading-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+/* Dark Theme Specifics */
+[data-theme='dark'] .reports-header-container {
+    box-shadow: var(--card-shadow), inset 0 0 100px rgba(0,0,0,0.2);
+}
+
+[data-theme='dark'] .report-card-icon {
+    background: #2a2a2a;
+}
+
+/* Dark Mode Refinements */
+[data-theme='dark'] .report-card-icon {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Force colored icons in dark mode */
+[data-theme='dark'] .report-card-icon span,
+[data-theme='dark'] .report-card-icon svg {
+    color: inherit !important;
+}
+
+/* Specific fix for selected state in dark mode */
+[data-theme='dark'] .report-card.selected {
+    background: rgba(24, 144, 255, 0.15) !important;
+    border-color: var(--primary-color) !important;
+}
+
+[data-theme='dark'] .report-card.selected .report-card-icon {
+    background: var(--primary-color) !important;
+    color: white !important;
+}

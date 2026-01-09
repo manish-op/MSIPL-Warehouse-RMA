@@ -1,246 +1,647 @@
-/* Unrepaired Page Styles */
-.unrepaired-page {
-    min-height: 100%;
-    background: #f0f2f5;
+:root {
+  --page-bg: var(--background-color);
+  --header-text: var(--header-text);
+  --card-bg: var(--component-background);
+  --card-head-bg: var(--secondary-bg);
+  --card-head-border: var(--border-color);
+  --text-main: var(--text-color);
+  --text-secondary: var(--text-color-secondary);
+  --text-label: var(--primary-color);
+  --text-value: var(--text-color);
+  --item-header-bg: var(--hover-color);
+  --item-header-text: var(--primary-color);
+  --item-card-border: var(--border-color);
+  --fault-box-bg: var(--hover-color);
+  --fault-box-border: var(--border-color);
+  --item-footer-bg: var(--hover-color);
+  --border-split: var(--border-color);
+  --shadow-main: var(--card-shadow);
 }
 
-/* Header Section */
+[data-theme='dark'] {
+  /* Using global variables, specific tweaks can go here if needed */
+  --text-label: #58a6ff; /* Slightly brighter blue for dark mode labels */
+  --text-secondary: #a6a6a6 !important; /* Brighter secondary text for dark mode */
+  --fault-box-bg: rgba(255, 173, 20, 0.1) !important; /* Slightly more visible warning background */
+  --fault-box-border: rgba(255, 173, 20, 0.3) !important;
+}
+
+[data-theme='dark'] .ant-modal .ant-typography-secondary {
+  color: #a6a6a6 !important;
+}
+
+/* =========================================
+   1. Page Layout & Global
+   ========================================= */
+.unrepaired-page {
+  padding: 0;
+  background-color: var(--page-bg);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* =========================================
+   2. Page Header
+   ========================================= */
 .unrepaired-header {
-    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-    padding: 24px 32px;
-    border-radius: 0 0 24px 24px;
-    box-shadow: 0 4px 20px rgba(24, 144, 255, 0.3);
+  padding: 24px 32px;
+  margin-bottom: 24px;
+}
+
+/* Header Gradient Themes */
+.header-unrepaired {
+  background: var(--header-unrepaired-grad);
+  box-shadow: var(--card-shadow);
+}
+
+.header-assigned {
+  background: var(--header-assigned-grad);
+  box-shadow: var(--card-shadow);
+}
+
+.header-repaired {
+  background: var(--header-repaired-grad);
+  box-shadow: var(--card-shadow);
+}
+
+.header-cant-repair {
+  background: var(--header-cant-repair-grad);
+  box-shadow: var(--card-shadow);
+}
+
+.header-depot {
+  background: var(--header-depot-grad);
+  box-shadow: var(--card-shadow);
+}
+
+/* Dark mode tweaks */
+[data-theme='dark'] .unrepaired-header {
+  box-shadow: var(--card-shadow), inset 0 0 100px rgba(0,0,0,0.2);
 }
 
 .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Force text visibility in headers since they use colorful backgrounds */
+.unrepaired-header .ant-typography {
+  color: #ffffff !important;
+}
+
+.unrepaired-header .ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Header Icon Box */
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header-title {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
+/* Header Icon Box */
 .header-icon {
-    font-size: 36px;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.2);
-    padding: 12px;
-    border-radius: 12px;
+  font-size: 28px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
 }
 
+/* Refresh Button */
 .refresh-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #fff;
-    border-radius: 8px;
-    font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: white;
+  font-weight: 500;
 }
 
 .refresh-btn:hover {
-    background: rgba(255, 255, 255, 0.3) !important;
-    border-color: rgba(255, 255, 255, 0.5) !important;
-    color: #fff !important;
+  background: white;
+  color: #1890ff;
+  border-color: white;
 }
 
-/* Stats Row */
-.stats-row {
-    margin-top: 16px;
-}
-
-.stat-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 16px 20px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    color: #fff;
-}
-
-.stat-box .anticon {
-    font-size: 24px;
-    opacity: 0.9;
-}
-
-.stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 12px;
-    opacity: 0.85;
-    margin-top: 2px;
-}
-
-/* Content Section */
+/* =========================================
+   3. Main Content Area
+   ========================================= */
 .unrepaired-content {
-    padding: 24px 32px;
+  padding: 0 32px 32px 32px;
 }
 
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 0;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
+.loading-container,
 .empty-state {
-    padding: 80px 0;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  padding: 60px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--shadow-main);
 }
 
-/* RMA Groups */
-.rma-groups {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.rma-panel {
+  background: var(--card-bg) !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--card-head-border) !important;
+  overflow: hidden !important;
+  margin-bottom: 16px !important;
 }
 
+[data-theme='dark'] .rma-panel {
+  background: var(--component-background) !important;
+  border-color: var(--border-color) !important;
+}
+
+.rma-collapse-header {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding-right: 24px !important; /* Space for the expand icon */
+}
+
+.rma-collapse-header .ant-typography {
+  color: var(--text-main) !important;
+}
+
+[data-theme='dark'] .rma-collapse-header .ant-typography-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* Fix for the expand icon visibility in dark mode */
+[data-theme='dark'] .ant-collapse-expand-icon,
+[data-theme='dark'] .ant-collapse-arrow {
+  color: var(--text-color) !important;
+}
+
+[data-theme='dark'] .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
+  color: var(--text-color) !important;
+}
+
+/* Ensure the header content doesn't overlap with the expand icon */
+.ant-collapse-header {
+  position: relative !important;
+}
+
+.ant-collapse-expand-icon {
+  position: absolute !important;
+  right: 16px !important;
+}
+
+/* =========================================
+   4. RMA Group Card
+   ========================================= */
 .rma-group-card {
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border: none;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--card-head-border);
+  background: var(--card-bg);
+  box-shadow: 0 4px 20px var(--shadow-main);
 }
 
+/* Light Blue Header for the Group Card */
 .rma-group-card .ant-card-head {
-    background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
-    border-bottom: 1px solid #91d5ff;
-    padding: 16px 24px;
+  background-color: var(--card-head-bg);
+  border-bottom: 2px solid var(--card-head-border);
+  padding: 0 24px;
+  color: var(--text-main);
 }
 
-.rma-group-card .ant-card-body {
-    padding: 20px;
-    background: #fafafa;
+.rma-card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 0;
 }
 
-.rma-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.rma-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-/* Item Cards */
-.item-card {
-    border-radius: 12px;
-    border: 1px solid #f0f0f0;
-    transition: all 0.3s ease;
-    height: 100%;
+.rma-id-box {
+  display: flex;
+  flex-direction: column;
 }
 
-.item-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.15);
-    border-color: #69c0ff;
+.rma-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-.item-card .ant-card-body {
+.rma-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-value);
+}
+
+.rma-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Button overrides for group card actions */
+.rma-actions .ant-btn-default {
+  border-color: var(--border-color);
+  color: var(--text-color);
+  background: var(--component-background);
+}
+
+.rma-actions .ant-btn-default:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: var(--hover-color);
+}
+
+/* =========================================
+   5. Item Grid Layout
+   ========================================= */
+.rma-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  padding: 8px;
+}
+
+/* =========================================
+   6. Individual Item Card
+   ========================================= */
+.rma-item-card-modern {
+  background: var(--card-bg);
+  border: 1px solid var(--item-card-border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.rma-item-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow);
+  border-color: var(--primary-color);
+}
+
+/* Item Header Strip */
+.item-header {
+  background: var(--item-header-bg);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-split);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-product {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--item-header-text);
+}
+
+.add-rma-btn {
+  background: var(--component-background);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--primary-color);
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.add-rma-btn:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  background: var(--hover-color);
+}
+
+/* Details */
+.item-details-grid {
+  padding: 16px 16px 0 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.detail-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-box .label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.detail-box .value {
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.detail-box .value.monospace {
+  font-family: 'Consolas', monospace;
+  background: var(--page-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--item-card-border);
+  color: var(--text-main);
+}
+
+/* Fault Box */
+.fault-box {
+  margin: 16px;
+  background: var(--fault-box-bg);
+  border: 1px solid var(--fault-box-border);
+  padding: 10px;
+  border-radius: 6px;
+  flex-grow: 1;
+}
+
+.fault-box .label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.fault-desc {
+  font-size: 13px;
+  color: var(--text-main);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Item Footer */
+.item-footer {
+  padding: 12px 16px;
+  background: var(--item-footer-bg);
+  border-top: 1px solid var(--border-split);
+}
+
+.item-footer .ant-btn-primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.item-footer .ant-btn-primary:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+/* =========================================
+   7. Ant Design Component Overrides (Dark Mode)
+   ========================================= */
+[data-theme='dark'] .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #177ddc !important;
+}
+
+/* Fix for default buttons that might have white backgrounds in dark mode */
+[data-theme='dark'] .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger):not(.ant-btn-link) {
+  background: #262626 !important;
+  border-color: #434343 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme='dark'] .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger):not(.ant-btn-link):hover {
+  background: #303030 !important;
+  border-color: #177ddc !important;
+  color: #177ddc !important;
+}
+
+/* Ensure empty state text is visible */
+[data-theme='dark'] .ant-empty-description {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Fix for Divider text in dark mode */
+[data-theme='dark'] .ant-divider-inner-text {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+/* Global Tag Fixes for Dark Mode */
+[data-theme='dark'] .ant-tag {
+  border: none !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Ensure tags with backgrounds are readable */
+[data-theme='dark'] .ant-tag-geekblue {
+  background: #111d2c !important;
+  color: #177ddc !important;
+  border: 1px solid #153450 !important;
+}
+
+[data-theme='dark'] .ant-tag-orange {
+  background: #2b2111 !important;
+  color: #d89614 !important;
+  border: 1px solid #594414 !important;
+}
+
+[data-theme='dark'] .ant-tag-cyan {
+  background: #112123 !important;
+  color: #13a8a8 !important;
+  border: 1px solid #144848 !important;
+}
+
+[data-theme='dark'] .ant-tag-processing {
+  background: #111d2c !important;
+  color: #177ddc !important;
+  border: 1px solid #153450 !important;
+}
+
+[data-theme='dark'] .ant-tag-red {
+  background: #2a1215 !important;
+  color: #a61d24 !important;
+  border: 1px solid #5c0011 !important;
+}
+
+[data-theme='dark'] .ant-tag-purple {
+  background: #1a1325 !important;
+  color: #722ed1 !important;
+  border: 1px solid #301c4d !important;
+}
+
+[data-theme='dark'] .ant-tag-blue {
+  background: #111d2c !important;
+  color: #177ddc !important;
+  border: 1px solid #153450 !important;
+}
+
+[data-theme='dark'] .ant-tag-green {
+  background: #162312 !important;
+  color: #49aa19 !important;
+  border: 1px solid #274916 !important;
+}
+
+/* Ensure fault-box children are visible if they are generic divs */
+[data-theme='dark'] .fault-box div {
+  color: var(--text-main) !important;
+}
+
+/* =========================================
+   8. Responsive Design (Mobile/Tablet)
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+
+  /* 1. Page Layout */
+  .unrepaired-page {
+    background-color: var(--page-bg);
+  }
+
+  .unrepaired-content {
+    padding: 12px;
+  }
+
+  /* 2. Header */
+  .unrepaired-header {
     padding: 16px;
-}
-
-.item-card .ant-card-actions {
-    background: #e6f7ff;
-    border-top: 1px solid #91d5ff;
-    padding: 8px 12px;
-}
-
-.item-card .ant-card-actions>li {
-    margin: 0;
-}
-
-.item-content {
-    display: flex;
+    margin-bottom: 16px;
     flex-direction: column;
-    gap: 8px;
-}
+    gap: 12px;
+    align-items: flex-start;
+  }
 
-.item-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.item-row .ant-typography-secondary {
-    font-size: 12px;
-}
-
-.fault-section {
-    display: flex;
+  .header-content {
     flex-direction: column;
-    gap: 4px;
-}
-
-.fault-text {
-    margin: 0 !important;
-    color: #595959;
-    font-size: 13px;
-}
-
-.assign-btn {
+    align-items: flex-start;
+    gap: 12px;
     width: 100%;
-    background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
-    border: none;
-    height: 36px;
-    font-weight: 500;
-    border-radius: 8px;
+  }
+
+  .header-title {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .header-icon {
+    font-size: 24px;
+    padding: 8px;
+  }
+
+  .header-title div h2.ant-typography {
+    font-size: 20px !important;
+    /* Force smaller size */
+  }
+
+  .refresh-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* 3. RMA Group Card */
+  .rma-group-card .ant-card-head {
+    padding: 0 12px;
+  }
+
+  .rma-card-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .rma-identity {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .rma-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    /* Allow buttons to wrap */
+    gap: 8px;
+  }
+
+  /* Make buttons more compact on mobile */
+  .rma-actions .ant-btn {
+    flex: 1 0 auto;
+    /* Grow to fill, BUT DO NOT SHRINK */
+    font-size: 12px;
+    padding: 6px 12px;
+    height: auto;
+    min-height: 32px;
+    white-space: nowrap;
+    overflow: visible;
+  }
+
+  /* Hide button text on very small screens if needed, 
+     or just let them wrap. Let's start by letting them 
+     wrap and reducing padding/text size. 
+     If still too crowded, we can hide the text. */
+
+  /* 5. Item Details */
+  .assign-all-btn {
+    width: 100%;
+    /* Force full width for primary action */
+  }
+
+  /* 4. Item Grid */
+  .rma-items-grid {
+    grid-template-columns: 1fr;
+    /* Single column on mobile */
+    gap: 16px;
+  }
+
+  .rma-item-card-modern {
+    margin-bottom: 0;
+  }
+
+  /* 5. Item Details */
+  .item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .item-product {
+    font-size: 14px;
+    word-break: break-word;
+    /* Prevent long names from being chopped */
+    white-space: normal;
+  }
+
+  .item-details-grid {
+    grid-template-columns: 1fr;
+    /* Stack details */
+    gap: 12px;
+  }
+
+  /* Prevent text chopping */
+  .detail-box .value {
+    word-break: break-all;
+    white-space: normal;
+  }
 }
 
-.assign-btn:hover {
-    background: linear-gradient(135deg, #40a9ff 0%, #69c0ff 100%) !important;
+/* Ensure button text is always visible */
+.rma-actions .ant-btn {
+  color: #0050b3 !important;
 }
 
-/* Modal Styles */
-.assign-modal .ant-modal-header {
-    border-bottom: 1px solid #91d5ff;
-    padding: 16px 24px;
-    background: #e6f7ff;
-}
-
-.assign-modal .ant-modal-body {
-    padding: 20px 24px;
-}
-
-.assign-modal .ant-modal-footer {
-    border-top: 1px solid #f0f0f0;
-    padding: 12px 24px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .unrepaired-header {
-        padding: 16px 20px;
-    }
-
-    .unrepaired-content {
-        padding: 16px 20px;
-    }
-
-    .header-content {
-        flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
-    }
-
-    .refresh-btn {
-        width: 100%;
-    }
-
-    .header-icon {
-        font-size: 28px;
-        padding: 10px;
-    }
+.rma-actions .ant-btn-primary {
+  color: #fff !important;
 }

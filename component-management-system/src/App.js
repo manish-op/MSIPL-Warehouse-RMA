@@ -7,22 +7,12 @@ import Profile from "./Components/UserProfile/Profile";
 import Logout from "./Components/Logout/Logout";
 import ChangePassword from "./Components/UserProfile/ChangePassword";
 import AddEmployee from "./Components/Employee/AddEmployee/AddEmployee";
-import ChangeEmployeePassword from "./Components/Employee/ChnageEmployeePassword/ChangeEmployeePassword";
-import AssignEmployeeRegion from "./Components/Region/EmployeeRelated/AssignEmployeeRegion";
-import ChangeEmployeeRole from "./Components/Role/ChangeEmployeeRole";
-import AddRegion from "./Components/Region/Add/AddRegion";
-import UpdateRegion from "./Components/Region/Update/UpdateRegion";
-import AddKeyword from "./Components/Keyword/Add/Keyword/AddKeyword";
-import AddSubKeyword from "./Components/Keyword/Add/SubKeyword/AddSubKeyword.js";
-import AddItem from "./Components/Items/AddItem/AddItem.js";
-import GetItemSearchBySerialNo from "./Components/Items/GetItem/GetItemSearchBySerialNo.js";
-import UpdateItem from "./Components/Items/UpdateItem/UpdateItem.js";
-import GetItemByKeyword from "./Components/Items/GetItem/GetItemByKeyword.js";
-import GetHistoryBySerialNo from "./Components/Items/HistoryRelated/GetHistoryBySerialNo.js";
-import HistoryTable from "./Components/Items/HistoryRelated/HistoryTable.js";
-import UpdateKeyword from "./Components/Keyword/Update/Keyword/UpdateKeyword.js";
-import UpdateSubKeyword from "./Components/Keyword/Update/SubKeyword/UpdateSubKeyword.js";
+import EmployeeManagement from "./Components/Employee/EmployeeManagement";
+import RegionManagement from "./Components/Region/RegionManagement";
 import KeywordManagement from "./Components/Keyword/KeywordManagement.js";
+import AddItem from "./Components/Items/AddItem/AddItem.js";
+import UpdateItem from "./Components/Items/UpdateItem/UpdateItem.js";
+import HistoryTable from "./Components/Items/HistoryRelated/HistoryTable.js";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute.js";
 import RepairingPage from "./Components/FRU/Repairing/RepairingPage.js";
 import RepairingDashboardForManager from "./Components/FRU/Repairing/AdminOrManagerSection/RepairingDashboardForManager.js";
@@ -30,17 +20,14 @@ import InwardGatePass from "./Components/GatePass/InwardGatePass.js";
 import ImportExport from "./Components/ImportExport/ImportExport.js";
 import OutwardGatePass from "./Components/GatePass/OutwardGatePass.js";
 import "@ant-design/v5-patch-for-react-19";
-import AddAvailabilityStatus from "./Components/StatusOptionComp/AvailabilityStatus/AddAvailabilityStatus.js";
-import UpdateAvailabilityStatus from "./Components/StatusOptionComp/AvailabilityStatus/UpdateAvailabilityStatus.js";
-import AddItemStatusOption from "./Components/StatusOptionComp/ItemStatus/AddItemStatusOption.js";
-import UpdateItemStatusOption from "./Components/StatusOptionComp/ItemStatus/UpdateItemStatusOption.js";
+import StatusManagement from "./Components/StatusOptionComp/StatusManagement.js";
 import { ThemeProvider } from "./context/ThemeContext.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ChatComponent from "./Components/Chat/ChatComponent.js";
 import EmployeeList from "./Components/EmployeeList/EmployeeList.js";
 import ThresholdManager from "./Components/Threshold/ThresholdManager.js";
-import NotificationBell from "./Components/NotificationBell/NotificationBell.js";
-import ActivityFeed from "./Components/ActivityLogs/ActivityFeed.js";
+import ActiveAlerts from "./Components/Alerts/ActiveAlert.js";
+import ItemSearch from "./Components/Items/ItemSearch/ItemSearch.js";
 import EnhancedActivityFeed from "./Components/ActivityLogs/EnhancedActivityFeed.js";
 import RmaDashboard from "./Components/RMA/RMADashboard.js";
 import RmaRequestForm from "./Components/RMA/RmaRequestForm.js";
@@ -51,6 +38,11 @@ import RepairedPage from "./Components/Repair/RepairedPage.js";
 import AssignedPage from "./Components/Repair/AssignedPage.js";
 import CantBeRepairedPage from "./Components/Repair/CantBeRepairedPage.js";
 import AuditTrail from "./Components/RMA/AuditTrail.js";
+import DepotDispatchPage from "./Components/RMA/DepotDispatchPage.js";
+import ReportsPage from "./Components/RMA/ReportsPage.js";
+import FeedbackButton from "./Components/Feedback/FeedbackButton.js";
+import AddCustomerSLA from "./Components/CustomerSLA/AddCustomerSLA.js";
+import ManageCustomerSLA from "./Components/CustomerSLA/ManageCustomerSLA.js";
 
 // checking the branch changes
 
@@ -60,7 +52,47 @@ const RepairRequestFormWrapper = () => {
   return <RepairRequestForm formData={formData} items={items} onFormSubmit={() => { }} />;
 };
 
+// ⚠️ MAINTENANCE MODE TOGGLE - Set to true when deploying updates
+const MAINTENANCE_MODE = false;
+
+const MaintenancePage = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    flexDirection: 'column',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    fontFamily: 'Arial, sans-serif',
+    textAlign: 'center',
+    padding: '20px'
+  }}>
+    <div style={{
+      background: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: '20px',
+      padding: '40px 60px',
+      backdropFilter: 'blur(10px)',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+    }}>
+      <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔧</div>
+      <h1 style={{ margin: '0 0 15px 0', fontSize: '2.5rem' }}>Under Maintenance</h1>
+      <p style={{ margin: '0', fontSize: '1.2rem', opacity: 0.9 }}>
+        We're making improvements to serve you better.
+      </p>
+      <p style={{ margin: '10px 0 0 0', fontSize: '1rem', opacity: 0.7 }}>
+        Please check back shortly.
+      </p>
+    </div>
+  </div>
+);
+
 function App() {
+  // Show maintenance page when MAINTENANCE_MODE is true
+  if (MAINTENANCE_MODE) {
+    return <MaintenancePage />;
+  }
+
   return (
     <ThemeProvider>
       <div className="App">
@@ -79,55 +111,24 @@ function App() {
 
               {/* Employee related */}
               <Route path="addEmployee" element={<AddEmployee />} />
-              <Route
-                path="changEmployeePass"
-                element={<ChangeEmployeePassword />}
-              />
-              <Route
-                path="changEmployeeRegion"
-                element={<AssignEmployeeRegion />}
-              />
-              <Route
-                path="changEmployeeRole"
-                element={<ChangeEmployeeRole />}
-              />
+              <Route path="employeeManagement" element={<EmployeeManagement />} />
 
-              {/* Region */}
-              <Route path="addNewRegion" element={<AddRegion />} />
-              <Route path="updateRegion" element={<UpdateRegion />} />
+              {/* Region Management */}
+              <Route path="regionManagement" element={<RegionManagement />} />
 
-              {/* Keyword / SubKeyword */}
-              <Route path="addKeyword" element={<AddKeyword />} />
-              <Route path="updateKeyword" element={<UpdateKeyword />} />
-              <Route path="addSubKeyword" element={<AddSubKeyword />} />
-              <Route path="updateSubKeyword" element={<UpdateSubKeyword />} />
+              {/* Keyword Management */}
               <Route path="keywordManagement" element={<KeywordManagement />} />
 
               {/* Items */}
               <Route path="addItem" element={<AddItem />} />
-              <Route
-                path="getItemBySerial"
-                element={<GetItemSearchBySerialNo />}
-              />
-              <Route
-                path="getItemByKeyword"
-                element={<GetItemByKeyword />}
-              />
+
               <Route path="updateItem" element={<UpdateItem />} />
-              <Route path="itemHistory" element={<GetHistoryBySerialNo />} />
+
+
               <Route path="historyTable" element={<HistoryTable />} />
               <Route
-                path="addAvailStatus"
-                element={<AddAvailabilityStatus />}
-              />
-              <Route
-                path="updateAvailStatus"
-                element={<UpdateAvailabilityStatus />}
-              />
-              <Route path="addItemStatus" element={<AddItemStatusOption />} />
-              <Route
-                path="UpdateItemStatus"
-                element={<UpdateItemStatusOption />}
+                path="statusManagement"
+                element={<StatusManagement />}
               />
 
               {/* Item repairing */}
@@ -153,7 +154,9 @@ function App() {
               <Route path="activity-logs" element={<ChatComponent />} />
               <Route path="all-users" element={<EmployeeList />} />
               <Route path="thresholds" element={<ThresholdManager />} />
-              <Route path="alerts/active" element={<NotificationBell />} />
+              <Route path="alerts/active" element={<ActiveAlerts />} />
+              <Route path="itemSearch" element={<ItemSearch />} />
+
               <Route path="items/activity" element={<EnhancedActivityFeed />} />
             </Route>
 
@@ -165,9 +168,14 @@ function App() {
             <Route path="/assigned" element={<AssignedPage />} />
             <Route path="/repaired" element={<RepairedPage />} />
             <Route path="/cant-be-repaired" element={<CantBeRepairedPage />} />
+            <Route path="/depot-dispatch" element={<DepotDispatchPage />} />
+            <Route path="/rma-reports" element={<ReportsPage />} />
             <Route path="/audit-trail" element={<AuditTrail />} />
+            <Route path="/customer-sla/add" element={<AddCustomerSLA />} />
+            <Route path="/customer-sla/manage" element={<ManageCustomerSLA />} />
           </Route>
         </Routes>
+        <FeedbackButton />
       </div>
     </ThemeProvider>
   );

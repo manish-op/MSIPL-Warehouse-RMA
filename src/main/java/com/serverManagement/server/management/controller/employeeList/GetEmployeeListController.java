@@ -14,13 +14,12 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 public class GetEmployeeListController {
 
-	@Autowired
+    @Autowired
     private GetEmployeeListService getEmployeeListService;
 
     @GetMapping("/api/all-users")
     public ResponseEntity<?> getEmployeeList(HttpServletRequest httpRequest,
-                                             @RequestParam(required = false)
-                                             String regionName) {
+            @RequestParam(name = "regionName", required = false) String regionName) {
         return getEmployeeListService.getEmployeeList(httpRequest, regionName);
     }
 }

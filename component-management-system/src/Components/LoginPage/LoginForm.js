@@ -88,10 +88,10 @@ function LoginForm() {
         <Card className="login-card" variant="borderless">
           <div className="login-header">
             <img src={logo} alt="Company Logo" className="login-logo" />
-            <Title level={4} style={{ margin: "10px 0 0 0", color: "var(--text-color)" }}>
+            <Title level={4} style={{ margin: "10px 0 0 0" }}>
               Motorola Solutions India Pvt. Ltd.
             </Title>
-            <Text type="secondary" style={{ color: "var(--text color)" }}>
+            <Text type="secondary">
               {mode === "warehouse"
                 ? "Warehouse Management System"
                 : "RMA Request Portal"}

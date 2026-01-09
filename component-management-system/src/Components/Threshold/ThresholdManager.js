@@ -9,18 +9,23 @@ import {
   Input,
   InputNumber,
 } from "antd";
+import {
+  AlertOutlined,
+  NumberOutlined,
+  EnvironmentOutlined,
+  StockOutlined,
+} from "@ant-design/icons";
 import GetRegionAPI from "../API/Region/GetRegion/GetRegionAPI";
-import CreateThresholdApi from "../API/ThresholdAPI/ThresholdApi"
+import CreateThresholdApi from "../API/ThresholdAPI/ThresholdApi";
 import "./ThresholdManager.css";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 function ThresholdManager() {
   const [form] = Form.useForm();
   const [regions, setRegions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Get regions from your API on component load
   useEffect(() => {
     const fetchRegions = async () => {
       try {
@@ -35,7 +40,6 @@ function ThresholdManager() {
     fetchRegions();
   }, []);
 
-  // Handle the form submission
   const onFinish = async (values) => {
     setLoading(true);
     message.loading({ content: "Creating rule...", key: "threshold" });
@@ -43,36 +47,67 @@ function ThresholdManager() {
     const success = await CreateThresholdApi(values);
 
     if (success) {
-      message.success({ content: "Rule created successfully!", key: "threshold", duration: 2 });
-      form.resetFields(); // Clear the form
+      message.success({
+        content: "Threshold rule created successfully!",
+        key: "threshold",
+        duration: 2,
+      });
+      form.resetFields();
     } else {
-      message.error({ content: "Failed to create rule.", key: "threshold", duration: 2 });
+      message.error({
+        content: "Failed to create rule.",
+        key: "threshold",
+        duration: 2,
+      });
     }
     setLoading(false);
   };
 
   return (
-    <div className="p-4 sm:p-8 md:p-12 bg-gray-100 min-h-screen flex items-center justify-center">
-      <Card
-        className="w-full max-w-lg rounded-xl shadow-lg"
-        title={
-          <Title level={3} className="text-center mb-4 text-gray-800">
-            Set Inventory Threshold
-          </Title>
-        }
-      >
+    <div className="threshold-page">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="header-content">
+          <div className="header-icon">
+            <AlertOutlined />
+          </div>
+          <div className="header-text">
+            <Title level={3} className="header-title">
+              Threshold Management
+            </Title>
+            <Text className="header-subtitle">
+              Set inventory alert thresholds for low stock notifications
+            </Text>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Card */}
+      <Card className="threshold-card" bordered={false}>
+        <div className="card-description">
+          <Text className="desc-text">
+            Create rules to get notified when inventory levels fall below the
+            specified minimum quantity.
+          </Text>
+        </div>
+
         <Form
           form={form}
           name="threshold_form"
           onFinish={onFinish}
           layout="vertical"
+          requiredMark={false}
         >
           <Form.Item
             name="partNo"
             label="Part Number"
             rules={[{ required: true, message: "Please input a Part Number!" }]}
           >
-            <Input placeholder="Enter the PartNo (e.g., '1')" />
+            <Input
+              prefix={<NumberOutlined className="input-icon" />}
+              placeholder="Enter the Part Number"
+              size="large"
+            />
           </Form.Item>
 
           <Form.Item
@@ -82,10 +117,14 @@ function ThresholdManager() {
           >
             <Select
               showSearch
+              size="large"
               placeholder="Select Region"
               optionFilterProp="children"
+              suffixIcon={<EnvironmentOutlined className="input-icon" />}
               filterOption={(input, option) =>
-                (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                (option?.children ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
               }
             >
               {regions.map((region) => (
@@ -101,13 +140,15 @@ function ThresholdManager() {
             label="Minimum Quantity"
             rules={[
               { required: true, message: "Please set a minimum quantity!" },
-              { type: 'number', min: 1, message: 'Quantity must be at least 1' }
+              { type: "number", min: 1, message: "Quantity must be at least 1" },
             ]}
           >
-            <InputNumber 
-              min={1} 
-              style={{ width: '100%' }}
+            <InputNumber
+              min={1}
+              size="large"
+              style={{ width: "100%" }}
               placeholder="Enter the minimum required stock"
+              prefix={<StockOutlined className="input-icon" />}
             />
           </Form.Item>
 
@@ -116,7 +157,10 @@ function ThresholdManager() {
               type="primary"
               htmlType="submit"
               loading={loading}
-              className="w-full"
+              icon={<AlertOutlined />}
+              block
+              size="large"
+              className="submit-btn"
             >
               Set Threshold Rule
             </Button>

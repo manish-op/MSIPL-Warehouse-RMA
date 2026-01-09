@@ -1,96 +1,363 @@
-
-/* --- Main Layout --- */
-.add-employee-wrapper {
+.add-employee-page {
   min-height: 100dvh;
+  padding: 24px;
+  background-color: var(--background-color);
+}
+
+/* --- Page Header --- */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%);
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
-  background-color: var(--background-color);
-  transition: padding 0.2s ease-in-out; 
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 28px;
+  color: #fff;
 }
 
-.add-employee-card {
-  width: 100%;
-  max-width: 640px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  margin: 0 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 14px;
+}
+
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #fff !important;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* --- Form Card --- */
+.form-card {
+  max-width: 900px;
+  margin: 0 auto;
   background-color: var(--component-background);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-
-.add-employee-card .ant-card-head {
-  border-bottom: 1px solid var(--border-color);
-  padding: 16px 24px;
-  transition: padding 0.2s ease-in-out; 
+.form-card .ant-card-body {
+  padding: 32px;
 }
-.add-employee-card .ant-card-head-title {
-  font-weight: 600;
+
+/* --- Form Sections --- */
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section:last-of-type {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.section-icon {
   font-size: 18px;
-  color: var(--text-color);
-  transition: font-size 0.2s ease-in-out;
+  color: var(--primary-color);
 }
 
-
-.add-employee-card .ant-card-body {
-    padding: 24px; /* Default padding for larger screens */
-    transition: padding 0.2s ease-in-out;
-}
-
-/* Form Labels */
-.add-employee-card .ant-form-item-label > label {
-  font-weight: 500;
-  color: var(--text-color-secondary);
-}
-.add-employee-card .ant-input-prefix {
-  background-color: transparent !important;
-}
-
-
-.add-employee-card .ant-input,
-.add-employee-card .ant-input-password,
-.add-employee-card .ant-select-selector {
-  background-color: var(--component-background) !important;
-  border: 1px solid var(--border-color) !important;
+.section-title {
+  font-size: 16px;
   color: var(--text-color) !important;
 }
 
-/* --- Password Meter --- */
-.password-meter {
-  margin-top: -8px;
-  margin-bottom: 16px;
+.section-divider {
+  margin: 12px 0 20px 0 !important;
+  border-color: var(--border-color) !important;
 }
 
-
-/* In AddEmployee.css */
-.compact-form .ant-form-item {
-  margin-bottom: 12px; 
+/* --- Form Items --- */
+.form-card .ant-form-item {
+  margin-bottom: 20px;
 }
 
-@media (max-width: 576px) {
-  .add-employee-wrapper {
-    padding: 16px; 
-    align-items: flex-start; 
-  }
+.form-card .ant-form-item-label>label {
+  font-weight: 500;
+  color: var(--text-color) !important;
+  font-size: 14px;
+}
 
-  .add-employee-card .ant-card-head {
+.input-icon {
+  color: var(--text-color-secondary) !important;
+}
 
-    padding: 12px 16px;
-  }
-  
-  .add-employee-card .ant-card-head-title {
-      
-      font-size: 16px;
-  }
+/* --- Input Styling --- */
+.form-card .ant-input-lg,
+.form-card .ant-input-password-large input,
+.form-card .ant-select-lg .ant-select-selector {
+  border-radius: 8px !important;
+}
 
-  .add-employee-card .ant-card-body {
-    
+.form-card .ant-input-affix-wrapper-lg {
+  border-radius: 8px !important;
+  padding: 8px 12px;
+}
+
+.form-card .ant-select-lg .ant-select-selector {
+  height: 44px !important;
+  padding: 6px 12px !important;
+}
+
+.form-card .ant-select-lg .ant-select-selection-item,
+.form-card .ant-select-lg .ant-select-selection-placeholder {
+  line-height: 30px !important;
+}
+
+/* --- Password Strength Section --- */
+.password-strength-section {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.strength-header {
+  margin-bottom: 12px;
+}
+
+.strength-label {
+  color: var(--text-color-secondary) !important;
+}
+
+.password-requirements {
+  margin-top: 16px;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  transition: color 0.2s ease;
+}
+
+.requirement .anticon {
+  font-size: 14px;
+  color: var(--color-error);
+}
+
+.requirement.met {
+  color: var(--color-success);
+}
+
+.requirement.met .anticon {
+  color: var(--color-success);
+}
+
+/* --- Form Actions --- */
+.form-actions {
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.submit-btn {
+  width: 100%;
+  height: 48px !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  background: linear-gradient(135deg, #1f3b57 0%, #2d5a87 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.3);
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 59, 87, 0.4);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .add-employee-page {
     padding: 16px;
   }
 
-
-  .add-employee-card .ant-btn-lg {
-    font-size: 15px;
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
   }
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .header-title {
+    font-size: 20px !important;
+  }
+
+  .refresh-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .form-card .ant-card-body {
+    padding: 20px;
+  }
+
+  .password-strength-section {
+    padding: 12px;
+  }
+
+  .requirement {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 14px 16px;
+  }
+
+  .header-content {
+    gap: 12px;
+  }
+
+  .header-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .header-title {
+    font-size: 18px !important;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+  }
+
+  .form-card .ant-card-body {
+    padding: 16px;
+  }
+
+  .form-section {
+    margin-bottom: 24px;
+  }
+
+  .submit-btn {
+    height: 44px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* --- Dark Theme Enhancements --- */
+[data-theme='dark'] .page-header {
+  background: linear-gradient(135deg, #162b40 0%, #1f3b57 100%);
+}
+
+[data-theme='dark'] .form-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .password-strength-section {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .submit-btn {
+  box-shadow: 0 4px 12px rgba(31, 59, 87, 0.2);
+}
+
+/* Dark Theme Form Label and Input Fix */
+[data-theme='dark'] .form-card .ant-form-item-label>label {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .form-card .ant-input,
+[data-theme='dark'] .form-card .ant-input-affix-wrapper,
+[data-theme='dark'] .form-card .ant-input-password input {
+  color: #e8e6e3 !important;
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+[data-theme='dark'] .form-card .ant-input::placeholder,
+[data-theme='dark'] .form-card .ant-input-password input::placeholder {
+  color: #888888 !important;
+}
+
+[data-theme='dark'] .form-card .ant-select-selector {
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+[data-theme='dark'] .form-card .ant-select-selection-item,
+[data-theme='dark'] .form-card .ant-select-selection-placeholder {
+  color: #e8e6e3 !important;
+}
+
+[data-theme='dark'] .form-card .section-divider {
+  color: #a0a0a0 !important;
+}
+
+[data-theme='dark'] .form-card .section-divider::before,
+[data-theme='dark'] .form-card .section-divider::after {
+  border-color: #434343 !important;
+}
+
+/* --- Ant Design Overrides for Progress --- */
+.password-strength-section .ant-progress-bg {
+  transition: all 0.3s ease;
+}
+
+/* --- Loading State --- */
+.form-card .ant-spin-nested-loading>div>.ant-spin {
+  max-height: none;
+}
+
+.form-card .ant-spin-text {
+  color: var(--text-color);
+  margin-top: 8px;
 }

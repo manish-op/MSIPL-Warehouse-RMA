@@ -6,17 +6,18 @@
   color: #d0e2f5;
   padding: 12px 30px;
   font-size: 14px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
   width: 100%;
   box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   box-sizing: border-box;
+  z-index: 1000;
+  pointer-events: auto;
+  cursor: pointer;
+  margin-top: auto;
 }
 
 .footer-left{
-  padding: left 20px;;
+  padding-left: 20px;
 }
 
 .footer-left,
