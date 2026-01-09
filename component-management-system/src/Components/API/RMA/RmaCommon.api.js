@@ -35,5 +35,16 @@ export const RmaCommonApi = {
 
     getProductRates: async (items) => {
         return apiPost("/rma/product-rates", items, "json");
-    }
+    },
+
+    // Address Management
+    getAllAddresses: async () => apiGet("/rma/addresses"),
+    
+    saveAddress: async (payload) => apiPost("/rma/addresses", payload),
+    
+    // Customers (rma_customers table)
+    getAllCustomersList: () => apiGet('/rma/customers'),
+    
+    // Expose generic get for one-off calls
+    apiGet: (url) => apiGet(url)
 };

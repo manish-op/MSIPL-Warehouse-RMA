@@ -112,10 +112,64 @@ export default function UnrepairedPage() {
     const [dcSubmitting, setDcSubmitting] = useState(false);
     const [selectedDcRmaNo, setSelectedDcRmaNo] = useState("");
     const [dcTableData, setDcTableData] = useState([]);
+    // const [dcTableData, setDcTableData] = useState([]); // Already declared above
+
     const [transporters, setTransporters] = useState([]);
     const [isNewTransporter, setIsNewTransporter] = useState(false);
+    const [savedAddresses, setSavedAddresses] = useState([]); // Address Dropdown State
+    const [selectedAddressName, setSelectedAddressName] = useState(undefined);
 
     // --- Load Data ---
+    const fetchSavedAddresses = async () => {
+        try {
+            // Fetch from both SavedAddress (manual saves) and CustomerEntity (master list)
+            const [savedRes, custRes] = await Promise.all([
+                RmaApi.getAllAddresses(),
+                RmaApi.getAllCustomersList()
+            ]);
+
+            let combined = [];
+
+            // 1. Master Customer List (Priority)
+            if (custRes.success && Array.isArray(custRes.data)) {
+                 const customers = custRes.data.map(c => ({
+                     name: c.companyName,
+                     address: c.address,
+                     gstIn: "" 
+                 }));
+                 combined = [...combined, ...customers];
+            }
+
+            // 2. Saved Addresses (Manual)
+            if (savedRes.success && Array.isArray(savedRes.data)) {
+                combined = [...combined, ...savedRes.data];
+            }
+
+            // Remove duplicates by JSON content (Name + Address) with aggressive normalization, ignoring suffixes
+            const unique = [];
+            const seen = new Set();
+            const normalize = (str) => (str || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+
+            for (const item of combined) {
+                // Use base name (before '(') for deduplication key
+                const baseName = item.name.split('(')[0];
+                const uniqueKey = normalize(baseName) + "|" + normalize(item.address);
+
+                if (!seen.has(uniqueKey)) {
+                    seen.add(uniqueKey);
+                    unique.push(item);
+                } else {
+                    // Preference to shorter name
+                    const existingIdx = unique.findIndex(u => (normalize(u.name.split('(')[0]) + "|" + normalize(u.address)) === uniqueKey);
+                    if (existingIdx !== -1 && item.name.length < unique[existingIdx].name.length) {
+                         unique[existingIdx] = item;
+                    }
+                }
+            }
+            
+            setSavedAddresses(unique);
+        } catch (e) { console.error("Failed to load addresses", e); setSavedAddresses([]); }
+    };
     const fetchTransporters = async () => {
         // RESTRICTED: Only Blue Dart and Safe Express allowed
         const ALLOWED_TRANSPORTERS = [
@@ -172,6 +226,7 @@ export default function UnrepairedPage() {
         loadItems();
         loadEmployees();
         fetchTransporters();
+        fetchSavedAddresses();
     }, []);
 
     // --- Group Items ---
@@ -375,11 +430,50 @@ export default function UnrepairedPage() {
             model: item.model,
             qty: 1,
             rate: item.value || 0,
-            itemRmaNo: item.itemRmaNo
+            itemRmaNo: item.itemRmaNo,
+            hsnCode: "" // Init HSN
         }));
 
         setSelectedDcRmaNo(rmaNo);
         setDcTableData(tableData);
+
+        // Fetch Prices and HSN
+        try {
+            const itemsToFetch = status.itemsWithRma.map(i => ({ product: i.product, model: i.model }));
+            const rateRes = await RmaApi.getProductRates(itemsToFetch);
+            
+            // HSN Fetch
+            const hsnMap = {};
+             await Promise.all(status.itemsWithRma.map(async (item) => {
+               if (item.product) {
+                   try {
+                       const hsnRes = await RmaApi.apiGet(`/rma/hsn/${encodeURIComponent(item.product)}`);
+                       if(hsnRes.success && hsnRes.data) {
+                           hsnMap[item.product] = hsnRes.data.hsnCode;
+                       }
+                   } catch(e) {}
+               }
+            }));
+
+
+            if (rateRes.success) {
+                const ratesMap = rateRes.data;
+                const formattedData = tableData.map(item => {
+                     const key = `${item.product?.trim() || ""}::${(item.model || "").trim()}`;
+                     return { 
+                         ...item, 
+                         rate: ratesMap[key] || item.rate,
+                         hsnCode: hsnMap[item.product] || ""
+                     };
+                });
+                setDcTableData(formattedData);
+                
+                // Initialize form items
+                dcForm.setFieldsValue({
+                    items: formattedData.map(d => ({ rate: d.rate, hsnCode: d.hsnCode }))
+                });
+            }
+        } catch(e) { console.error("Failed to fetch rates/HSN", e); }
 
         dcForm.resetFields();
 
@@ -424,19 +518,33 @@ export default function UnrepairedPage() {
             // Merge Items with Form Data
             const formattedItems = dcTableData.map((item, index) => ({
                 ...item,
-                rate: values.items && values.items[index]?.rate ? values.items[index].rate : item.rate
+                rate: values.items && values.items[index]?.rate ? values.items[index].rate : item.rate,
+                hsnCode: values.items && values.items[index]?.hsnCode ? values.items[index].hsnCode : (item.hsnCode || "")
             }));
 
-            // Commented out DC Generation as per request
-            /*
-            await RmaApi.generateDeliveryChallan({
+            // Perform DC Generation
+            const dcResult = await RmaApi.generateDeliveryChallan({
                 rmaNo: selectedDcRmaNo,
                 ...values,
                 items: formattedItems
             });
-            message.success("Delivery Challan generated!");
-            setDcModalVisible(false);
-            */
+            
+            if (dcResult.success) {
+                message.success("Delivery Challan generated!");
+                
+                // Auto-save Address
+                if (values.consigneeName && values.consigneeAddress) {
+                    RmaApi.saveAddress({
+                        name: values.consigneeName,
+                        address: values.consigneeAddress,
+                        gstIn: values.gstIn
+                    }).then(() => fetchSavedAddresses());
+                }
+
+                setDcModalVisible(false);
+            } else {
+                 message.error("Failed to generate DC");
+            }
 
         } catch (error) {
             console.error(error);
@@ -1044,13 +1152,87 @@ export default function UnrepairedPage() {
                     confirmLoading={dcSubmitting}
                     width={900}
                 >
-                    <Form form={dcForm} layout="vertical" onFinish={handleGenerateDC}>
+                    <Form 
+                        form={dcForm} 
+                        layout="vertical" 
+                        onFinish={handleGenerateDC}
+
+                    >
                         <Row gutter={16}>
                             <Col span={12}>
+                                <Card size="small" title="Consignor">
+                                    <Form.Item name="consignorDetailsSelect" label="Select Consignor" style={{ marginBottom: 0 }}>
+                                        <Select 
+                                            placeholder="Select" 
+                                            onChange={(idx) => {
+                                                const selected = savedAddresses[idx];
+                                                if (selected) {
+                                                    dcForm.setFieldsValue({
+                                                        consignorName: selected.name,
+                                                        consignorAddress: selected.address,
+                                                        consignorGst: selected.gstIn || ""
+                                                    });
+                                                }
+                                            }}
+                                            dropdownMatchSelectWidth={false}
+                                            optionLabelProp="label"
+                                        >
+                                            {savedAddresses.map((a, idx) => (
+                                                <Select.Option key={idx} value={idx} label={a.address}> 
+                                                    <div style={{ whiteSpace: 'normal', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                                        <div style={{ fontWeight: 'bold' }}>{a.name}</div>
+                                                        <div style={{ fontSize: '11px', color: '#666' }}>{a.address}</div>
+                                                        {a.gstIn && <div style={{ fontSize: '10px', color: '#888' }}>GST: {a.gstIn}</div>}
+                                                    </div>
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                    <Form.Item name="consignorName" label="Name" style={{ marginTop: 8 }}><Input /></Form.Item>
+                                    <Form.Item name="consignorAddress" label="Address"><Input.TextArea rows={2} /></Form.Item>
+                                    <Form.Item name="consignorGst" label="GST"><Input /></Form.Item>
+                                </Card>
+                            </Col>
+                            <Col span={12}>
                                 <Card size="small" title="Consignee">
-                                    <Form.Item name="consigneeName" label="Name"><Input /></Form.Item>
-                                    <Form.Item name="consigneeAddress" label="Address"><Input.TextArea /></Form.Item>
-                                    <Form.Item name="gstIn" label="GSTIN"><Input /></Form.Item>
+                                    <Form.Item label="Select Saved Address">
+                                        <Select 
+                                            placeholder="Select Saved Consignee" 
+                                            onChange={(idx) => {
+                                                const selected = savedAddresses[idx];
+                                                if (selected) {
+                                                    setSelectedAddressName(selected.name); 
+                                                    dcForm.setFieldsValue({
+                                                        consigneeName: selected.name,
+                                                        consigneeAddress: selected.address,
+                                                        gstIn: selected.gstIn || ""
+                                                    });
+                                                }
+                                            }}
+                                            value={selectedAddressName}
+                                            optionLabelProp="label"
+                                            dropdownMatchSelectWidth={false}
+                                        >
+                                            {savedAddresses.map((a, idx) => (
+                                                <Select.Option key={idx} value={idx} label={a.name}>
+                                                    <div style={{ whiteSpace: 'normal', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                                        <strong>{a.name}</strong>
+                                                        <div style={{ fontSize: '11px', color: '#666', marginTop: '2px', lineHeight: '1.2' }}>{a.address}</div>
+                                                        {a.gstIn && <div style={{ fontSize: '10px', color: '#888' }}>GST: {a.gstIn}</div>}
+                                                    </div>
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                    <Form.Item name="consigneeName" label="Name">
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item name="consigneeAddress" label="Address">
+                                        <Input.TextArea />
+                                    </Form.Item>
+                                    <Form.Item name="gstIn" label="GSTIN">
+                                        <Input />
+                                    </Form.Item>
                                 </Card>
                             </Col>
                             <Col span={12}>
@@ -1095,15 +1277,25 @@ export default function UnrepairedPage() {
                             columns={[
                                 { title: 'Product', dataIndex: 'product' },
                                 { title: 'Serial', dataIndex: 'serialNo' },
-                                {
-                                    title: 'Value (₹)',
-                                    render: (_, __, idx) => (
-                                        <Form.Item name={['items', idx, 'rate']} noStyle rules={[{ required: true }]}>
-                                            <Input type="number" placeholder="0" />
-                                        </Form.Item>
-                                    )
-                                }
-                            ]}
+                                    {
+                                        title: 'Value (₹)',
+                                        width: 100,
+                                        render: (_, __, idx) => (
+                                            <Form.Item name={['items', idx, 'rate']} noStyle rules={[{ required: true }]}>
+                                                <Input type="number" placeholder="0" />
+                                            </Form.Item>
+                                        )
+                                    },
+                                    {
+                                        title: 'HSN Code',
+                                        width: 100,
+                                        render: (_, __, idx) => (
+                                            <Form.Item name={['items', idx, 'hsnCode']} noStyle>
+                                                <Input placeholder="HSN" />
+                                            </Form.Item>
+                                        )
+                                    }
+                                ]}
                         />
                     </Form>
                 </Modal>
