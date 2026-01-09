@@ -7,6 +7,11 @@ public class DeliveryChallanRequest {
     private String consigneeName;
     private String consigneeAddress;
     private String gstIn;
+    // Consignor Fields
+    private String consignorName;
+    private String consignorAddress;
+    private String consignorGst;
+
     private String boxes;
     private String dimensions;
     private String weight;
@@ -73,6 +78,30 @@ public class DeliveryChallanRequest {
         this.gstIn = gstIn;
     }
 
+    public String getConsignorName() {
+        return consignorName;
+    }
+
+    public void setConsignorName(String consignorName) {
+        this.consignorName = consignorName;
+    }
+
+    public String getConsignorAddress() {
+        return consignorAddress;
+    }
+
+    public void setConsignorAddress(String consignorAddress) {
+        this.consignorAddress = consignorAddress;
+    }
+
+    public String getConsignorGst() {
+        return consignorGst;
+    }
+
+    public void setConsignorGst(String consignorGst) {
+        this.consignorGst = consignorGst;
+    }
+
     public String getBoxes() {
         return boxes;
     }
@@ -118,6 +147,7 @@ public class DeliveryChallanRequest {
         private String model;
         private String rate; // Input by user
         private String serialNo;
+        private String hsnCode; // Input by user
         private int slNo;
         private Long itemId;
 
@@ -159,6 +189,14 @@ public class DeliveryChallanRequest {
 
         public void setSerialNo(String serialNo) {
             this.serialNo = serialNo;
+        }
+
+        public String getHsnCode() {
+            return hsnCode;
+        }
+
+        public void setHsnCode(String hsnCode) {
+            this.hsnCode = hsnCode;
         }
 
         public int getSlNo() {

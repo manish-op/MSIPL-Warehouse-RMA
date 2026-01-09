@@ -140,6 +140,8 @@ export default function DepotDispatchPage() {
   // Dispatch logic flags
   const [isReturnDispatch, setIsReturnDispatch] = useState(false);
   const [isCustomerDispatch, setIsCustomerDispatch] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressName, setSelectedAddressName] = useState(undefined); // State for Select value
 
   const loadItems = async () => {
     setLoading(true);
@@ -177,10 +179,62 @@ export default function DepotDispatchPage() {
     setTransporters(ALLOWED_TRANSPORTERS);
   };
 
+    const fetchSavedAddresses = async () => {
+        try {
+            // Fetch from both SavedAddress (manual saves) and CustomerEntity (master list)
+            const [savedRes, custRes] = await Promise.all([
+                RmaApi.getAllAddresses(),
+                RmaApi.getAllCustomersList()
+            ]);
+
+            let combined = [];
+
+            // 1. Master Customer List (Priority)
+            if (custRes.success && Array.isArray(custRes.data)) {
+                 const customers = custRes.data.map(c => ({
+                     name: c.companyName,
+                     address: c.address,
+                     gstIn: "" 
+                 }));
+                 combined = [...combined, ...customers];
+            }
+
+            // 2. Saved Addresses (Manual)
+            if (savedRes.success && Array.isArray(savedRes.data)) {
+                combined = [...combined, ...savedRes.data];
+            }
+
+            // Remove duplicates by JSON content (Name + Address) with aggressive normalization, ignoring suffixes
+            const unique = [];
+            const seen = new Set();
+            const normalize = (str) => (str || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+
+            for (const item of combined) {
+                // Use base name (before '(') for deduplication key
+                const baseName = item.name.split('(')[0];
+                const uniqueKey = normalize(baseName) + "|" + normalize(item.address);
+                
+                if (!seen.has(uniqueKey)) {
+                    seen.add(uniqueKey);
+                    unique.push(item);
+                } else {
+                    // Preference to shorter name
+                    const existingIdx = unique.findIndex(u => (normalize(u.name.split('(')[0]) + "|" + normalize(u.address)) === uniqueKey);
+                    if (existingIdx !== -1 && item.name.length < unique[existingIdx].name.length) {
+                         unique[existingIdx] = item;
+                    }
+                }
+            }
+            
+            setSavedAddresses(unique);
+        } catch (e) { console.error("Failed to load addresses", e); setSavedAddresses([]); }
+    };
+
   /* Access Control Removed by User Request */
   useEffect(() => {
     loadItems();
     fetchTransporters();
+    fetchSavedAddresses();
   }, []);
 
   const openEditRmaModal = (item) => {
@@ -428,20 +482,62 @@ export default function DepotDispatchPage() {
     try {
       const itemsToFetch = rmaItems.map(i => ({ product: i.product, model: i.model }));
       const rateRes = await RmaApi.getProductRates(itemsToFetch);
+      
+      // Fetch HSNs
+      const hsnMap = {};
+      await Promise.all(rmaItems.map(async (item) => {
+           if (item.product) {
+               try {
+                   // This is inefficient (N requests), but simple for now. Better to have bulk API.
+                   // Since I only have single fetch, I'll restrict concurrency or just do it.
+                   // Or I can add a bulk HSN fetch to backend. 
+                   // Given constraints, I'll try to use the single one or just let user enter.
+                   // But user wants it saved.
+                   
+                   // Let's assume we fetch it one by one for now or just proceed.
+                   const hsnRes = await RmaApi.apiGet(`/rma/hsn/${encodeURIComponent(item.product)}`);
+                   if(hsnRes.success && hsnRes.data) {
+                       hsnMap[item.product] = hsnRes.data.hsnCode;
+                   }
+               } catch(e) {}
+           }
+      }));
 
       if (rateRes.success) {
         const ratesMap = rateRes.data;
         const itemFormValues = rmaItems.map(item => {
           const key = `${item.product?.trim() || ""}::${(item.model || "").trim()}`;
-          return { rate: ratesMap[key] || "" };
+          return { 
+              rate: ratesMap[key] || "",
+              hsnCode: hsnMap[item.product] || "" // Pre-fill HSN
+          };
         });
         dcForm.setFieldsValue({ items: itemFormValues });
       }
     } catch (e) {
-      console.error("Failed to fetch rates", e);
+      console.error("Failed to fetch rates/HSN", e);
     }
 
     setDcModalVisible(true);
+  };
+
+  const handleAddressSelect = (value) => {
+      setSelectedAddressName(value); // Set Select value
+      const selected = savedAddresses.find(a => a.name === value);
+      if (selected) {
+          dcForm.setFieldsValue({
+              consigneeName: selected.name,
+              consigneeAddress: selected.address,
+              gstIn: selected.gstIn || ""
+          });
+      }
+  };
+
+  const handleManualNameChange = (e) => {
+     // If user types manually, clear the select to indicate custom entry
+     if (selectedAddressName) {
+         setSelectedAddressName(undefined);
+     }
   };
 
   const handleGenerateDC = async (values) => {
@@ -458,6 +554,9 @@ export default function DepotDispatchPage() {
         transporterName,
         transporterId,
         dcNo,
+        consignorName,
+        consignorAddress,
+        consignorGst,
         items: formItems,
       } = values;
 
@@ -471,6 +570,7 @@ export default function DepotDispatchPage() {
           formItems && formItems[index] && formItems[index].rate
             ? formItems[index].rate
             : 0,
+        hsnCode: formItems && formItems[index] ? formItems[index].hsnCode : "",
         itemRmaNo: item.itemRmaNo,
       }));
 
@@ -481,6 +581,9 @@ export default function DepotDispatchPage() {
         consigneeName,
         consigneeAddress,
         gstIn,
+        consignorName,
+        consignorAddress,
+        consignorGst,
         boxes: parseInt(boxes, 10),
         dimensions,
         weight,
@@ -523,6 +626,16 @@ export default function DepotDispatchPage() {
       const result = await RmaApi.generateDeliveryChallan(payload);
       if (result.success) {
         message.success("Delivery Challan Generated Successfully");
+        
+        // Save Address if new
+        if (!isReturnDispatch && consigneeName && consigneeAddress) {
+             RmaApi.saveAddress({
+                 name: consigneeName,
+                 address: consigneeAddress,
+                 gstIn: gstIn
+             }).then(() => fetchSavedAddresses());
+        }
+
         setDcModalVisible(false);
         fetchTransporters();
       } else {
@@ -1417,17 +1530,71 @@ export default function DepotDispatchPage() {
                     title="Consignor Details"
                     size="small"
                   >
-                    <p>
-                      <strong>Motorola Solutions India</strong>
-                    </p>
-                    <p>A, Building 8, DLF</p>
-                    <p>Gurgaon, Haryana, India</p>
+                    <Form.Item name="consignorDetailsSelect" label="Select Consignor" style={{ marginBottom: 0 }}>
+                        <Select 
+                            placeholder="Select" 
+                            onChange={(idx) => {
+                                const selected = savedAddresses[idx];
+                                if (selected) {
+                                    dcForm.setFieldsValue({
+                                        consignorName: selected.name,
+                                        consignorAddress: selected.address,
+                                        consignorGst: selected.gstIn || ""
+                                    });
+                                }
+                            }}
+                            dropdownMatchSelectWidth={false}
+                            optionLabelProp="label"
+                        >
+                            {savedAddresses.map((a, idx) => (
+                                <Select.Option key={idx} value={idx} label={a.address}> 
+                                    <div style={{ whiteSpace: 'normal', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                        <div style={{ fontWeight: 'bold' }}>{a.name}</div>
+                                        <div style={{ fontSize: '11px', color: '#666' }}>{a.address}</div>
+                                        {a.gstIn && <div style={{ fontSize: '10px', color: '#888' }}>GST: {a.gstIn}</div>}
+                                    </div>
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="consignorName" label="Name" style={{ marginTop: 8 }}><Input /></Form.Item>
+                    <Form.Item name="consignorAddress" label="Address"><Input.TextArea rows={2} /></Form.Item>
+                    <Form.Item name="consignorGst" label="GST"><Input /></Form.Item>
                   </Card>
                 </Col>
                 <Col xs={24} md={12}>
                   <Card title="Consignee Details" size="small">
+                    <Form.Item label="Select Saved Address">
+                        <Select 
+                            placeholder="Select Saved Consignee" 
+                            onChange={(idx) => {
+                                const selected = savedAddresses[idx];
+                                if (selected) {
+                                    setSelectedAddressName(selected.name); 
+                                    dcForm.setFieldsValue({
+                                        consigneeName: selected.name,
+                                        consigneeAddress: selected.address,
+                                        gstIn: selected.gstIn || ""
+                                    });
+                                }
+                            }}
+                            value={selectedAddressName}
+                            optionLabelProp="label"
+                            dropdownMatchSelectWidth={false}
+                        >
+                            {savedAddresses.map((a, idx) => (
+                                <Select.Option key={idx} value={idx} label={a.name}>
+                                    <div style={{ whiteSpace: 'normal', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                        <strong>{a.name}</strong>
+                                        <div style={{ fontSize: '11px', color: '#666', marginTop: '2px', lineHeight: '1.2' }}>{a.address}</div>
+                                        {a.gstIn && <div style={{ fontSize: '10px', color: '#888' }}>GST: {a.gstIn}</div>}
+                                    </div>
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
                     <Form.Item name="consigneeName" label="Name">
-                      <Input />
+                      <Input onChange={handleManualNameChange} /> 
                     </Form.Item>
                     <Form.Item name="consigneeAddress" label="Address">
                       <Input.TextArea rows={2} />
@@ -1583,6 +1750,19 @@ export default function DepotDispatchPage() {
                           <Input prefix="₹" type="number" placeholder="Value" />
                         </Form.Item>
                       ),
+                    },
+                    {
+                      title: "HSN Code",
+                      key: "hsnCode",
+                      width: 120,
+                      render: (_, record, index) => (
+                        <Form.Item
+                          name={["items", index, "hsnCode"]}
+                          style={{ margin: 0 }}
+                        >
+                           <Input placeholder="HSN" />
+                        </Form.Item>
+                      )
                     },
                   ]}
                 />

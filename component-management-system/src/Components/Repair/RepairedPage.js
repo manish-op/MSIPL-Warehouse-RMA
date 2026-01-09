@@ -101,6 +101,63 @@ export default function RepairedPage() {
     const [transporters, setTransporters] = useState([]);
     const [isNewTransporter, setIsNewTransporter] = useState(false);
     const [selectedRmaForDc, setSelectedRmaForDc] = useState(null);
+    const [savedAddresses, setSavedAddresses] = useState([]); // Address Dropdown State
+    const [selectedAddressName, setSelectedAddressName] = useState(undefined);
+
+    // --- Load Data ---
+    const fetchSavedAddresses = async () => {
+        try {
+            // Fetch from both SavedAddress (manual saves) and CustomerEntity (master list)
+            const [savedRes, custRes] = await Promise.all([
+                RmaApi.getAllAddresses(),
+                RmaApi.getAllCustomersList()
+            ]);
+
+            let combined = [];
+
+            // 1. Master Customer List (Priority)
+            if (custRes.success && Array.isArray(custRes.data)) {
+                 const customers = custRes.data.map(c => ({
+                     name: c.companyName,
+                     address: c.address,
+                     gstIn: "" // CustomerEntity doesn't have GST field visible in entity, using empty
+                 }));
+                 combined = [...combined, ...customers];
+            }
+
+            // 2. Saved Addresses (Manual)
+            if (savedRes.success && Array.isArray(savedRes.data)) {
+                combined = [...combined, ...savedRes.data];
+            }
+
+            // Remove duplicates by JSON content (Name + Address) with aggressive normalization, ignoring suffixes
+            const unique = [];
+            const seen = new Set();
+            const normalize = (str) => (str || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            for (const item of combined) {
+                // Use base name (before '(') for deduplication key
+                const baseName = item.name.split('(')[0];
+                const uniqueKey = normalize(baseName) + "|" + normalize(item.address);
+                
+                if (!seen.has(uniqueKey)) {
+                    seen.add(uniqueKey);
+                    unique.push(item);
+                } else {
+                    // Start of optional swap logic: preference to shorter name (cleaner) if match
+                    // Find the existing item in unique array (O(N) search inside loop is fine for small list)
+                    const existingIdx = unique.findIndex(u => (normalize(u.name.split('(')[0]) + "|" + normalize(u.address)) === uniqueKey);
+                    if (existingIdx !== -1) {
+                         if (item.name.length < unique[existingIdx].name.length) {
+                             unique[existingIdx] = item; // Replace with cleaner name
+                         }
+                    }
+                }
+            }
+            
+            setSavedAddresses(unique);
+        } catch (e) { console.error("Failed to load addresses", e); setSavedAddresses([]); }
+    };
     const [dcForm] = Form.useForm();
 
     // Dispatch Modal State
@@ -170,6 +227,7 @@ export default function RepairedPage() {
     useEffect(() => {
         loadItems();
         fetchTransporters();
+        fetchSavedAddresses();
     }, []);
 
     // ... [KEEPING EXISTING MODAL LOGIC SAME AS PROVIDED] ...
@@ -199,28 +257,64 @@ export default function RepairedPage() {
         }
 
         const firstItem = rmaItems[0];
-        dcForm.setFieldsValue({
+        
+        let initialValues = {
             modeOfShipment: "ROAD",
             boxes: "1",
-            consigneeName: firstItem?.companyName || "",
+             consigneeName: firstItem?.companyName || "",
             consigneeAddress: firstItem?.returnAddress || "",
             dcNo: nextDcNo // Auto-fill DC Number
-        });
+        };
+
+        // Normalize helper: trim, lowercase, remove special chars
+        const normalize = (s) => s ? s.toString().trim().toLowerCase().replace(/[^a-z0-9]/g, "") : "";
+
+        // Auto-match saved address from DB
+        if (firstItem?.companyName && savedAddresses.length > 0) {
+            const normalizedCompany = normalize(firstItem.companyName);
+            const match = savedAddresses.find(a => normalize(a.name) === normalizedCompany);
+            
+            if (match) {
+                setSelectedAddressName(match.name);
+                initialValues.consigneeName = match.name;
+                initialValues.consigneeAddress = match.address;
+                initialValues.gstIn = match.gstIn || "";
+            } else {
+                setSelectedAddressName(undefined);
+            }
+        } else {
+             setSelectedAddressName(undefined);
+        }
+
+        dcForm.setFieldsValue(initialValues);
 
         try {
             const itemsToFetch = rmaItems.map(i => ({ product: i.product, model: i.model }));
             const rateRes = await RmaApi.getProductRates(itemsToFetch);
+            
+             // HSN Fetch
+            const hsnMap = {};
+             await Promise.all(rmaItems.map(async (item) => {
+               if (item.product) {
+                   try {
+                       const hsnRes = await RmaApi.apiGet(`/rma/hsn/${encodeURIComponent(item.product)}`);
+                       if(hsnRes.success && hsnRes.data) {
+                           hsnMap[item.product] = hsnRes.data.hsnCode;
+                       }
+                   } catch(e) {}
+               }
+            }));
 
             if (rateRes.success) {
                 const ratesMap = rateRes.data;
                 const itemFormValues = tableData.map(item => {
                     const key = `${item.product?.trim() || ""}::${(item.model || "").trim()}`;
-                    return { rate: ratesMap[key] || "" };
+                    return { rate: ratesMap[key] || "", hsnCode: hsnMap[item.product] || "" };
                 });
                 dcForm.setFieldsValue({ items: itemFormValues });
             }
         } catch (e) {
-            console.error("Failed to fetch rates", e);
+            console.error("Failed tofetch rates", e);
         }
 
         setDcModalVisible(true);
@@ -229,21 +323,23 @@ export default function RepairedPage() {
     const handleGenerateDC = async (values) => {
         try {
             setDcSubmitting(true);
-            setDcSubmitting(true);
-            const { consigneeName, consigneeAddress, gstIn, boxes, dimensions, weight, modeOfShipment, courierName, transporterId, dcNo, items: formItems } = values;
+            const { consigneeName, consigneeAddress, gstIn, consignorName, consignorAddress, consignorGst, boxes, dimensions, weight, modeOfShipment, courierName, transporterId, dcNo, items: formItems } = values;
 
             const formattedItems = dcTableData.map((item, index) => ({
                 slNo: index + 1,
                 product: item.product,
                 model: item.model,
                 serialNo: item.serialNo,
+                serialNo: item.serialNo,
                 rate: (formItems?.[index]?.rate || 0).toString(),
+                hsnCode: formItems?.[index]?.hsnCode || "",
                 itemId: item.id
             }));
 
             const payload = {
                 rmaNo: selectedRmaForDc,
                 consigneeName, consigneeAddress, gstIn,
+                consignorName, consignorAddress, consignorGst,
                 boxes: parseInt(boxes), dimensions, weight, modeOfShipment,
 
                 transporterName: Array.isArray(courierName) ? courierName[courierName.length - 1] : courierName,
@@ -255,6 +351,15 @@ export default function RepairedPage() {
             const result = await RmaApi.generateDeliveryChallan(payload);
             if (result.success) {
                 message.success("Delivery Challan Generated Successfully");
+                // Auto-save Address
+                if (consigneeName && consigneeAddress) {
+                    RmaApi.saveAddress({
+                        name: consigneeName,
+                        address: consigneeAddress,
+                        gstIn: gstIn
+                    }).then(() => fetchSavedAddresses());
+                }
+
                 setDcModalVisible(false);
                 fetchTransporters();
             } else {
@@ -795,20 +900,97 @@ export default function RepairedPage() {
                 </Modal>
 
                 <Modal title="Generate Delivery Challan" open={dcModalVisible} onCancel={() => setDcModalVisible(false)} width={1000} footer={[<Button key="cancel" onClick={() => setDcModalVisible(false)}>Cancel</Button>, <Button key="gen" type="primary" icon={<FilePdfOutlined />} onClick={() => dcForm.submit()} loading={dcSubmitting}>Generate DC</Button>]}>
-                    <Form form={dcForm} layout="vertical" onFinish={handleGenerateDC} initialValues={{ modeOfShipment: "ROAD", boxes: "1" }}>
+                    <Form 
+                        form={dcForm} 
+                        layout="vertical" 
+                        onFinish={handleGenerateDC} 
+                        initialValues={{ modeOfShipment: "ROAD", boxes: "1" }}
+
+                    >
                         <Row gutter={16}>
                             <Col span={12}>
                                 <Card title="Consignor Details" size="small">
-                                    <p><strong>Motorola Solutions India</strong></p>
-                                    <p>A, Building 8, DLF</p>
-                                    <p>Gurgaon, Haryana, India</p>
+                                    <Form.Item name="consignorDetailsSelect" label="Select Consignor" style={{ marginBottom: 0 }}>
+                                        <Select 
+                                            placeholder="Select Consignor Address" 
+                                            onChange={(idx) => {
+                                                const selected = savedAddresses[idx];
+                                                if (selected) {
+                                                    dcForm.setFieldsValue({
+                                                        consignorName: selected.name,
+                                                        consignorAddress: selected.address,
+                                                        consignorGst: selected.gstIn || ""
+                                                    });
+                                                }
+                                            }}
+                                            dropdownMatchSelectWidth={false}
+                                            optionLabelProp="label"
+                                        >
+                                            {savedAddresses.map((a, idx) => (
+                                                <Select.Option key={idx} value={idx} label={a.address /* Use Address as label to distinguish? Or just Name */}> 
+                                                    <div style={{ whiteSpace: 'normal', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                                        <div style={{ fontWeight: 'bold' }}>{a.name}</div>
+                                                        <div style={{ fontSize: '11px', color: '#666' }}>{a.address}</div>
+                                                        {a.gstIn && <div style={{ fontSize: '10px', color: '#888' }}>GST: {a.gstIn}</div>}
+                                                    </div>
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                    
+                                    {/* Read-only display or Editable fields for Consignor? User didn't specify. 
+                                        Let's make them visible inputs so they can verify selection. */}
+                                    <Form.Item name="consignorName" label="Name" style={{ marginTop: 8 }}>
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item name="consignorAddress" label="Address">
+                                        <Input.TextArea rows={2} />
+                                    </Form.Item>
+                                    <Form.Item name="consignorGst" label="GST">
+                                        <Input />
+                                    </Form.Item>
                                 </Card>
                             </Col>
                             <Col span={12}>
                                 <Card title="Consignee Details" size="small">
-                                    <Form.Item name="consigneeName" label="Name"><Input /></Form.Item>
-                                    <Form.Item name="consigneeAddress" label="Address"><Input.TextArea rows={2} /></Form.Item>
-                                    <Form.Item name="gstIn" label="GST IN"><Input /></Form.Item>
+                                    <Form.Item label="Select Saved Address">
+                                        <Select 
+                                            placeholder="Select Saved Consignee" 
+                                            onChange={(idx) => {
+                                                const selected = savedAddresses[idx];
+                                                if (selected) {
+                                                    setSelectedAddressName(selected.name); // Keep display name for other logic
+                                                    dcForm.setFieldsValue({
+                                                        consigneeName: selected.name,
+                                                        consigneeAddress: selected.address,
+                                                        gstIn: selected.gstIn || ""
+                                                    });
+                                                }
+                                            }}
+                                            value={selectedAddressName}
+                                            optionLabelProp="label"
+                                            dropdownMatchSelectWidth={false}
+                                        >
+                                            {savedAddresses.map((a, idx) => (
+                                                <Select.Option key={idx} value={idx} label={a.name}>
+                                                    <div style={{ whiteSpace: 'normal', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                                        <strong>{a.name}</strong>
+                                                        <div style={{ fontSize: '11px', color: '#666', marginTop: '2px', lineHeight: '1.2' }}>{a.address}</div>
+                                                        {a.gstIn && <div style={{ fontSize: '10px', color: '#888' }}>GST: {a.gstIn}</div>}
+                                                    </div>
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                    <Form.Item name="consigneeName" label="Name">
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item name="consigneeAddress" label="Address">
+                                        <Input.TextArea rows={2} />
+                                    </Form.Item>
+                                    <Form.Item name="gstIn" label="GST IN">
+                                        <Input />
+                                    </Form.Item>
                                     <Form.Item name="dcNo" label="Delivery Challan No." rules={[{ required: true }]}><Input placeholder="Auto-generated" /></Form.Item>
                                 </Card>
                             </Col>
@@ -825,7 +1007,13 @@ export default function RepairedPage() {
                             <Col span={12}><Form.Item name="transporterId" label="Transporter ID"><Input /></Form.Item></Col>
                         </Row>
                         <Divider>Items</Divider>
-                        <Table dataSource={dcTableData} pagination={false} size="small" columns={[{ title: 'Sr No', dataIndex: 'slNo', width: 60 }, { title: 'Material', dataIndex: 'serialNo' }, { title: 'Desc', dataIndex: 'product' }, { title: 'Value', render: (_, __, idx) => <Form.Item name={['items', idx, 'rate']} style={{ margin: 0 }} rules={[{ required: true, message: 'Required' }]}><Input prefix="₹" type="number" /></Form.Item> }]} />
+                        <Table dataSource={dcTableData} pagination={false} size="small" columns={[
+                                { title: 'Sr No', dataIndex: 'slNo', width: 60 }, 
+                                { title: 'Material', dataIndex: 'serialNo' }, 
+                                { title: 'Desc', dataIndex: 'product' }, 
+                                { title: 'Value', render: (_, __, idx) => <Form.Item name={['items', idx, 'rate']} style={{ margin: 0 }} rules={[{ required: true, message: 'Required' }]}><Input prefix="₹" type="number" /></Form.Item> },
+                                { title: 'HSN', width: 100, render: (_, __, idx) => <Form.Item name={['items', idx, 'hsnCode']} style={{ margin: 0 }}><Input placeholder="HSN" /></Form.Item> }
+                        ]} />
                     </Form>
                 </Modal>
 
